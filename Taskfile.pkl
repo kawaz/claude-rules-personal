@@ -1,0 +1,39 @@
+/// claude-rules Taskfile (pkfire).
+///
+/// VCS 抽象 / migrate gate は kawaz/pkf-tasks 由来。
+/// 本リポはルール (.md) 配布が主。lint/test/build は持たない。
+amends "package://pkg.pkl-lang.org/github.com/mizchi/pkfire/pkfire@0.10.0#/Taskfile.pkl"
+
+import "package://pkg.pkl-lang.org/github.com/kawaz/pkf-tasks/pkf-tasks@2.3.1#/all.pkl" as kawaz
+
+local list: Task = new {
+  name = "list"
+  description = "list recipes"
+  cache = false
+  quiet = true
+  cmd = "pkf list --unsorted"
+}
+
+local default: Task = new {
+  name = "default"
+  description = "default is list"
+  cache = false
+  deps { list }
+}
+
+local push: Task = (kawaz.vcs.push) {
+  name = "push"
+  description = "push with migration check"
+  deps {
+    kawaz.migrate.checkPkfTasks
+    kawaz.migrate.checkPkfire
+  }
+}
+
+tasks {
+  default
+  list
+  push
+  ...kawaz.vcs.allTasks
+  ...kawaz.migrate.allTasks
+}
