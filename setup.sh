@@ -73,16 +73,24 @@ echo "Target: $TARGET (self=$SELF)"
 DEST="$TARGET/rules"
 mkdir -p "$DEST"
 
-# Backup legacy top-level *.md files in DEST (subdirs untouched)
+# Detect legacy *.md files directly in DEST. Refuse to proceed if found.
+#
+# Auto-moving was deliberately removed: any stray directory created by setup
+# pollutes the Claude Code config-dir layout (CC and user-created dirs become
+# indistinguishable). The migration step from the old flat layout is a one-time
+# operation that the user handles manually.
 LEGACY=()
 while IFS= read -r -d '' f; do LEGACY+=("$f"); done < <(
   find "$DEST" -maxdepth 1 -type f -name '*.md' -print0 2>/dev/null
 )
 if [ "${#LEGACY[@]}" -gt 0 ]; then
-  BACKUP="$DEST/.legacy-backup-$(date +%Y%m%d-%H%M%S)"
-  mkdir -p "$BACKUP"
-  mv "${LEGACY[@]}" "$BACKUP/"
-  echo "  legacy .md backed up to $BACKUP"
+  echo "ERROR: legacy *.md files exist directly under $DEST:" >&2
+  for f in "${LEGACY[@]}"; do echo "  $f" >&2; done
+  echo "" >&2
+  echo "These predate the symlinked layout. Remove or relocate them manually," >&2
+  echo "then rerun setup.sh. Their content should already be in claude-rules-*" >&2
+  echo "repos (in for-me/, for-all/, or for-others/ under rules/)." >&2
+  exit 1
 fi
 
 link_dir() {
