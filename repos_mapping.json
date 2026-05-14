@@ -1,0 +1,27 @@
+{
+  "$schema-hint": "Master list of all claude-rules-* repos and which CLAUDE_CONFIG_DIR each one owns. setup.sh reads this to decide where to symlink for-me/for-others/for-all layers.",
+  "repos": [
+    {
+      "name": "personal",
+      "repo": "kawaz/claude-rules-personal",
+      "home": "~/.claude-personal",
+      "ghAccount": "kawaz"
+    },
+    {
+      "name": "emeradaco",
+      "repo": "kawaz123/claude-rules-emeradaco",
+      "home": "~/.claude-emeradaco",
+      "ghAccount": "kawaz123"
+    },
+    {
+      "name": "zunsystem",
+      "repo": "kawaz/claude-rules-zunsystem",
+      "ghAccount": "kawaz"
+    },
+    {
+      "name": "syun",
+      "repo": "kawaz/claude-rules-syun",
+      "ghAccount": "kawaz"
+    }
+  ]
+}

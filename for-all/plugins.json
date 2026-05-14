@@ -1,0 +1,13 @@
+{
+  "$schema-hint": "List of plugins to install via `claude plugin marketplace add` then `claude plugin install`. setup.sh runs both commands idempotently. Omit marketplace for built-in marketplaces (e.g. claude-plugins-official).",
+  "plugins": [
+    {"marketplace": "kawaz/claude-cmux-msg",            "plugin": "cmux-msg@cmux-msg"},
+    {"marketplace": "kawaz/claude-session-analysis",    "plugin": "claude-session-analysis@claude-session-analysis"},
+    {"marketplace": "kawaz/claude-pr-monitor",          "plugin": "pr-monitor@pr-monitor"},
+    {"marketplace": "kawaz/claude-bash-safety",         "plugin": "bash-safety@bash-safety"},
+    {"marketplace": "kawaz/claude-push-guard",          "plugin": "push-guard@push-guard"},
+    {"marketplace": "kawaz/claude-rules-source-guard",  "plugin": "claude-rules-source-guard@claude-rules-source-guard"},
+    {"plugin": "skill-creator@claude-plugins-official"},
+    {"plugin": "security-guidance@claude-plugins-official"}
+  ]
+}
