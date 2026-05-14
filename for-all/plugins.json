@@ -7,6 +7,8 @@
     {"marketplace": "kawaz/claude-bash-safety",         "plugin": "bash-safety@bash-safety"},
     {"marketplace": "kawaz/claude-push-guard",          "plugin": "push-guard@push-guard"},
     {"marketplace": "kawaz/claude-rules-source-guard",  "plugin": "claude-rules-source-guard@claude-rules-source-guard"},
+    {"marketplace": "kawaz/claude-plugin-force-bun",    "plugin": "force-bun@force-bun"},
+    {"marketplace": "kawaz/claude-plugin-force-uv",     "plugin": "force-uv@force-uv"},
     {"plugin": "skill-creator@claude-plugins-official"},
     {"plugin": "security-guidance@claude-plugins-official"}
   ]
