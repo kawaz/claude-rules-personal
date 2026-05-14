@@ -116,12 +116,12 @@ translation pair の検証は `kawaz/pkf-tasks` の `docs:check-translation-{com
 
 canonical は **kawaz/bump-semver の `Taskfile.pkl`**。各リポは構造をそのまま踏襲し、言語依存 task (lint:go / lint:rust 等) と version files (`VERSION` / `Cargo.toml` 等) だけカスタムする。構造変更は bump-semver 側を先に直してから追従する。
 
-骨格 (pkfire 0.7.0+ / pkf-tasks 2.2.0+):
+骨格 (pkfire 0.10.0+ / pkf-tasks 3.0.0+):
 
 ```pkl
-amends "package://pkg.pkl-lang.org/github.com/mizchi/pkfire/pkfire@0.7.0#/Taskfile.pkl"
+amends "package://pkg.pkl-lang.org/github.com/mizchi/pkfire/pkfire@0.10.0#/Taskfile.pkl"
 
-import "package://pkg.pkl-lang.org/github.com/kawaz/pkf-tasks/pkf-tasks@2.2.0#/all.pkl" as kawaz
+import "package://pkg.pkl-lang.org/github.com/kawaz/pkf-tasks/pkf-tasks@3.0.2#/all.pkl" as kawaz
 
 // 言語固有 task (lint:go の例、Rust/TS 等で同等のものを定義) — internal にして pkf list から隠す
 local lintGo: Task = new {
@@ -130,18 +130,26 @@ local lintGo: Task = new {
   inputs { "src/**/*.go"; "go.mod"; "go.sum" }
   cmd = "gofmt -w .\ngo vet ./..."
 }
-local lint: Task = new { name = "lint"; deps { lintGo /* + lintRust 等 */ }; cmd = "echo lint ok"; cache = false }
+local lint: Task = new { name = "lint"; deps { lintGo /* + lintRust 等 */ }; cache = false }  // cmd 省略 = deps-only umbrella (pkfire 0.8+)
 local test: Task = new { name = "test"; deps { lint }; cmd = "go test ./..." }
 local build: Task = new { name = "build"; deps { lint }; cmd = "go build ..."; outputs { "bin/<TOOL>" } }
-local ci: Task = new { name = "ci"; deps { lint; test; build }; cmd = "echo ci ok"; cache = false }
+local ci: Task = new { name = "ci"; deps { lint; test; build }; cache = false }
 
-// version bump gate (pkf-tasks v0.0.7+ の semver group を 2 通り parameterize)
+// version bump gate (kawaz.semver.checkBumped を parameterize)
 local checkVersionBumped: Task = (kawaz.semver.checkBumped) {
-  compareRefCmd = "echo main@origin"
+  compareRef = "main@origin"           // v3.0+ で compareRefCmd → compareRef rename (plain string ref)
   triggerPaths = List("src/")
-  versionFiles = List("VERSION")   // ← リポごとに上書き
+  versionFiles = List("VERSION")       // ← リポごとに上書き
   taskName = "semver:check-version-bumped"
 }.check
+
+// (任意) cmd:<command> input source を使った bin --version の整合 gate (bump-semver v0.16.0+ / pkf-tasks v3.0+)
+local versions = (kawaz.semver.versions) {
+  versionFiles = List("VERSION")
+  cmdSources = List("cmd:./bin/<TOOL> --version")   // ldflags 埋め込み project では推奨
+}
+local versionDisplay: Task = versions.version           // pkf run version で source 一覧表示
+local checkVersionsAligned: Task = versions.checkAligned // gate (push deps に入れる場合は push 側で追加)
 
 // release flow
 local bumpVersion: Task = new {
@@ -160,14 +168,16 @@ local push: Task = (kawaz.vcs.push) {
 // default = run + 引数 forward (pkfire 0.7.0+ の `pkf run -- args` で default に流れる)
 local default: Task = new {
   name = "default"; deps { build }; acceptsArgs = true; cache = false
+  quiet = true   // pkfire 0.8+ で stdout に "[pkf] ..." prefix を出さない
   cmd = #"./bin/<TOOL> "$@""#
 }
-local list: Task = new { name = "list"; cmd = "pkf list --unsorted"; cache = false }
+local list: Task = new { name = "list"; cmd = "pkf list --unsorted"; cache = false; quiet = true }
 
 tasks {
   default; list; test; push; bumpVersion; ci; build; lint; lintGo
-  ...kawaz.vcs.allTasks; ...kawaz.docs.allTasks
-  checkVersionBumped; kawaz.semver.compare; ...kawaz.migrate.allTasks
+  ...kawaz.vcs.tasks; ...kawaz.docs.tasks     // v3.0+: allTasks → tasks rename (pkfire schema 合わせ)
+  checkVersionBumped; versionDisplay; checkVersionsAligned
+  kawaz.semver.compare; ...kawaz.migrate.tasks
 }
 ```
 
@@ -175,9 +185,12 @@ tasks {
 - `kawaz.vcs.{commit,push,ensureClean,fetch,fetchTags}` で jj/git auto-dispatch (pkfire 0.7.0+ で `visibility = "internal"` の building block 化)
 - `kawaz.docs.checkTranslations` で翻訳ペア検証 (commit-lag + links、umbrella 経由)
 - `kawaz.migrate.{checkPkfTasks,checkPkfire}` で `pkf-tasks@` / `pkfire@` の追従漏れ自動検知
-- `kawaz.semver.checkBumped` を `compareRefCmd` / `triggerPaths` / `versionFiles` で parameterize
+- `kawaz.semver.checkBumped` を `compareRef` / `triggerPaths` / `versionFiles` で parameterize (v3.0+ rename、shell exec ではなく plain string ref)
+- `kawaz.semver.versions` で `versionFiles` + `cmdSources: List("cmd:./bin/<TOOL> --version")` を渡し、version files と bin --version 出力の整合 gate を `pkf run version` / `semver:check-versions-aligned` 経由で得る (bump-semver v0.16.0+ の `cmd:` input source 必須)
 - 並び順 (`tasks { ... }`) は declaration order で `pkf list --unsorted` に反映 (利用頻度順に手書きで整列)
 - internal task (`visibility = "internal"`) は `pkf list` から hide、`--all` で reveal
+- group spread は `...kawaz.<group>.tasks` (v3.0+、pkfire 0.10.0 の Taskfile.pkl schema field `tasks: Listing<Task>` と統一)
+- pkfire 0.10.0+ の `workflowTests` で「Go source 変更が push pipeline 全 task を affected 集合に乗せるか」等を Pkl 上で spec として宣言し `pkf affected --check` で実行プランと比較できる (実例: kawaz/bump-semver の Taskfile.pkl)
 
 参考実装: **kawaz/bump-semver** (Go の canonical)、kawaz/claude-cmux-msg (TypeScript + claude-plugin)。構造変更は canonical を先に直してから他リポへ追従する。
 
@@ -225,12 +238,14 @@ product code に変更があるのに version が main@origin から進んでい
 
 ```pkl
 local checkVersionBumped: Task = (kawaz.semver.checkBumped) {
-  compareRefCmd = "echo main@origin"
+  compareRef = "main@origin"         // v3.0+ で compareRefCmd → compareRef rename (plain ref string)
   triggerPaths = List("src/")        // ← リポごとに上書き (docs/ や README は除外)
   versionFiles = List("VERSION")     // ← リポごとに上書き (Cargo.toml / package.json 等も可、複数指定可)
   taskName = "semver:check-version-bumped"
 }.check
 ```
+
+動的 ref (= 最新 tag と比較したい等) は `compareRef = "vcs:latest-tag()"` のように bump-semver の `vcs:` schema 関数形式を直接書ける (= 内部で `bump-semver get` 経由で解決)。
 
 このゲートがあれば docs 修正のみの push は自動 skip される (= triggerPaths の diff なしならエラーにならない)。`push-without-bump` のような別 task は不要。
 
