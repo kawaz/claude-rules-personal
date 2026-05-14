@@ -4,7 +4,7 @@
 /// 本リポはルール (.md) 配布が主。lint/test/build は持たない。
 amends "package://pkg.pkl-lang.org/github.com/mizchi/pkfire/pkfire@0.10.0#/Taskfile.pkl"
 
-import "package://pkg.pkl-lang.org/github.com/kawaz/pkf-tasks/pkf-tasks@2.3.1#/all.pkl" as kawaz
+import "package://pkg.pkl-lang.org/github.com/kawaz/pkf-tasks/pkf-tasks@3.0.2#/all.pkl" as kawaz
 
 local list: Task = new {
   name = "list"
@@ -34,6 +34,6 @@ tasks {
   default
   list
   push
-  ...kawaz.vcs.allTasks
-  ...kawaz.migrate.allTasks
+  ...kawaz.vcs.tasks
+  ...kawaz.migrate.tasks
 }
