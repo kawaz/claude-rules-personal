@@ -8,13 +8,14 @@
 ## 初回レビュー
 
 ```bash
-# 必ず -m でモデルを指定すること (gpt-5.3-codex が最適)
-codex exec -m gpt-5.3-codex "このプランをレビューして。瑣末な点へのクソリプはしないで。致命的な点だけ指摘して: {plan_full_path} (ref: {CLAUDE.md full_path})"
+# モデルは指定しない。codex CLI のデフォルトが最新フロンティアモデルを指すため、
+# -m で明示するとその版に固定され最新追従しなくなる。
+codex exec "このプランをレビューして。瑣末な点へのクソリプはしないで。致命的な点だけ指摘して: {plan_full_path} (ref: {CLAUDE.md full_path})"
 ```
 
 ## 更新後の再レビュー
 
 ```bash
 # resume --last をつけないと最初のレビューの文脈が失われるから注意
-codex exec resume --last -m gpt-5.3-codex "プランを更新したからレビューして。瑣末な点へのクソリプはしないで。致命的な点だけ指摘して: {plan_full_path} (ref: {CLAUDE.md full_path})"
+codex exec resume --last "プランを更新したからレビューして。瑣末な点へのクソリプはしないで。致命的な点だけ指摘して: {plan_full_path} (ref: {CLAUDE.md full_path})"
 ```
