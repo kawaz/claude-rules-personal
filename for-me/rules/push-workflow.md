@@ -1,10 +1,14 @@
 # Push ワークフロー
 
-## push は `just push` を使う
+## push は `pkf run push` を使う
 
-`jj git push` や `git push` を直接実行しない。必ず `just push` を使う。
+`jj git push` や `git push` を直接実行しない。必ず `pkf run push` を使う。
 
-理由: `just push` は check + test を通してから push する。直接 push すると品質チェックをスキップしてしまう。
+理由: `pkf run push` は deps で check + test + 翻訳ペア検証 + version bump 漏れ検出などの品質ゲートを通してから push する。直接 push するとこれらをスキップしてしまう。
+
+直接 `git push` / `jj git push` を試みても push-guard プラグインの hook がブロックし、`pkf run push` に誘導する。
+
+Taskfile.pkl 未整備のリポ（マイグレーション途中）は、そのリポの push 用 task に従う。
 
 ## push 後は CI を watch する
 

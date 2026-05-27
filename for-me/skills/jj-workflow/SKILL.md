@@ -1,3 +1,8 @@
+---
+name: jj-workflow
+description: jj 管理リポジトリ (= `.jj/` ディレクトリが存在する) での workflow 手順書。git bare + jj workspace 方式のセットアップ、workspace 作成/削除、bookmark 命名、PR 作成 (新規 / wip 昇格)、push 後の手順、コミット操作 (`jj commit` 一発フロー、`jj describe` の使い所)、署名運用 (`signing.behavior=drop` + `git.sign-on-push`)、bookmark 種類とデータ保護、トラブルシュート ("stale info" / tag が見えない)、jj-worktree / jj-guard 連携。`jj <command>` を実行する場面、jj リポでの新規 PR 作成、workspace 追加、push エラー対処など jj 固有の手順が必要なときに使う。git 管理リポ (`.git` のみ) では使わない。
+---
+
 # jj ワークフロー
 
 `.jj` が存在するリポジトリで適用。それ以外は git-workflow.md（git bare + worktree 方式）に従う。
@@ -49,7 +54,7 @@ default WS の `.jj` は repo 直下に残り、上位ディレクトリの `.jj
 (cd "$REPO_PARENT" && git clone --bare <url> .git && git --git-dir=.git config --add remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*' && git --git-dir=.git config remote.origin.tagOpt --tags && jj git init --git-repo .git && jj workspace add {main} && jj new -r 'root()')
 ```
 
-`tagOpt --tags` を入れる理由: `jj git fetch` は内部で git の fetch refspec / tagOpt を読む。標準の `+refs/heads/*:...` だけだと **tag が自動取得されない** (jj 0.41 で確認、jj-tips.md トラブルシュート節参照)。bare git に tagOpt を設定しておけば `jj git fetch` 1 発で tag も来る。
+`tagOpt --tags` を入れる理由: `jj git fetch` は内部で git の fetch refspec / tagOpt を読む。標準の `+refs/heads/*:...` だけだと **tag が自動取得されない** (jj 0.41 で確認、jj-tips skill のトラブルシュート節参照)。bare git に tagOpt を設定しておけば `jj git fetch` 1 発で tag も来る。
 
 ### git bare + jj workspace 方式（fork して clone）
 
@@ -155,18 +160,22 @@ jj git push
 ## コミット操作
 
 - jj では作業中の状態も常にコミット。uncommitted な状態は存在しない
-- **基本フロー: describe → new**
-  1. `jj describe -m "メッセージ"` で現在の change を記述
-  2. `jj new` で新しい空の change を作り、次の作業を開始
-  - git の `git commit` に相当。jj では「今の change を確定して次へ進む」操作
+- **基本フロー: `jj commit -m "メッセージ"` 一発**で「@ を確定 + 子に空 @ を作って前進」が完了する
+  - 公式 help 明記: 引数なしの `jj commit -m` は `jj describe + jj new` と等価
+  - 部分 commit したい時は `jj commit -m "msg" <paths>` (= 指定パスだけ確定、残りは新 @ に retain)
+- **`jj describe -m MSG` 単体は使い所限定**: 過去 change の description を書き換える時 (`-r <change>`) にだけ使う
+  - @ に describe しただけだと空 @ が進まず、次の Write/Edit が同じ change に紛れ込む「commit したつもり」事故になる
+  - @ を確定したいなら必ず `jj commit` で空 @ を進める
 - 修正を親に吸収: `jj squash`
-- コミットメッセージ変更: `jj describe -m MSG`
+- bookmark を末端に追随させながら部分 commit したい時のみ `jj split -m "msg" <paths>` を選ぶ
+  (commit と違って bookmark が @ = remaining 側に前進する。詳細は jj-tips skill の commit vs split 節)
 
 ### ユーザーが「コミット」と言った場合
 
 1. 適切な関心事単位でコミットを分割する（chore/feat/refactor/docs 等）
-2. 各コミットに describe でメッセージを付ける
-3. 先頭コミット（最新）で `jj new` して次の作業用の空 change を作る
+2. 末端 change から順に `jj commit -m "..."` でメッセージを付けながら確定 (@ も自動で空に進む)
+3. 過去 change にメッセージを付け直す場合のみ `jj describe -r <change> -m "..."` を使う
+4. 最後に @ が空 change のまま (= 次の作業の入れ物として開いている) であることを確認する
 
 ## 署名
 

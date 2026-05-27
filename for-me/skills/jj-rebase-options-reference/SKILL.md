@@ -1,3 +1,8 @@
+---
+name: jj-rebase-options-reference
+description: jj のリビジョン指定オプション (= `-r` / `-s` (`--source`) / `-b` (`--branch`) / `-f` (`--from`) / `--onto` (`-o`, `-d`) / `--insert-after` (`-A`) / `--insert-before` (`-B`) / `--into` (`-t`, `--to`)) の完全リファレンス (jj v0.38.0)。各オプションが対象指定 (何を) と場所指定 (どこへ) のどちらの軸に属するか、どのコマンドで利用可能か、デフォルト値、複数指定時の挙動、エイリアスの整合性。`jj rebase` / `jj duplicate` / `jj split` / `jj squash` / `jj revert` / `jj new` の配置オプションを使う時、複数コミットを移動するときの挙動を確認したい時、`-r` と `--source` / `--branch` の違いを思い出したい時に使う。
+---
+
 # jj リビジョン指定オプション リファレンス (v0.38.0)
 
 ## 概要: 2つの軸

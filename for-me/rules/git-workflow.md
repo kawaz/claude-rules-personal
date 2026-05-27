@@ -1,6 +1,6 @@
 # Git ワークフロー（git bare + worktree 方式）
 
-`.jj` が存在しないリポジトリで適用。`.jj` がある場合は jj-workflow.md（git bare + jj workspace 方式）に従う。
+`.jj` が存在しないリポジトリで適用。`.jj` がある場合は jj-workflow skill (git bare + jj workspace 方式) に従う。
 
 ## ディレクトリ構成
 

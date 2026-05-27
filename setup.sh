@@ -21,10 +21,12 @@ Without --home, derives the target from \$CLAUDE_CONFIG_DIR.
 repos_mapping.json defines all repos and which CLAUDE_CONFIG_DIR each one
 "owns". The repo whose 'home' matches the target is treated as 'self'.
 
-Target layout:
+Target layout (rules: directory symlink / skills: per-skill symlink):
   \$TARGET/rules/for-me-from-<self>       -> <self>/for-me/rules
   \$TARGET/rules/for-all-from-<repo>      -> <repo>/for-all/rules   (every repo)
   \$TARGET/rules/for-others-from-<repo>   -> <repo>/for-others/rules (non-self repos)
+  \$TARGET/skills/<repo>-<slug>           -> <repo>/for-*/skills/<slug>
+  \$TARGET/CLAUDE.md                      -> <self>/for-me/CLAUDE.md
 
 Plugins:
   Every repo's for-all/plugins.json is merged and applied via
@@ -71,7 +73,8 @@ done
 
 echo "Target: $TARGET (self=$SELF)"
 DEST="$TARGET/rules"
-mkdir -p "$DEST"
+SKILLS_DEST="$TARGET/skills"
+mkdir -p "$DEST" "$SKILLS_DEST"
 
 # Detect legacy *.md files directly in DEST. Refuse to proceed if found.
 #
@@ -102,6 +105,35 @@ link_dir() {
   echo "  linked: $link_name -> $source"
 }
 
+# Link each skill directory under <repo>/for-*/skills/ as a flat, prefixed
+# symlink: $SKILLS_DEST/<repo>-<slug>. Claude Code does not recurse into
+# skills/ subdirectories, so a flat layout is required; the <repo>- prefix
+# keeps slugs unique across overlays and aids slash-command completion.
+link_skills() {
+  local repo_name=$1 skills_src=$2
+  [ -d "$skills_src" ] || return 0
+  local slug_dir slug
+  for slug_dir in "$skills_src"/*/; do
+    [ -d "$slug_dir" ] || continue
+    slug=$(basename "$slug_dir")
+    ln -sfn "${slug_dir%/}" "$SKILLS_DEST/$repo_name-$slug"
+    echo "  skill linked: $repo_name-$slug -> ${slug_dir%/}"
+  done
+}
+
+# Remove dangling symlinks (target no longer exists) directly under a dir.
+# Lets rules/skills that were moved or deleted leave no stale links behind.
+prune_dangling() {
+  local dir=$1 link
+  [ -d "$dir" ] || return 0
+  for link in "$dir"/*; do
+    if [ -L "$link" ] && [ ! -e "$link" ]; then
+      rm "$link"
+      echo "  pruned dangling: $link"
+    fi
+  done
+}
+
 PLUGIN_JSONS=()
 
 for i in "${!NAMES[@]}"; do
@@ -117,10 +149,18 @@ for i in "${!NAMES[@]}"; do
   fi
 
   link_dir "for-all-from-$name" "$repo_root/for-all/rules"
+  link_skills "$name" "$repo_root/for-all/skills"
   if [ "$name" = "$SELF" ]; then
     link_dir "for-me-from-$name" "$repo_root/for-me/rules"
+    link_skills "$name" "$repo_root/for-me/skills"
+    # self repo's for-me/CLAUDE.md -> $TARGET/CLAUDE.md (env-specific user memory)
+    if [ -f "$repo_root/for-me/CLAUDE.md" ]; then
+      ln -sfn "$repo_root/for-me/CLAUDE.md" "$TARGET/CLAUDE.md"
+      echo "  linked: CLAUDE.md -> $repo_root/for-me/CLAUDE.md"
+    fi
   else
     link_dir "for-others-from-$name" "$repo_root/for-others/rules"
+    link_skills "$name" "$repo_root/for-others/skills"
   fi
 
   [ -f "$repo_root/for-all/plugins.json" ] && PLUGIN_JSONS+=("$repo_root/for-all/plugins.json")
@@ -161,7 +201,15 @@ if [ "${#PLUGIN_JSONS[@]}" -gt 0 ]; then
   done
 fi
 
+# Prune dangling symlinks left by moved/removed rules and skills
 echo
-echo "Install complete: $DEST"
-echo "---"
+echo "=== Prune dangling symlinks ==="
+prune_dangling "$DEST"
+prune_dangling "$SKILLS_DEST"
+
+echo
+echo "Install complete: rules=$DEST skills=$SKILLS_DEST"
+echo "--- rules ---"
 ls -la "$DEST" | grep -vE '^total|^d.*\.\.?$|\.legacy-backup' | head -30
+echo "--- skills ---"
+ls -la "$SKILLS_DEST" | grep -vE '^total|^d.*\.\.?$' | head -30

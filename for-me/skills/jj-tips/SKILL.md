@@ -1,19 +1,27 @@
+---
+name: jj-tips
+description: jj 実践 Tips。jj コマンド (= `jj commit` / `jj split` / `jj rebase` / `jj edit` / `jj new` / `jj squash` / `jj duplicate` / `jj abandon` / `jj op restore` / `jj bookmark` 等) を使ったコミット操作・組み替え・bookmark 管理・トラブル対処のパターン集。「git 脳を捨てる」原則、覚えるべき 5 コマンド、過去コミット分割 (split)、安全枝を生やして集める、過去コミットから特定パス除去、`jj commit` と `jj split` の使い分け、外から作業中 ws に事故なく change を送り込む手順、bookmark 移動と push のハマりどころ、リモートブックマーク削除、fork で upstream に追従、AI がハマりやすいアンチパターン (`jj describe` だけで終わる commit したつもり事故 等)。jj リポでコミット組み替え・分割・bookmark 操作・op restore による復旧などの実践的判断が必要なときに使う。
+---
+
 # jj 実践 Tips（AI 向け）
 
-jj-workflow.md は手順書、jj プラグインはリファレンス。このファイルは実践で得た「こうすると失敗しない」パターン集。
+jj-workflow skill は手順書、jj プラグインはリファレンス。このファイルは実践で得た「こうすると失敗しない」パターン集。
 
 ## 原則: git 脳を捨てる
 
 jj で git のやり方（restore, revert, reset）を持ち込むとだいたい破綻する。jj はコミットの並べ替え・組み替えが圧倒的に簡単なので、「元に戻す」のではなく「正しい形に組み替える」。
 
-## 覚えるべき4コマンド
+## 覚えるべき5コマンド
 
-副作用のない参照系（st/show/diff/log）は除いて、コミット操作はこの4つでほぼ全部できる:
+副作用のない参照系（st/show/diff/log）は除いて、コミット操作はこの5つでほぼ全部できる:
 
-- **`jj new`** — 名無しの編集可能な空コミットを生やす。jj では add や commit は不要（ワークスペースの変更は全て自動コミット）。`jj new` で空コミットに移動すれば、さっきまでのコミットとワークスペースが切り離されてカジュアルに保護される
+- **`jj commit -m "msg"`** — @ を msg で確定し、子に空 @ を作って前進する。日常の「commit したい」はこれ一発で完了 (= `jj describe + jj new` の合体、公式 help 明記)。git の `git commit -m` と同じ感覚で使える
+- **`jj new`** — 名無しの編集可能な空コミットを生やす。jj では add や commit は不要（ワークスペースの変更は全て自動コミット）。`jj new` で空コミットに移動すれば、さっきまでのコミットとワークスペースが切り離されてカジュアルに保護される。`commit` を使わず手動で「描いて→新空 change へ」したい時や、特定 revision の子として空 change を生やしたい時に使う
 - **`jj rebase`** — コミットを移動・挿入する
-- **`jj split`** — コミットを分割する
+- **`jj split`** — コミットを分割する（commit との差は [[#jj-commit-と-jj-split-の使い分け]] 節参照）
 - **`jj edit`** — カレントワークスペースを別コミットに切り替える（git switch に近い）
+
+なお `jj describe -m "msg"` 単体は **過去 change の description を後から書き直す時 (`-r <change>`) にだけ使う**。@ に describe しても空 @ は進まないので「commit したつもり」事故になる ([[#jj-describe-だけ実行して終わるcommit-したつもり事故]] 参照)。
 
 ## jj edit — 気兼ねなくコミット間を行き来
 
@@ -145,6 +153,7 @@ done
 - `--ignore-immutable` で immutable boundary を超えて過去 commit を書き換える
 - `--insert-after $drop_ws@` で「対象ファイルだけの change」を全部隔離 ws の子孫に集める
 - `jj log` のデフォルトは子孫→祖先の新しい順なので、取得した順に処理していけばループ各時点で「まだ書き換えられていない」change_id を扱える（祖先から先に書き換えると、子孫側の change_id がリスト時点と乖離して破綻する）
+- **multi-branch でループ中に conflict が出ても気にせず最後まで回す**: 並列 ws / 並列 branch がある状態 (= main 系の commit が rewrite される時に別 branch の子孫が auto rebase で 3-way merge) で対象ファイルの内容衝突が出ても、conflict markers は対象ファイル内 (= drop 対象) に書き込まれる。後続の loop で当該 change を split すると marker ごと隔離 ws に移動するので、最終的に全 change から対象ファイルが消えて conflict も同時に解消される。memory の「子孫→祖先順」前提が崩れる multi-branch でも、loop を中断せず全 change_ids 分回し切るのが正解。途中でユーザに見せる log には `(conflict)` 表示が並ぶが、最後まで実行すれば消える
 - 検証: `jj log -r "::main & files('$drop_filesets')"` が空なら main 系統から対象ファイルが消えている
 - 後始末: `jj workspace forget $drop_ws && rm -rf ../$drop_ws && jj abandon -r 'descendants(<隔離先のcid>)' --include-roots`
 
@@ -162,6 +171,76 @@ jj rebase -r X --after Y    # X を Y の後に挿入
 jj rebase -r X -d Y         # X を Y の子に移動（子孫なし）
 jj rebase -s X -d Y         # X とその子孫ごと移動
 ```
+
+### `jj commit` と `jj split` の使い分け
+
+シンプルな用途では両者の動作はほぼ同じだが、`commit --help` に明示された 4 つの差がある:
+
+1. **interactive デフォルト**: commit=no (全選択) / split=yes (diff editor)
+2. **`-r` の有無**: commit は @ 専用 / split は任意 revision に効く (= 過去 change の分割可)
+3. **bookmark の前進**: split (without `-o`/`-A`/`-B`) は @ (= remaining 側) に bookmark を前進させる / commit は前進させない
+4. **`-o`/`-A`/`-B` 配置オプション**: split のみ (selected を別位置に挿入できる)
+
+公式 help 引用:
+
+> When called without path arguments or `--interactive`, `jj commit` is equivalent to `jj describe` followed by `jj new`.
+
+= `jj commit -m "msg"` は `jj describe + jj new` の合体。基本フローはこっちで一発。
+
+実用上の選び方:
+
+| やりたいこと | 選ぶコマンド |
+|---|---|
+| @ を全部確定して空 @ で次へ (= git commit -m 感覚) | `jj commit -m "msg"` |
+| @ の中身を path 指定で部分 commit | `jj commit -m "msg" <paths>` |
+| bookmark を末端に追随させながら過去を切り分け | `jj split -m "msg" <paths>` |
+| 過去 change を後から分割 (`-r <change>`) | `jj split` 一択 |
+| selected を別位置に挿入 (`-o`/`-A`/`-B`) | `jj split` 一択 |
+
+シンプルな部分 commit は commit、bookmark を進めたい / 位置を選びたい / 過去を分割したい時だけ split、というのが棲み分けの目安。
+
+### 外から作業中の ws に事故なく change を送り込む（隔離 ws + insert-before）
+
+別 workspace（例: `main`）で誰か（kawaz 本人 or 別 agent）が作業中に、外側から無関係の change（例: docs 追記、フィードバック起票）を入れたいとき、対象 ws に直接 Write するのは危険。jj は auto-snapshot するので一見書けたように見えるが、所有者が `jj edit` 等で @ を移動した瞬間に書いた内容は @ から外れて「消えた」ように見える（実体は op log に残るが復旧手間）。
+
+安全な手順:
+
+```bash
+# 1. 対象 ws の @ をベースに隔離 ws を立てる（兄弟関係になる）
+(cd $REPO/main && jj workspace add ../wip-<topic>)
+# 隔離 ws の @ は対象 ws の親（@-）の子として作られる（main@ と兄弟の空 change）
+
+# 2. 隔離 ws 側で Write/Edit（対象 ws には一切触らない）
+# (Write/Edit tool で $REPO/wip-<topic>/... を編集)
+
+# 3. 編集を確定 + 空 @ を作る（commit 一発、describe + new ではなく）
+(cd $REPO/wip-<topic> && jj commit -m "docs(...): ...")
+# これで @- = 確定した私の change、@ = 空 change という形になる
+
+# 4. 確定した change（= @-）を対象 ws の @ の前に挿入
+MY_CHANGE=$(cd $REPO/wip-<topic> && jj log -r '@-' --no-graph -T 'change_id.short() ++ "\n"' | head -1)
+MAIN_CHANGE=$(cd $REPO/main && jj log -r '@' --no-graph -T 'change_id.short() ++ "\n"' | head -1)
+(cd $REPO/wip-<topic> && jj rebase -r "$MY_CHANGE" --insert-before "$MAIN_CHANGE")
+# 対象 ws の @ は自動 rebase で「私の change を親に持つ」状態になる
+# 結果: ... → 対象 ws の元 @- → 私の change → 対象 ws の @（変わらず）
+
+# 5. 隔離 ws を片付け（commit 後の空 @ も一緒に消える）
+(cd $REPO/main && jj workspace forget wip-<topic>)
+rm -rf "$REPO/wip-<topic>"
+```
+
+ポイント:
+
+- 対象 ws の @ が「空 change（uncommitted 状態の入れ物）」のままなら、所有者の working copy は丸ごと安全（私の change は @ の親に乗るだけ）
+- 対象 ws に未 commit の編集があっても、jj が自動 rebase してくれるので所有者の作業内容は失われない（commit ID は振り直されるが）
+- 隔離 ws を別ディレクトリに作る代わりに `jj new -r <親>` で支流を生やして書く方法もあるが、Write tool 等の外側ツールが「現在の cwd の working copy」を見るので、別 ws の方が衝突が起きにくい
+- 自分のリポでも「複数 agent が同時に同じ ws で書くと事故」防止策として常用してよい
+
+回避できる事故:
+
+- 所有者が `jj edit` / `jj new` で @ を移動した瞬間、外から書いた内容が @ から消える
+- 所有者の working copy 編集中ファイルを外側の Write が上書き
+- 隔離 ws なら所有者がいくら @ を動かしても私の change は独立して残る
 
 ## bookmark は保険
 
@@ -231,49 +310,9 @@ jj op restore <push前のop-id>          # 復元
 # その後、正しい手順で push し直す
 ```
 
-### "stale info" エラーで push が拒否される
+### "stale info" エラー / tag が jj 側に見えない
 
-git bare + jj workspace 方式のセットアップ直後や `git clone --bare` 後に発生しやすい。
-git bare リポジトリの fetch refspec にブランチ用設定が不足していることが原因。
-
-```bash
-# 原因確認: refs/heads 用の refspec があるか
-git --git-dir="$REPO_PARENT/.git" config --get-all remote.origin.fetch
-
-# ブランチ用 refspec が無ければ追加
-git --git-dir="$REPO_PARENT/.git" config --add remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'
-
-# git fetch → jj fetch → push
-git --git-dir="$REPO_PARENT/.git" fetch origin
-jj git fetch
-jj bookmark track {bookmark} --remote=origin  # untracked の場合
-jj git export # jj の状態を git に反映
-jj git push --bookmark {bookmark}
-```
-
-### tag が jj 側に見えない (`jj git fetch` 後も古い tag のまま)
-
-`jj git fetch` は git の `remote.<name>.tagOpt` / fetch refspec を読む。標準 refspec だけだと **tag は自動取得されない** (jj 0.41、git の `fetch` と同じ挙動)。bump-semver の `vcs:latest-tag()` 等で「jj 経由で最新 tag を見る」処理が古い tag を返す症状に出る。
-
-**恒久対処** (clone 時に仕込む):
-
-```bash
-git --git-dir="$REPO_PARENT/.git" config remote.origin.tagOpt --tags
-```
-
-**既設定なし環境の応急対処** (colocate off の場合):
-
-```bash
-# bare git で直接 fetch --tags してから jj に取り込む
-git --git-dir="$REPO_PARENT/.git" fetch --tags origin
-jj git import   # 外部 git の変更 (tag 含む) を jj に反映
-```
-
-`jj git import` は「外部 git で起きた変更を jj 側に取り込む」公式コマンド。tag は immutable なので bookmark conflict / 自動 rebase は起きず、副作用は op log エントリ追加のみ。colocate **on** だと毎コマンド自動実行されるためこの問題は構造的に起きない。
-
-`jj git export` は逆方向 (jj → git、bookmark 反映用) で tag fetch には**使わない**。
-
-詳細は jj-workflow.md トラブルシュート節を参照。
+git bare + jj workspace 方式のセットアップ直後に起きやすい、fetch refspec 不足が原因の 2 症状。原因・対処コマンドは **jj-workflow skill のトラブルシュート節**（"stale info" エラー / tag が jj 側に見えない）に正本を集約。ここでは重複記載しない。
 
 ### リモートブックマーク（ブランチ）の削除
 
@@ -320,6 +359,14 @@ jj git push
 ```
 
 ## AI がハマりやすいアンチパターン
+
+### `jj describe` だけ実行して終わる（commit したつもり事故）
+
+`jj describe -m "msg"` は **@ に description を付けるだけ**で空 @ を作らない。これだけで終わると、次の Write/Edit が前回の作業と同じ change に紛れ込んで「いつの間にか巨大 commit」になる。
+
+基本は `jj commit -m "msg"` で「確定 + 空 @ を作る」を一発。`jj describe` 単体は **過去 change の description を書き直したい時に `-r <change>` 付きで使う** ものと割り切る。
+
+jj 公式 README / チュートリアルに `describe` 例が多い (`commit` は git ユーザ向け説明として位置付けが控えめ) のが学習バイアスの原因。それらをそのまま真似ると AI がこの罠にハマる。
 
 ### restore / revert を多用する
 
