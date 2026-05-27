@@ -81,6 +81,19 @@ frontmatter の `description` で発火条件 (= jj リポでの作業、`jj <co
 
 frontmatter の `description` で発火条件 (= `agent-browser` CLI 利用、または playwright-cli の session 命名規約参照) を絞り、無関係な作業中は load されない。
 
+## 更新 (2026-05-28 後): docs-structure も skill 化 + テンプレ embed で対応
+
+優先順 6 (docs-structure.md の参考実装リスト分離) は **常時読み込み rule から Claude Code Skill (frontmatter trigger) に移行 + テンプレファイルを skill ディレクトリ内に embed** で対応:
+
+- `for-me/skills/docs-structure/SKILL.md` 新設 (= 元 rule の判断ロジックを保持)
+- `for-me/skills/docs-structure/templates/` 配下にテンプレファイル一式を embed (README{,-ja} / DESIGN{,-ja} / STRUCTURE / ROADMAP / MANUAL{,-ja} / decisions/{DR-NNNN, INDEX} / issue / journal / findings / runbooks / research / knowledge / design)
+- 元 `for-me/rules/docs-structure.md` 削除
+- 参照側 `for-me/rules/docs-knowledge-flow.md` の文中・関連リンクを skill 化済みである旨に更新
+
+project type 別 subdir 分離は **見送り** (= docs/ 構造自体は言語非依存。言語固有要素は Taskfile.pkl 側で吸収する設計なので、テンプレも全 project type 共通で OK)。
+
+frontmatter の `description` で発火条件 (= docs/ 配下のファイル作成・編集、DR 起票、README/DESIGN 更新等) を絞り、docs 作業以外では load されない。テンプレ embed により「新規ファイル作成時の起点」が skill 内で完結し、毎回手書きで boilerplate を書かずに済む。
+
 ## 注
 
 本 audit は「過剰特化していないか」のみを観点とし、内容の正しさ / 有用性は評価していない。
