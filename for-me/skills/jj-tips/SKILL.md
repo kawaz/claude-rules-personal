@@ -217,12 +217,18 @@ jj rebase -s X -d Y         # X とその子孫ごと移動
 (cd $REPO/wip-<topic> && jj commit -m "docs(...): ...")
 # これで @- = 確定した私の change、@ = 空 change という形になる
 
-# 4. 確定した change（= @-）を対象 ws の @ の前に挿入
+# 4. 確定した change（= @-）を main bookmark の直後に挿入
 MY_CHANGE=$(cd $REPO/wip-<topic> && jj log -r '@-' --no-graph -T 'change_id.short() ++ "\n"' | head -1)
-MAIN_CHANGE=$(cd $REPO/main && jj log -r '@' --no-graph -T 'change_id.short() ++ "\n"' | head -1)
-(cd $REPO/wip-<topic> && jj rebase -r "$MY_CHANGE" --insert-before "$MAIN_CHANGE")
-# 対象 ws の @ は自動 rebase で「私の change を親に持つ」状態になる
-# 結果: ... → 対象 ws の元 @- → 私の change → 対象 ws の @（変わらず）
+(cd $REPO/wip-<topic> && jj rebase -r "$MY_CHANGE" --insert-after main)
+# 対象 ws の @ (= main bookmark の元の子) は自動 rebase で「私の change を親に持つ」状態になる
+# 結果: ... → 元 main bookmark の commit → 私の change → 対象 ws の @（変わらず、ただし親が変わる）
+# main bookmark 自体は動かない（= kawaz が push で進める責任）
+
+# Why bookmark 名 (`main`)、not `main@` or @ 値の取得:
+# `main@` (= 対象 ws の @) は kawaz が一時的に `jj edit` で他 change に移動していると別 commit を指す。
+# bookmark 名なら delivery point を指して安定するので `--insert-after main` の方が安全。
+# `--insert-before` を使う場合も同様に bookmark 名で指定 (= `--insert-before main` だと main 自体が
+# X の child に rebase = force push 相当になるので、通常は `--insert-after main` を選ぶ)。
 
 # 5. 隔離 ws を片付け（commit 後の空 @ も一緒に消える）
 (cd $REPO/main && jj workspace forget wip-<topic>)
