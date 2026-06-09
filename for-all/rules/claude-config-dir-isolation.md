@@ -115,7 +115,7 @@ repo-local で override する:
 
 ```bash
 # 案 1: SSH_AUTH_SOCK 一時切替 (signing.key は global の値を尊重)
-SSH_AUTH_SOCK=~/.ssh/agent-env-Y.sock jj git push  # or pkf run push
+SSH_AUTH_SOCK=~/.ssh/agent-env-Y.sock jj git push
 
 # 案 2: repo-local で signing.key を agent の公開鍵に固定
 cd /path/to/env-Y/<repo>

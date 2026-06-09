@@ -1,6 +1,6 @@
 ---
 name: jj-workflow
-description: jj 管理リポジトリ (= `.jj/` ディレクトリが存在する) での workflow 手順書。git bare + jj workspace 方式のセットアップ、workspace 作成/削除、bookmark 命名、PR 作成 (新規 / wip 昇格)、push 後の手順、コミット操作 (`jj commit` 一発フロー、`jj describe` の使い所)、署名運用 (`signing.behavior=drop` + `git.sign-on-push`)、bookmark 種類とデータ保護、トラブルシュート ("stale info" / tag が見えない)、jj-worktree / jj-guard 連携。`jj <command>` を実行する場面、jj リポでの新規 PR 作成、workspace 追加、push エラー対処など jj 固有の手順が必要なときに使う。git 管理リポ (`.git` のみ) では使わない。
+description: jj 管理リポジトリ (= `.jj/` ディレクトリが存在する) での workflow 手順書。git bare + jj workspace 方式のセットアップ、workspace 作成/削除、bookmark 命名、PR 作成 (新規 / wip 昇格)、push 後の手順、コミット操作 (`jj commit` 一発フロー)、署名運用 (`signing.behavior=drop` + `git.sign-on-push`)、bookmark 種類とデータ保護、トラブルシュート ("stale info" / tag が見えない)、jj-worktree / jj-guard 連携。`jj <command>` を実行する場面、jj リポでの新規 PR 作成、workspace 追加、push エラー対処など jj 固有の手順が必要なときに使う。git 管理リポ (`.git` のみ) では使わない。
 ---
 
 # jj ワークフロー
@@ -161,11 +161,7 @@ jj git push
 
 - jj では作業中の状態も常にコミット。uncommitted な状態は存在しない
 - **基本フロー: `jj commit -m "メッセージ"` 一発**で「@ を確定 + 子に空 @ を作って前進」が完了する
-  - 公式 help 明記: 引数なしの `jj commit -m` は `jj describe + jj new` と等価
   - 部分 commit したい時は `jj commit -m "msg" <paths>` (= 指定パスだけ確定、残りは新 @ に retain)
-- **`jj describe -m MSG` 単体は使い所限定**: 過去 change の description を書き換える時 (`-r <change>`) にだけ使う
-  - @ に describe しただけだと空 @ が進まず、次の Write/Edit が同じ change に紛れ込む「commit したつもり」事故になる
-  - @ を確定したいなら必ず `jj commit` で空 @ を進める
 - 修正を親に吸収: `jj squash`
 - bookmark を末端に追随させながら部分 commit したい時のみ `jj split -m "msg" <paths>` を選ぶ
   (commit と違って bookmark が @ = remaining 側に前進する。詳細は jj-tips skill の commit vs split 節)
@@ -174,8 +170,7 @@ jj git push
 
 1. 適切な関心事単位でコミットを分割する（chore/feat/refactor/docs 等）
 2. 末端 change から順に `jj commit -m "..."` でメッセージを付けながら確定 (@ も自動で空に進む)
-3. 過去 change にメッセージを付け直す場合のみ `jj describe -r <change> -m "..."` を使う
-4. 最後に @ が空 change のまま (= 次の作業の入れ物として開いている) であることを確認する
+3. 最後に @ が空 change のまま (= 次の作業の入れ物として開いている) であることを確認する
 
 ## 署名
 
