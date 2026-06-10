@@ -4,9 +4,10 @@
 {project-name}/
   README.md / README-ja.md
   LICENSE
-  {言語固有のビルド設定 e.g. Cargo.toml / package.json / moon.mod.json}
+  {言語固有のビルド設定 e.g. Cargo.toml / package.json / pyproject.toml / moon.mod.json}
+                            # ↑ ビルド設定が version を持つ言語 (Rust / Node / Python など) は
+                            #   それを単一の正本にする (VERSION file を別に置かない)
   justfile                  # task runner (canonical, docs-structure 参照)
-  VERSION                   # (or 言語固有の version file)
   src/                      # 実装本体
   tests/                    # テスト
   docs/                     # 設計・運用・履歴
