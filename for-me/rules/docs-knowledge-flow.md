@@ -15,6 +15,37 @@
 
 複数該当する場合は複数記録する。delete 後は jj/git 履歴で追えるが、上記ディレクトリに残すと **grep 発見性が高い**（AI agent も能動的に過去事例を見つけられる）。
 
+## issue が増えた時の運用拡張
+
+### `wip` 状態は `## TODO` を内包 (= INDEX 有無に関わらず採用)
+
+仕掛中 issue file 内に進捗 checkbox:
+
+```markdown
+## TODO
+- [x] 仕様確定
+- [ ] 実装
+- [ ] test
+```
+
+単一 issue 内で完結、小規模 project でも即採用可。
+
+### `docs/issue/INDEX.md` (= 5+ issue になったら任意導入)
+
+全体俯瞰用。各 entry に status + (必要なら) `blocked_by` を併記:
+
+| status | 意味 |
+|---|---|
+| `idea` | アイデア、まだ actionable でない |
+| `open` | 未着手 |
+| `wip` | 仕掛中、本文に `## TODO` あり |
+| `blocked` | 待ち (= `blocked_by: <issue/外部依存>`) |
+| `pending-sublimation` | 実装済、DR/journal/code に昇華して削除待ち |
+
+status を schema 化する理由: 自由記述だと AI ごとに違う語彙を使い、grep / triage が壊れる。
+
+完了時の運用は不変 (= sublimation → file delete、上記「issue 解決時のフロー」と同じ)。INDEX があれば entry も同時削除。
+
 ## 並列作業時の journal 習慣
 
 Claude (AI agent) が non-stop モードや複数タスクを並列で進める場合、ユーザがチャットの生ログを追うのは時系列で混ざりすぎて辛い。**作業内容ごとに slug 単位で journal を書く** ことで状況復元しやすくする。
