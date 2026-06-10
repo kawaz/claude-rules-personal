@@ -78,9 +78,11 @@ GitHub Web UI を `playwright-cli` で操作して **画像を user-attachments 
 
 **「止めるモード」は無い**。失敗したら Claude が次ターンで snapshot を見て対応 (edit で再投稿 / 別ファイルで再 drop / エラー読み取り)。
 
-## 5. textarea 自動検出 (固定セレクタ禁止)
+## 5. textarea 自動検出 (固定セレクタ禁止、新旧 UI 両対応)
 
-GH の markdown editor は文脈ごとに `name` / `id` が異なる:
+GH の markdown editor は文脈・UI 世代ごとに `name` / `id` / 構造が違う:
+
+**旧 UI** (`<form>` ベース、name 属性で識別可能):
 
 | 文脈 | name | id pattern |
 |------|------|-----------|
@@ -94,31 +96,59 @@ GH の markdown editor は文脈ごとに `name` / `id` が異なる:
 | Discussion 新規/編集 | `discussion[body]` | `discussion_body` |
 | Release | `release[body]` | `release_body` |
 
-固定セレクタは使わず、以下のヒューリスティック (優先順) を `eval` で実行して target を決める:
+**新 UI** (React 化、2026-06 時点で issue/PR コメント新規 UI が切替済) では:
+- textarea の `name=""`、`id="_r_9i_"` のような React 動的 ID
+- `<form>` でラップされず、`<div data-testid="comment-composer">` 等でラップ
+- `placeholder="Use Markdown to format your comment"` などで識別可
+
+固定セレクタは使わず、新旧両対応のヒューリスティック (優先順) を `eval` で実行:
 
 ```js
-// playwright-cli eval-page で実行、`window.__GH_IMG_TARGET` に保持
+// playwright-cli eval で実行、`window.__GH_IMG_TARGET` に保持
+// NOTE: submit 後に React が textarea を再生成するため、本 eval は **drop 直前と URL 抽出時の双方** で
+// 毎回呼び直す (キャッシュした参照は無効化されうる)
 (() => {
   const userSelector = USER_SELECTOR;  // --textarea 引数。なければ null
   function find() {
+    // 1. ユーザー指定 (--textarea <css>) — 最優先
     if (userSelector) {
       const el = document.querySelector(userSelector);
       if (el?.matches?.('textarea')) return el;
     }
+    // 2. focus 中の textarea
     if (document.activeElement?.matches?.('textarea')) return document.activeElement;
-    const visible = [...document.querySelectorAll('textarea')]
-      .filter(t => t.offsetParent !== null && /body$|body\]$/.test(t.name || '') && !t.readOnly);
-    if (visible.length === 1) return visible[0];
-    const editing = visible.find(t => /^(issuecomment|comment|review|issue-\d|pull_request_review)-/.test(t.id));
+
+    const candidates = [...document.querySelectorAll('textarea')]
+      .filter(t => t.offsetParent !== null && !t.readOnly);
+
+    // 3. 新 UI: composer/body wrapper の data-testid
+    let v = candidates.filter(t => {
+      const wrap = t.closest('[data-testid]');
+      const tid = wrap?.dataset?.testid || '';
+      return /composer|comment-body|issue-body|pull_request_body|discussion/i.test(tid);
+    });
+    if (v.length === 1) return v[0];
+
+    // 4. 旧 UI: name 末尾が body / body]
+    v = candidates.filter(t => /body$|body\]$/.test(t.name || ''));
+    if (v.length === 1) return v[0];
+
+    // 5. 旧 UI: 編集モード id
+    const editing = candidates.find(t => /^(issuecomment|comment|review|issue-\d|pull_request_review)-/.test(t.id));
     if (editing) return editing;
-    return visible[0] || null;
+
+    // 6. 新 UI fallback: placeholder に "Markdown"
+    const md = candidates.find(t => /markdown/i.test(t.placeholder || ''));
+    if (md) return md;
+
+    return candidates[0] || null;
   }
   const ta = find();
   if (!ta) throw new Error('no textarea found');
   window.__GH_IMG_TARGET = ta;
   ta.scrollIntoView({block: 'center'});
   ta.focus();
-  return {id: ta.id, name: ta.name, tag: ta.tagName};
+  return {id: ta.id, name: ta.name, tag: ta.tagName, placeholder: ta.placeholder};
 })()
 ```
 
@@ -126,12 +156,12 @@ GH の markdown editor は文脈ごとに `name` / `id` が異なる:
 
 ## 6. drop --path で全画像 1 ショット投入
 
-textarea が確定したら ref を取って drop:
+textarea が確定したら snapshot で ref を取って drop (drop target は **textarea 自身**、新旧 UI とも実証):
 
 ```bash
 playwright-cli -s=$AB_SESSION snapshot
-# snapshot 結果から textarea の ref (例: e42) を読む
-playwright-cli -s=$AB_SESSION drop @e42 \
+# snapshot 結果から textarea の ref (例: e524) を読む。ref はそのまま (ref=eN を eN として渡す、@ プレフィックス不要)
+playwright-cli -s=$AB_SESSION drop e524 \
   --path=/tmp/before.png \
   --path=/tmp/after-sp.png \
   --path=/tmp/after-pc.png
@@ -140,16 +170,21 @@ playwright-cli -s=$AB_SESSION drop @e42 \
 drop した順 = URL 配列の順番。
 
 - 1 ショット内で複数 `--path` を **必ず順番通り**に並べる (--image 引数の順序と一致させる)
-- ファイルが存在しない場合は drop 前にチェックして即エラー return (空の URL で fill しても害は無いが、polling timeout になるので無駄)
+- ファイルが存在しない場合は drop 前にチェックして即エラー return
+- **新 UI 注意**: drop で挿入される文字列は markdown `![](URL)` ではなく HTML `<img width="..." height="..." alt="Image" src="URL">`。URL 抽出正規表現 (§7) はどちらでも引っかかるが、`{{label}}` 置換のためには **URL リストだけ取得して body を完全書き換え** する方針が安定 (= §8/§9 と整合)
 
 ## 7. polling 待ち (中核 eval)
 
 drop 完了後、placeholder 消滅 + URL 件数一致を `setInterval` で polling (`250ms` 間隔、`60s` timeout):
 
 ```js
-// playwright-cli eval-page で実行、await 可
+// playwright-cli eval で実行、await 可
+// CRITICAL: window.__GH_IMG_TARGET は drop 前に §5 で取得済みのもの。**新 UI では React が再生成しない範囲で同じ参照が使える**が、submit/preview 切替後は再生成されるため、polling 開始前に composer から再取得しておくのが安全
 await new Promise((resolve, reject) => {
-  const ta = window.__GH_IMG_TARGET;
+  // 念のため再取得 (旧 UI でも問題ない)
+  const composer = document.querySelector('[data-testid=comment-composer]');
+  const ta = composer?.querySelector('textarea') || window.__GH_IMG_TARGET;
+  window.__GH_IMG_TARGET = ta;
   const EXPECTED = N;  // drop した画像枚数
   const URL_RE = /https:\/\/github\.com\/user-attachments\/assets\/[a-f0-9-]+/g;
   const PEND_RE = /\(Uploading [^)]*\)|attachments-spinner/;
@@ -171,6 +206,7 @@ await new Promise((resolve, reject) => {
 - 完了時 `urls` の **配列順序 = drop した順序**
 - `new Set` で重複除去 (placeholder と URL が二重に並ぶ過渡期間がありうるため)
 - `EXPECTED` 未達 / placeholder 残存のまま 60s 経過 → reject、snapshot で textarea 内容を確認して再 drop
+- **再取得イディオム**: timeout したら「`__GH_IMG_TARGET` が古い参照を握ったまま」を最初に疑う。`document.querySelector('[data-testid=comment-composer] textarea')` で取り直して polling し直す
 
 ## 8. URL → body 埋め込み
 
@@ -198,18 +234,28 @@ label が無い画像 (= `:` 区切り無し) の URL は、`--body-file` の末
 
 ## 9. fill で textarea 完全書き換え
 
-embedded markdown が確定したら playwright `fill` で textarea を上書き:
+embedded markdown が確定したら textarea を上書き。**新 UI 注意**: playwright `fill` だけでは React state が更新されないケースがある。**確実なのは native value setter 経由で `input` event を dispatch する eval 方式**:
 
-```bash
-playwright-cli -s=$AB_SESSION fill @e42 "$(cat /tmp/comment-embedded.md)"
+```js
+// 推奨: eval 経由で React state 同期を保証
+(() => {
+  const composer = document.querySelector('[data-testid=comment-composer]');
+  const ta = composer?.querySelector('textarea') || window.__GH_IMG_TARGET;
+  const body = BODY_STRING;  // §8 で組み立てた本文
+  const setter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value').set;
+  setter.call(ta, body);
+  ta.dispatchEvent(new Event('input', {bubbles: true}));
+  return {len: ta.value.length};
+})()
 ```
 
-- React state が同期される (playwright fill が input event を発火、実証済み)
-- embedded body は一時ファイルに書き出してから `fill "$(<file)"` が安全 (shell quoting 事故を避ける)
+- React state が確実に同期される (= submit ボタンが enabled になる)
+- 旧 UI なら playwright `fill ref "$body"` でも動くが、新 UI と切り分けるより eval 統一が単純
+- 本文は一時ファイルに書き出してから JS 文字列リテラルに埋め込むのが安全 (shell quoting 事故を避ける)
 
-## 10. submit ボタン自動検出
+## 10. submit ボタン自動検出 (新旧 UI 両対応)
 
-submit ボタン名も文脈で変わる:
+submit ボタン名は文脈で変わる:
 
 | 文脈 | ボタン名 |
 |------|----------|
@@ -221,30 +267,36 @@ submit ボタン名も文脈で変わる:
 | Discussion 新規 | Comment |
 | Release | Publish release / Save draft |
 
-`eval` で `textarea.closest('form')` 内から submit ボタンを探す:
+**旧 UI**: container = `textarea.closest('form')`、submit = `button[type=submit]`。
+**新 UI**: container = `[data-testid=comment-composer]` 等、submit = `<button type="button">Comment</button>` (textContent マッチで判定)。
+
+両対応 eval:
 
 ```js
 (() => {
-  const ta = window.__GH_IMG_TARGET;
-  const form = ta.closest('form');
-  if (!form) throw new Error('no form');
-  const buttons = [...form.querySelectorAll('button[type=submit]:not([disabled])')]
-    .filter(b => b.offsetParent !== null);
-  if (!buttons.length) throw new Error('no visible submit');
-  if (buttons.length === 1) {
-    buttons[0].scrollIntoView({block: 'center'});
-    return {label: buttons[0].textContent.trim(), id: buttons[0].id};
+  const composer = document.querySelector('[data-testid=comment-composer]')
+                   || window.__GH_IMG_TARGET.closest('form, [data-testid$="composer"], [data-testid$="-form"]')
+                   || window.__GH_IMG_TARGET.closest('[data-testid]');
+  if (!composer) throw new Error('no container');
+  const allBtns = [...composer.querySelectorAll('button')]
+    .filter(b => b.offsetParent !== null && !b.disabled);
+  if (!allBtns.length) throw new Error('no enabled button');
+  // 1. textContent 完全一致で submit 語彙
+  const SUBMIT_RE = /^(comment|update\s+comment|submit\s+new\s+issue|create|publish|save\s+draft|update)$/i;
+  let primary = allBtns.find(b => SUBMIT_RE.test(b.textContent.trim()));
+  // 2. fallback: 旧 UI の form 内 button[type=submit] のうち最後
+  if (!primary) {
+    const submits = allBtns.filter(b => b.type === 'submit');
+    primary = submits[submits.length - 1] || allBtns[allBtns.length - 1];
   }
-  const primary = buttons.find(b => /comment|update|submit|publish|create|save/i.test(
-    b.textContent + ' ' + (b.getAttribute('aria-label') || '')
-  )) || buttons[buttons.length - 1];
   primary.scrollIntoView({block: 'center'});
-  primary.setAttribute('data-gh-img-submit', '1');
-  return {label: primary.textContent.trim(), id: primary.id};
+  primary.click();
+  return {clicked: primary.textContent.trim(), type: primary.type};
 })()
 ```
 
-click は snapshot 取り直して ref で `click @eN`、または `eval` で `document.querySelector('[data-gh-img-submit]').click()` を直接実行。
+- **eval 内で直接 click** が単純で確実 (snapshot 経由 ref 取り直しは React 再生成で参照ズレを起こしうる)
+- click 前に必ず textarea の React state を §9 の eval で同期しておくこと (= でないと Comment ボタンが disabled のままで click が無視される)
 
 ## 11. 投稿確認
 
@@ -285,6 +337,20 @@ playwright-cli -s=$AB_SESSION tab-close <タブインデックス>
 ```
 
 `tab-close` で掃除しないとブラウザにゴミタブが残る。
+
+## 13.1. 検証履歴 (= 動作確認済みの中核事実)
+
+| 検証 | 文脈 | UI 世代 | 結果 |
+|------|------|--------|------|
+| 2026-06-09: emeradaco PR #2343 編集再投稿 | PR コメント編集 (`#issuecomment-NNN`) | 旧 UI (form ベース) | drop で 2 画像 upload → URL 抽出 → `{{label}}` embed → submit すべて PASS。URL は 06:01 取得 → 07:17 再利用で時間軸永続性も実証 |
+| 2026-06-10: kawaz/claude-rules-personal#1 新規コメント | issue 新規コメント | **新 UI** (`<div data-testid="comment-composer">` ベース、React 動的 ID) | drop で 2 画像 upload → URL 抽出 → React-aware native setter で本文 fill → submit PASS。本セッションでの追検証成果 |
+
+新 UI 適応で本仕様書からの変更点 (§5/§7/§9/§10):
+
+1. **textarea 検出**: `name` だけでなく `closest('[data-testid]')` の testid と placeholder も判定軸 (§5)
+2. **textarea 再生成対策**: drop / submit / preview 切替で React が textarea を再生成 → `__GH_IMG_TARGET` キャッシュは無効化されうる、polling/fill/submit 直前に再取得 (§7)
+3. **fill 方式**: playwright `fill` でなく `Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value').set` + `dispatchEvent('input')` で React state を確実に同期 (§9)
+4. **submit ボタン**: 新 UI では `<form>` がなく `type=button` の Comment ボタン。container は `[data-testid=comment-composer]`、textContent 完全一致で submit 語彙 (§10)
 
 ## 14. URL の永続性 (再利用可能)
 
