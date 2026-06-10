@@ -1,8 +1,11 @@
 # {タイトル}
 
-- Status: Open <!-- Open / In Progress / Blocked -->
+- Status: open <!-- idea / open / wip / blocked / pending-sublimation -->
 - Created: YYYY-MM-DD
 - Origin: {自リポ TODO / 他プロジェクト依頼 (= 依頼元プロジェクト)}
+<!-- blocked の時は blocked_by を追記:
+- Blocked by: {別 issue / 外部依存}
+-->
 
 ## 概要
 
@@ -16,6 +19,13 @@
 
 - [ ] {完了の判定基準 1}
 - [ ] {完了の判定基準 2}
+
+## TODO
+
+<!-- wip 状態のとき進捗 checkbox で内包。idea/open 時は section ごと削除可。 -->
+
+- [ ] {次に手を付けるサブタスク}
+- [ ] ...
 
 ## 解決時の記録先
 

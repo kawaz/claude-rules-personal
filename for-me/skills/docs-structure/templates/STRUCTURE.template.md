@@ -5,7 +5,7 @@
   README.md / README-ja.md
   LICENSE
   {言語固有のビルド設定 e.g. Cargo.toml / package.json / moon.mod.json}
-  Taskfile.pkl              # task runner 設定
+  justfile                  # task runner (canonical, docs-structure 参照)
   VERSION                   # (or 言語固有の version file)
   src/                      # 実装本体
   tests/                    # テスト
