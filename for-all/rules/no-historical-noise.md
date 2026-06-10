@@ -18,13 +18,9 @@
 
 ## 適用フロー
 
-- code を書く / 修正するとき: 「これは current の挙動説明か? 過去への言及か?」を自問
-- 「previously」「once」「以前」「旧」「v0.X で」が出てきたら、削れないか確認
-- docs / DR を書くとき: 同様。current の説明だけにする
-- ファイル整理: 既存 code/docs 修正時に historical noise を見つけたら ついでに 削除
+- 書く時: 「previously」「once」「以前」「旧」「v0.X で」「phase 1 では」が出たら削れないか確認
+- 既存 file 修正時: 見つけたら ついで削除
 
 ## Why
 
-- AI (= 自分) は「変更経緯」を書きたがる癖がある。これを抑える
-- 最新読者は current spec を読みに来る、history を読みに来てない
-- history が必要な読者は git log / commit message / DR を見る (= そこに正本がある)
+AI (= 自分) は「変更経緯」を書きたがる癖がある。history が必要な読者は git log / DR を見るので、code/docs は current 専用にする。
