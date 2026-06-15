@@ -160,17 +160,21 @@ jj git push
 ## コミット操作
 
 - jj では作業中の状態も常にコミット。uncommitted な状態は存在しない
-- **基本フロー: `jj commit -m "メッセージ"` 一発**で「@ を確定 + 子に空 @ を作って前進」が完了する
-  - 部分 commit したい時は `jj commit -m "msg" <paths>` (= 指定パスだけ確定、残りは新 @ に retain)
+- **基本フロー: `jj commit -m "msg" <files...>` でパス指定して固定**。
+  パスなしの `jj commit -m "msg"` は他セッション (= 別 workspace / 別 Claude)
+  が @ に追加した未認識ファイルを巻き込むので **禁則** (詳細は
+  [[jj-tips]] の「パス指定なしの巻き込み事故」)
 - 修正を親に吸収: `jj squash`
-- bookmark を末端に追随させながら部分 commit したい時のみ `jj split -m "msg" <paths>` を選ぶ
-  (commit と違って bookmark が @ = remaining 側に前進する。詳細は jj-tips skill の commit vs split 節)
+- bookmark を末端に追随させながら部分 commit したい時のみ `jj split -m "msg" <files...>` を選ぶ
+  (commit と違って bookmark が @ = remaining 側に前進する。詳細は [[jj-tips]] の commit vs split 節)
 
 ### ユーザーが「コミット」と言った場合
 
 1. 適切な関心事単位でコミットを分割する（chore/feat/refactor/docs 等）
-2. 末端 change から順に `jj commit -m "..."` でメッセージを付けながら確定 (@ も自動で空に進む)
-3. 最後に @ が空 change のまま (= 次の作業の入れ物として開いている) であることを確認する
+2. 末端 change から順に `jj commit -m "msg" <files...>` でパス指定して確定 (@ も自動で空に進む)
+3. 最後に @ が空 change のまま (= 次の作業の入れ物として開いている) であることを確認
+4. @ に他セッションが追加した未 commit ファイルが残っていれば、放置せず読む
+   (= 別 commit で固定するか、削除するか判断)。push-workflow.md 参照
 
 ## 署名
 

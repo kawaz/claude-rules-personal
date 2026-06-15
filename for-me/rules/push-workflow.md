@@ -2,12 +2,30 @@
 
 ## commit (= 固定) → push の順
 
-push の前提は固定された commit。`-m "msg" <files...>` でファイル指定して積む。
+push の前提は固定された commit。**自分が修正したファイルだけを `<files...>`
+でパス指定して固定する**。パスなしの `jj commit -m "msg"` / `git commit -am` /
+`git add .` は **他セッション (= 別 workspace / 別 Claude) の未認識変更を
+巻き込む事故源** (双方向: 自分が巻き込む / 自分が巻き込まれる)。
 
-- **jj リポ**: `jj commit -m "msg" <files...>` で固定 (= `jj describe + jj new` の合体)。
-  `jj describe` 単体は @ にラベルを貼るだけで空 @ を作らない (= 固定ではない)。
-  部分 commit / 組み替え / split との使い分けは [[jj-tips]] skill。
-- **git リポ**: `git commit -m "msg" <files...>`。
+- **jj リポ**: `jj commit -m "msg" <files...>` 必須。`jj split -m "msg" <files...>` も同様。
+  `jj describe` 単体は @ にラベルを貼るだけ (= 固定ではない)。詳細は [[jj-tips]] skill。
+- **git リポ**: `git commit -m "msg" <files...>` 必須。`-a` / `git add .` は避ける。
+
+### 例外 (= パス指定なし OK)
+
+@ の全ファイルが自セッション生成かつ他セッション接触なしと確認済みの時だけ。
+通常は判断コストの方が高いので **常にパス指定** が安全。
+
+## push 直前: @ に他セッションのファイルが居残っていないか確認
+
+`jj status` (or `git status`) で @ の中身を確認する。他セッションが追加した
+ファイルが `<files...>` 指定から漏れて @ に残っていたら、**放置せず読む**:
+
+- コミットすべき内容なら別 commit で固定 (= パス指定で)
+- 残す価値がない / 既に対応済みなら削除
+
+「自分のファイルじゃないからほっとく」は不可。古いファイルを未 commit のまま
+@ に放置する理由はない。
 
 ## push 経路
 
