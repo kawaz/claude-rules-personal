@@ -13,6 +13,9 @@ Claude Code に **OpenAI 公式 codex plugin** を入れる手順。`plan-review
 
 `/codex:setup` が `ready: true` を返せば導入完了。`loggedIn: false` なら ChatGPT 認証案内に従う (= `codex login` を `!codex login` で session 内実行)。
 
+素の `/codex:setup` は動作確認のみ。永続 state は書かないため毎セッション実行しない。
+永続設定が変わるのは review gate の ON/OFF 時のみ。
+
 ## review gate (任意)
 
 stop 時に直近 diff を codex に通す「review gate」を有効化する場合:
@@ -53,6 +56,7 @@ stop 時に直近 diff を codex に通す「review gate」を有効化する場
 | `/codex:cancel` | task キャンセル |
 
 各 command は `--wait` (foreground 同期) / `--background` (Claude background task) で実行モード制御可能。
+`/codex:setup` は導入確認 / broker 再接続 / review gate 切替用。予防目的で毎回打たない。
 
 ## jj 環境での注意
 
