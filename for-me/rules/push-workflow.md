@@ -1,5 +1,16 @@
 # Push ワークフロー
 
+## commit (= 固定) → push の順
+
+push の前提は固定された commit。`-m "msg" <files...>` でファイル指定して積む。
+
+- **jj リポ**: `jj commit -m "msg" <files...>` で固定 (= `jj describe + jj new` の合体)。
+  `jj describe` 単体は @ にラベルを貼るだけで空 @ を作らない (= 固定ではない)。
+  部分 commit / 組み替え / split との使い分けは [[jj-tips]] skill。
+- **git リポ**: `git commit -m "msg" <files...>`。
+
+## push 経路
+
 `jj git push` / `git push` を直接実行しない。リポ側の push task (justfile 等) を使う。
 直接 push しても push-guard プラグインの hook がブロックし、正規経路に誘導する。
 

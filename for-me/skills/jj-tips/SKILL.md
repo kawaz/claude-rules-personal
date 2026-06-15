@@ -1,6 +1,6 @@
 ---
 name: jj-tips
-description: jj 実践 Tips。jj コマンド (= `jj commit` / `jj split` / `jj rebase` / `jj edit` / `jj new` / `jj squash` / `jj duplicate` / `jj abandon` / `jj op restore` / `jj bookmark` 等) を使ったコミット操作・組み替え・bookmark 管理・トラブル対処のパターン集。「git 脳を捨てる」原則、覚えるべき 5 コマンド、過去コミット分割 (split)、安全枝を生やして集める、過去コミットから特定パス除去、`jj commit` と `jj split` の使い分け、外から作業中 ws に事故なく change を送り込む手順、bookmark 移動と push のハマりどころ、リモートブックマーク削除、fork で upstream に追従、AI がハマりやすいアンチパターン (`jj describe` だけで終わる commit したつもり事故 等)。jj リポでコミット組み替え・分割・bookmark 操作・op restore による復旧などの実践的判断が必要なときに使う。
+description: jj 実践 Tips。jj コマンド (= `jj commit` / `jj split` / `jj rebase` / `jj edit` / `jj new` / `jj squash` / `jj duplicate` / `jj abandon` / `jj op restore` / `jj bookmark` 等) を使ったコミット操作・組み替え・bookmark 管理・トラブル対処のパターン集。「git 脳を捨てる」原則、覚えるべき 5 コマンド、過去コミット分割 (split)、安全枝を生やして集める、過去コミットから特定パス除去、`jj commit` と `jj split` の使い分け、外から作業中 ws に事故なく change を送り込む手順、bookmark 移動と push のハマりどころ、リモートブックマーク削除、fork で upstream に追従、AI がハマりやすいアンチパターン (`jj describe` だけで終わる commit したつもり事故 等)。jj リポで日常 commit (= `jj commit -m "msg" <files>` で固定) / push 前の固定 / コミット組み替え・分割・bookmark 操作・op restore による復旧などの判断が必要なときに使う。
 ---
 
 # jj 実践 Tips（AI 向け）
