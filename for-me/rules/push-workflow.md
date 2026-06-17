@@ -69,7 +69,12 @@ find for-{all,me}/rules/ -name '*.md' -size +5k
 
 ## push 後は CI を watch する
 
-push したら必ず CI の結果を確認する:
+push したら必ず CI の結果を確認する。**`kawaz/claude-gh-monitor` plugin
+(skill: `gh-monitor:watch-workflow`) が enable なら、push 直後の PostToolUse
+hook が SHA-pinned mode で自動起動する** ので、二重監視を避けるため手動で
+`gh run watch` を叩かない。
+
+hook が走らない場合 (= plugin disabled / hook 抑制 / 緊急時):
 
 ```bash
 sleep 3
@@ -77,6 +82,6 @@ run_id=$(gh run list --repo OWNER/REPO --limit 1 --json databaseId -q '.[0].data
 gh run watch "$run_id" --repo OWNER/REPO
 ```
 
-- バックグラウンドで watch して良い
 - 失敗したらその場で対処
-- CI が起動していない場合は理由を調査（workflow ファイルのエラー等）
+- CI が起動していない場合は理由を調査 (workflow ファイルのエラー / そもそも
+  workflow を持たないリポ / paths filter にマッチしない 等)
