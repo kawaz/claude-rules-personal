@@ -67,21 +67,25 @@ find for-{all,me}/rules/ -name '*.md' -size +5k
 `jj git push` / `git push` を直接実行しない。リポ側の push task (justfile 等) を使う。
 直接 push しても push-guard プラグインの hook がブロックし、正規経路に誘導する。
 
-## push 後は CI を watch する
+## push 後は workflow run を watch する
 
-push したら必ず CI の結果を確認する。**`kawaz/claude-gh-monitor` plugin
-(skill: `gh-monitor:watch-workflow`) が enable なら、push 直後の PostToolUse
-hook が SHA-pinned mode で自動起動する** ので、二重監視を避けるため手動で
-`gh run watch` を叩かない。
+push の正規経路はリポの push task (justfile 等)。**push task は実行末尾で
+`gh-monitor:watch-workflow` 起動 hint を echo するのが標準パターン**。
+AI はその hint を読んで skill を能動的に起動する (= SHA-pinned mode で commit に
+紐づく workflow run を監視、全 run が terminal state に到達したら自動 exit)。
 
-hook が走らない場合 (= plugin disabled / hook 抑制 / 緊急時):
+canonical 実装は `kawaz/bump-semver` の justfile:
 
-```bash
-sleep 3
-run_id=$(gh run list --repo OWNER/REPO --limit 1 --json databaseId -q '.[0].databaseId')
-gh run watch "$run_id" --repo OWNER/REPO
+```make
+push: ci check-outdated-translations check-version-bumped
+    bump-semver vcs push --branch main --jj-bookmark-auto-advance
+    @echo "[hint] gh-monitor:watch-workflow --sha $(bump-semver vcs get commit-id --rev main) --on-success release.yml 'just on-success-release' kawaz/bump-semver"
 ```
 
+push task に hint echo が無いリポでは、AI が SHA (`git rev-parse HEAD` or jj
+`latest(::@ & ~empty())`) を取って `gh-monitor:watch-workflow` skill を手動で
+起動する。直接 `gh run watch` / `gh run list` を叩かない。
+
 - 失敗したらその場で対処
-- CI が起動していない場合は理由を調査 (workflow ファイルのエラー / そもそも
-  workflow を持たないリポ / paths filter にマッチしない 等)
+- workflow が起動していない場合は理由を調査 (workflow ファイルのエラー /
+  そもそも workflow を持たないリポ / `on: push` の paths filter にマッチしない 等)
