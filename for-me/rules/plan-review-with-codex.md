@@ -25,8 +25,8 @@ Agent({
 - prompt に `--background` / 「codex 側 background」/ 「長時間 task OK、background で」を書かない。
 - `<task-notification>` の `<result>` にレビュー結果が十分入っているか確認する。
 
-P-TODO1 は [検証不能: Claude Code 2.1.177]。`<result>` 全文返却は未検証として扱う。
-通知が空 / job ID のみ / partial の場合は、結果取得の退避経路へ進む。
+`<result>` 全文返却は未検証として扱う。通知が空 / job ID のみ / partial の場合は、
+結果取得の退避経路へ進む。
 
 ## 結果取得の退避経路
 

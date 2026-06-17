@@ -93,6 +93,6 @@ journal で「同じ問題が複数回出てきた」と気づいたら runbook 
 ## 関連
 
 - `docs-structure` skill — 各ディレクトリの定義（構造）+ テンプレ embed
-- `~/.claude/rules/research-documentation.md` — findings の書き方
-- `~/.claude/rules/design-priority.md` — DR を立てるべき判断軸
+- [[research-documentation]] — findings の書き方
+- [[design-priority]] — DR を立てるべき判断軸
 - 参考実装: kawaz/claude-cmux-msg の `docs/journal/`、`docs/decisions/INDEX.md`
