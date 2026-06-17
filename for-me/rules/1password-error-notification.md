@@ -1,11 +1,16 @@
 # 1Password エラー時の対応
 
+> **Note**: 本来 [`kawaz/authsock-warden`](https://github.com/kawaz/authsock-warden)
+> 側で対処すべき問題。上流 issue 起票済み:
+> [docs/issue/2026-06-17-1password-fill-whole-buffer-handler.md](https://github.com/kawaz/authsock-warden/blob/main/docs/issue/2026-06-17-1password-fill-whole-buffer-handler.md)。
+> 本ルールは上流で対処されるまでの **暫定対応** ([[dogfooding-feedback-upstream]] 準拠)。
+
 git, jj, ssh 関連の署名操作は通常タイムアウトせず正常動作する。
 `1Password: failed to fill whole buffer` エラーが発生した場合のみ以下を実行:
 
 1. 音声通知:
    ```bash
-   say '1Passwordのエラーで困ってます。気づいて！'
+   say 'ワンパスワードのエラーで困ってます。気づいて！'
    ```
 
 2. ユーザーが在席していると判断できる場合のみ、AskUserQuestion で再試行を確認:
