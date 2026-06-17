@@ -1,8 +1,14 @@
-# [Draft] kawaz/* リポでの `gh issue create` ガード hook (アイデア)
+# kawaz/* リポでの `gh issue create` ガード hook
 
-Status: 仕様確定 (2026-06-02)、push-guard と同パターンで **独立 plugin リポ化** が確定方針。
-実装着手待ち。draft prefix は kawaz が plugin リポ作成後に外す。
-Updated: 2026-06-02 (push-guard 実調査反映、Decision 1-6 確定、設置場所は plugin パッケージ方式)
+Status: 仕様確定 (2026-06-02)、push-guard と同パターンで **独立 plugin リポ化** が確定方針。実装着手待ち。
+
+## TODO
+
+- [x] 仕様確定 (2026-06-02)
+- [ ] `kawaz/claude-gh-issue-guard` plugin リポ作成
+- [ ] `hooks/gh-issue-guard.sh` 実装 + tests
+- [ ] `~/.claude-personal/settings.json` に marketplace + enabledPlugins 追加
+- [ ] 数日運用 → false positive / 過剰 block 観察、regex 調整
 
 ## 背景
 

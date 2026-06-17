@@ -34,4 +34,3 @@ claude が対外文書 (メール・PR・コメント・各種公的書類言及
 ## 関連
 
 - [[sanitize-work-identifiers]] — 業務文脈の固有名詞のサニタイズ規定 (本ファイルは kawaz 個人の正本)
-- emeradaco 側からは `[[kawaz-identity]]` でこのファイルを参照可能

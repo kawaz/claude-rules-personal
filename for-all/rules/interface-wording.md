@@ -27,8 +27,4 @@ API・CLI・エラー・UI の文言はコードと同じ設計対象。
 
 ## 関連
 
-- [[cli-design-preferences]] — CLI の引数・サブコマンド構造側
-
-> **Note**: 現状 API/CLI/エラー/UI を本ファイルで束ねている。
-> UI 固有項目 (アクセシビリティ・i18n・確認文言等) が育って 5-6 個を
-> 超えたら `ui-wording.md` への分割を検討する。
+- [[design-priority]] — 設計判断の優先順位
