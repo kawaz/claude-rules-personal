@@ -2,9 +2,11 @@
 
 `docs-structure` skill は **「どこに何を置くか」** の構造定義 + テンプレ embed。本ルールは **「いつ何を書くか」** のタイミングと習慣。
 
+issue 運用は **[claude-local-issue plugin](https://github.com/kawaz/claude-local-issue)** が正本 (= write / read / update / list / migrate の 5 sub-command で frontmatter / INDEX / archive を一括管理)。本ルールは plugin が前提とする運用上の判断軸 (= 何を / どこへ昇華するか) を定める。plugin が扱う status / frontmatter / archive の仕組みは plugin 側 `SKILL.md` / `docs/DESIGN.md` を参照。
+
 ## issue 解決時のフロー
 
-`docs/issue/<file>.md` を解決する時は **delete する**。ただしその前に、解決の性格に応じて以下に記録を残す:
+`docs/issue/<file>.md` の解決は **local-issue plugin の `update <slug> close` で行う** (= archive へ移動 + close_reason 記録、`status: resolved` 遷移)。close 前に、解決の性格に応じて以下に記録を残す:
 
 | 解決の性格 | 記録先 |
 |---|---|
@@ -13,11 +15,11 @@
 | 運用上の再発可能性がある (手順化しておきたい) | `docs/runbooks/<topic>.md` |
 | 経緯・試行錯誤・ハマり所を残したい | `docs/journal/YYYY-MM-DD-<slug>.md` |
 
-複数該当する場合は複数記録する。delete 後は jj/git 履歴で追えるが、上記ディレクトリに残すと **grep 発見性が高い**（AI agent も能動的に過去事例を見つけられる）。
+複数該当する場合は複数記録する。close 後の issue は `docs/issue/archive/` に物理移動し、frontmatter の全 timestamp + close_reason が DB として残る。`list` sub-command は archive を既定で除外するので、メインコンテキストからは「消えた」ように振る舞う一方、`grep -r docs/issue/archive/` で過去事例は探せる。
 
-## issue が増えた時の運用拡張
+## issue 運用 (plugin が前提とする仕組み)
 
-### `wip` 状態は `## TODO` を内包 (= INDEX 有無に関わらず採用)
+### `wip` 状態は `## TODO` を内包
 
 仕掛中 issue file 内に進捗 checkbox:
 
@@ -28,23 +30,27 @@
 - [ ] test
 ```
 
-単一 issue 内で完結、小規模 project でも即採用可。
+単一 issue 内で完結。`update <slug> status=wip` で `status: wip` + `wip_entered` が記録される。
 
-### `docs/issue/INDEX.md` (= 5+ issue になったら任意導入)
+### `docs/issue/INDEX.md` (= plugin が必須化)
 
-全体俯瞰用。各 entry に status + (必要なら) `blocked_by` を併記:
+plugin の write / update が自動更新する全体俯瞰インデックス。手で書かず、plugin の sub-command 経由で同期する。
+
+### status 値 (= plugin の schema)
 
 | status | 意味 |
 |---|---|
 | `idea` | アイデア、まだ actionable でない |
 | `open` | 未着手 |
 | `wip` | 仕掛中、本文に `## TODO` あり |
-| `blocked` | 待ち (= `blocked_by: <issue/外部依存>`) |
-| `pending-sublimation` | 実装済、DR/journal/code に昇華して削除待ち |
+| `blocked` | 待ち (= frontmatter `blocked_by` に対象を記載) |
+| `pending-sublimation` | 実装済、DR/journal/code に昇華して archive 待ち |
+| `discarded` | 前提が消えた / 方針変更で着手しない (= 不採用、archive へ) |
+| `resolved` | 解決済 (= archive へ) |
 
-status を schema 化する理由: 自由記述だと AI ごとに違う語彙を使い、grep / triage が壊れる。
+status を schema で固定する理由: 自由記述だと AI ごとに違う語彙を使い、grep / triage が壊れる。状態遷移はユーザ意図なので `update` sub-command 引数で明示的に渡す。
 
-完了時の運用は不変 (= sublimation → file delete、上記「issue 解決時のフロー」と同じ)。INDEX があれば entry も同時削除。
+完了時の運用: sublimation → `update close` で `discarded` または `resolved` 遷移 + archive 自動移動 + INDEX 自動更新。「DR/journal に昇華 → file 削除」は不要 (plugin が archive 側に動かす)。
 
 ## 並列作業時の journal 習慣
 
@@ -93,6 +99,7 @@ journal で「同じ問題が複数回出てきた」と気づいたら runbook 
 ## 関連
 
 - `docs-structure` skill — 各ディレクトリの定義（構造）+ テンプレ embed
+- **kawaz/claude-local-issue** — issue 運用の正本 plugin (sub-command: write / read / update / list / migrate)。frontmatter / INDEX / archive の機械的詳細は plugin の `SKILL.md` / `docs/DESIGN.md`
 - [[research-documentation]] — findings の書き方
 - [[design-priority]] — DR を立てるべき判断軸
 - 参考実装: kawaz/claude-cmux-msg の `docs/journal/`、`docs/decisions/INDEX.md`

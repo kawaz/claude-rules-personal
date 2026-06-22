@@ -81,21 +81,22 @@ docs/
 - DR が議論ログ・調査寄りに育って判断記録の体を成さなくなったら `research/YYYY-MM-DD-<slug>.md` に降格。INDEX.md の `Moved to research/` 区分で追跡
 
 `issue/`:
-- 用途は (a) 自リポの TODO + (b) **他プロジェクトから受けた依頼/要望**（自リポを「依頼受付窓口」として運用）+ (c) **ゆるいメモ置き場 / セッション跨ぎ議論記録** の 3 方向
+- 運用の正本は **[claude-local-issue plugin](https://github.com/kawaz/claude-local-issue)** (sub-command: `write` / `read` / `update` / `list` / `migrate`)。本節は plugin が前提とする運用方針 (= 何を / どこに置くか) のみ扱う。frontmatter / status 遷移 / archive の機械的詳細は plugin の `SKILL.md` / `docs/DESIGN.md`
+- 用途は (a) 自リポの TODO + (b) **他プロジェクトから受けた依頼/要望** (自リポを「依頼受付窓口」として運用) + (c) **ゆるいメモ置き場 / セッション跨ぎ議論記録** の 3 方向
 - 認識: **GitHub flow のような厳密な issue 回しではない、一段ゆるい運用**。具体的には以下のような使い方が想定される:
-  - 比較的大きな改修アイデアで時間をかけたいもの（今すぐ手をつけないが頭の中に残しておくと邪魔なメモ）
+  - 比較的大きな改修アイデアで時間をかけたいもの (今すぐ手をつけないが頭の中に残しておくと邪魔なメモ)
   - 忙しい時に後回しにしたいタスク
-  - 別リポジトリへの非同期メッセージ（= 上記 (b)）
-  - 議論経過をセッションを跨いで保存したい時のメモ（= 同じ issue ファイルに議論を追記して育てる用途も OK）
+  - 別リポジトリへの非同期メッセージ (= 上記 (b))
+  - 議論経過をセッションを跨いで保存したい時のメモ (= 同じ issue ファイルに議論を追記して育てる用途も OK)
 - 起票の「重さ」に幅を持たせて良い:
   - **small issue** (= 数行のメモ、1 セッションで解決可) も OK、過剰に構造化しなくて良い
   - **large issue** (= 設計検討込み長文、複数セッションで議論を追記しながら成熟させる) も OK
-  - GH issue のような「Status / Priority / Labels / Assignee」厳密管理は不要、ヘッダは Status と Date 程度で十分
-- **他プロジェクトへ依頼する場合は相手プロジェクトの `docs/issue/`** に書く（自リポに書くと相手が見つけられない）。発端は別ローカルプロジェクト間での依頼受付として設計したもの
+  - frontmatter の管理は plugin の sub-command (= `write` / `update`) が担うので手書きしない
+- **他プロジェクトへ依頼する場合は相手プロジェクトの `docs/issue/`** に書く (自リポに書くと相手が見つけられない)。発端は別ローカルプロジェクト間での依頼受付として設計したもの
 - 想定する「相手プロジェクト」は kawaz 自身が管理するリポに限定される。本ルールはその前提で設計されている
-- 相手リポが `docs/issue/` 慣習を持っていない場合は、依頼自体は新ルール（`docs/issue/YYYY-MM-DD-<slug>.md`）で起票し、同時に「docs-structure 準拠への移行依頼」を別 issue として相手リポに作成する（kawaz の自リポ群で揃える方針のため）
-- 解決した issue は **削除**（jj/git 履歴で追える、`done/` 移動はしない）
-- 削除前に内容に応じて `decisions/` `runbooks/` `journal/` に記録を残す（`docs-knowledge-flow.md` 参照）
+- 相手リポが `docs/issue/` 慣習を持っていない場合は、依頼自体は新ルール (`docs/issue/YYYY-MM-DD-<slug>.md`) で起票し、同時に「docs-structure 準拠への移行依頼」を別 issue として相手リポに作成する (kawaz の自リポ群で揃える方針のため)
+- 解決した issue は plugin の **`update <slug> close`** で archive へ移動 (= `docs/issue/archive/<file>.md`、`status: resolved` 遷移、`close_reason` 記録)。frontmatter の全 timestamp が DB として残るので、過去経緯は `grep -r docs/issue/archive/` で参照可
+- archive 移動の前に、内容に応じて `decisions/` `runbooks/` `journal/` に記録を残す ([[docs-knowledge-flow]] 参照)
 
 `journal/` と `findings/` の境界:
 - journal: 日々の生記録、ハマり所と解決策のペア、コマンド・設定値、後日読み返して状況復元できる粒度。non-stop 直後の確認に膨大なログより向く
