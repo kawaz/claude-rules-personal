@@ -17,40 +17,12 @@ issue 運用は **[claude-local-issue plugin](https://github.com/kawaz/claude-lo
 
 複数該当する場合は複数記録する。close 後の issue は `docs/issue/archive/` に物理移動し、frontmatter の全 timestamp + close_reason が DB として残る。`list` sub-command は archive を既定で除外するので、メインコンテキストからは「消えた」ように振る舞う一方、`grep -r docs/issue/archive/` で過去事例は探せる。
 
-## issue 運用 (plugin が前提とする仕組み)
+## issue 運用 (= plugin に委譲、原則だけ書く)
 
-### `wip` 状態は `## TODO` を内包
-
-仕掛中 issue file 内に進捗 checkbox:
-
-```markdown
-## TODO
-- [x] 仕様確定
-- [ ] 実装
-- [ ] test
-```
-
-単一 issue 内で完結。`update <slug> status=wip` で `status: wip` + `wip_entered` が記録される。
-
-### `docs/issue/INDEX.md` (= plugin が必須化)
-
-plugin の write / update が自動更新する全体俯瞰インデックス。手で書かず、plugin の sub-command 経由で同期する。
-
-### status 値 (= plugin の schema)
-
-| status | 意味 |
-|---|---|
-| `idea` | アイデア、まだ actionable でない |
-| `open` | 未着手 |
-| `wip` | 仕掛中、本文に `## TODO` あり |
-| `blocked` | 待ち (= frontmatter `blocked_by` に対象を記載) |
-| `pending-sublimation` | 実装済、DR/journal/code に昇華して archive 待ち |
-| `discarded` | 前提が消えた / 方針変更で着手しない (= 不採用、archive へ) |
-| `resolved` | 解決済 (= archive へ) |
-
-status を schema で固定する理由: 自由記述だと AI ごとに違う語彙を使い、grep / triage が壊れる。状態遷移はユーザ意図なので `update` sub-command 引数で明示的に渡す。
-
-完了時の運用: sublimation → `update close` で `discarded` または `resolved` 遷移 + archive 自動移動 + INDEX 自動更新。「DR/journal に昇華 → file 削除」は不要 (plugin が archive 側に動かす)。
+- **frontmatter / status 遷移 / INDEX / archive** の機械的詳細は plugin が担う (正本は plugin の `SKILL.md` / `docs/DESIGN.md`)。手書きで frontmatter を作らない、INDEX も自動更新に任せる。
+- 仕掛中の issue は本文に `## TODO` checkbox を持たせて進捗を可視化 (`update <slug> status=wip` と併用)。
+- status 値は plugin が schema (`idea` / `open` / `wip` / `blocked` / `pending-sublimation` / `discarded` / `resolved`) を固定している。**状態遷移はユーザ意図**なので `update` sub-command の引数で明示的に渡す (自由記述で書かない)。
+- 完了は `update <slug> close` で `discarded` or `resolved` 遷移 + archive 自動移動。「DR/journal に昇華 → file 削除」のフローは廃止 (= plugin が archive 側に動かす)。
 
 ## 並列作業時の journal 習慣
 
