@@ -1,6 +1,6 @@
 ---
 name: docs-structure
-description: kawaz/* 各リポジトリの `docs/` 構造標準化ルール。新規 doc ファイル作成 (README / DESIGN / STRUCTURE / ROADMAP / MANUAL)、`docs/` 配下サブディレクトリへの起票 (decisions/DR / findings / journal / runbooks / issue / research / knowledge / design)、DR 起票 + INDEX.md 更新、`YYYY-MM-DD-<slug>.md` 命名、ja/en 翻訳ペア運用 (README / DESIGN / MANUAL)、相互リンクヘッダ、justfile の canonical 参照 (kawaz/bump-semver)、`docs/issue/` 解決時の削除フロー、既存リポの migration 等、kawaz リポの docs 配下を触る作業時に参照。新規ファイル作成時は同梱の `templates/` 配下テンプレを起点にする。
+description: kawaz/* 各リポジトリの `docs/` 構造標準化ルール。新規 doc ファイル作成 (README / DESIGN / STRUCTURE / ROADMAP / MANUAL)、`docs/` 配下サブディレクトリへの起票 (decisions/DR / findings / journal / runbooks / issue / research / knowledge / design)、DR 起票 + INDEX.md 更新、`YYYY-MM-DD-<slug>.md` 命名、ja/en 翻訳ペア運用 (README / DESIGN / MANUAL)、相互リンクヘッダ、justfile の canonical 参照 (kawaz/bump-semver)、`docs/issue/` の claude-local-issue plugin 運用 (= close で archive 移動)、既存リポの migration 等、kawaz リポの docs 配下を触る作業時に参照。新規ファイル作成時は同梱の `templates/` 配下テンプレを起点にする。
 ---
 
 # kawaz docs/ 構造標準化
