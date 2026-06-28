@@ -46,7 +46,11 @@
 - CLIツールはcompletion出力機能を持つべき
 - `*.plugin.zsh` で提供可能
 - 過不足のないコンテキスト対応補完
-- コード修正時はhelpと実装の整合性を確認
+- **3 つを同期保守**: 実装 (option parser / 振る舞い) ↔ `--help` テキスト ↔ completion 定義
+  - 実装変更時: `--help` と completion を同時に追従
+  - `--help` 変更時 (= option 追加 / 削除 / 引数仕様変更): completion 定義も必ず追従
+  - completion 追加時: `--help` の出力と齟齬なく
+- 片方向だけ追従するアンチパターン (= 「help 更新したけど completion 古いまま」「completion 直したけど help 古い」) は **片面 rule の盲点** ([[self-written-rule-blind-spots]])、3 者の整合は意識的に確認
 
 ## 参考
 
