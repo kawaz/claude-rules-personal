@@ -98,6 +98,6 @@ gif / 動画 / 事前リサイズ・圧縮 / マスキング / 差分マージ /
 
 ## 関連スキル / ルール
 
-- **撮影源 / attach 経路**: `personal-agent-browser-session-isolation` (session 命名) / `personal-playwright-cli-chrome-beta-multi-profile` (Chrome Beta token attach) / 各業務 overlay の `antenna-staging-e2e` 等
+- **撮影源 / attach 経路**: `personal-playwright-cli-chrome-beta-multi-profile` (Chrome Beta token attach、session 命名規約も含む) / 各業務 overlay の `antenna-staging-e2e` 等
 - **越境作業時**: `claude-config-dir-isolation` 準拠でサブシェル化 + 対象環境の Chrome profile を使用
 - **詳細手順**: 同ディレクトリ `instruction.md` (サブエージェントが読む)
