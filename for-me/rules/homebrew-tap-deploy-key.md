@@ -64,6 +64,37 @@ Formula 反映確認:
 brew install kawaz/tap/$PROJECT && $PROJECT --version
 ```
 
+## dotfiles 側の brew formula list 登録 (= darwin-rebuild 由来の uninstall 対策)
+
+kawaz の macOS 環境は **nix-darwin** で brew formula を declarative 管理している。
+`dotfiles/darwin/default.nix` の `brews = [...]` リストに登録されてない formula は
+**`darwin-rebuild switch` のたびに自動 uninstall される**。
+
+= 新 kawaz リポを brew で配布開始した時、**dotfiles に登録しないと自分の環境からも消える**。
+
+### 手順 (= 配布開始した kawaz リポを自環境に永続 install したい時に必須)
+
+1. `~/.dotfiles/darwin/default.nix` を開く
+2. `brews = [` 内の **適切なグループ** (= "kawaz utilities" / "System tools" 等、既存の並びに合わせる) に
+   `"kawaz/tap/<project>"` を 1 行追加
+3. dotfiles をいつもの手順で commit + push + `darwin-rebuild switch` 適用
+4. apply 後 `brew list | grep <project>` で永続化を確認
+
+### 既存例
+
+`dotfiles/darwin/default.nix` 内の `brews = [...]` には既に
+`kawaz/tap/authsock-filter / authsock-warden / bump-semver / hyoui / jj-worktree / stable-which`
+が登録されている。新規追加もこれらの並びに合わせる。
+
+### 追加忘れの徴候
+
+- `brew install kawaz/tap/<project>` を手で打って入れた後、しばらくして `command not found: <project>` になる
+  = `darwin-rebuild switch` が走って uninstall された
+- `just on-success-release` の `brew upgrade` が `Error: kawaz/tap/<project> not installed` で失敗
+  = 同上
+
+これらが起きたら dotfiles 登録忘れを疑う。
+
 ## ローテーション / 廃止
 
 基本不要。鍵漏洩懸念または FROM リポ廃止時のみ:
