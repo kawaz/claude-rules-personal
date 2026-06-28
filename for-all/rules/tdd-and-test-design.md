@@ -99,7 +99,7 @@
 
 - ケース直前に意図を 1-3 行で書く: 「**何の入力で何を確認、なぜそうなるべきか (= DR / 仕様根拠)**」
 - 複数 case をまとめた section の冒頭に共通の判断を書く (= 軸の意味論)
-- DR の reference を直接 inline (例: `// DR-0006: -n is cat-equivalent`)、test 読者が DR を別タブで開かなくても判断が分かる
+- **DR の判断本質を文章で書き、DR ref は補助 marker**: 「`// 末尾 @ も先頭 @ と同等に Absolute フラグ立てる: @ idempotent 規約による (DR-0007 Phase 2 marker)`」のように、test 読者が **DR を別タブで開かなくても判断が完全に分かる** 形にする。`// DR-0006: -n is cat-equivalent` のような DR ref 単独引用は不可 (= DR が消えた / 別プロジェクトに移植 / OSS 公開 した時に意味を失う)。**portability の根拠**: 「テスト = 真の仕様書、ソースを捨てても再現可能、別言語移植も test を pass させれば済む」を満たすため、test 内の reference は test 単体で self-contained でなくてはいけない。DR ref は「この判断は記録された経緯がある」という意図的な history pointer 扱いで、必須ではなく補助情報。同じ原則は issue ref / PR ref / commit hash 等の全 cross-reference に適用
 - 境界判断は **なぜそこが境界か** を明示 (例: `// 6 ASCII whitespace bytes only — Unicode WS (NBSP, U+2028) intentionally not trimmed per DR-0001`)
 - 仕様変更で test を変える時、**変更の議論ログも近接 comment に追記** (例: `// DR-0005 で --eol 廃止に伴い -n の意味を cat 同等に refine`)
 
