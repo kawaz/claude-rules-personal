@@ -1,3 +1,22 @@
+---
+title: "ルール群の構造を再編する"
+status: open
+category: design
+created: 2026-06-18T07:16:14+09:00
+last_read:
+open_entered: 2026-06-18T07:16:14+09:00
+wip_entered:
+blocked_entered:
+pending_entered:
+discarded_entered:
+resolved_entered:
+discard_reason:
+pending_reason:
+close_reason:
+blocked_by:
+origin:
+---
+
 # ルール群の構造を再編する
 
 ## 背景

@@ -1,3 +1,22 @@
+---
+title: "kawaz/* リポでの `gh issue create` ガード hook"
+status: open
+category: design
+created: 2026-06-17T13:37:50+09:00
+last_read:
+open_entered: 2026-06-17T13:37:50+09:00
+wip_entered:
+blocked_entered:
+pending_entered:
+discarded_entered:
+resolved_entered:
+discard_reason:
+pending_reason:
+close_reason:
+blocked_by:
+origin:
+---
+
 # kawaz/* リポでの `gh issue create` ガード hook
 
 Status: 仕様確定 (2026-06-02)、push-guard と同パターンで **独立 plugin リポ化** が確定方針。実装着手待ち。

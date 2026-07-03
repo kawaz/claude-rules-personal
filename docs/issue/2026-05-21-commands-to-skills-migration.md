@@ -1,3 +1,22 @@
+---
+title: "既存 commands を skills に移行する"
+status: open
+category: task
+created: 2026-05-28T08:50:04+09:00
+last_read:
+open_entered: 2026-05-28T08:50:04+09:00
+wip_entered:
+blocked_entered:
+pending_entered:
+discarded_entered:
+resolved_entered:
+discard_reason:
+pending_reason:
+close_reason:
+blocked_by:
+origin:
+---
+
 # 既存 commands を skills に移行する
 
 ## 背景

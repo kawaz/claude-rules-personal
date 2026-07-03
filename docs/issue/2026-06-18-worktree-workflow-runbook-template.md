@@ -1,3 +1,22 @@
+---
+title: "worktree/workspace 経由作業の runbook テンプレを docs-structure に追加"
+status: open
+category: request
+created: 2026-06-18T11:29:35+09:00
+last_read:
+open_entered: 2026-06-18T11:29:35+09:00
+wip_entered:
+blocked_entered:
+pending_entered:
+discarded_entered:
+resolved_entered:
+discard_reason:
+pending_reason:
+close_reason:
+blocked_by:
+origin:
+---
+
 # worktree/workspace 経由作業の runbook テンプレを docs-structure に追加
 
 ## 背景
