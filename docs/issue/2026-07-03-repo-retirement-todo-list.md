@@ -38,6 +38,7 @@ origin: エコシステム横断監査 (2026-07-03)
 - unbreaker
 - findmy
 - bump.mbt (GitHub archive 済み・ローカル整理のみ)
+- claude-plugins (marketplace リポ。kawaz 本人が 2026-05-24 に PR #1 で非推奨化を merge 済み・README に「アーカイブまたは削除予定」と明記済みだが archive 未実施。ローカル clone は origin に対し 1 ahead / 3 behind で diverged — ローカル側 commit は force-uv v0.2.3 bump で origin 側の同内容 commit と重複しており、統合 or 破棄の判断も必要)
 
 ## 背景
 
