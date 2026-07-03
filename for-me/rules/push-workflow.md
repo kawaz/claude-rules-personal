@@ -39,28 +39,12 @@ push の前提は固定された commit。**自分が修正したファイルだ
 - **常時ロードサイズ**: 単一 rule ファイルが 5KB を超えたら、`[[rule-writing-guidelines]]` の「省コンテキスト」原則に照らして分割 / reference 化 / 詳細外出しを検討
 - **`.draft-` prefix の rule 配置**: `for-me/rules/` 配下に `.draft-*.md` を置かない (常時ロードされる)。draft は `docs/issue/` へ
 
-新規 rule 追加 / 既存 rule 修正の commit 前に 1 度通す。簡易検査:
+このうち機械検査できる項目 (リンク方向 / 自己参照 / `.draft-` 配置 = fatal、5KB 超 =
+warning) は `just lint-rules` に集約済み。**push の deps で自動実行される**ため通常は
+push task がまとめて弾く。commit 前に単体で確認したければ `just lint-rules` を実行する。
 
-```bash
-# 越境リンク (for-all → for-me)
-rg -l '\[\[' for-all/rules/ | while read f; do
-  rg -o '\[\[([^\]]+)\]\]' -r '$1' "$f" | while read name; do
-    [ -f "for-me/rules/${name}.md" ] && echo "越境: $f → for-me/rules/${name}.md"
-  done
-done
-
-# 自己参照
-for f in for-all/rules/*.md for-me/rules/*.md; do
-  base=$(basename "$f" .md)
-  rg -q "\[\[$base\]\]" "$f" && echo "自己参照: $f"
-done
-
-# .draft- 配置
-ls for-{all,me}/rules/.draft-*.md 2>/dev/null && echo "draft が rules 配下に存在"
-
-# 大きすぎる rule (5KB 超)
-find for-{all,me}/rules/ -name '*.md' -size +5k
-```
+「未来予告 / 過去 narrative」(`[[no-historical-noise]]`) だけは機械判定が難しいので
+目視で確認する。
 
 ## push 経路
 
