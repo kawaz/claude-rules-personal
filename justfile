@@ -43,6 +43,52 @@ sync:
 promote:
     bump-semver vcs promote
 
-# push to origin/main (gates: check-on-default-branch + ensure-clean)
-push: check-on-default-branch ensure-clean
+# rule メタ規約 lint (push-workflow.md の commit 前チェックを機械化)
+# (a) for-all→for-me 越境リンク / (b) 自己参照 / (c) .draft- 配置 = fatal
+# (d) 5KB 超 rule = warning のみ (省コンテキスト検討材料、fatal にしない)
+lint-rules:
+    #!/usr/bin/env bash
+    set -uo pipefail
+    fatal=0
+    # (a) 越境リンク: for-all/rules/*.md の [[name]] が for-me/rules/<name>.md を指す
+    while IFS= read -r f; do
+        while IFS= read -r name; do
+            if [ -n "$name" ] && [ -f "for-me/rules/${name}.md" ]; then
+                echo "FATAL 越境リンク: $f の [[${name}]] が for-me/rules/${name}.md を指す"
+                fatal=1
+            fi
+        done < <(rg -o '\[\[([^\]]+)\]\]' -r '$1' "$f")
+    done < <(rg -l '\[\[' for-all/rules/ || true)
+    # (b) 自己参照: rule ファイルが [[自分の slug]] を含む
+    for f in for-all/rules/*.md for-me/rules/*.md; do
+        base=$(basename "$f" .md)
+        if rg -q "\[\[${base}\]\]" "$f"; then
+            echo "FATAL 自己参照: $f が [[${base}]] で自身を参照"
+            fatal=1
+        fi
+    done
+    # (c) .draft- が rules 配下に存在 (draft は docs/issue/ へ)
+    drafts=$(ls for-all/rules/.draft-*.md for-me/rules/.draft-*.md 2>/dev/null || true)
+    if [ -n "$drafts" ]; then
+        echo "FATAL .draft- が rules 配下に存在:"
+        printf '%s\n' "$drafts" | sed 's/^/  /'
+        fatal=1
+    fi
+    # (d) 5KB 超 rule (warning のみ、常時ロード肥大の検討材料)
+    big=$(find for-all/rules for-me/rules -name '*.md' -size +5k | sort)
+    if [ -n "$big" ]; then
+        n=$(printf '%s\n' "$big" | wc -l | tr -d ' ')
+        echo "WARN 5KB 超の rule ${n} 件 (rule-writing-guidelines の省コンテキスト検討):"
+        while IFS= read -r bf; do
+            echo "  $bf ($(wc -c < "$bf" | tr -d ' ') bytes)"
+        done <<< "$big"
+    fi
+    if [ "$fatal" -ne 0 ]; then
+        echo "lint-rules: FATAL 違反あり (上記参照)" >&2
+        exit 1
+    fi
+    echo "lint-rules: OK (fatal 違反なし)"
+
+# push to origin/main (gates: lint-rules + check-on-default-branch + ensure-clean)
+push: check-on-default-branch ensure-clean lint-rules
     bump-semver vcs push --branch main --jj-bookmark-auto-advance
