@@ -100,9 +100,17 @@ canonical 同期で notify --self + just watch に書き換える。AI が hint 
 
 ### push task に notify も hint も無いリポ
 
-AI が SHA (`git rev-parse HEAD` or jj `latest(::@ & ~empty())`) を取って
-`gh-monitor:watch-workflow` skill を手動で起動する。直接 `gh run watch` /
-`gh run list` を叩かない。
+AI が push 対象コミットの SHA を取って `gh-monitor:watch-workflow` skill を
+手動で起動する。SHA は backend で使い分ける:
+
+- **git**: `git rev-parse HEAD`
+- **jj**: `jj log -r 'heads((::@-) & (~empty() | merges()))' --no-graph -T commit_id`
+  = `@` を除いた最新の固定「実体」コミット。`@-` 起点で未コミット working copy を
+  避け、`| merges()` で jj の空マージ ("merges without user modifications") を救済し、
+  timestamp でなく topology で選ぶため `heads()`。素朴な `latest(::@ & ~empty())` は
+  存在しない SHA を pin して watch が no-match-timeout まで無駄常駐する事故になる。
+
+直接 `gh run watch` / `gh run list` は叩かない。
 
 ### 失敗時 / 起動しない時
 
