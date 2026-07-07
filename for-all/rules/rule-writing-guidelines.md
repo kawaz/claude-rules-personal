@@ -27,8 +27,9 @@ rule / skill を書く・改廃するときの正本。
 5. **`.draft-` を rules 配下に置かない** (常時ロードされる)。draft は
    `docs/issue/` へ
 
-3 の越境検査・4・5 と「5KB 超 warning」は `just lint-rules` が機械検査する
-(push の deps で自動実行)。3 の「skill 参照は名前で書く」は目視。「未来予告 / 過去 narrative」([[no-historical-noise]]) だけは
+3 の越境検査・4・5 と「5KB 超 warning」は claude-rules-personal リポの
+`just lint-rules` task が機械検査する (同リポの push の deps で自動実行、
+他リポにこの task は無い)。3 の「skill 参照は名前で書く」は目視。「未来予告 / 過去 narrative」([[no-historical-noise]]) だけは
 機械判定が難しいので目視で確認する。
 
 ## 「該当なし」「やらないこと」明示の優先順位
