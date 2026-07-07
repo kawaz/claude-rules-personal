@@ -1,3 +1,8 @@
+---
+name: git-worktree-workflow
+description: "`.jj` が存在しない git 専用リポでの git bare + worktree 方式の作業手順書。ディレクトリ構成 (bare repo + 兄弟 worktree)、feature/fix/docs ブランチ命名、worktree 命名 (issue 番号 / pr 番号 / wip)、リポジトリ親の特定コマンド、PR-base ブランチの初回作成、新規 PR 作成フロー、wip → PR 昇格 (branch -m → push -u → worktree move)、pre-commit 自動修正時の amend を扱う。`.jj` が無い git リポで worktree / PR 作成の作業を始めるときに使う。`.jj` があるリポは jj-workflow skill が正。"
+---
+
 # Git ワークフロー（git bare + worktree 方式）
 
 `.jj` が存在しないリポジトリで適用。`.jj` がある場合は jj-workflow skill (git bare + jj workspace 方式) に従う。

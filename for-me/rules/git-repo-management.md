@@ -1,5 +1,10 @@
 # Git リポジトリ管理
 
+## workflow の選択
+
+worktree / commit / PR 作業は `.jj/` 有 → `jj-workflow` skill、
+無 (`.git` のみ) → `git-worktree-workflow` skill に従う。
+
 ## パス規約
 
 `${XDG_DATA_HOME:-$HOME/.local/share}/repos/{host}/{owner}/{repo}/`

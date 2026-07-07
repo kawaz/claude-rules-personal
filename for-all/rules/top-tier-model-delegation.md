@@ -55,7 +55,7 @@
 model 未指定で起動してしまった場合は、序盤なら止めて指定し直すほうが安い。
 
 専用 agent (`nitpick-reviewer` / `codex:codex-rescue` 等) は各 agent の `model`
-フロントマター指定が優先、未指定なら親継承。詳細は [[claude-plugin-reference]] skill。
+フロントマター指定が優先、未指定なら親継承。詳細は `claude-plugin-reference` skill。
 
 ## Why
 
