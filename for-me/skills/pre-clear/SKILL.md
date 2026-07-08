@@ -23,9 +23,30 @@ dir=${XDG_CACHE_HOME:-$HOME/.cache}/claude-session-state/<project-slug>/
 ```
 
 - `<project-slug>` = プロジェクトの短名 (例: kuu)。既存ディレクトリがあればそれに合わせる
-- `<YYYYMMDD-HHMM>.md` に書き、同内容を `latest.md` へコピー (履歴は残す、発見は latest.md)
+- 状態本文は `<YYYYMMDD-HHMM>.md` に書く (immutable、履歴として残す)
+- **`latest.md` は本文を持たないポインタファイル**:
+
+```
+state: <YYYYMMDD-HHMM>.md
+loaded_by:
+```
+
 - cache 置きは意図的: 消えても journal / メモリ / VCS 履歴から復元可能な**運用状態のみ**を書く。
   永続知識 (設計判断・教訓) は journal / DR / メモリへ — ここに退避しない
+
+### ロード側プロトコル (多重ロード防止)
+
+1. `latest.md` を読み、`loaded_by:` を確認する
+2. **空なら**: `state:` の実体を Read し、直後に `loaded_by:` へ 1 行追記
+   (`  - <ISO時刻> <自分の session-id>`)。以後このハンドオフは自分のもの
+3. **他セッションの記録が既にあるなら**: このハンドオフは**その系列に消費済み**なので
+   自分のハンドオフとして採用しない (その系列はクラッシュしても `claude --continue` で
+   同一セッションとして続くため、状態はそちらが正)。journal / メモリ / リポの実機確認から
+   通常どおり立ち上がる
+
+> Why: ハンドオフは「1 つの後継セッション」宛て。多重ロードすると 2 系列が同じ状態から
+> 分岐して同一 ws を取り合う。クラッシュ復旧は --continue の領分であり、状態ファイルの
+> 更新頻度で守るものではない。
 
 ## 2. 内容 — 10 セクション (compact-plus 由来) + clear 固有の力点
 
