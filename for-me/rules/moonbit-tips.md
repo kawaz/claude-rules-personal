@@ -3,13 +3,18 @@
 ## シンボルリネーム
 
 ```bash
-moon ide rename old_name new_name --loc src/file.mbt:行:列
+moon ide rename old_name new_name --loc src/file.mbt:行:列 --apply
 ```
 
-- シンボル定義の位置を `--loc` で指定（行・列は 1-based）
+- **デフォルトは edits のプレビュー出力のみ。書き換えには `--apply` が必須**
+- `--loc` は `path[:line[:col]]` (行・列は 1-based)。`--loc` なしはモジュール/ワークスペース
+  全域のセマンティック検索 (シンボル形式: `foo` / `@pkg.foo` / `Type::member`)。
+  ローカル変数・shadow 名・曖昧なシンボルは行・列まで指定する
 - 全参照（呼び出し元、examples 含む）を自動置換
 - テスト名やコメント内の文字列リテラルは対象外（手動対応）
-- パッチ出力ではなく**直接ファイルを書き換える**
+- **誤爆実績あり**: 関数パラメータの rename で無関係な別関数のパラメータまで
+  書き換わった事例 (kuu.mbt、2026-07-10)。`--apply` 後は毎回 `jj diff` / `git diff`
+  で意図した範囲だけが変わったことを確認する
 - `--no-check` で事後の moon check をスキップ可能
 
 ## ビルド対象の制御
