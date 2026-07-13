@@ -20,7 +20,10 @@ kawaz の Mac には CLIProxyAPI (サブスク認証を OpenAI/Claude 互換 API
 
 **codex plugin (openai/codex-plugin-cc) は廃止済み** — `codex:codex-rescue` subagent や `/codex:*` slash command を使わない。
 
-AI からの実行経路 (headless claude をプロキシに向ける):
+経路はセッションの起動形態で決まる:
+
+- **プロキシ経由セッション** (kawaz は普段 `claude-proxy` で起動する運用): `/model gpt-5.6-sol` 切替や subagent で完結。AI が経路を意識する必要なし
+- **非プロキシセッション** (Anthropic 直結) で codex 依頼を受けた時の fallback: Bash で headless claude をプロキシに向ける
 
 ```bash
 ANTHROPIC_BASE_URL=http://127.0.0.1:8317 \
