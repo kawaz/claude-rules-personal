@@ -24,12 +24,19 @@ kawaz の Mac には CLIProxyAPI (サブスク認証を OpenAI/Claude 互換 API
 codex は agent 定義 preset で使う: `codex-sol-reviewer` (レビュー特化) / `codex-sol-worker`
 (高難度実作業) / `codex-terra-worker` (通常作業・二次意見) / `codex-luna-worker` (軽量定型)。
 
-**context 制約**: codex は素の上限 ~270k だが cliproxyapi 経由では 200k に見え、subagent の
-ベースライン注入 (ツールスキーマ + ハーネス機構、CLAUDE.md 由来ではない) が **~67-77k**
-(2026-07-15 実測)。実効 ~120k しか残らないので、大入力タスク (数万 token 級のレビュー対象・
-長大ファイル群) は agent 経由でなく `claude -p --bare` 経路 (開始時 ~1k) で回す —
-**手順・罠 (auth env 必須 / tool set は Bash,Edit,Read 固定 / read-only 縛りは
-disallowedTools 側) は `codex-bare-batch` skill が正本**。
+**モデル特性** (GPT-5.6 GA、gihyo.jp 2026-07 記事より): sol = フラッグシップ (コーディングも
+SOTA 級、`gpt-5.6` 指定時のデフォルト) / terra = GPT-5.5 相当を低コストで (日常業務) /
+luna = 高速・大量処理 (Ultra 不可)。effort は low〜xhigh/max (Ultra はプラン限定・
+proxy 経由では実質 max まで)。**出力が短くなる傾向があり「簡潔に」系の指示を重ねると
+必要な内容まで省略する** — 文字数上限で縛らず「残すべき要素」を指定する。
+
+**context 制約**: GPT-5.6 の素の window は 1.05M (272K 超入力は割増料金境界) だが、
+cliproxyapi 経由では 200k に見える。subagent のベースライン注入 (ツールスキーマ +
+ハーネス機構、CLAUDE.md 由来ではない) が **~67-77k** (2026-07-15 実測) なので実効
+~120k。大入力タスク (数万 token 級のレビュー対象・長大ファイル群) は agent 経由でなく
+`claude -p --bare` 経路 (開始時 ~1k) で回す — **手順・罠 (auth env 必須 / tool set は
+Bash,Edit,Read 固定 / read-only 縛りは disallowedTools 側) は `codex-bare-batch` skill
+が正本**。
 
 **codex plugin (openai/codex-plugin-cc) は廃止済み** — `codex:codex-rescue` subagent や `/codex:*` slash command を使わない。
 
