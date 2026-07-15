@@ -19,6 +19,24 @@ kawaz の Mac には CLIProxyAPI (サブスク認証を OpenAI/Claude 互換 API
 
 「codex にレビューさせて」「codex の意見」等は **CLIProxyAPI 経由で codex モデルに依頼する**ことを指す。レビュー・監査は `gpt-5.6-sol`、軽い二次意見は `gpt-5.6-terra`。
 
+### codex worker の preset と context 制約
+
+codex は agent 定義 preset で使う: `codex-sol-reviewer` (レビュー特化) / `codex-sol-worker`
+(高難度実作業) / `codex-terra-worker` (通常作業・二次意見) / `codex-luna-worker` (軽量定型)。
+
+**context 制約**: codex は素の上限 ~270k だが cliproxyapi 経由では 200k に見え、subagent の
+ベースライン注入 (ルール類 + ツールスキーマ) が **~77k** (2026-07-15 実測: ツール未使用
+一問一答で subagent_tokens 76,589)。実効 ~120k しか残らないので、大入力タスク (数万 token
+級のレビュー対象・長大ファイル群) は agent 経由でなく **`claude -p --bare` の Bash 経路**
+で注入を削って回す:
+
+```bash
+(cd <repo> && ANTHROPIC_BASE_URL=http://127.0.0.1:8317 ANTHROPIC_AUTH_TOKEN=local \
+  claude -p --bare --model gpt-5.6-sol < prompt.md > result.md 2>&1)
+```
+
+(業務面は 8318。`--allowedTools` は read-only 縛りが必要なレビュー時のみ付ける)
+
 **codex plugin (openai/codex-plugin-cc) は廃止済み** — `codex:codex-rescue` subagent や `/codex:*` slash command を使わない。
 
 経路はセッションの起動形態で決まる:
