@@ -25,7 +25,11 @@ tier 間の分担原則は [[top-tier-model-delegation]] が正本 — 本ルー
   (字義通り解釈) ので、曖昧さを残した委譲には使わない
 - **opus47[-low/-high]**: 設計自由度が残るタスク・調査/見積・指示が曖昧になりうる探索的作業。
   曖昧・矛盾した指示を自力で妥当に解消する幅がある
-- effort は作業種別で調整: low = 機械的作業 / 継承 = 通常実装 / high = レビュー・監査・検証設計
+- **effort は全 agent 定義で明示する** (kawaz 裁定 2026-07-15): low = 機械的作業 /
+  medium = 通常実装 / high = レビュー・監査・検証設計。未指定はメインの effort を継承する
+  ため、メインが fable/opus を目的別 effort で運用している以上 worker の effort が起動元の
+  状態次第で不定になる (意図せず xhigh や low で走る)。Agent tool に effort パラメータは
+  無いので frontmatter が唯一の制御点
 - 生の実測ログはプロジェクトメモリ側 (kuu の feedback-try-sonnet5.md 等) — 本ルールは蒸留原則のみ
 
 ## 委譲プロンプトに必ず入れる規約 (モデル非依存)
