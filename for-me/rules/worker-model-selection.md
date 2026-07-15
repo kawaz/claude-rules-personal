@@ -52,23 +52,27 @@ tier 間の分担原則は [[top-tier-model-delegation]] が正本 — 本ルー
 
 ## model × effort 選択マトリクス (迷わないためのパターン、kawaz 裁定 2026-07-15)
 
+agent 名は `<model><effort>-worker[-用途]` の形式 (例: `sonnet5-worker-medium`)。
+表中はモデル+effort の略記 (例: `sonnet5-medium`) で書く。
+
 | 課題の性質 | 選択 |
 |---|---|
 | 機械的・定型 (整形・一括リネーム・転写・記録・journal) | sonnet5-low / codex-luna |
-| 方針確定済みの単一課題実装 (受け入れ条件が明文化できる) | sonnet5 (medium) / codex-terra |
-| 定型調査・棚卸し (読み取り専用、小粒度に分割済み) | sonnet5 (medium) / Explore |
-| 日常業務処理・大量リクエストの低コスト処理 | sonnet5 (medium) / codex-terra (コスト重視ならこちら) |
+| 方針確定済みの単一課題実装 (受け入れ条件が明文化できる) | sonnet5-medium / codex-terra |
+| 定型調査・棚卸し (読み取り専用、小粒度に分割済み) | sonnet5-medium / Explore |
+| 日常業務処理・大量リクエストの低コスト処理 | sonnet5-medium / codex-terra (コスト重視ならこちら) |
 | **プランが確定済みの本実装・自走実行** (指示書が書けている) | **codex-sol** (指示書は fable に書かせる) |
-| **不具合調査・デバッグ・原因の再現追跡** | **codex-sol-high** (圧倒的に強い) |
+| **不具合調査・デバッグ・原因の再現追跡** | **codex-sol** (high、圧倒的に強い) |
 | 長時間エージェント自走・terminal/GUI 操作・Web リサーチ | codex-sol |
-| **複雑課題が複数直列 / ルール遵守が critical / 手戻り高コスト** | **sonnet5 不可** → opus47 / codex-sol-high 以上 |
-| 設計自由度が残る実装・探索的調査・指示が曖昧になりうる作業 | opus47 (medium)。「何をやるべきかから考える」域なら fable |
+| **複雑課題が複数直列 / ルール遵守が critical / 手戻り高コスト** | **sonnet5 不可** → opus47-medium / codex-sol 以上 |
+| 設計自由度が残る実装・探索的調査・指示が曖昧になりうる作業 | opus47-medium。「何をやるべきかから考える」域なら fable |
 | 検証設計・原因分析・機械確認系レビュー | opus47-high / sonnet5-high (単一課題のみ) |
 | 複雑な PR 作成・実務文書・長文脈整合が要る統合作業 | claude 系 (opus47 / fable) — codex より SWE-Bench Pro 級で優位 |
-| 範囲明確な単発の高度判断 | fable low |
-| 本気レビュー・設計監査・**codex 成果の要件充足/ブレ検査** | fable high (subagent) / codex 二次意見は sol-reviewer |
-| 指揮・タスク分解・統合・**codex への作業指示書き** (メイン) | fable medium (通常) / high (とても複雑、kuu 級) |
-| ここぞの本気レビュー・プラン立案 (コスト度外視) | fable xhigh |
+| 範囲明確な単発の高度判断 | fable5-low |
+| 本気レビュー・設計監査・**codex 成果の要件充足/ブレ検査** | fable5-high (subagent) / 別モデル系統の二次意見は codex-sol-reviewer |
+| 指揮・タスク分解・統合・**codex への作業指示書き** (メイン) | fable5 (メイン、通常 medium / kuu 級は high) |
+| ここぞの本気レビュー・プラン立案 (コスト度外視) | fable5-xhigh |
+| 粗探し特化のレビュー (辛口・改善余地の網羅) | nitpick-reviewer (fable5-high ベース) |
 
 - 判定の第一分岐は「**何をやればいいか分かっているか**」— 分かっていない (要件・設計から
   考える) なら claude 系 (fable/opus47)、分かっている (指示書がある) なら codex も対等以上の
