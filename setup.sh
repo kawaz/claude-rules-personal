@@ -2,8 +2,9 @@
 # setup.sh — install claude-rules-* layers into a CLAUDE_CONFIG_DIR.
 #
 # Reads repos_mapping.json (sibling to this script) and lays out
-# for-me/for-all/for-others as directory symlinks under $TARGET/rules.
-# Then installs plugins listed in any for-all/plugins.json across repos.
+# for-me/for-all/for-others as directory symlinks under $TARGET/rules and
+# $TARGET/agents. Then installs plugins listed in any for-all/plugins.json
+# across repos.
 
 set -euo pipefail
 
@@ -21,10 +22,11 @@ Without --home, derives the target from \$CLAUDE_CONFIG_DIR.
 repos_mapping.json defines all repos and which CLAUDE_CONFIG_DIR each one
 "owns". The repo whose 'home' matches the target is treated as 'self'.
 
-Target layout (rules: directory symlink / skills: per-skill symlink):
+Target layout (rules/agents: directory symlink / skills: per-skill symlink):
   \$TARGET/rules/for-me-from-<self>       -> <self>/for-me/rules
   \$TARGET/rules/for-all-from-<repo>      -> <repo>/for-all/rules   (every repo)
   \$TARGET/rules/for-others-from-<repo>   -> <repo>/for-others/rules (non-self repos)
+  \$TARGET/agents/for-*-from-<repo>       -> <repo>/for-*/agents    (same scheme as rules)
   \$TARGET/skills/<repo>-<slug>           -> <repo>/for-*/skills/<slug>
   \$TARGET/CLAUDE.md                      -> <self>/for-me/CLAUDE.md
 
@@ -73,8 +75,9 @@ done
 
 echo "Target: $TARGET (self=$SELF)"
 DEST="$TARGET/rules"
+AGENTS_DEST="$TARGET/agents"
 SKILLS_DEST="$TARGET/skills"
-mkdir -p "$DEST" "$SKILLS_DEST"
+mkdir -p "$DEST" "$AGENTS_DEST" "$SKILLS_DEST"
 
 # Detect legacy *.md files directly in DEST. Refuse to proceed if found.
 #
@@ -84,10 +87,10 @@ mkdir -p "$DEST" "$SKILLS_DEST"
 # operation that the user handles manually.
 LEGACY=()
 while IFS= read -r -d '' f; do LEGACY+=("$f"); done < <(
-  find "$DEST" -maxdepth 1 -type f -name '*.md' -print0 2>/dev/null
+  find "$DEST" "$AGENTS_DEST" -maxdepth 1 -type f -name '*.md' -print0 2>/dev/null
 )
 if [ "${#LEGACY[@]}" -gt 0 ]; then
-  echo "ERROR: legacy *.md files exist directly under $DEST:" >&2
+  echo "ERROR: legacy *.md files exist directly under $DEST / $AGENTS_DEST:" >&2
   for f in "${LEGACY[@]}"; do echo "  $f" >&2; done
   echo "" >&2
   echo "These predate the symlinked layout. Remove or relocate them manually," >&2
@@ -97,11 +100,11 @@ if [ "${#LEGACY[@]}" -gt 0 ]; then
 fi
 
 link_dir() {
-  local link_name=$1 source=$2
+  local dest=$1 link_name=$2 source=$3
   if [ ! -d "$source" ]; then
     echo "  skip (no dir): $link_name -> $source" >&2; return
   fi
-  ln -sfn "$source" "$DEST/$link_name"
+  ln -sfn "$source" "$dest/$link_name"
   echo "  linked: $link_name -> $source"
 }
 
@@ -148,10 +151,12 @@ for i in "${!NAMES[@]}"; do
     continue
   fi
 
-  link_dir "for-all-from-$name" "$repo_root/for-all/rules"
+  link_dir "$DEST" "for-all-from-$name" "$repo_root/for-all/rules"
+  link_dir "$AGENTS_DEST" "for-all-from-$name" "$repo_root/for-all/agents"
   link_skills "$name" "$repo_root/for-all/skills"
   if [ "$name" = "$SELF" ]; then
-    link_dir "for-me-from-$name" "$repo_root/for-me/rules"
+    link_dir "$DEST" "for-me-from-$name" "$repo_root/for-me/rules"
+    link_dir "$AGENTS_DEST" "for-me-from-$name" "$repo_root/for-me/agents"
     link_skills "$name" "$repo_root/for-me/skills"
     # self repo's for-me/CLAUDE.md -> $TARGET/CLAUDE.md (env-specific user memory)
     if [ -f "$repo_root/for-me/CLAUDE.md" ]; then
@@ -159,7 +164,8 @@ for i in "${!NAMES[@]}"; do
       echo "  linked: CLAUDE.md -> $repo_root/for-me/CLAUDE.md"
     fi
   else
-    link_dir "for-others-from-$name" "$repo_root/for-others/rules"
+    link_dir "$DEST" "for-others-from-$name" "$repo_root/for-others/rules"
+    link_dir "$AGENTS_DEST" "for-others-from-$name" "$repo_root/for-others/agents"
     link_skills "$name" "$repo_root/for-others/skills"
   fi
 
@@ -205,11 +211,14 @@ fi
 echo
 echo "=== Prune dangling symlinks ==="
 prune_dangling "$DEST"
+prune_dangling "$AGENTS_DEST"
 prune_dangling "$SKILLS_DEST"
 
 echo
-echo "Install complete: rules=$DEST skills=$SKILLS_DEST"
+echo "Install complete: rules=$DEST agents=$AGENTS_DEST skills=$SKILLS_DEST"
 echo "--- rules ---"
 ls -la "$DEST" | grep -vE '^total|^d.*\.\.?$|\.legacy-backup' | head -30
+echo "--- agents ---"
+ls -la "$AGENTS_DEST" | grep -vE '^total|^d.*\.\.?$' | head -30
 echo "--- skills ---"
 ls -la "$SKILLS_DEST" | grep -vE '^total|^d.*\.\.?$' | head -30

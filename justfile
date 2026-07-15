@@ -89,6 +89,37 @@ lint-rules:
     fi
     echo "lint-rules: OK (fatal 違反なし)"
 
-# push to origin/main (gates: lint-rules + check-on-default-branch + ensure-clean)
-push: check-on-default-branch ensure-clean lint-rules
+# agent 定義 lint: name/description 必須 + リポ内 name 重複 (重複は片方が黙って
+# 破棄される Claude Code 仕様のため fatal)。リポ横断の重複は setup.sh が警告する
+lint-agents:
+    #!/usr/bin/env bash
+    set -uo pipefail
+    fatal=0
+    names=""
+    for f in for-all/agents/*.md for-me/agents/*.md for-others/agents/*.md; do
+        [ -f "$f" ] || continue
+        name=$(awk '/^---$/{n++;next} n==1 && /^name:/{sub(/^name:[ ]*/,"");print;exit}' "$f")
+        if [ -z "$name" ]; then
+            echo "FATAL name 欠落: $f (frontmatter に name: が必須)"
+            fatal=1
+            continue
+        fi
+        if ! awk '/^---$/{n++;next} n==1 && /^description:/{found=1} END{exit !found}' "$f"; then
+            echo "FATAL description 欠落: $f"
+            fatal=1
+        fi
+        if printf '%s\n' "$names" | grep -qx "$name"; then
+            echo "FATAL name 重複: $name ($f) — 重複 agent は片方が黙って破棄される"
+            fatal=1
+        fi
+        names="$names"$'\n'"$name"
+    done
+    if [ "$fatal" -ne 0 ]; then
+        echo "lint-agents: FATAL 違反あり (上記参照)" >&2
+        exit 1
+    fi
+    echo "lint-agents: OK"
+
+# push to origin/main (gates: lint-rules + lint-agents + check-on-default-branch + ensure-clean)
+push: check-on-default-branch ensure-clean lint-rules lint-agents
     bump-semver vcs push --branch main --jj-bookmark-auto-advance
