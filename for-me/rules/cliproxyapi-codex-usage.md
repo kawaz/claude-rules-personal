@@ -30,20 +30,18 @@ luna = 高速・大量処理 (Ultra 不可)。effort は low〜xhigh/max (Ultra 
 proxy 経由では実質 max まで)。**出力が短くなる傾向があり「簡潔に」系の指示を重ねると
 必要な内容まで省略する** — 文字数上限で縛らず「残すべき要素」を指定する。
 
-**context 制約**: GPT-5.6 の素の window は 1.05M (272K 超入力は割増料金境界) だが、
-cliproxyapi 経由では 200k に見える。subagent のベースライン注入 (ツールスキーマ +
-ハーネス機構、CLAUDE.md 由来ではない) が **~67-77k** (2026-07-15 実測) なので実効
-~120k。大入力タスク (数万 token 級のレビュー対象・長大ファイル群) は agent 経由でなく
-`claude -p --bare` 経路 (開始時 ~1k) で回す — **手順・罠 (auth env 必須 / tool set は
-Bash,Edit,Read 固定 / read-only 縛りは disallowedTools 側) は `codex-bare-batch` skill
-が正本**。
+**context 制約**: `CLAUDE_CODE_MAX_CONTEXT_TOKENS=1000000` を settings.json env に
+**常設済み** (kawaz 裁定 2026-07-15) — codex でも 200k を超えて使える。ただし:
 
-200k 壁は `CLAUDE_CODE_MAX_CONTEXT_TOKENS` で解除でき、**--bare 以外の対話・通常モード
-でも有効** (input 285k 成功を実測、2026-07-15)。ただし全モデル一律に効く乱暴なノブ
-なので **settings.json への常設は禁止** (1M 常設 → 200k モデルで auto-compact 不発の
-API エラー / 270k 常設 → claude `[1m]` セッションを切り下げ)。codex で大 context を
-使う時だけ起動時に付ける: `CLAUDE_CODE_MAX_CONTEXT_TOKENS=270000 claude --model
-gpt-5.6-sol` (270000 = 272K 割増境界の内側ガード兼用)。
+- **272K 超の入力は割増料金** (入力 2 倍・出力 1.5 倍がリクエスト全体に掛かり、quota
+  消費にも効く)。ただし割増後の sol ≒ fable 通常価格なので許容範囲 (kawaz 裁定
+  2026-07-15) — 270K 超が必要な作業を組む時は「このタスクは割増帯 (fable 級コスト)」
+  と一言添えて進めれば OK、停止して確認までは不要
+- subagent 経路はベースライン注入 ~67-77k で実効 ~120k のまま (常設 env は subagent の
+  注入を減らさない)。大入力は `claude -p --bare` 経路 (開始時 ~1k) — 手順・罠は
+  `codex-bare-batch` skill が正本
+- 実測の根拠・切り分けの詳細は
+  `docs/findings/2026-07-15-context-limits-and-agent-baseline-tokens.md`
 
 **codex plugin (openai/codex-plugin-cc) は廃止済み** — `codex:codex-rescue` subagent や `/codex:*` slash command を使わない。
 

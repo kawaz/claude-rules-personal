@@ -83,13 +83,17 @@ tier 間の分担原則は [[top-tier-model-delegation]] が正本 — 本ルー
 model×effort と同時に「タスクが運ぶ入力量 vs 経路の余地」を見積もる。委譲の context 超過死
 (Prompt is too long) はモデル選定が正しくても起きる:
 
-| 経路 | 見かけ上限 | ベースライン注入 | 実効余地 |
+| 経路 | 上限 | ベースライン注入 | 実効余地 |
 |---|---|---|---|
 | claude 系 worker `[1m]` (sonnet5/opus47 preset) | 1M | ~70-90k | **~900k** |
 | fable (メイン/subagent) | 1M | メインはルール類で大 | 大 |
-| codex preset (codex-*-worker) | 200k | ~67-77k | **~120k** |
-| codex bare batch (`claude -p --bare`) | 200k (env で ~270k+ 解除可) | ~1k | ~199-270k |
+| codex (preset / 対話。MAX_CONTEXT_TOKENS=1M 常設済) | 1M (272K 超は割増) | preset ~67-77k | 割増境界まで **~200k** |
+| codex bare batch (`claude -p --bare`) | 同上 (env 明示要) | ~1k | ~270k (割増境界まで) |
 | Explore (built-in、読み取り調査) | 継承 | ~37k | 広い |
+
+- codex の 272K 超は割増料金 (入力 2×・出力 1.5×、quota にも効く) だが**割増後 sol ≒
+  fable 通常価格**なので許容 (kawaz 裁定 2026-07-15)。割増帯が必要な構成はその旨を
+  一言添えて進める
 
 - **見積り式**: 委譲プロンプト + 対象ファイル群 + 作業中の Read/Grep 蓄積 (対象の 2-3 倍を
   見込む) + 報告。**合計が実効余地の ~50% を超えるなら、粒度を割るか window の大きい経路へ**
