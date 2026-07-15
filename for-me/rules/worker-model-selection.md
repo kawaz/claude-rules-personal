@@ -28,26 +28,55 @@ tier 間の分担原則は [[top-tier-model-delegation]] が正本 — 本ルー
   した指示を自力で妥当に解消する幅がある
 - **fable**: opus より更に広く複雑で難しい判断と視野を持ち、安定して高度な作業・指揮を
   行える。課題によっては fable-low が高度かつ低コスト。fable-medium の指揮は
-  opus-high/xhigh より遥かに良い (kawaz 体感)
+  opus-high/xhigh より遥かに良い (kawaz 体感)。ただし**遅い** (放置運用なら許容)。
+  **コードを直接書かせるより、要件壁打ち・プラン・codex への作業指示書き・成果の
+  ブレ検査に回す方が強い**
+
+## claude 系 × codex 系の特性差 (2026-07 時点の集約)
+
+- **役割の構図**: 「何をやればいいのか分からない時は claude (fable)、分かっている時は
+  codex (sol)」。fable = 思慮深い設計者 (洞察・設計判断・文章)、sol = 実行者
+  (自走力・粘り強さ)。**「fable が codex への作業指示を書き、codex が実装し、fable が
+  要件充足・ブレを検査する」編成が意図からブレず品質を上げる現実解** (人間が codex への
+  プロンプトを直接書くより fable に書かせる方が良い)
+- **codex (sol) が強い**: 不具合調査 (圧倒的)、長時間エージェント自走、terminal 操作、
+  GUI 自動化、Web リサーチ、少トークン・短時間で同等結果 (コスト効率)
+- **claude が強い**: 複雑な PR 作成 (SWE-Bench Pro で大差)、実務文書、最難関数学、
+  多ツール連携、長文脈整合性。指示なしでも独立実装クロスチェック・総当たり照合を
+  自発的に行う (= 検証が厚い、その分遅い)
+- **effort の効き方の差** (Project Euler 最新難問の実測記事): sol は effort が素直に効く =
+  **medium は検証を省いて誤答しうる** (candidates の最終検証スキップ)。opus も medium で
+  早切り上げ誤答の実績。**難問・検証必須のタスクを codex/opus に出すなら high 以上**。
+  fable は medium でも 4 戦全勝 (検証の徹底が特性差)
+- ベンチ数値は OpenAI 自己測定 + METR がゲーミング指摘あり — 数値より役割構図で選ぶ
 
 ## model × effort 選択マトリクス (迷わないためのパターン、kawaz 裁定 2026-07-15)
 
 | 課題の性質 | 選択 |
 |---|---|
 | 機械的・定型 (整形・一括リネーム・転写・記録・journal) | sonnet5-low / codex-luna |
-| 方針確定済みの単一課題実装 (受け入れ条件が明文化できる) | sonnet5 (medium) |
+| 方針確定済みの単一課題実装 (受け入れ条件が明文化できる) | sonnet5 (medium) / codex-terra |
 | 定型調査・棚卸し (読み取り専用、小粒度に分割済み) | sonnet5 (medium) / Explore |
-| 日常業務処理・大量リクエストの低コスト処理 | sonnet5 (medium) |
-| **複雑課題が複数直列 / ルール遵守が critical / 手戻り高コスト** | **sonnet5 不可** → opus47 以上 |
-| 設計自由度が残る実装・探索的調査・指示が曖昧になりうる作業 | opus47 (medium) |
+| 日常業務処理・大量リクエストの低コスト処理 | sonnet5 (medium) / codex-terra (コスト重視ならこちら) |
+| **プランが確定済みの本実装・自走実行** (指示書が書けている) | **codex-sol** (指示書は fable に書かせる) |
+| **不具合調査・デバッグ・原因の再現追跡** | **codex-sol-high** (圧倒的に強い) |
+| 長時間エージェント自走・terminal/GUI 操作・Web リサーチ | codex-sol |
+| **複雑課題が複数直列 / ルール遵守が critical / 手戻り高コスト** | **sonnet5 不可** → opus47 / codex-sol-high 以上 |
+| 設計自由度が残る実装・探索的調査・指示が曖昧になりうる作業 | opus47 (medium)。「何をやるべきかから考える」域なら fable |
 | 検証設計・原因分析・機械確認系レビュー | opus47-high / sonnet5-high (単一課題のみ) |
+| 複雑な PR 作成・実務文書・長文脈整合が要る統合作業 | claude 系 (opus47 / fable) — codex より SWE-Bench Pro 級で優位 |
 | 範囲明確な単発の高度判断 | fable low |
-| 本気レビュー・設計監査・最終品質判定 | fable high (subagent) |
-| 指揮・タスク分解・統合 (メインセッション) | fable medium (通常) / high (とても複雑、kuu 級) |
+| 本気レビュー・設計監査・**codex 成果の要件充足/ブレ検査** | fable high (subagent) / codex 二次意見は sol-reviewer |
+| 指揮・タスク分解・統合・**codex への作業指示書き** (メイン) | fable medium (通常) / high (とても複雑、kuu 級) |
 | ここぞの本気レビュー・プラン立案 (コスト度外視) | fable xhigh |
 
-- 判定の第一分岐は「**複雑課題が直列に複数あるか**」— あるなら sonnet5 を候補から外す
-  (effort を上げても解消しない特性差。表の上 4 行は全て単一課題 or 分割済みが前提)
+- 判定の第一分岐は「**何をやればいいか分かっているか**」— 分かっていない (要件・設計から
+  考える) なら claude 系 (fable/opus47)、分かっている (指示書がある) なら codex も対等以上の
+  候補。**fable がプラン → codex-sol が実装 → fable がブレ検査**の 3 段が品質の定石
+- 第二分岐は「**複雑課題が直列に複数あるか**」— あるなら sonnet5 を候補から外す
+  (effort を上げても解消しない特性差。sonnet 適用行は全て単一課題 or 分割済みが前提)
+- **難問・検証必須タスクを codex/opus に出す時は effort high 以上** (medium は検証を省いて
+  誤答する実測あり。fable のみ medium でも検証が厚い)
 - **effort は全 agent 定義で明示する** (kawaz 裁定 2026-07-15)。未指定はメインの effort を
   継承するため、メインが fable/opus を目的別 effort で運用している以上 worker の effort が
   起動元の状態次第で不定になる (意図せず xhigh や low で走る)。Agent tool に effort
