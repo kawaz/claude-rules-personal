@@ -57,5 +57,5 @@ settings.json で常時プロキシ経由なので、AI は `/model gpt-5.6-sol`
 
 ## 関連
 
-- [[worker-model-selection]] — Claude 系 worker のモデル選定 (本ルールは codex モデルの経路)
+- [[worker-model-selection]] — Claude 系 worker のモデル選定 (実体は `worker-fleet` skill、本ルールは codex モデルの経路)
 - [[claude-config-dir-isolation]] — 面分離の原則
