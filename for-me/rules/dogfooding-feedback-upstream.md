@@ -1,6 +1,6 @@
 # Dogfooding での気づきは上流の kawaz 製ツールへ還元する
 
-kawaz 製ツール (bump-semver, pkfire, jj-worktree, authsock-warden, ...) を別プロジェクトで
+kawaz 製ツール (bump-semver, jj-worktree, authsock-warden, ...) を別プロジェクトで
 使っていて仕様の罠・bug・改善点に気づいたら、**利用側プロジェクトの docs (journal/findings)
 にとどめない**。kawaz は自製ツールをいくらでも直せるので、利用側に埋もれた気づきは
 改善機会の損失になる。

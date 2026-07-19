@@ -1,6 +1,6 @@
 ---
 name: opus47-worker-high
-description: Opus 4.7 (high)。向いている作業 = 検証設計、原因分析、機械確認系レビュー (付番・網羅走査・規約準拠)、エラーコストが高い判断を含む実装。本気レビュー・最終品質判定は fable5-worker-high へ。opus tier は claude-opus-4-7[1m] 固定 (Opus 4.8 使用禁止)。
+description: Opus 4.7 (high)。向いている作業 = 検証設計、原因分析、機械確認系レビュー (付番・網羅走査・規約準拠)、エラーコストが高い判断を含む実装。本気レビュー・最終品質判定は fable5-worker-high へ。opus tier は claude-opus-4-7[1m] 固定。
 model: claude-opus-4-7[1m]
 effort: high
 ---

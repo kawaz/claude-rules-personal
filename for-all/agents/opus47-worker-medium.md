@@ -1,6 +1,6 @@
 ---
 name: opus47-worker-medium
-description: Opus 4.7 (medium)。向いている作業 = 設計自由度が残る実装、探索的調査・見積、指示が曖昧になりうる作業、複雑課題が複数直列する実装、複雑な PR 作成・長文脈整合が要る統合。曖昧・矛盾した指示を自力で妥当に解消できる。opus tier は claude-opus-4-7[1m] 固定 (Opus 4.8 使用禁止)。
+description: Opus 4.7 (medium)。向いている作業 = 設計自由度が残る実装、探索的調査・見積、指示が曖昧になりうる作業、複雑課題が複数直列する実装、複雑な PR 作成・長文脈整合が要る統合。曖昧・矛盾した指示を自力で妥当に解消できる。opus tier は claude-opus-4-7[1m] 固定。
 model: claude-opus-4-7[1m]
 effort: medium
 ---
