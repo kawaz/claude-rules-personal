@@ -61,8 +61,3 @@
 
 実装 / OS / 端末 / library の挙動は文書と乖離していることが多い。
 推測ベースの判断は再現性も裏取り可能性もない。
-
-## 関連
-
-- [[research-documentation]] — 検証結果の記録ルール
-- [[spec-careful-reading]] — 仕様文書の読み方

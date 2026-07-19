@@ -46,10 +46,3 @@
 
 - **テストスタイルの統合論失敗** (= 2026-06-29 grapheme.mbt と timespec.mbt の相互レビュー時): grapheme は外部 source of truth (UAX #29) への準拠 domain、timespec は内部 source of truth (自分で決める) domain。両者の長所 (= 構造化テンプレ + 仕様 ref / ドメイン語彙固定 + 自然文段落) は **domain 性質が互いに排他的** な制約から導かれていて、ハイブリッドにすると両方の domain 性質を裏切る。kawaz の「あちらとこちらは扱ってるドメインが違う」指摘で明らかになった
 - **責務境界明示分離パターンの発見** (= 同日 die session との 3 者比較): kawaz/die は CLI ツールで「POSIX 慣習準拠面」と「ツール独自判断面」の両者を負う domain だが、case ごと / 同一 case 内文章内のいずれかで責務境界を明示分離する慣習 (= rule 改訂前から先取り実装) で両 style 共存。「ハイブリッドは壊れる」警告は **library 系の同一 case 内で style 選択を強制される場合** に強く適用される話で、CLI 系のように責務境界が分離可能な場合の例外パターンが見つかった
-
-## 関連
-
-- [[feedback-evaluation]] — 悪い面を必ず探す (= ハイブリッドは「悪い面が見えてない」徴候)
-- [[default-convergence-guard]] — デフォルト収束の警戒 (= ハイブリッドは「無難な統合案」に流れる癖)
-- [[design-priority]] — 設計の優先順位 (= 集約より「正しい設計を選ぶ」)
-- [[self-written-rule-blind-spots]] — 自作 rule の盲点警戒 (= 本 rule も対極 = 「並列のまま渡す」の判断軸を含める)

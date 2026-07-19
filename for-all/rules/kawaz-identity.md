@@ -30,7 +30,3 @@ claude が対外文書 (メール・PR・コメント・各種公的書類言及
 | GitHub commit author / 業務リポ | git config の表記 (= Yoshiaki Kawazu) |
 
 不明・迷ったら **本人 (kawaz) に確認**。推測しない。
-
-## 関連
-
-- [[sanitize-work-identifiers]] — 業務文脈の固有名詞のサニタイズ規定 (本ファイルは kawaz 個人の正本)

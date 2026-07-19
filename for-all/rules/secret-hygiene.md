@@ -61,10 +61,3 @@ Claude は rotate / revoke を勝手に試みず、kawaz に以下を依頼:
    `op://...` 参照経由に切替
 2. **当該セッション jsonl のクリーニング**: セッションログから該当値を削除
    (= context に残ったままだと後続セッションで再露出)
-
-## 関連
-
-- [[sanitize-work-identifiers]] — 固有名詞のサニタイズ (識別子側)
-- [[sanitize-local-paths]] — ローカルパスのサニタイズ (パス側)
-- 個別 token / 鍵管理は overlay 各 rule (`playwright-cli-*-profile` /
-  `homebrew-tap-deploy-key` 等) を参照

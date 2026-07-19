@@ -36,9 +36,3 @@ sleep / commit 前提の wip) の判定条件は skill 側。
 - flaky 即断 / timeout 延長 / test 改変で green 偽装: [[test-failure-no-tampering]]
 - 撤退 / 機能削除で逃げる: [[retreat-is-last-resort]]
 - 言語 default に無自覚に流れる: [[default-convergence-guard]]
-
-## 関連
-
-- [[empirical-verification]] — 観測道具で実体確認 (= 推測で sleep 間隔を決めない)
-- [[design-priority]] — sleep が必要に見えるのは設計不整合の徴候かも
-- [[self-written-rule-blind-spots]] — 例外を skill 側に明示して両面化
