@@ -1,6 +1,6 @@
 ---
 name: sloppy-ai-patterns
-description: AI の雑対応 anti-pattern (sleep / polling 等) の代替手段カタログと例外判定の詳細。sleep やポーリングループを書き換えたい / 書きそうになったときの言語・環境別 event-driven primitive 一覧 (shell の inotifywait・fswatch・wait、Rust の tokio::select!・notify、JS の await・fs.watch、Python の asyncio、Go の channel + select、Claude Code の Monitor tool、HTTP の SSE / WebSocket / long polling)、および sleep / polling が正当になる例外 (真の定期実行 cron / heartbeat、polling しか提供しない外部 API での rate-limit・exponential backoff、時間そのものが入力の deterministic test、commit 前提の wip) の判定条件を扱う。常時側の症状・自警は sloppy-ai-patterns rule が正。
+description: AI の雑対応 anti-pattern (sleep / polling 等) の代替手段カタログと例外判定を確認する時に読む。常時側の症状・自警は sloppy-ai-patterns rule が正。
 ---
 
 # 雑対応 anti-pattern の代替と例外 (詳細)

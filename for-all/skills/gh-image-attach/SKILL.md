@@ -1,6 +1,6 @@
 ---
 name: gh-image-attach
-description: GitHub の issue / PR / discussion / release などのコメント・本文に **画像付き Markdown を投稿**する。`playwright-cli` + Chrome Beta token attach で GH の markdown editor を直接操作し、`drop --path` で `user-attachments` CDN にアップロード → 自動挿入された URL を `{{label}}` プレースホルダで本文に埋め込み → submit する。**`gh` CLI には画像添付の公式手段が無いため、画像を含むコメント/本文投稿はこのスキル経由が必須**。撮影スキル (`antenna-staging-e2e` 等) で作った画像をそのまま GH に貼る用途を想定。`PLAYWRIGHT_MCP_EXTENSION_TOKEN` 設定済み + 対象 GH の Chrome Beta profile (ログイン済) 起動中が前提。
+description: GitHub の issue / PR / discussion / release などに画像付き Markdown を投稿する時に読む。`gh` CLI には画像添付の公式手段が無いためこのスキル経由が必須。`PLAYWRIGHT_MCP_EXTENSION_TOKEN` と Chrome Beta profile (ログイン済) が前提。
 ---
 
 # gh-image-attach

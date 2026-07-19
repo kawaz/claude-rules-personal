@@ -1,6 +1,6 @@
 ---
 name: cross-env-ssh-signing
-description: kawaz の複数 CLAUDE_CONFIG_DIR 環境 (個人面 / emeradaco 業務面 / 他 overlay) をまたいで越境作業する際の SSH 認証・commit signing 切替の詳細手順書。`git push` / `git fetch` の ssh 認証 (経路 A = `~/.ssh/config` の `Match exec` / `IdentityAgent`) と、jj/git の commit signing (経路 B = `ssh-keygen -Y sign` が `SSH_AUTH_SOCK` 直読み) の違い、`No private key found / SSH sign failed` の対処、`SSH_AUTH_SOCK` 一時切替 / `signing.key` の repo-local override 手順を扱う。別環境のリポへ `jj git push` / `git push` / `git commit -S` する場面、越境 signing が `SSH sign failed` で落ちた場面で使う。同一環境内の通常 push では不要。概念 (なぜ環境分離するか) は `claude-config-dir-isolation` rule を参照。
+description: 複数 CLAUDE_CONFIG_DIR 環境をまたいで push / commit signing する時に読む。`SSH sign failed / No private key found` の対処を含む。同一環境内の通常 push では不要。概念 (なぜ環境分離するか) は `claude-config-dir-isolation` rule。
 ---
 
 # 越境作業の SSH 認証 / commit signing 切替

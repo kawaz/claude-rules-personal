@@ -1,6 +1,6 @@
 ---
 name: playwright-cli-chrome-beta-multi-profile
-description: playwright-cli (`@playwright/cli`) を **業務用 Chrome Beta の複数プロファイル**で attach して自動化する共通セットアップ・運用手順。Playwright Extension + `PLAYWRIGHT_MCP_EXTENSION_TOKEN` 経路 (= 業務 Chrome の cookie / ログイン状態 / 拡張機能をそのまま使う) のインストール・token 取得・`attach --extension=chrome-beta`・セッション命名・タブグループ可視範囲制御・close とタブ後始末・トラブルシュート。`playwright-cli attach/tab-new/snapshot/click/requests` 等を Chrome Beta プロファイルで使う場面、`PLAYWRIGHT_MCP_EXTENSION_TOKEN` を扱う場面、各業務 overlay の `playwright-cli-<env>-profile` から参照される共通手順として使う。playwright-cli を使わない作業中は load 不要 (= 常時読み込みではない)。
+description: playwright-cli を業務用 Chrome Beta の複数プロファイルで attach して自動化する時に読む。共通セットアップ・token 取得・セッション運用・トラブルシュートを扱う。各業務 overlay の `playwright-cli-<env>-profile` から参照される共通手順。playwright-cli を使わない作業では不要。
 ---
 
 # playwright-cli × Chrome Beta マルチプロファイル運用

@@ -1,6 +1,6 @@
 ---
 name: gh-image-fetch
-description: GitHub の issue / PR / discussion / release / README **に貼られた画像を認証なし curl で取得する** (= 逆方向: [[gh-image-attach]] は投稿側)。`gh api` に `Accept: application/vnd.github.html+json` を付けて `body_html` を取得すると、`user-attachments/assets/<UUID>` は **5 分 TTL の JWT 署名付き一時 URL** に置換済みで返る → `curl -sL` で PNG バイナリ直取り可。README の外部 URL 画像は **`camo.githubusercontent.com` proxy** に化けて 1 年キャッシュで無認証取得可。**AI が GH 上の画像を context に取り込む / 保存する用途** (issue のスクショを Read するために一旦 DL、release notes の図を doc に埋め直す 等) 想定。`gh` CLI 認証済み前提、TTL が短い (= 5 分) ため取得したら即保存が必須。
+description: GitHub の issue / PR / discussion / release / README に貼られた画像を認証なし curl で取得する時に読む (投稿側は gh-image-attach skill)。`gh` CLI 認証済み前提。取得 URL は短命 TTL のため即保存する。
 ---
 
 # gh-image-fetch

@@ -1,6 +1,6 @@
 ---
 name: push-watch
-description: kawaz リポで push した後の CI / Release workflow 監視運用の手順書。push task 末尾の `cmux-msg notify --self` 通知を受けて `just watch` を Monitor で起動する canonical フロー、watch-workflow.sh (gh-monitor plugin) の引数構成、`--on-success` での release 後続アクション、旧 `@echo "[hint] ..."` パターンが残るリポの移行書き換え、notify も hint も無いリポで SHA を取って手動 watch する手順を扱う。push 後に workflow を見届ける場面、push task を新規リポに整備する場面、hint echo を見つけた場面で使う。
+description: kawaz リポで push 後の CI / Release workflow 監視運用時に読む。push task 整備や hint echo 移行の手順も含む。
 ---
 
 # push 後の workflow watch 運用
