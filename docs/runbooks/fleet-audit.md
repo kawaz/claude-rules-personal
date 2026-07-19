@@ -52,7 +52,7 @@ kawaz の全ローカルリポ (`~/.local/share/repos/github.com/kawaz/*` + `kaw
 
 5. **各リポの release workflow 型 (旧 tag-push 待ち型の検出)**
    ```bash
-   # on: push: tags: を待つ旧型は「仕組みの bug」(release-flow-awareness rule)
+   # on: push: tags: を待つ旧型は「仕組みの bug」(release-flow skill)
    rg -l -A3 'on:\s*\n?.*push' ~/.local/share/repos/github.com/kawaz/*/main/.github/workflows/release.yml 2>/dev/null
    rg -n 'tags:' ~/.local/share/repos/github.com/kawaz/*/main/.github/workflows/*.yml 2>/dev/null
    ```
@@ -100,5 +100,5 @@ kawaz の全ローカルリポ (`~/.local/share/repos/github.com/kawaz/*` + `kaw
 ## 関連
 
 - `docs/runbooks/repo-retirement.md` — 引退リポの後始末手順 (手順 7 の受け皿)
-- `for-all/rules/release-flow-awareness.md` — release workflow の標準型 (手順 5)
+- `for-me/skills/release-flow/SKILL.md` — release workflow の標準型 (手順 5)
 - `for-me/rules/push-workflow.md` — 未 push 残置の扱い (手順 6)

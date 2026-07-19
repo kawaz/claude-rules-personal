@@ -1,8 +1,15 @@
+---
+name: docs-knowledge-flow
+description: docs/ 配下の書き込み・issue 起票・DR 追加・findings 記録・journal 執筆・runbook 化などの知識保存作業を行う時に読む。「いつ何を書くか」のタイミングと習慣を扱う。「どこに何を置くか」の構造は docs-structure skill。
+paths:
+  - "docs/**"
+---
+
 # 知識保存フロー
 
-`docs-structure` skill は **「どこに何を置くか」** の構造定義 + テンプレ embed。本ルールは **「いつ何を書くか」** のタイミングと習慣。
+`docs-structure` skill は **「どこに何を置くか」** の構造定義 + テンプレ embed。本 skill は **「いつ何を書くか」** のタイミングと習慣。
 
-issue 運用は **[claude-local-issue plugin](https://github.com/kawaz/claude-local-issue)** が正本 (= write / read / update / list / migrate の 5 sub-command で frontmatter / INDEX / archive を一括管理)。本ルールは plugin が前提とする運用上の判断軸 (= 何を / どこへ昇華するか) を定める。plugin が扱う status / frontmatter / archive の仕組みは plugin 側 `SKILL.md` / `docs/DESIGN.md` を参照。
+issue 運用は **[claude-local-issue plugin](https://github.com/kawaz/claude-local-issue)** が正本 (= write / read / update / list / migrate の 5 sub-command で frontmatter / INDEX / archive を一括管理)。本 skill は plugin が前提とする運用上の判断軸 (= 何を / どこへ昇華するか) を定める。plugin が扱う status / frontmatter / archive の仕組みは plugin 側 `SKILL.md` / `docs/DESIGN.md` を参照。
 
 ## issue 解決時のフロー
 
@@ -67,11 +74,3 @@ journal で「同じ問題が複数回出てきた」と気づいたら runbook 
 「単発の調査をしてその確定事実だけ残したい」場合に `docs/findings/YYYY-MM-DD-title.md`。journal が「経緯」中心、findings が「確定事実」中心、と棲み分け。
 
 `research-documentation.md` ルールで findings の書き方が定義されているのでそちらに従う。
-
-## 関連
-
-- `docs-structure` skill — 各ディレクトリの定義（構造）+ テンプレ embed
-- **kawaz/claude-local-issue** — issue 運用の正本 plugin (sub-command: write / read / update / list / migrate)。frontmatter / INDEX / archive の機械的詳細は plugin の `SKILL.md` / `docs/DESIGN.md`
-- [[research-documentation]] — findings の書き方
-- [[design-priority]] — DR を立てるべき判断軸
-- 参考実装: kawaz/claude-cmux-msg の `docs/journal/`、`docs/decisions/INDEX.md`

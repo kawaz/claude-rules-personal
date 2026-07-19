@@ -1,19 +1,29 @@
 ---
 name: release-flow
-description: kawaz リポのリリース自動化フローの手順書。VERSION bump → main push → release workflow が semver 検証して `gh release create` で tag + GH Release を作る標準ループの全体像、新規リポ / 未知リポを触るときに読むべき観点 (.github/workflows の on: 句、push task、bump-version task)、`on: push: tags:` で手動 tag を待つ非標準型を見つけたときの kawaz/bump-semver release.yml テンプレへの書き換え提案手順を扱う。リリースフローの整備・調査・修正、release が出ない原因調査、release workflow の新規セットアップの場面で使う。禁則 (tag を打たない等) は release-flow-awareness rule が正。
+description: kawaz リポのリリースフロー関連作業時に読む。release workflow の整備・調査・修正、release が出ない原因調査、新規リポでのリリース基盤セットアップ、リリース禁則の確認に使う。
 ---
 
-# リリースフロー標準ループ
+# リリースフロー
 
-kawaz リポでは tag 打ちと GH Release 作成は CI/CD の仕事。人もエージェントも
-tag を打たない (禁則の正本は release-flow-awareness rule)。
+## 禁則 (リリース成果物を持つプロジェクトのみ)
+
+kawaz リポでは **tag 打ちと GH Release 作成は CI/CD の仕事**:
+
+- 人 (kawaz) もエージェント (Claude) も **`git tag` / `jj tag` を打たない**
+- **`gh release create` を手で叩かない** (workflow 自身が tag + Release を作る)
+- release は VERSION 系ファイルの bump + main への push だけで出る
+- workflow / push task の挙動が読み取れない場合は本文の箇条書きで kawaz に
+  確認、黙って push しない
+- リリース不要なプロジェクトでは `release.yml` 不在を bug と判定しない /
+  「リリースが完成しない」報告をしない / push 後の watch で release workflow
+  を期待しない
 
 ## 自動化の標準ループ
 
 1. `git/jj push` を hook ガードが捕まえてリポの push task に誘導する
 2. push task は deps で version check を回し、必要なら bump-version task を強制
-3. bump-version task が VERSION (or `PklProject.version` / `Cargo.toml
-   [package].version` / `package.json $.version`) を更新して commit
+3. bump-version task が VERSION (or `Cargo.toml [package].version` /
+   `package.json $.version`) を更新して commit
 4. main に push されると release workflow が VERSION 変更を trigger に起動
    (`on: push: branches:[main] + paths:[VERSION]` 等)
 5. workflow 内で「既存 tag より大きいか」を semver で検証
@@ -28,7 +38,7 @@ canonical 実装: `kawaz/bump-semver/.github/workflows/release.yml`。
 新規リポ / リリースフローを認識していないリポを触るときは以下を読んで把握:
 
 1. `.github/workflows/*.yml` 全部 (特に release 系の `on:` 句)
-2. task runner の `push` task (Taskfile.pkl / justfile / package.json scripts)
+2. task runner の `push` task (justfile / package.json scripts)
 3. bump-version task の有無 + 何の version file を bump するか
 
 ## 標準型から外れたリポを発見したら
