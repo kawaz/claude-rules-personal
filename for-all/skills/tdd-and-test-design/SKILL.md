@@ -1,3 +1,13 @@
+---
+name: tdd-and-test-design
+description: テスト設計・追加・レビュー・評価する時に読む。t_wada の TDD (RED/GREEN/REFACTOR)、テストは動く仕様書、仕様輪郭の網羅原則、コメント inline、対極 (書かない/削る判断) を扱う。
+paths:
+  - "**/*test*"
+  - "**/*Test*"
+  - "**/tests/**"
+  - "**/__tests__/**"
+---
+
 # TDD とテスト設計
 
 機能追加・bug fix では **t_wada の TDD** + **テスト設計の核心原則** を実践する。

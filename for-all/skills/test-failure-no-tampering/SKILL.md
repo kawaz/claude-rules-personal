@@ -1,3 +1,13 @@
+---
+name: test-failure-no-tampering
+description: 失敗しているテストに手を入れる時に読む。テスト改変による偽 green 禁則、flaky 認定の説明責任、真因調査の順序を扱う。
+paths:
+  - "**/*test*"
+  - "**/*Test*"
+  - "**/tests/**"
+  - "**/__tests__/**"
+---
+
 # テスト失敗時の改変による隠蔽は禁則
 
 テストが fail したとき、**テスト側を「通る形」に書き換えて green に戻す**のは

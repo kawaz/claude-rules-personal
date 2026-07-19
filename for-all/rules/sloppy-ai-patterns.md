@@ -33,6 +33,6 @@ sleep / commit 前提の wip) の判定条件は skill 側。
 ~10 行だけ足し、代替表・例外の詳細は skill 側に足す (= 常時ロード肥大防止)。
 既に専用 rule がある anti-pattern は重複させず link で済ます:
 
-- flaky 即断 / timeout 延長 / test 改変で green 偽装: [[test-failure-no-tampering]]
+- flaky 即断 / timeout 延長 / test 改変で green 偽装: test-failure-no-tampering skill
 - 撤退 / 機能削除で逃げる: [[retreat-is-last-resort]]
 - 言語 default に無自覚に流れる: [[default-convergence-guard]]
