@@ -13,8 +13,8 @@
 			"path": "../../claude-rules-zunsystem/main"
 		},
 		{
-			"name": "claude-rules-emeradaco@main",
-			"path": "../../../kawaz123/claude-rules-emeradaco/main"
+			"name": "claude-rules-kawaz123@main",
+			"path": "../../../kawaz123/claude-rules-kawaz123/main"
 		}
 	]
 }
