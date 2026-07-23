@@ -18,8 +18,12 @@ emeradaco / ...) は起動時の `CLAUDE_CONFIG_DIR` の値で決まり、途中
 
 ## 越境作業
 
-別環境のリポを触る指示が来たら、基本形はサブシェル
-`(cd /path/to/env-Y/<repo> && <command>)` — direnv と `~/.ssh/config` の
-Match exec が cd で自動切替する。rules は全環境に注入されるが memory は
-越境しない。**push / commit signing を伴う越境**は認証が2経路あり cd だけ
-では切り替わらないため、`cross-env-ssh-signing` skill の手順に従う。
+別環境のリポを触る指示が来たら、基本形は
+`direnv exec /path/to/env-Y/<repo> -- <command>` — .envrc の環境変数
+(SSH_AUTH_SOCK / GH_CONFIG_DIR 等) が確実に適用される。
+`(cd ... && <command>)` のサブシェルは Claude の非対話 shell では
+**direnv hook が発火せず** .envrc が乗らない ([[tooling-tips]] の実測参照)。
+`~/.ssh/config` の Match exec (cwd/remote 判定) は cd でも効くが、
+env 由来の切替 (jj signing 等) は direnv exec が必要。rules は全環境に
+注入されるが memory は越境しない。**push / commit signing を伴う越境**は
+認証が2経路あり、`cross-env-ssh-signing` skill の手順に従う。
