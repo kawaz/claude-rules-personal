@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"name": "claude-rules-personal@main",
+			"path": "."
+		},
+		{
+			"name": "claude-rules-syun@main",
+			"path": "../../claude-rules-syun/main"
+		},
+		{
+			"name": "claude-rules-zunsystem@main",
+			"path": "../../claude-rules-zunsystem/main"
+		}
+	]
+}
