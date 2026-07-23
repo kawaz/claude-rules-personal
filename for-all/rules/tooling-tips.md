@@ -6,6 +6,9 @@
 
 ```bash
 # Good — .envrc の環境変数 (SSH_AUTH_SOCK / GH_CONFIG_DIR 等) が正しく適用される
+direnv exec /path/to/dir command args...
+
+# Bad — `--` は不要かつ有害 (direnv が `--` をコマンド名として解釈しエラーになる。実測 2026-07-23)
 direnv exec /path/to/dir -- command args...
 
 # 許容 — direnv 管理外のディレクトリ、または .envrc に依存しない操作
