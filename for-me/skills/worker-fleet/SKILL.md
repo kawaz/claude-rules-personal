@@ -65,7 +65,7 @@ opus-high / sonnet-high、意味論の穴探しが主目的の時だけ最上位
   さらに**複雑な課題が複数直列に絡むと、ルール・指示を無視して手抜き・課題回避で
   ゴールに向かう傾向**があり、安易な選択は手戻りコストで逆に危険。指示の質に品質が
   そのまま比例する (字義通り解釈)
-- **opus47**: 高精度推論・複雑な設計判断・エラーコストが高い本番判断向き。曖昧・矛盾
+- **opus5**: 高精度推論・複雑な設計判断・エラーコストが高い本番判断向き。曖昧・矛盾
   した指示を自力で妥当に解消する幅がある
 - **fable**: opus より更に広く複雑で難しい判断と視野を持ち、安定して高度な作業・指揮を
   行える。課題によっては fable-low が高度かつ低コスト。fable-medium の指揮は
@@ -105,13 +105,13 @@ agent 名は `<model><effort>-worker[-用途]` の形式 (例: `sonnet5-worker-m
 | **プランが確定済みの本実装・自走実行** (指示書が書けている) | **codex-sol** (難所が薄ければ codex-terra / sonnet5-medium) |
 | **不具合調査・デバッグ・原因の再現追跡** | **codex-sol** (high、圧倒的に強い) |
 | 長時間エージェント自走・terminal/GUI 操作・Web リサーチ | codex-sol |
-| **複雑課題が複数直列 / ルール遵守が critical / 手戻り高コスト** | **sonnet5 不可** → opus47-medium / codex-sol 以上 |
-| 設計自由度が残る実装・探索的調査・指示が曖昧になりうる作業 | opus47-medium。「何をやるべきかから考える」域なら fable |
-| 検証設計・原因分析・機械確認系レビュー | opus47-high / sonnet5-high (単一課題のみ) |
-| 複雑な PR 作成・実務文書・長文脈整合が要る統合作業 | claude 系 (opus47 / fable) — codex より SWE-Bench Pro 級で優位 |
+| **複雑課題が複数直列 / ルール遵守が critical / 手戻り高コスト** | **sonnet5 不可** → opus5-medium / codex-sol 以上 |
+| 設計自由度が残る実装・探索的調査・指示が曖昧になりうる作業 | opus5-medium。「何をやるべきかから考える」域なら fable |
+| 検証設計・原因分析・機械確認系レビュー | opus5-high / sonnet5-high (単一課題のみ) |
+| 複雑な PR 作成・実務文書・長文脈整合が要る統合作業 | claude 系 (opus5 / fable) — codex より SWE-Bench Pro 級で優位 |
 | 範囲明確な単発の高度判断 | fable5-low |
 | 本気レビュー・設計監査 (意味論の穴探しが主目的) | fable5-high (subagent) / 別モデル系統の二次意見は codex-sol-reviewer |
-| worker 成果の検査 (差分照合・数値維持・網羅走査など機械確認寄り) | opus47-high / sonnet5-high |
+| worker 成果の検査 (差分照合・数値維持・網羅走査など機械確認寄り) | opus5-high / sonnet5-high |
 | 指揮・タスク分解・統合 (メイン) | fable5 (メイン、通常 medium / kuu 級は high) |
 | ここぞの本気レビュー・プラン立案 (コスト度外視) | fable5-xhigh |
 | 粗探し特化のレビュー (辛口・改善余地の網羅) | nitpick-reviewer (fable5-high ベース) |
@@ -131,7 +131,7 @@ model×effort と同時に「タスクが運ぶ入力量 vs 経路の余地」�
 
 | 経路 | 上限 | ベースライン注入 | 実効余地 |
 |---|---|---|---|
-| claude 系 worker `[1m]` (sonnet5/opus47 preset) | 1M | ~70-90k | **~900k** |
+| claude 系 worker `[1m]` (sonnet5/opus5 preset) | 1M | ~70-90k | **~900k** |
 | fable (メイン/subagent) | 1M | メインはルール類で大 | 大 |
 | codex (preset / 対話。MAX_CONTEXT_TOKENS=1M 常設済) | 1M (272K 超は割増) | preset ~67-77k | 割増境界まで **~200k** |
 | codex bare batch (`claude -p --bare`) | 同上 (env 明示要) | ~1k | ~270k (割増境界まで) |
@@ -143,7 +143,7 @@ model×effort と同時に「タスクが運ぶ入力量 vs 経路の余地」�
 - **claude 系 worker は常に `[1m]` 付きモデル ID を使う** (sonnet/opus/fable いずれも。
   kawaz 裁定 2026-07-15)。200k 超過に課金ペナルティは無く、途中で「Prompt is too long」
   死する損失の方が大きい。agent 定義 frontmatter は `claude-sonnet-5[1m]` /
-  `claude-opus-4-7[1m]` の形で書く
+  `claude-opus-5[1m]` の形で書く
 - **見積り式**: 委譲プロンプト + 対象ファイル群 + 作業中の Read/Grep 蓄積 (対象の 2-3 倍を
   見込む) + 報告。**合計が実効余地の ~50% を超えるなら、粒度を割るか window の大きい経路へ**
   (実例: 13 issue 一括棚卸しは 200k で死亡 → 4 issue × 3 分割で完走、2026-07-15)

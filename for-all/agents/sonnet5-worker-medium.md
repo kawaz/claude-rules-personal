@@ -1,6 +1,6 @@
 ---
 name: sonnet5-worker-medium
-description: Sonnet 5 (medium)。向いている作業 = 方針確定済みの単一課題実装 (受け入れ条件が明文化済み)、移植、RED→GREEN、定型調査・棚卸し (小粒度に分割済み)、日常業務処理。不向き = 複雑課題が複数直列 / ルール遵守 critical / 手戻り高コスト (手抜き・課題回避の特性があるため opus47 以上へ)。
+description: Sonnet 5 (medium)。向いている作業 = 方針確定済みの単一課題実装 (受け入れ条件が明文化済み)、移植、RED→GREEN、定型調査・棚卸し (小粒度に分割済み)、日常業務処理。不向き = 複雑課題が複数直列 / ルール遵守 critical / 手戻り高コスト (手抜き・課題回避の特性があるため opus5 以上へ)。
 model: claude-sonnet-5[1m]
 effort: medium
 ---

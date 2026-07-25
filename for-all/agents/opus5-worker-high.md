@@ -1,7 +1,7 @@
 ---
-name: sonnet5-worker-high
-description: Sonnet 5 (high)。向いている作業 = 単一課題の検証設計・機械確認系レビュー・難度高めの単一課題実装 (opus5-high の低コスト代替)。不向き = 複雑課題の直列 (effort を上げても手抜き特性は解消しない)、探索的で指示が曖昧になりうる作業。
-model: claude-sonnet-5[1m]
+name: opus5-worker-high
+description: Opus 5 (high)。向いている作業 = 検証設計、原因分析、機械確認系レビュー (付番・網羅走査・規約準拠)、エラーコストが高い判断を含む実装。本気レビュー・最終品質判定は fable5-worker-high へ。opus tier は claude-opus-5[1m] 固定。
+model: claude-opus-5[1m]
 effort: high
 ---
 
