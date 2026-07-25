@@ -25,7 +25,7 @@ kawaz の Mac には CLIProxyAPI (サブスク認証を OpenAI/Claude 互換 API
 
 ### 公開モデル
 
-- claude 系: `claude-{opus-4-7,sonnet-5,fable-5,haiku-4-5-*}` (+`[1m]` 可)
+- claude 系: `claude-{opus-5,sonnet-5,fable-5,haiku-4-5-*}` (+`[1m]` 可)
 - 個人面のみ `-zun` / `-gmail` variant (アカウントピン留め、素の名前はレート時自動 failover のプール)
 - codex 系: `gpt-5.6-{terra,sol,luna}` (通常/ハイエンド/軽量)
 - codex の effort は Claude の thinking budget から自動変換 (1024/4000/16000/32000 → low/medium/high/xhigh)
