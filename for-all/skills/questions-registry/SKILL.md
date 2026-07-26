@@ -11,9 +11,14 @@ description: docs/QUESTIONS.md の運用 (裁定待ち Q / 確認待ち C)。loa
 ユーザ入力中の割り込みが不快)。判断が要る時はチャット本文で尋ね (自由文回答歓迎)、
 裁定を待つ間に他の作業へ進められるなら本ファイルに 👺ラベル付きで起票して参照する。
 
-本 skill が常時ロード rule でなく統括 role の skill なのは、ユーザと直接
-コミュニケーションを取るのがメインコンテキストだけだから (= ワーカーは
-AskUserQuestion も QUESTIONS.md への起票も行わない)。
+常時ロード rule でなく skill なのは、ユーザと直接コミュニケーションを取るのが
+メインコンテキストだけだから (= ワーカーは AskUserQuestion も QUESTIONS.md への
+起票も行わない)。メインは `load-role-main` から invoke するので常にロード済み。
+
+`for-all` に置くのは、各業務 overlay がこの一般規約を土台に差分ルールを重ねる
+構成のため (例: emeradaco はファイル名・commit 有無・スコープを差し替える)。
+`for-me` だと self repo のセッションにしか配布されず、overlay 側の差分ルールが
+土台を失う。
 
 ## Why
 
