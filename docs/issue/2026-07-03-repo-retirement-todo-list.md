@@ -25,20 +25,37 @@ origin: エコシステム横断監査 (2026-07-03)
 以下の適用候補リポについて、archive / 削除 / 継続の判断を kawaz が行い、
 判断が出たリポから runbook の手順に従って処理する。
 
-適用候補リポ:
+適用候補リポ (2026-07-26 時点):
 
-- ssh-agent-router
-- ssh-agent-tools
-- ssh-authsock-filter (GitHub 非公開・ローカルのみの断片)
-- claude-desktop-ws (commit 0 の骨組み)
-- json-compact (docs のみで実装なし)
-- claude-pr-monitor のローカル化石クローン (rename 済み)
-- csv2json
-- csv2tsv
-- unbreaker
-- findmy
-- bump.mbt (GitHub archive 済み・ローカル整理のみ)
-- claude-plugins (marketplace リポ。kawaz 本人が 2026-05-24 に PR #1 で非推奨化を merge 済み・README に「アーカイブまたは削除予定」と明記済みだが archive 未実施。ローカル clone は origin に対し 1 ahead / 3 behind で diverged — ローカル側 commit は force-uv v0.2.3 bump で origin 側の同内容 commit と重複しており、統合 or 破棄の判断も必要)
+### 未処理
+
+- ssh-agent-router: 「後継を案内して archive」の方針は確定済み。後継リポの特定が未完 (kawaz は cache-warden を挙げたが役割が対応せず、対応するのは authsock-warden に見える。docs/QUESTIONS.md の RR-C1 で確認待ち)
+
+### 処理済み (完全削除、ローカル)
+
+- ssh-agent-tools (608M、GH に実体なし)
+- json-compact (184K、GH に実体なし)
+- ssh-authsock-filter (92K、commit 0、GH に実体なし)
+- claude-desktop-ws (80K、.git のみで空、GH に実体なし)
+- bump.mbt (3.3M、GH は archive 済みの空リポ。ローカルに 2732 行の MoonBit 実装があったが後継 bump-semver で作り直し済みのため削除)
+- claude-plugins (1.6M、GH archive 実行済み + ローカル削除)
+
+計 6 リポ、約 610M を回収。
+
+### GH archive 実行済み
+
+- claude-plugins (isArchived=true を確認済み。後継は個別 plugin リポ 6 件へ移行済みで GH README に明記済み)
+
+### 処理不要と判明
+
+- claude-pr-monitor: GH 上で claude-gh-monitor に rename 済み。同一リポなので引退作業自体が不要 (旧名で gh repo view すると rename 先の状態が返る点に注意)
+
+### 放置 (kawaz 裁定)
+
+- csv2json (2016 年最終)
+- csv2tsv (2020 年最終)
+- unbreaker (2020 年最終)
+- findmy (GH 側 2025-02、ローカル 2022 で未同期)
 
 ## 背景
 
@@ -51,9 +68,9 @@ origin: エコシステム横断監査 (2026-07-03)
 
 ## 受け入れ条件
 
-- [ ] 各候補リポについて kawaz が archive / 削除 / 継続 のいずれかを判断する
-- [ ] 判断が出たリポは runbook (`docs/runbooks/repo-retirement.md`) の手順で処理済みにする
-- [ ] リスト全件の処理が完了する
+- [x] 各候補リポについて kawaz が archive / 削除 / 継続 のいずれかを判断する (ssh-agent-router の後継特定のみ残)
+- [ ] 判断が出たリポは runbook の手順で処理済みにする (ssh-agent-router 以外は完了)
+- [ ] リスト全件の処理が完了する (残り 1 件)
 
 ## TODO
 
