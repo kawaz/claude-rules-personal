@@ -1,6 +1,6 @@
 ---
 name: git-worktree-workflow
-description: "`.jj` が無い git 専用リポで worktree / PR 作業を始める時に読む。`.jj` があるリポは jj-workflow skill。"
+description: "git 専用リポの worktree / PR 作業手順。VCS hook が案内する。"
 ---
 
 # Git ワークフロー（git bare + worktree 方式）

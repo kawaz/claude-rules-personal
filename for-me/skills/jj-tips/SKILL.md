@@ -1,6 +1,6 @@
 ---
 name: jj-tips
-description: jj 実践 Tips。jj でのコミット操作・組み替え (split / rebase / squash)・bookmark 管理・op restore による復旧・AI が踏むアンチパターンを扱う。
+description: jj 実践 Tips (コミット操作・組み替え・復旧)。VCS hook が案内する。
 ---
 
 # jj 実践 Tips（AI 向け）

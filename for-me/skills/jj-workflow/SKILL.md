@@ -1,6 +1,6 @@
 ---
 name: jj-workflow
-description: jj 管理リポ (`.jj/` あり) の workflow 手順書。workspace / bookmark / PR 作成 / 署名 / push エラー対処。git 専用リポでは git-worktree-workflow を使う。
+description: jj リポの workflow 手順書 (workspace / bookmark / PR / 署名)。VCS hook が案内する。
 ---
 
 # jj ワークフロー
