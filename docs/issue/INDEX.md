@@ -8,7 +8,6 @@ active な issue の一覧。close 済みは archive/ にあり、ここには�
 | 2026-07-03 | task | open | [repo-retirement-todo-list](./2026-07-03-repo-retirement-todo-list.md) | repo-retirement runbook の適用対象リストを消化する (archive/削除/継続判定) |
 | 2026-07-03 | idea | idea | [metacognitive-rule-model-revalidation](./2026-07-03-metacognitive-rule-model-revalidation.md) | メタ認知系ルール (sloppy-ai-patterns 等) をモデル世代交代時に再検証する運用の検討 |
 | 2026-07-03 | idea | idea | [ccmsg-nandakke-priority-review](./2026-07-03-ccmsg-nandakke-priority-review.md) | ccmsg / nandakke の優先度再考 — エコシステム横断監査所見 |
-| 2026-07-03 | design | open | [always-loaded-rules-diet](./2026-07-03-always-loaded-rules-diet.md) | 常時ロードされる rules の token 予算を見直し、頻度の低いルールを skill へ降格する |
 | 2026-07-03 | design | idea | [sanitize-work-identifiers-hook](./2026-07-03-sanitize-work-identifiers-hook.md) | 業務固有名詞サニタイズの機械判定 hook 化 (claude-sanitize-guard) 設計案 |
 | 2026-07-03 | design | idea | [fleet-audit-automation](./2026-07-03-fleet-audit-automation.md) | fleet-audit runbook の週次自動化 (schedule + subagent 構想) |
 | 2026-07-03 | design | idea | [work-principles-delegation-merge](./2026-07-03-work-principles-delegation-merge.md) | work-principles.md と top-tier-model-delegation.md の委譲ロジック責務分裂を解消する |

@@ -1,6 +1,6 @@
 ---
 title: "常時ロードされる rules の token 予算を見直し、頻度の低いルールを skill へ降格する"
-status: open
+status: resolved
 category: design
 created: 2026-07-03T14:04:19+09:00
 last_read:
@@ -9,10 +9,10 @@ wip_entered:
 blocked_entered:
 pending_entered:
 discarded_entered:
-resolved_entered:
+resolved_entered: 2026-07-26T17:44:17+09:00
 discard_reason:
 pending_reason:
-close_reason:
+close_reason: ["done: 受け入れ条件4件すべて達成。線引き基準はrule-writing-guidelinesに明文化済み、降格候補はkawaz裁定済み(2026-07-19の7ruleのskill化含む)、採用降格はskill化完了、常時ロード予算チェックはlint-rulesに実装済み(commit f8cd0dc4、閾値80KB=BD-Q1裁定a案)"]
 blocked_by:
 origin: エコシステム横断監査 (2026-07-03)
 ---
@@ -50,7 +50,7 @@ subagent 起動) 由来。
 
 ## 受け入れ条件
 
-- [ ] 常時ロード vs オンデマンドの線引き基準が `rule-writing-guidelines` に明文化されている
-- [ ] 降格候補ルールについて kawaz の採否判断が得られている
-- [ ] 採用された降格について skill 化 (description 設計 + トリガ検証) が完了している
-- [ ] 採用する場合、常時ロード予算チェックが `just lint-rules` 等の仕組みに組み込まれている
+- [x] 常時ロード vs オンデマンドの線引き基準が `rule-writing-guidelines` に明文化されている
+- [x] 降格候補ルールについて kawaz の採否判断が得られている
+- [x] 採用された降格について skill 化 (description 設計 + トリガ検証) が完了している
+- [x] 採用する場合、常時ロード予算チェックが `just lint-rules` 等の仕組みに組み込まれている
