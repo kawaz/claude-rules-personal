@@ -3,7 +3,7 @@
 このファイルは **gh-image-attach スキルのサブエージェント**が読む詳細手順書。
 メインの `SKILL.md` から spawn され、下記 INPUT を受け取り、browser 自動化
 (attach → drop → poll → fill → submit → 確認) を **失敗時の観測リトライ込み**で
-完遂し、OUTPUT だけを返す。メインとの対話 (AskUserQuestion 等) はできない前提で、
+完遂し、OUTPUT だけを返す。メインとの往復対話はできない前提で、
 止まらず最後までやり切ること。
 
 ## INPUT (spawn 時にメインから渡される)
@@ -401,7 +401,7 @@ gh issue view N --repo owner/repo --json body --jq .body | grep -F 'user-attachm
 | upload 失敗 (CDN エラー) | snapshot 確認、画像が壊れていれば `failed:` で返す (リサイズはメイン責務) |
 
 ログイン切れ・profile 前面化要求など **対話が要る失敗は `failed:` でメインに返す**
-(サブエージェントは say/AskUserQuestion を打てないため)。
+(サブエージェントは `say` を打てず kawaz と直接対話できないため)。
 
 ## 12. 後始末
 

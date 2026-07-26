@@ -32,13 +32,13 @@ API なし。**Web UI を playwright で叩く本スキルが唯一の実用経�
 
 ## preflight (メインが委譲前に確認 — 対話が要るのはここだけ)
 
-サブエージェントは `say` / AskUserQuestion を打てない。対話が要る前提条件は**メインで解消**してから委譲する:
+サブエージェントは `say` を打てず kawaz と直接対話できない。対話が要る前提条件は**メインで解消**してから委譲する:
 
 1. `echo "$PLAYWRIGHT_MCP_EXTENSION_TOKEN"` が空でない (env 継承される)
 2. 対象 GH にログイン済みの Chrome Beta profile が起動中 (`pgrep -af 'Chrome Beta'`)
 3. attach 瞬間に profile が前面化する。kawaz 不在で profile が背面なら `say` で前面化依頼 (→ `notification-tips`)
 
-満たせなければメインで解消 (必要なら AskUserQuestion)。満たせたら委譲する。
+満たせなければメインで解消 (必要ならチャット本文で kawaz に依頼)。満たせたら委譲する。
 ヘッドレス profile が無い / 拡張ブロック時は `playwright-cli-chrome-beta-multi-profile` 末尾の代替経路を参照。
 
 ## 委譲 (heavy 手順はサブエージェントに閉じる)
