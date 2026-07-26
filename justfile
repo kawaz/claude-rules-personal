@@ -1,9 +1,10 @@
 # claude-rules-personal justfile
 #
-# rule (.md) / skill (.md) 配布が主。lint / test / build / version は持たない。
-# 翻訳ペア (-ja.md) も無いため check-outdated-translations も無し。push gate は
-# `ensure-clean` のみで十分。Taskfile.pkl は pkf-tasks/pkfire の migrate check
-# 用に過渡的に残存 (= 別経路で `pkf run check-migrate` 等で呼ぶ運用)。
+# rule (.md) / skill (.md) 配布が主。加えて hooks/ を claude plugin として配布する
+# ため version を持つ (= `claude plugin update` が plugin.json / marketplace.json の
+# version を見る)。lint / test / build は無く、翻訳ペア (-ja.md) も無いため
+# check-outdated-translations も無し。Taskfile.pkl は pkf-tasks/pkfire の migrate
+# check 用に過渡的に残存 (= 別経路で `pkf run check-migrate` 等で呼ぶ運用)。
 
 set shell := ["bash", "-euo", "pipefail", "-c"]
 
@@ -43,9 +44,9 @@ sync:
 promote:
     bump-semver vcs promote
 
-# rule メタ規約 lint (push-workflow.md の commit 前チェックを機械化)
 # (a) for-all→for-me 越境リンク / (b) 自己参照 / (c) .draft- 配置 = fatal
 # (d) 5KB 超 rule = warning のみ (省コンテキスト検討材料、fatal にしない)
+# rule メタ規約 lint (push-workflow.md の commit 前チェックを機械化)
 lint-rules:
     #!/usr/bin/env bash
     set -uo pipefail
@@ -89,8 +90,9 @@ lint-rules:
     fi
     echo "lint-rules: OK (fatal 違反なし)"
 
-# agent 定義 lint: name/description 必須 + リポ内 name 重複 (重複は片方が黙って
-# 破棄される Claude Code 仕様のため fatal)。リポ横断の重複は setup.sh が警告する
+# (重複は片方が黙って破棄される Claude Code 仕様のため fatal)。リポ横断の
+# 重複は setup.sh が警告する
+# agent 定義 lint: name/description 必須 + リポ内 name 重複を検出
 lint-agents:
     #!/usr/bin/env bash
     set -uo pipefail
@@ -120,6 +122,50 @@ lint-agents:
     fi
     echo "lint-agents: OK"
 
-# push to origin/main (gates: lint-rules + lint-agents + check-on-default-branch + ensure-clean)
-push: check-on-default-branch ensure-clean lint-rules lint-agents
+# plugin manifest 検証 (marketplace.json / plugin.json の schema + version 一致)
+validate:
+    claude plugin validate .
+
+# plugin.json と marketplace.json の 2 ファイルを同時に進める (bump-semver が
+# version 一致を保証する)。
+# version を bump して Release commit を作成 (push は別途 `just push`)
+bump-version bump="patch": ensure-clean (_bump-version bump ".claude-plugin/plugin.json" ".claude-plugin/marketplace.json")
+
+[private]
+[script]
+_bump-version bump *version_files:
+    level="$1"; shift
+    new_version=$(bump-semver "$level" "$@" --write --no-hint)
+    bump-semver vcs commit -m "Release v${new_version}" "$@"
+
+# trigger paths に diff が無い push は自動 skip される (= rule/skill/docs のみの
+# 変更では bump 不要)。
+# plugin 配布物 (hooks/) を変えたのに version 未 bump なら push を止める
+[private]
+check-version-bumped: (_check-version-bumped "hooks/")
+
+[private]
+[script]
+_check-version-bumped *trigger_paths:
+    rc=0
+    bump-semver vcs diff -q main@origin -- "$@" || rc=$?
+    case "$rc" in
+      0) exit 0 ;;
+      1) ;;
+      *) echo "ERROR: bump-semver vcs diff failed (rc=$rc). main@origin が track されていない可能性。先に 'jj git fetch' を試してください" >&2; exit 1 ;;
+    esac
+    # 初回リリース前は main@origin に manifest が無い = 比較対象がないので素通し。
+    # vcs diff -s の name-status が A (追加) を返す = 相手側に存在しない。
+    if bump-semver vcs diff -s main@origin .claude-plugin/plugin.json 2>/dev/null |
+        grep -q '^A'; then
+        exit 0
+    fi
+    bump-semver compare gt .claude-plugin/plugin.json vcs:main@origin:.claude-plugin/plugin.json --no-hint && exit 0
+    echo 'ERROR: hooks/ が変わっているが version 未 bump。"just bump-version" を実行してください' >&2
+    exit 1
+
+# gates: check-on-default-branch + ensure-clean + lint-rules + lint-agents
+#        + validate + check-version-bumped
+# push to origin/main
+push: check-on-default-branch ensure-clean lint-rules lint-agents validate check-version-bumped
     bump-semver vcs push --branch main --jj-bookmark-auto-advance
