@@ -7,9 +7,13 @@ description: docs/QUESTIONS.md の運用 (裁定待ち Q / 確認待ち C)。loa
 
 プロジェクト内の `docs/QUESTIONS.md` に、ユーザの判断が要る項目を集約する。
 
-**このファイルはメインセッションが管理する** (= ワーカーが直接触ることはない)。
-だから常時ロード rule ではなく統括 role の skill として持つ。AskUserQuestion
-使用禁止の禁則だけは全 role に効くので rule 側 ([[no-askuserquestion]]) に残る。
+**AskUserQuestion は使用禁止** (タイムアウト無しで無限待ち、リモート応答不可、
+ユーザ入力中の割り込みが不快)。判断が要る時はチャット本文で尋ね (自由文回答歓迎)、
+裁定を待つ間に他の作業へ進められるなら本ファイルに 👺ラベル付きで起票して参照する。
+
+本 skill が常時ロード rule でなく統括 role の skill なのは、ユーザと直接
+コミュニケーションを取るのがメインコンテキストだけだから (= ワーカーは
+AskUserQuestion も QUESTIONS.md への起票も行わない)。
 
 ## Why
 
