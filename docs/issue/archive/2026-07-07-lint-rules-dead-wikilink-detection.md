@@ -1,6 +1,6 @@
 ---
 title: lint-rules の死角 — slug 改名・rule 統合時の dead wikilink を機械検出できない
-status: open
+status: resolved
 category: design
 created: 2026-07-07T17:19:41+09:00
 last_read:
@@ -9,10 +9,10 @@ wip_entered:
 blocked_entered:
 pending_entered:
 discarded_entered:
-resolved_entered:
+resolved_entered: 2026-07-26T17:30:13+09:00
 discard_reason:
 pending_reason:
-close_reason:
+close_reason: ["lint-rules に検査(e)として実装済み(commit 8718f291)","受け入れ条件1: for-all/for-me + skills/agents から[[slug]]全数抽出 実装済み","受け入れ条件2: slug をrulesファイル名/skillsディレクトリ名に解決する検査 実装済み","受け入れ条件3: 外部overlay slug は許容リスト方式(.lint-external-slugs)採用、リスト外は fatal","受け入れ条件4(任意): 同じ仕組みで[[skill名]]も自動的に検証対象になるため別実装不要、見送り","除外設計: [[#見出し]]は同一ファイル内アンカーのため対象外、バッククォート記法説明も除外","実在dead link[[main-context-role]]を検出し同commitで修正、故意の[[zzz-nonexistent-slug]]でも検出確認済み","done"]
 blocked_by:
 origin: 自リポ TODO
 ---
