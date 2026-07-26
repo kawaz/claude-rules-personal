@@ -1,6 +1,6 @@
 ---
 name: docs-structure
-description: kawaz リポの `docs/` 構造標準 (どこに何を置くか) を作業時に参照する。新規 doc 作成 (README / DESIGN / STRUCTURE / ROADMAP / MANUAL)、`docs/` 配下サブディレクトリへの起票 (decisions/DR / findings / journal / runbooks / issue / research / knowledge / design)、DR 起票 + INDEX 更新、ja/en 翻訳ペア運用、既存リポの migration に使う。「いつ何を書くか」は docs-knowledge-flow skill。
+description: kawaz リポの docs/ 構造標準 (どこに何を置くか)。新規 doc 作成・DR 起票・翻訳ペア運用時に読む。
 paths:
   - "docs/**"
   - "README*.md"

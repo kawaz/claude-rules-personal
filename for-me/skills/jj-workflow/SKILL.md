@@ -1,6 +1,6 @@
 ---
 name: jj-workflow
-description: jj 管理リポジトリ (= `.jj/` ディレクトリが存在する) での workflow 手順書。git bare + jj workspace 方式のセットアップ、workspace 作成/削除、bookmark 命名、PR 作成 (新規 / wip 昇格)、push 後の手順、コミット操作 (`jj commit` 一発フロー)、署名運用 (`signing.behavior=drop` + `git.sign-on-push`)、bookmark 種類とデータ保護、トラブルシュート ("stale info" / tag が見えない)、jj-worktree / jj-guard 連携。`jj <command>` を実行する場面、jj リポでの新規 PR 作成、workspace 追加、push エラー対処など jj 固有の手順が必要なときに使う。git 管理リポ (`.git` のみ) では使わない。
+description: jj 管理リポ (`.jj/` あり) の workflow 手順書。workspace / bookmark / PR 作成 / 署名 / push エラー対処。git 専用リポでは git-worktree-workflow を使う。
 ---
 
 # jj ワークフロー

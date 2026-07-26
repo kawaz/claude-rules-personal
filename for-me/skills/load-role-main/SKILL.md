@@ -1,6 +1,6 @@
 ---
 name: load-role-main
-description: 統括メイン (main role) が最初に invoke するローダースキル。統括として動く AI が必須の全 skill を Skill tool で連続 invoke する指示を持つ。role-based-skill-loading ルールから呼ばれる。
+description: 統括メイン (main role) のローダー。必須 skill 群を連続 invoke する。
 ---
 
 # load-role-main — 統括メインが必須の skill を連続 invoke

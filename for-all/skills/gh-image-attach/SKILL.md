@@ -1,6 +1,6 @@
 ---
 name: gh-image-attach
-description: GitHub の issue / PR / discussion / release などに画像付き Markdown を投稿する時に読む。`gh` CLI には画像添付の公式手段が無いためこのスキル経由が必須。`PLAYWRIGHT_MCP_EXTENSION_TOKEN` と Chrome Beta profile (ログイン済) が前提。
+description: GitHub の issue / PR / discussion / release に画像付き Markdown を投稿する時に読む (`gh` CLI に画像添付手段が無いため必須)。
 ---
 
 # gh-image-attach

@@ -1,6 +1,6 @@
 ---
 name: docs-knowledge-flow
-description: docs/ 配下の書き込み・issue 起票・DR 追加・findings 記録・journal 執筆・runbook 化などの知識保存作業を行う時に読む。「いつ何を書くか」のタイミングと習慣を扱う。「どこに何を置くか」の構造は docs-structure skill。
+description: docs/ への知識保存 (issue 起票 / DR / findings / journal / runbook) を「いつ何を書くか」。構造は docs-structure。
 paths:
   - "docs/**"
 ---

@@ -1,6 +1,6 @@
 ---
 name: macos-signing-notarization
-description: kawaz の macOS 配布バイナリ / .app の codesign + notarize 関連作業時に読む。証明書取得・GitHub Secrets 投入・release.yml パターン・TCC/バンドル/notarize 障害対応の手順書 INDEX。Linux のみ配布や署名なし配布では不要。
+description: macOS 配布バイナリ / .app の codesign + notarize 作業時に読む。証明書・Secrets 投入・障害対応の手順書 INDEX。
 ---
 
 # macOS 署名・notarization

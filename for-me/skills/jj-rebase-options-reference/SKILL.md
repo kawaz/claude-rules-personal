@@ -1,6 +1,6 @@
 ---
 name: jj-rebase-options-reference
-description: jj のリビジョン指定オプション (`-r` / `-s` / `-b` / `-f` / `--onto` / `--insert-after` / `--insert-before` / `--into` 等) の完全リファレンス。`jj rebase` / `duplicate` / `split` / `squash` / `revert` / `new` の配置オプションの意味・挙動を確認したい時に読む。
+description: jj のリビジョン指定オプション (`-r` / `-s` / `-b` / `--onto` / `--insert-after` 等) の完全リファレンス。rebase 系の配置オプションの挙動確認時に読む。
 ---
 
 # jj リビジョン指定オプション リファレンス (v0.38.0)

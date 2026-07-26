@@ -1,6 +1,6 @@
 ---
 name: cross-env-ssh-signing
-description: 複数 CLAUDE_CONFIG_DIR 環境をまたいで push / commit signing する時に読む。`SSH sign failed / No private key found` の対処を含む。同一環境内の通常 push では不要。概念 (なぜ環境分離するか) は `claude-config-dir-isolation` rule。
+description: 複数 CLAUDE_CONFIG_DIR 環境をまたいで push / commit signing する時に読む。`SSH sign failed / No private key found` の対処を含む。
 ---
 
 # 越境作業の SSH 認証 / commit signing 切替

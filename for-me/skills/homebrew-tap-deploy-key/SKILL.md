@@ -1,6 +1,6 @@
 ---
 name: homebrew-tap-deploy-key
-description: kawaz/<project> から kawaz/homebrew-tap への自動 push を有効にする deploy key セットアップ時に読む。release.yml が `secrets.HOMEBREW_TAP_DEPLOY_KEY` を参照するが未設定な時、Action ログの `Permission to kawaz/homebrew-tap.git denied` エラー対処時、初回リリース前準備で使う。
+description: homebrew-tap への自動 push 用 deploy key セットアップ時に読む。`Permission to kawaz/homebrew-tap.git denied` の対処を含む。
 ---
 
 # Homebrew Tap Deploy Key

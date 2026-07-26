@@ -1,6 +1,6 @@
 ---
 name: codex-bare-batch
-description: codex (gpt-5.6-*) に大入力タスクを claude -p --bare で投げる手順。agent preset (codex-*-worker) の context が足りない時 (レビュー対象が数万 token 級・長大ファイル群) に使う。auth env・tool set・read-only 縛り・出力回収の定型を含む。
+description: codex に大入力タスクを `claude -p --bare` で投げる手順。codex-*-worker preset の context が足りない時に使う。
 ---
 
 # codex を claude -p --bare で使う (大入力バッチ経路)

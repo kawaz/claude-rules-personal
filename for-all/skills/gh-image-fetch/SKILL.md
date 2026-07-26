@@ -1,6 +1,6 @@
 ---
 name: gh-image-fetch
-description: GitHub の issue / PR / discussion / release / README に貼られた画像を認証なし curl で取得する時に読む (投稿側は gh-image-attach skill)。`gh` CLI 認証済み前提。取得 URL は短命 TTL のため即保存する。
+description: GitHub の issue / PR / discussion / README に貼られた画像を curl で取得する時に読む (投稿側は gh-image-attach)。
 ---
 
 # gh-image-fetch

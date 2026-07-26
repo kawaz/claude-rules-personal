@@ -1,6 +1,6 @@
 ---
 name: worker-fleet
-description: サブエージェント委譲・チーム編成・Workflow 設計・agent 選定の前に必ず読む。自 tier 判定と分担原則、model×effort 選択マトリクス、claude 系×codex 系の特性差、経路ごとの context 実効余地、委譲プロンプト規約、worker 監査の禁則を扱う。worker 自身はロード不要 (委譲側の関心)。
+description: サブエージェント委譲・Workflow 設計・agent 選定の前に読む。model×effort 選定と委譲規約。
 ---
 
 # worker fleet — モデル選定と委譲プロトコル

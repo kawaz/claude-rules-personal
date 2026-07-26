@@ -1,6 +1,6 @@
 ---
 name: playwright-cli-chrome-beta-multi-profile
-description: playwright-cli を業務用 Chrome Beta の複数プロファイルで attach して自動化する時に読む。共通セットアップ・token 取得・セッション運用・トラブルシュートを扱う。各業務 overlay の `playwright-cli-<env>-profile` から参照される共通手順。playwright-cli を使わない作業では不要。
+description: playwright-cli を業務用 Chrome Beta の複数プロファイルで attach して自動化する時に読む。セットアップ・token 取得・セッション運用。
 ---
 
 # playwright-cli × Chrome Beta マルチプロファイル運用
