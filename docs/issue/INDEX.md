@@ -5,7 +5,6 @@ active な issue の一覧。close 済みは archive/ にあり、ここには�
 | date | category | status | slug | 概要 |
 |---|---|---|---|---|
 | 2026-07-07 | task | open | [orchestrate-skill-ab-validation](./2026-07-07-orchestrate-skill-ab-validation.md) | orchestrate skill (Phase 0-4) の効果 A/B 実測と発火・命名・ゲート閾値の調整 |
-| 2026-07-03 | task | open | [repo-retirement-todo-list](./2026-07-03-repo-retirement-todo-list.md) | repo-retirement runbook の適用対象リストを消化する (archive/削除/継続判定) |
 | 2026-07-03 | idea | idea | [metacognitive-rule-model-revalidation](./2026-07-03-metacognitive-rule-model-revalidation.md) | メタ認知系ルール (sloppy-ai-patterns 等) をモデル世代交代時に再検証する運用の検討 |
 | 2026-07-03 | idea | idea | [ccmsg-nandakke-priority-review](./2026-07-03-ccmsg-nandakke-priority-review.md) | ccmsg / nandakke の優先度再考 — エコシステム横断監査所見 |
 | 2026-07-03 | design | idea | [sanitize-work-identifiers-hook](./2026-07-03-sanitize-work-identifiers-hook.md) | 業務固有名詞サニタイズの機械判定 hook 化 (claude-sanitize-guard) 設計案 |

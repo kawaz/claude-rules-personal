@@ -1,6 +1,6 @@
 ---
 title: リポ整理 (archive/削除/継続判定) 適用対象リストの消化
-status: open
+status: resolved
 category: task
 created: 2026-07-03T14:09:26+09:00
 last_read:
@@ -9,10 +9,10 @@ wip_entered:
 blocked_entered:
 pending_entered:
 discarded_entered:
-resolved_entered:
+resolved_entered: 2026-07-26T19:59:32+09:00
 discard_reason:
 pending_reason:
-close_reason:
+close_reason: ["done:適用候補12リポ全て処理完了","done:完全削除(ローカル)6リポ計610M — ssh-agent-tools(608M)/bump.mbt(3.3M、後継bump-semverで作り直し済み)/claude-plugins(1.6M)/json-compact(184K)/ssh-authsock-filter(92K)/claude-desktop-ws(80K)","done:GH archive実行2リポ — claude-plugins(isArchived=true確認済み、後継6リポへ移行済み)/ssh-agent-router(READMEに後継明記してpush、gh repo archive実行、isArchived=true確認済み、参照元grepで更新対象なし確認)","done:処理不要と判明 — claude-pr-monitor(GH上でclaude-gh-monitorにrename済み、同一リポにつき引退作業不要)","done:放置(kawaz裁定) — csv2json/csv2tsv/unbreaker/findmy","done:ssh-agent-router後継特定の経緯 — cache-wardenでなくauthsock-wardenが現行後継(authsock-filter READMEの2段構成後継記載で確認)","done:gh CLI注意点 — repo viewのJSONフィールドはisArchived(archivedはUnknown JSON fieldエラー)"]
 blocked_by:
 origin: エコシステム横断監査 (2026-07-03)
 ---
