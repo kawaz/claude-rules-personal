@@ -107,6 +107,15 @@ lint-rules:
             echo "  $bf ($(wc -c < "$bf" | tr -d ' ') bytes)"
         done <<< "$big"
     fi
+    # (f) 常時ロード合計の予算 (warning のみ、kawaz 裁定 2026-07-26 BD-Q1=a)
+    #     80KB は「現況から増えたら気づく」ための線であって目標値ではない。
+    #     現況を下回る値にすると常時 warning になり警告が無視されるので避けた。
+    #     検査できるのは自リポ分のみ (他 overlay の rules は lint から見えない)。
+    total=$(cat for-all/rules/*.md for-me/rules/*.md 2>/dev/null | wc -c | tr -d ' ')
+    budget=81920
+    if [ "$total" -gt "$budget" ]; then
+        echo "WARN 常時ロード rules 合計 ${total} bytes が予算 ${budget} を超過 (skill への降格を検討)"
+    fi
     if [ "$fatal" -ne 0 ]; then
         echo "lint-rules: FATAL 違反あり (上記参照)" >&2
         exit 1
