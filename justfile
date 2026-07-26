@@ -122,9 +122,25 @@ lint-agents:
     fi
     echo "lint-agents: OK"
 
-# plugin manifest 検証 (marketplace.json / plugin.json の schema + version 一致)
+# plugin manifest 検証 (marketplace.json / plugin.json の schema)
 validate:
     claude plugin validate .
+
+# plugin.json と marketplace.json の version 一致を保証 (multi-file 整合性)。
+# bump-semver get は multi-file 時に内部で整合チェック (不一致は error 表示で exit 非 0)。
+[private]
+check-versions:
+    @bump-semver get .claude-plugin/plugin.json .claude-plugin/marketplace.json --no-hint >/dev/null
+
+# 各 update は warn 降格: push は既に成功済なので、ここで失敗しても release 自体は
+# 完了している (失敗時に exit 非 0 にすると「push 済みなのに just push 失敗表示 →
+# 再実行は version gate で弾かれ詰む」)。
+# release 成功後の local 反映 (単独再実行可、push からも自動で呼ばれる)
+on-success-release:
+    @claude plugin marketplace update claude-rules-personal || echo "[warn] marketplace update 失敗。push は成功済み。'just on-success-release' で単独再実行可" >&2
+    @claude plugin update claude-rules-personal@claude-rules-personal || echo "[warn] plugin update 失敗。push は成功済み。'just on-success-release' で単独再実行可" >&2
+    @echo ""
+    @echo "[hint] /reload-plugins to apply in this session without restart"
 
 # plugin.json と marketplace.json の 2 ファイルを同時に進める (bump-semver が
 # version 一致を保証する)。
@@ -165,7 +181,8 @@ _check-version-bumped *trigger_paths:
     exit 1
 
 # gates: check-on-default-branch + ensure-clean + lint-rules + lint-agents
-#        + validate + check-version-bumped
-# push to origin/main
-push: check-on-default-branch ensure-clean lint-rules lint-agents validate check-version-bumped
+#        + validate + check-versions + check-version-bumped
+# push して local plugin cache まで反映する (release artifact 無しなので push = リリース完了)
+push: check-on-default-branch ensure-clean lint-rules lint-agents validate check-versions check-version-bumped
     bump-semver vcs push --branch main --jj-bookmark-auto-advance
+    @just on-success-release
