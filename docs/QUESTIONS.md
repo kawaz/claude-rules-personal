@@ -20,4 +20,59 @@
 
 ## 裁定待ち
 
+### 👺RR-Q1: 引退候補 12 リポの処遇 (GitHub 上に実体があるもの)
+
+[repo-retirement-todo-list](./issue/2026-07-03-repo-retirement-todo-list.md) の
+対象を実測した。判断が要るのは以下 6 件 (残り 6 件は下記「判断不要」)。
+
+用途が推測でしかないので、リポごとに archive / 削除 / 継続を指定してほしい。
+一括でよければ「全部 archive」等でも可。
+
+- [ ] a: `csv2json` (2016 年最終、10 年放置)
+- [ ] b: `csv2tsv` (2020 年最終)
+- [ ] c: `unbreaker` (2020 年最終)
+- [ ] d: `findmy` (GH 側 2025-02、ローカル 2022 で未同期)
+- [ ] e: `ssh-agent-router` (2026-02 最終。他 2 つの ssh 系と役割が重なる可能性)
+- [ ] f: `claude-plugins` (GH の README は既に deprecated 明記済み、後継 6 リポへ
+  移行済み。**archive するだけで完了**)
+
+推し: f は README で移行済みなので **archive 実行**。a-d は年単位で放置され
+参照もないので **archive** (削除は不可逆なので archive を推す)。e は ssh 系
+3 リポの整理方針とセットで決めたいので保留でもよい。
+
+#### 背景説明 (基本省略、詳細を求められたら補充)
+
+`claude-plugins` はローカル clone が origin に対し 1 ahead / 3 behind で
+diverged している。ローカル未 push の commit
+(`adb17da feat: force-uv deactivate in .venv`) があるので、archive 前に
+捨てるか拾うかの判断が要る。
+
+### 👺RR-Q2: GitHub に実体が無いローカル断片 4 件の扱い
+
+以下は GH にリポ自体が存在せず、ローカルのみの断片。runbook の archive 手順は
+GH 前提なので適用できない。
+
+- [ ] a: 4 件ともローカルディレクトリごと削除する
+- [ ] b: 中身を確認してから個別に判断する (私が各リポの実装内容を要約して再提示)
+- [ ] c: 放置する (実害が無いため)
+
+対象: `ssh-agent-tools` (2025-06 最終)、`json-compact` (2025-09 最終)、
+`ssh-authsock-filter` (commit 0、untracked のみ)、`claude-desktop-ws`
+(`.git` のみで完全に空)
+
+推し: `ssh-authsock-filter` と `claude-desktop-ws` は中身が無いので **a (削除)**。
+`ssh-agent-tools` と `json-compact` は実装があるので **b** で中身を見てから。
+
+### 👺RR-Q3: `bump.mbt` のローカル実装をどうするか
+
+GH 側は archive 済みの**空リポ** (`isEmpty=true`, `size=0`)。一方ローカルの jj
+リポには実装コード一式があるが、**git bookmark が一度も作られておらず push
+されていない**。ローカルと GH で実体が乖離している。
+
+- [ ] a: ローカル実装を push してから archive する (成果を GH に残す)
+- [ ] b: ローカルごと削除する (実装は不要と判断)
+- [ ] c: ローカルはそのまま残す (GH は archive 済みなので実害なし)
+
+推し: 実装の価値を私が判断できないので保留。中身を要約して再提示もできる。
+
 ## 確認待ち
