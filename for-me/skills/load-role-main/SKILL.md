@@ -22,7 +22,3 @@ description: 統括メイン (main role) のローダー。必須 skill 群を�
 - Skill tool は 1 invoke で 1 skill = 複数 skill 個数分の invoke が要る (本 loader 呼び出しで自動連鎖はしない、AI が指示履行で順次 invoke する)
 - Claude Code 標準に「Skill 内から別 Skill を自動ロード」機構は無い (2026-07-20 時点) ため、本 loader は AI の指示履行に依存
 
-## 関連
-
-- [[role-based-skill-loading]] — role 判定と loader invoke の常駐ルール
-- [[role-main-context]] — 統括メインの役割本体 (この loader が invoke する 1 個目)

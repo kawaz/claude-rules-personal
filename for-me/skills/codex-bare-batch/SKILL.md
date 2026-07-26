@@ -93,6 +93,6 @@ subagent 側の注入 (~67k) の正体はツールスキーマ + ハーネス機
 ない (CLAUDE.md 無し環境でも 67k を実測)。frontmatter でこれを削る手段は無い
 (`omitClaudeMd` はユーザ agent では無効を実測) ため、大入力の逃げ道は本経路のみ。
 
-## 関連
+## 出典
 
-- `docs/findings/2026-07-19-cliproxyapi-codex-runtime-notes.md` — codex の経路・面分離・特性メモ
+`docs/findings/2026-07-19-cliproxyapi-codex-runtime-notes.md` — codex の経路・面分離・特性メモ

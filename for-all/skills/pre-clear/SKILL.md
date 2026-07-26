@@ -103,7 +103,6 @@ loaded_by:
 Notes 内の §継続作業指示に何を書いたか (or 書かなかったか) を報告に含める** — 次
 セッションが立ち上げ後に即実行する内容として kawaz が事前に把握できるよう。
 
-## 関連
+## 出典
 
-- `pre-compact` skill — compact 前提の保存 (力点が逆: 要約の補正レイヤ)
-- 由来: compact-plus プラグイン (github.com/u-ichi/compact-plus) の 10 セクション構成
+compact-plus プラグイン (github.com/u-ichi/compact-plus) の 10 セクション構成

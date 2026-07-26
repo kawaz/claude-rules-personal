@@ -43,7 +43,6 @@ clear と違い**不完全な自動要約が付いてくる**前提なので、�
 する場合は継続作業指示を優先度リストの上位に置く。「要約が話題として書いた」と
 「継続作業指示が明示している」は別軸で、後者が上位判定材料。
 
-## 関連
+## 出典
 
-- `pre-clear` skill — clear 前提の保存 (自己完結ブートストラップ側)。10 セクション定義の正本もそちら
-- 由来: compact-plus プラグイン (github.com/u-ichi/compact-plus)
+compact-plus プラグイン (github.com/u-ichi/compact-plus) (10 セクション定義の正本は `pre-clear` skill)

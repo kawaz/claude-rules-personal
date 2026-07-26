@@ -134,18 +134,11 @@ private の実挙動は kawaz 業務環境等で確認して findings に追記�
 - **README の相対パス を自動的に raw に展開する CLI** (= 手組みで済むため作らない)
 - **camo URL の元 URL を hex decode するツール** (= sed / python で 1 行で済む)
 
-## 関連スキル / ルール
-
-- **反対方向**: [[gh-image-attach]] (画像を GH に投稿するスキル、playwright 経由)
-- **横串**: [[claude-config-dir-isolation]] 越境作業時は対象環境の `gh` 認証を使う
-- **業務 private 検証時**: 業務 overlay の `gh` 認証境界 (= [[account-isolation]] emeradaco)
-- **findings**: `docs/findings/2026-07-01-gh-user-attachments-fetch.md` (本スキルの根拠、
-  実測データ含む)
-
 ## 一次資料
 
 - [GitHub REST API: Media types](https://docs.github.com/en/rest/overview/media-types) —
   `application/vnd.github.html+json` の公式定義
 - [GitHub Docs: Camo image proxy](https://github.com/atmos/camo) — camo の仕組み
+- `docs/findings/2026-07-01-gh-user-attachments-fetch.md` — 本 skill の根拠 (実測データ含む)
 - スライド出典: シナマケミートアップ #14 「僕の考えた最強の AI 駆動開発フロー」
   コラム「Issue の画像を gh だけで取り出す」(2026-06 頃)

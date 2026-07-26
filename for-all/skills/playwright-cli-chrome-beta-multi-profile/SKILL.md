@@ -144,6 +144,3 @@ playwright-cli -s=<name> open --browser=chrome-beta \
 
 ただし業務 Chrome の cookie / 拡張機能 / テーマは引き継げないので、各サービスへの初回ログインからやり直しになる。
 
-## 関連
-
-- 各 overlay の `playwright-cli-*-profile.md` — 各業務プロファイルの token 保管・固有運用

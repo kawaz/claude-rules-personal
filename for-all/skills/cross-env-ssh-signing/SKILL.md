@@ -87,6 +87,3 @@ SSH_AUTH_SOCK=~/.ssh/agent-env-Y.sock jj config set --repo signing.key "$(SSH_AU
 各環境固有の越境手順 (例: emeradaco なら gh トークン / SSH 鍵 / signing.key の
 具体的な指定) は当該 overlay の `for-all/rules/` を参照する。
 
-## 関連
-
-- [[claude-config-dir-isolation]] — CLAUDE_CONFIG_DIR 運用と `~/.claude` 汚染対策の概念 (= 本 skill の概念正本)

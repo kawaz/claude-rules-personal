@@ -45,7 +45,3 @@ role skill が複数 role に増えた時のソート順管理のため、prefix
 - **role 固有スキル** = role で違う運用 (統括の worker 選定 / worker の実装規約 / reviewer の検査観点 等)
 - 大きい常駐ルールから優先的に role 固有スキルへ移動、常駐は行動制約の骨格のみ
 
-## 関連
-
-- [[role-main-context]] — 統括メインの役割本体 (`load-role-main` から invoke される)
-- `for-me/skills/load-role-main/SKILL.md` — 統括メインの必須 skill リストと invoke 指示
