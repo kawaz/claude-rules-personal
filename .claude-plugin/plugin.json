@@ -1,8 +1,10 @@
 {
-  "name": "claude-rules-personal",
+  "name": "rules-personal",
   "description": "kawaz 個人環境のルール層に付随する hook 群 (context 管理の自動化)",
   "version": "0.1.1",
-  "author": { "name": "kawaz" },
+  "author": {
+    "name": "kawaz"
+  },
   "license": "MIT",
   "repository": "https://github.com/kawaz/claude-rules-personal"
 }

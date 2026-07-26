@@ -1,13 +1,15 @@
 {
-  "name": "claude-rules-personal",
-  "owner": { "name": "kawaz" },
+  "name": "rules-personal",
+  "owner": {
+    "name": "kawaz"
+  },
   "metadata": {
     "description": "kawaz 個人環境のルール層に付随する hook 群 (context 管理の自動化)",
     "version": "0.1.1"
   },
   "plugins": [
     {
-      "name": "claude-rules-personal",
+      "name": "rules-personal",
       "description": "コマンド実行を検知して該当 skill の invoke を促す hook 群。skill の description を最小化しても発火経路を保てるようにする (description は全セッションの context に常時載るため)。ルール本体の注入は setup.sh の symlink 方式が継続。",
       "source": "./"
     }

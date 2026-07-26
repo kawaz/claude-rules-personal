@@ -137,8 +137,8 @@ check-versions:
 # 再実行は version gate で弾かれ詰む」)。
 # release 成功後の local 反映 (単独再実行可、push からも自動で呼ばれる)
 on-success-release:
-    @claude plugin marketplace update claude-rules-personal || echo "[warn] marketplace update 失敗。push は成功済み。'just on-success-release' で単独再実行可" >&2
-    @claude plugin update claude-rules-personal@claude-rules-personal || echo "[warn] plugin update 失敗。push は成功済み。'just on-success-release' で単独再実行可" >&2
+    @claude plugin marketplace update rules-personal || echo "[warn] marketplace update 失敗。push は成功済み。'just on-success-release' で単独再実行可" >&2
+    @claude plugin update rules-personal@rules-personal || echo "[warn] plugin update 失敗。push は成功済み。'just on-success-release' で単独再実行可" >&2
     @echo ""
     @echo "[hint] /reload-plugins to apply in this session without restart"
 
