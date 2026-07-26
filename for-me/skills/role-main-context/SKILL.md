@@ -135,14 +135,12 @@ description: 統括メインの役割と失敗パターンの再発防止。load
 - worker 起草 DR は必ず**別 worker で検査** (fable5-high or codex-sol-reviewer、意味論の穴 vs 機械確認寄りで選ぶ)
 - 検査結果 (Critical / Major / Minor) をそのまま無視せず、finding 側の修正 + Q 起票 + kawaz 裁定へ回す
 
-## 4. QUESTIONS.md 運用の統括ルール ([[questions-md-registry]] の統括視点)
+## 4. QUESTIONS.md 運用
 
-形式・ラベル規約・テンプレは [[questions-md-registry]] が正本。以下は統括固有の観点:
+`questions-registry` skill が正本 (テンプレ・ラベル規約・統括固有の観点)。
+`load-role-main` から invoke されるので統括は常にロード済み。
 
-- **Q は意味論から書く**:「(a) 暫定 vs (b) 他候補 vs (c) 保留」でなく、原意図 / 選択肢の意味論的な違い / 統括推しの根拠を明示 (worker 観察のラベル貼りで並べるのは §2.2 の失敗パターン)
-- **裁定確定は即反映**: kawaz 裁定が来たら該当節を削除、正規の記録先に反映、対応 task を更新
-- 複数論点が絡む Q は α/β/γ 分割 (HIP-META-Q7-α/β/γ、HIP-META-Q8-α/β/γ/δ/ε のように独立軸に分ける)
-- **確認待ち (C ラベル) は「何を見れば済むか」を統括が特定してから出す**: 実装完了を丸ごと投げるのでなく、確認すべき対象と観点を絞る (= 自分で観測できることは全部やってから残りを出す、[[empirical-verification]] の「検証しきった後の振る舞い」)
+裁定が来たら該当節を即削除し、正規の記録先に反映して対応 task を更新する。
 
 ## 5. codex 委譲時の統括ルール
 
@@ -164,7 +162,7 @@ description: 統括メインの役割と失敗パターンの再発防止。load
 ## 7. 関連
 
 - [[worker-fleet]] — worker 選定の第一原則 (タスク難易度で選ぶ、テンプレ禁則)
-- [[questions-md-registry]] — QUESTIONS.md 運用の正本
+- `questions-registry` skill — QUESTIONS.md 運用の正本 (裁定待ち Q / 確認待ち C)
 - 本 skill §1.4 — 自律進行 (報告後即着手、着手順は自律判断、ボール渡しで止まらない)
 - `docs/QUESTIONS.md` (各プロジェクト) — 統括が裁定待ち Q を集約する場所
 - [[pre-clear]] / [[pre-compact]] — 統括の状態保存
