@@ -77,6 +77,27 @@ lint-rules:
         printf '%s\n' "$drafts" | sed 's/^/  /'
         fatal=1
     fi
+    # (e) dead wikilink: [[slug]] が rules ファイル名 / skills ディレクトリ名 /
+    #     外部 overlay の許容リストのいずれにも解決できない = 改名・統合の置き去り。
+    #     除外するもの: [[#見出し]] (同一ファイル内アンカー)、`[[名前]]` のような
+    #     記法そのものの説明 (バッククォートで囲まれた 1 語)。
+    { ls for-all/rules/ for-me/rules/ 2>/dev/null | grep '\.md$' | sed 's/\.md$//'
+      ls -d skills/*/ 2>/dev/null | xargs -n1 basename
+      grep -vE '^[[:space:]]*(#|$)' .lint-external-slugs 2>/dev/null
+    } | sort -u > /tmp/lint-known-slugs.$$
+    grep -rhoE '\[\[[^]]+\]\]' for-all/ for-me/ skills/ agents/ 2>/dev/null |
+        sed 's/^\[\[//; s/\]\]$//' | grep -v '^#' | sort -u > /tmp/lint-used-slugs.$$
+    dead=$(comm -23 /tmp/lint-used-slugs.$$ /tmp/lint-known-slugs.$$)
+    rm -f /tmp/lint-known-slugs.$$ /tmp/lint-used-slugs.$$
+    while IFS= read -r slug; do
+        [ -n "$slug" ] || continue
+        # 記法の説明 (`[[名前]]` のようにバッククォート内) は実体を持たない
+        if rg -qF "\`[[${slug}]]\`" for-all/rules/ for-me/rules/ 2>/dev/null; then continue; fi
+        echo "FATAL dead wikilink: [[${slug}]] が解決できない"
+        rg -n --no-heading -F "[[${slug}]]" for-all/ for-me/ skills/ agents/ 2>/dev/null | sed 's/^/    /'
+        echo "  → 改名なら参照を直す / 外部 overlay の rule なら .lint-external-slugs に追加"
+        fatal=1
+    done <<< "$dead"
     # (d) 5KB 超 rule (warning のみ、常時ロード肥大の検討材料)
     big=$(find for-all/rules for-me/rules -name '*.md' -size +5k | sort)
     if [ -n "$big" ]; then

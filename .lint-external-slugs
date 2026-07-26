@@ -1,0 +1,22 @@
+# 他 overlay リポが持つ rule slug の許容リスト (lint-rules の dead wikilink 検査用)
+#
+# このリポからは実体が見えないが、実行時には各 overlay の rules/ が同じ
+# $CLAUDE_CONFIG_DIR/rules/ へ symlink されるので解決できる。
+# ここに無い未解決 slug は fatal (= 改名・統合で置き去りになった dead link)。
+#
+# 追加するとき: 対象 overlay の for-*/rules/ に実在することを確認してから書く。
+# 空行と # 始まりは無視される。
+
+# emeradaco (kawaz123/claude-rules-emeradaco)
+account-isolation
+identifiers-emeradaco
+questions-local-emeradaco
+vendor-glossary-emeradaco
+
+# syun (kawaz/claude-rules-syun)
+identifiers-syun
+playwright-cli-syun-profile
+
+# zunsystem (kawaz/claude-rules-zunsystem)
+identifiers-zunsystem
+playwright-cli-zunsystem-profile

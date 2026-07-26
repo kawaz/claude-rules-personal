@@ -1,6 +1,6 @@
 # Role-based skill loading — 常駐ルール最小化 + 役割別必須スキル自動ロード
 
-**目的**: 常駐ルール (rules/*.md) が肥大すると全ロード必須の負担が増える。役割ごとに必要なルールを skill に切り出して、セッション開始時に role 判定して `load_{role}_skill` を invoke することで、role 別に必要なものだけロードする ([[main-context-role]] は統括メインでのみ必須、ワーカー / レビュワーには不要 等)。
+**目的**: 常駐ルール (rules/*.md) が肥大すると全ロード必須の負担が増える。役割ごとに必要なルールを skill に切り出して、セッション開始時に role 判定して `load_{role}_skill` を invoke することで、role 別に必要なものだけロードする (`rules-personal:role-main-context` は統括メインでのみ必須、ワーカー / レビュワーには不要 等)。
 
 ## セッション開始時の必須手順
 
