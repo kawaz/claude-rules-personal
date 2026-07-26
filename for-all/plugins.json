@@ -9,6 +9,7 @@
     {"marketplace": "kawaz/claude-rules-source-guard",  "plugin": "claude-rules-source-guard@claude-rules-source-guard"},
     {"marketplace": "kawaz/claude-plugin-force-bun",    "plugin": "force-bun@force-bun"},
     {"marketplace": "kawaz/claude-plugin-force-uv",     "plugin": "force-uv@force-uv"},
+    {"marketplace": "kawaz/claude-rules-personal",      "plugin": "claude-rules-personal@claude-rules-personal"},
     {"plugin": "skill-creator@claude-plugins-official"},
     {"plugin": "security-guidance@claude-plugins-official"}
   ]
