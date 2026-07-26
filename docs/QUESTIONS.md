@@ -17,40 +17,4 @@
 
 ## 裁定待ち
 
-### 👺PM-Q1: plugin は 1 つに同居させるか、配布スコープごとに分けるか
-
-plugin には `for-all` / `for-me` のような配布スコープの区別が無く、install した環境に
-全部入る。現行 `for-me/skills` 14 個は personal 専用だが、plugins.json が `for-all` に
-ある以上、同居させると emeradaco 環境にも入る。
-
-- a (推奨): `rules-personal` (全環境向け: hooks + for-all 相当) と
-  `rules-personal-me` (personal 専用: for-me 相当) の 2 plugin に分け、
-  plugins.json の配置で配り分ける
-- b: 1 plugin に同居。emeradaco に personal 専用 skill が入るのを許容する
-- c: `for-me` 相当は symlink 継続、`for-all` 相当だけ plugin 化
-
-a 推奨の理由: 配布スコープの区別は現に必要 (worker-fleet や jj-workflow を
-emeradaco 環境へ配る理由がない)。plugin の慣習に寄せつつ区別を保つには
-plugin を分けるのが素直で、install の有無で表現できる。
-
-### 👺PM-Q2: skill/agent の変更ごとに version bump を必須にするか
-
-現在 `check-version-bumped` の trigger は `hooks/` のみで、「rule/skill/docs のみの
-変更では bump 不要」と justfile に明記している。skill/agent が plugin 配布物になると
-この前提が変わる。
-
-- a (推奨): trigger paths に `skills/` `agents/` を追加する。他 kawaz plugin リポ
-  (plugin-reference / gh-monitor / session-analysis) は全て `skills/` を trigger に
-  入れている
-- b: trigger は `hooks/` のまま。skill 修正は bump せず、必要時にまとめて bump
-
-a 推奨の理由: bump しないと `claude plugin update` が反映しないので、b だと
-「push したのに古い skill のまま」が常態化する。
-
-#### 背景説明 (基本省略、詳細を求められたら補充)
-
-symlink 方式は保存した瞬間に反映されるが、plugin 方式は
-push → bump → `plugin update` → `/reload-plugins` を経る。この即時性の喪失は
-plugin 化の代償として受け入れる前提の判断。
-
 ## 確認待ち

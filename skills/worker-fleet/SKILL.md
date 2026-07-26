@@ -96,6 +96,11 @@ opus-high / sonnet-high、意味論の穴探しが主目的の時だけ最上位
 agent 名は `<model><effort>-worker[-用途]` の形式 (例: `sonnet5-worker-medium`)。
 表中はモデル+effort の略記 (例: `sonnet5-medium`) で書く。
 
+**Agent tool の `subagent_type` に渡す時は `rules-personal:` を付ける**
+(例: `rules-personal:sonnet5-worker-medium`)。plugin 配布の agent は
+`<plugin>:<name>` が識別子になるため。本文・表中の言及は読みやすさ優先で
+prefix を省くが、実際に spawn する値には必ず付ける。
+
 | 課題の性質 | 選択 |
 |---|---|
 | 機械的・定型 (整形・一括リネーム・転写・記録・journal) | sonnet5-low / codex-luna |

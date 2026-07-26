@@ -11,11 +11,11 @@ description: 統括メイン (main role) のローダー。必須 skill 群を�
 
 以下を Skill tool で 1 個ずつ **必ず全て invoke**:
 
-1. **`personal-role-main-context`** — 統括メインの 5 責務 + 失敗パターンと立て直しの型
-2. **`personal-worker-fleet`** — worker 選定の第一原則 (タスク難易度で選ぶ、テンプレ禁則)
-3. **`personal-orchestrate`** — 中〜大規模タスクのオーケストレーション (Phase 0-4)
-4. **`personal-docs-structure`** — docs 構造 (どこに何を置くか)
-5. **`personal-questions-registry`** — 裁定待ち (Q) / 確認待ち (C) の集約運用
+1. **`rules-personal:role-main-context`** — 統括メインの 5 責務 + 失敗パターンと立て直しの型
+2. **`rules-personal:worker-fleet`** — worker 選定の第一原則 (タスク難易度で選ぶ、テンプレ禁則)
+3. **`rules-personal:orchestrate`** — 中〜大規模タスクのオーケストレーション (Phase 0-4)
+4. **`rules-personal:docs-structure`** — docs 構造 (どこに何を置くか)
+5. **`rules-personal:questions-registry`** — 裁定待ち (Q) / 確認待ち (C) の集約運用
 
 ## 補足
 

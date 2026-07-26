@@ -42,9 +42,9 @@ fi
 # jj 管理か git 専用かで案内先が変わる。jj workspace は `.jj` が file の
 # ことがある (secondary workspace) ので -e で判定する。
 if [ -e "$repo_root/.jj" ]; then
-  skills="personal-jj-workflow (workspace / bookmark / PR / push 手順), personal-jj-tips (コミット操作・組み替え・復旧)"
+  skills="rules-personal:jj-workflow (workspace / bookmark / PR / push 手順), rules-personal:jj-tips (コミット操作・組み替え・復旧)"
 else
-  skills="personal-git-worktree-workflow (worktree / PR 作業手順)"
+  skills="rules-personal:git-worktree-workflow (worktree / PR 作業手順)"
 fi
 
 # 1 セッション 1 リポにつき 1 回だけ案内する。

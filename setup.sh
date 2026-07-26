@@ -22,13 +22,17 @@ Without --home, derives the target from \$CLAUDE_CONFIG_DIR.
 repos_mapping.json defines all repos and which CLAUDE_CONFIG_DIR each one
 "owns". The repo whose 'home' matches the target is treated as 'self'.
 
-Target layout (rules/agents: directory symlink / skills: per-skill symlink):
+Target layout (rules: directory symlink / skills: per-skill symlink):
   \$TARGET/rules/for-me-from-<self>       -> <self>/for-me/rules
   \$TARGET/rules/for-all-from-<repo>      -> <repo>/for-all/rules   (every repo)
   \$TARGET/rules/for-others-from-<repo>   -> <repo>/for-others/rules (non-self repos)
-  \$TARGET/agents/for-*-from-<repo>       -> <repo>/for-*/agents    (same scheme as rules)
   \$TARGET/skills/<repo>-<slug>           -> <repo>/for-*/skills/<slug>
   \$TARGET/CLAUDE.md                      -> <self>/for-me/CLAUDE.md
+
+Skills and agents are moving to plugin distribution (a plugin's own skills/ and
+agents/ are auto-scanned). Overlays that still keep for-*/skills/ are linked by
+the scheme above; agents are no longer linked at all. \$TARGET/agents is still
+pruned so links from the old scheme get cleaned up.
 
 Plugins:
   Every repo's for-all/plugins.json is merged and applied via
@@ -152,11 +156,9 @@ for i in "${!NAMES[@]}"; do
   fi
 
   link_dir "$DEST" "for-all-from-$name" "$repo_root/for-all/rules"
-  link_dir "$AGENTS_DEST" "for-all-from-$name" "$repo_root/for-all/agents"
   link_skills "$name" "$repo_root/for-all/skills"
   if [ "$name" = "$SELF" ]; then
     link_dir "$DEST" "for-me-from-$name" "$repo_root/for-me/rules"
-    link_dir "$AGENTS_DEST" "for-me-from-$name" "$repo_root/for-me/agents"
     link_skills "$name" "$repo_root/for-me/skills"
     # self repo's for-me/CLAUDE.md -> $TARGET/CLAUDE.md (env-specific user memory)
     if [ -f "$repo_root/for-me/CLAUDE.md" ]; then
@@ -165,7 +167,6 @@ for i in "${!NAMES[@]}"; do
     fi
   else
     link_dir "$DEST" "for-others-from-$name" "$repo_root/for-others/rules"
-    link_dir "$AGENTS_DEST" "for-others-from-$name" "$repo_root/for-others/agents"
     link_skills "$name" "$repo_root/for-others/skills"
   fi
 

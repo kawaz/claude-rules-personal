@@ -34,7 +34,7 @@ role skill が複数 role に増えた時のソート順管理のため、prefix
 
 **例** (統括メイン開始時):
 1. `Skill(skill: "load-role-main")` を呼ぶ
-2. load-role-main の本文に「以下を Skill tool で全部 invoke: `role-main-context`, `personal-worker-fleet`, `personal-orchestrate`」と書いてある
+2. load-role-main の本文に「以下を Skill tool で全部 invoke: `rules-personal:role-main-context`, `rules-personal:worker-fleet`, `rules-personal:orchestrate`」と書いてある
 3. AI が列挙された各 skill を Skill tool で順次 invoke
 
 **強制力**: Claude Code 標準に「Skill 内から別 Skill を自動ロード」する機構は無い (2026-07-20 時点、`@ファイル名` の記法は本文の linkify 用途で、ロード命令ではない)。したがって本ルールは **AI の指示履行に依存**する。統括 role として動く AI は、load-main-skill 本文の指示を必ず履行する。

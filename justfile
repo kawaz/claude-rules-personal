@@ -1,10 +1,12 @@
 # claude-rules-personal justfile
 #
-# rule (.md) / skill (.md) 配布が主。加えて hooks/ を claude plugin として配布する
-# ため version を持つ (= `claude plugin update` が plugin.json / marketplace.json の
-# version を見る)。lint / test / build は無く、翻訳ペア (-ja.md) も無いため
-# check-outdated-translations も無し。Taskfile.pkl は pkf-tasks/pkfire の migrate
-# check 用に過渡的に残存 (= 別経路で `pkf run check-migrate` 等で呼ぶ運用)。
+# 2 系統の配布を持つ:
+#   - rules (for-*/rules/) — setup.sh が $CLAUDE_CONFIG_DIR へ symlink。plugin には
+#     rule を注入する機構が無いのでこちらは symlink 継続
+#   - plugin (hooks/ skills/ agents/) — `rules-personal` plugin として配布。
+#     version を持つのはこのため (`claude plugin update` が manifest の version を見る)
+# lint / test / build は無く、翻訳ペア (-ja.md) も無いため check-outdated-translations
+# も無し。Taskfile.pkl は pkf-tasks/pkfire の migrate check 用に過渡的に残存。
 
 set shell := ["bash", "-euo", "pipefail", "-c"]
 
@@ -90,16 +92,17 @@ lint-rules:
     fi
     echo "lint-rules: OK (fatal 違反なし)"
 
-# (重複は片方が黙って破棄される Claude Code 仕様のため fatal)。リポ横断の
-# 重複は setup.sh が警告する
-# agent 定義 lint: name/description 必須 + リポ内 name 重複を検出
+# (重複は片方が黙って破棄される Claude Code 仕様のため fatal)
+# agent 定義 lint: name/description 必須 + name 重複 + ゼロ件を検出
 lint-agents:
     #!/usr/bin/env bash
     set -uo pipefail
     fatal=0
     names=""
-    for f in for-all/agents/*.md for-me/agents/*.md for-others/agents/*.md; do
+    count=0
+    for f in agents/*.md; do
         [ -f "$f" ] || continue
+        count=$((count + 1))
         name=$(awk '/^---$/{n++;next} n==1 && /^name:/{sub(/^name:[ ]*/,"");print;exit}' "$f")
         if [ -z "$name" ]; then
             echo "FATAL name 欠落: $f (frontmatter に name: が必須)"
@@ -116,11 +119,17 @@ lint-agents:
         fi
         names="$names"$'\n'"$name"
     done
+    # ゼロ件は「検査した結果 OK」ではなく glob の破綻 (パス変更・移動漏れ)。
+    # 無検査で OK を出すと移行事故を silent pass するので fatal にする。
+    if [ "$count" -eq 0 ]; then
+        echo "FATAL agents/*.md が 1 件も見つからない (glob の破綻か移動漏れ)" >&2
+        exit 1
+    fi
     if [ "$fatal" -ne 0 ]; then
         echo "lint-agents: FATAL 違反あり (上記参照)" >&2
         exit 1
     fi
-    echo "lint-agents: OK"
+    echo "lint-agents: OK (${count} 件)"
 
 # plugin manifest 検証 (marketplace.json / plugin.json の schema)
 validate:
@@ -132,15 +141,28 @@ validate:
 check-versions:
     @bump-semver get .claude-plugin/plugin.json .claude-plugin/marketplace.json --no-hint >/dev/null
 
+# plugin cache は $CLAUDE_CONFIG_DIR 配下にあるため、環境ごとに update が要る
+# (personal で叩いても emeradaco 側は古いまま)。環境一覧の正本は repos_mapping.json
+# の home フィールド (rule 側に環境一覧を複製しない規約)。
 # 各 update は warn 降格: push は既に成功済なので、ここで失敗しても release 自体は
 # 完了している (失敗時に exit 非 0 にすると「push 済みなのに just push 失敗表示 →
 # 再実行は version gate で弾かれ詰む」)。
-# release 成功後の local 反映 (単独再実行可、push からも自動で呼ばれる)
+# release 成功後の local 反映 (全 CLAUDE_CONFIG_DIR、単独再実行可、push から自動)
+[script]
 on-success-release:
-    @claude plugin marketplace update rules-personal || echo "[warn] marketplace update 失敗。push は成功済み。'just on-success-release' で単独再実行可" >&2
-    @claude plugin update rules-personal@rules-personal || echo "[warn] plugin update 失敗。push は成功済み。'just on-success-release' で単独再実行可" >&2
-    @echo ""
-    @echo "[hint] /reload-plugins to apply in this session without restart"
+    fail=0
+    while IFS= read -r home; do
+        dir="${home/#\~/$HOME}"
+        [ -d "$dir" ] || { echo "[skip] $home (dir 無し)"; continue; }
+        echo "--- $home"
+        CLAUDE_CONFIG_DIR="$dir" claude plugin marketplace update rules-personal || fail=1
+        CLAUDE_CONFIG_DIR="$dir" claude plugin update rules-personal@rules-personal || fail=1
+    done < <(jq -r '.repos[] | select(.home != null and .home != "") | .home' repos_mapping.json)
+    if [ "$fail" -ne 0 ]; then
+        echo "[warn] 一部環境で update 失敗。push は成功済み。'just on-success-release' で単独再実行可" >&2
+    fi
+    echo ""
+    echo "[hint] 各環境のセッションで /reload-plugins すると restart 無しで反映される"
 
 # plugin.json と marketplace.json の 2 ファイルを同時に進める (bump-semver が
 # version 一致を保証する)。
@@ -154,11 +176,11 @@ _bump-version bump *version_files:
     new_version=$(bump-semver "$level" "$@" --write --no-hint)
     bump-semver vcs commit -m "Release v${new_version}" "$@"
 
-# trigger paths に diff が無い push は自動 skip される (= rule/skill/docs のみの
+# trigger paths に diff が無い push は自動 skip される (= rules/ や docs/ のみの
 # 変更では bump 不要)。
-# plugin 配布物 (hooks/) を変えたのに version 未 bump なら push を止める
+# plugin 配布物 (hooks/ skills/ agents/) を変えたのに version 未 bump なら push を止める
 [private]
-check-version-bumped: (_check-version-bumped "hooks/")
+check-version-bumped: (_check-version-bumped "hooks/" "skills/" "agents/")
 
 [private]
 [script]
@@ -177,7 +199,7 @@ _check-version-bumped *trigger_paths:
         exit 0
     fi
     bump-semver compare gt .claude-plugin/plugin.json vcs:main@origin:.claude-plugin/plugin.json --no-hint && exit 0
-    echo 'ERROR: hooks/ が変わっているが version 未 bump。"just bump-version" を実行してください' >&2
+    echo 'ERROR: plugin 配布物 (hooks/ skills/ agents/) が変わっているが version 未 bump。"just bump-version" を実行してください' >&2
     exit 1
 
 # gates: check-on-default-branch + ensure-clean + lint-rules + lint-agents
