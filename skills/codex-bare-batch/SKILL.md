@@ -33,8 +33,8 @@ SP=<scratchpad>   # prompt/結果の置き場。セッションの scratchpad �
 
 - model は用途で選ぶ: `gpt-5.6-sol` (レビュー・監査・高難度) / `gpt-5.6-terra`
   (通常) / `gpt-5.6-luna` (軽量)
-- 業務面 (emeradaco) では port を **8318** に変える (認証境界、面ごとの
-  proxy 構成は `docs/findings/2026-07-19-cliproxyapi-codex-runtime-notes.md`)
+- 業務面では port を **8318** に変える (認証境界、面ごとの proxy 構成は
+  `kawaz/llm-notes` の `docs/findings/2026-07-19-cliproxyapi-codex-runtime-notes.md`)
 - 長い入力は必ずファイル (`prompt.md`) に書いて stdin リダイレクトで渡す
   (引数渡しは shell 引用の事故源)
 - 実行は Bash tool の `run_in_background: true` が基本 (数分かかる)。完了通知後に
@@ -95,4 +95,5 @@ subagent 側の注入 (~67k) の正体はツールスキーマ + ハーネス機
 
 ## 出典
 
-`docs/findings/2026-07-19-cliproxyapi-codex-runtime-notes.md` — codex の経路・面分離・特性メモ
+`kawaz/llm-notes` の `docs/findings/2026-07-19-cliproxyapi-codex-runtime-notes.md`
+— codex の経路・面分離・特性メモ (private リポ。プロキシ・プロバイダの知見はそちらが正本)

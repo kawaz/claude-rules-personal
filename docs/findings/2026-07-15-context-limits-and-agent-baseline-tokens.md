@@ -83,3 +83,8 @@ OpenAI 互換 `/v1/chat/completions` の `reasoning_effort` 直指定も疎通�
 - Explore: `model:"inherit"`, Edit/Write 系 6 tool disallow, `omitClaudeMd:!0`,
   lean prompt, gitStatus 除外 (Explore/Plan のみ)
 - worker: tools `["*"]`, `maxTurns:200`
+
+## 関連
+
+本 findings の主題は Claude Code 側の context 挙動。測定経路として使った
+cliproxyapi そのものの構成・プロバイダ側の知見は `kawaz/llm-notes` (private) が正本。
