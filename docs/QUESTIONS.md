@@ -20,22 +20,4 @@
 
 ## 裁定待ち
 
-### 👺RS-Q1: rules-structure 残スコープ 2 (design 系同層内統合) の要否 ([issue](issue/2026-06-17-rules-structure-reorganization.md))
-
-スコープ 1 (_index.md) / 3 (取り込みプロセス) / 4 (lint) は完了。残る 2 の統合検討の結論:
-
-- [ ] a: 統合しないで issue close (推し。4 本の責務は直交 — 優先軸 / 構造禁則 / コード手癖検出 / ルール片面検出 — で、レビューが指摘した「同じに見える」問題は _index の 2 層表示が解決済み。統合は多責務化の方向)
-- [ ] b: design-priority × design-thinking のみ統合 (参照張り替え 2 件、lint 稼働下で安全に可能)
-- [ ] c: 点検系 2 本も統合
-
-### 👺CM-Q1: commands→skills 移行での呼び出し名変化の許容 ([issue](issue/2026-05-21-commands-to-skills-migration.md))
-
-残 8 command (decomposition.ja + itumono-* 7 本) を overlay の skills へ移行すると、setup.sh の prefix 規則で呼び出し名が変わる (例: `/itumono-full-review` → `/rules-personal-itumono-full-review`)。
-
-- [ ] a: prefix 付きへの変化を許容してそのまま移行 (推し。二重管理解消が主目的で、名前の一貫性も揃う)
-- [ ] b: 移行時に slug を短縮リネームして相殺 (例: `itumono-` を落とす。ただし手に馴染んだ名前は結局変わる)
-- [ ] c: 移行せず commands 直置きを現状維持で issue close
-
-a/b の場合、itumono-* 7 本を個別 skill のまま移すか束ねるかは移行時に構造を見て私が判断します (異論があれば添えてください)。
-
 ## 確認待ち
