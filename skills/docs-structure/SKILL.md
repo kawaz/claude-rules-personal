@@ -72,13 +72,15 @@ docs/
 | issue | `templates/issue/YYYY-MM-DD-template.md` |
 | journal | `templates/journal/YYYY-MM-DD-template.md` |
 | findings | `templates/findings/YYYY-MM-DD-template.md` |
-| runbooks | `templates/runbooks/YYYY-MM-DD-template.md` |
+| runbooks (汎用) | `templates/runbooks/YYYY-MM-DD-template.md` |
+| runbooks (worktree 合流・push) | `templates/runbooks/worktree-workflow.template.md` |
 | research | `templates/research/YYYY-MM-DD-template.md` |
 | knowledge | `templates/knowledge/YYYY-MM-DD-template.md` |
 | design 付随詳細 | `templates/design/topic-template.md` |
 
 テンプレ内の placeholder (= `{PROJECT_NAME}`, `{タイトル}`, `YYYY-MM-DD`, `NNNN` 等) は
-実値に置換してから配置する。
+実値に置換してから配置する。`worktree-workflow.template.md` のように中身が確定済みの
+テンプレは placeholder 置換がほぼ不要で、そのまま配置先の命名規則に合わせて置く。
 
 ## 補足: 各カテゴリの運用
 
@@ -208,6 +210,17 @@ just の変数 (`name := value`) は文字列のみ扱え、shell 内 embed で 
 ### push 時の version bump 漏れ検出
 
 product code に変更があるのに version が `main@origin` から進んでいなければ push を止める gate。`check-version-bumped` recipe を `push` の deps に入れる。trigger paths (= 検出対象) は recipe 内の shell logic で書く (docs / justfile 等の変更は除外)。trigger paths の diff が無い push は自動 skip されるので `push-without-bump` のような別 recipe は不要 (= src 変更したら必ず release という invariant をバイパスさせない)。具体的な実装は bump-semver の `justfile` 参照。
+
+### worktree からの push gate (sync / promote / push)
+
+worktree (git linked worktree / jj secondary workspace) で作業した change を default branch に合流させずに push しようとするのを止める gate。`bump-semver` v0.40.0+ の `vcs sync` / `vcs promote` / `vcs is on-default-branch` (= DR-0038) を使い、jj/git の差異を justfile に隠蔽する。
+
+- `push` の deps 先頭に `check-on-default-branch` を置く
+- `sync` (= `vcs sync --onto <default>@origin`) と `promote` (= `vcs promote`) を公開 recipe として並べる (AI・人間の双方が直接叩くので `[private]` にしない)
+- gate の predicate は **`vcs is on-default-branch` の反転**。`vcs is worktree` を使ってはいけない — git bare + jj workspace 方式では `main/` 自体が secondary workspace なので `main` でも true を返し、正常な push を誤ってブロックする (DR-0038 Adoption pattern)
+- `vcs is` は predicate-false 時に stderr へ何も出さない (`compare` と同じ semantics) ので、cascade の hint は **justfile 側で `printf >&2`** する
+
+recipe の実体と adopt 手順は `templates/runbooks/worktree-workflow.template.md`、実装例は本リポ (claude-rules-personal) の `justfile`。
 
 ### リリース artifact の有無
 
