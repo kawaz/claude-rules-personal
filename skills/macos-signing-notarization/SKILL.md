@@ -14,18 +14,21 @@ Gatekeeper 警告なしで配布するための手順集。canonical 実装は `
 
 ## AI が自分でどこまでやるか
 
-**Secrets 6 種のうち 4 種は AI が CLI で投入できる。** kawaz へ回すのは
-`APPLE_ID` と `APPLE_APP_SPECIFIC_PASSWORD` の 2 つだけ。
-Homebrew tap の `HOMEBREW_TAP_DEPLOY_KEY` は AI が全部できる
-(`homebrew-tap-deploy-key` skill)。
+**Secrets 6 種は AI がほぼ全部投入できる。** kawaz に回るのは、そのプロダクト用の
+App-Specific Password を**新規発行する**ときだけ (発行後は 1Password 経由で AI が受け取る)。
+Homebrew tap の `HOMEBREW_TAP_DEPLOY_KEY` も AI が全部できる。
 
 新規プロダクトに署名を入れるときの動き方:
 
-1. `setup-certificates.md` の「AI が先に済ませる」を実行 (4 種投入)
+1. `setup-certificates.md` の「AI が先に済ませる」1〜3 を実行
+   (identity / Team ID / 証明書 / Apple ID / App-Specific Password)
 2. `homebrew-tap-deploy-key` skill で deploy key を作る (承認を 1 回取る)
-3. 同 `setup-certificates.md` の「kawaz へ出す依頼文」をそのまま提示して残り 2 つを頼む
+3. App-Specific Password が未発行のときだけ、同 `setup-certificates.md` の
+   「kawaz へ出す依頼文」をそのまま提示する
 
-**「Secrets は人間の手作業」と丸ごと投げ返さない。** 分担は上記の表で確定している。
+**「Secrets は人間の手作業」と丸ごと投げ返さない。** 取得元は表で確定している。
+特に `APPLE_ID` は **1Password の「Apple Signing and Notarization」** にあり、
+iCloud のアカウントや証明書からは取れない (どちらも実踏で外した)。
 
 ## リソース (作業に応じて読む)
 
