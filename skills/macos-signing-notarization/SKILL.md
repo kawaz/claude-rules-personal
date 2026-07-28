@@ -12,11 +12,27 @@ Gatekeeper 警告なしで配布するための手順集。canonical 実装は `
 リリースフロー全体 (VERSION bump → main push → CI が tag/release を作る) は
 `release-flow` skill を参照。本 skill はその macOS 署名部分の詳細。
 
+## AI が自分でどこまでやるか
+
+**Secrets 6 種のうち 4 種は AI が CLI で投入できる。** kawaz へ回すのは
+`APPLE_ID` と `APPLE_APP_SPECIFIC_PASSWORD` の 2 つだけ。
+Homebrew tap の `HOMEBREW_TAP_DEPLOY_KEY` は AI が全部できる
+(`homebrew-tap-deploy-key` skill)。
+
+新規プロダクトに署名を入れるときの動き方:
+
+1. `setup-certificates.md` の「AI が先に済ませる」を実行 (4 種投入)
+2. `homebrew-tap-deploy-key` skill で deploy key を作る (承認を 1 回取る)
+3. 同 `setup-certificates.md` の「kawaz へ出す依頼文」をそのまま提示して残り 2 つを頼む
+
+**「Secrets は人間の手作業」と丸ごと投げ返さない。** 分担は上記の表で確定している。
+
 ## リソース (作業に応じて読む)
 
-- **`setup-certificates.md`** — 初回セットアップ。Apple Developer Program 登録、Developer ID /
-  Apple Development 証明書の取得、p12 エクスポート → base64 → GitHub Secrets 6 種の投入。
-  **プロダクト別に App-Specific Password を新規発行する方針**。署名 secrets が無くて CI が落ちた時もここ。
+- **`setup-certificates.md`** — 初回セットアップ。**実行者の分担表**、AI が実行する
+  コマンド列、kawaz へ出す依頼文のテンプレ。Apple Developer Program 登録、p12 エクスポート →
+  base64 → GitHub Secrets 6 種の投入。**プロダクト別に App-Specific Password を新規発行する方針**。
+  署名 secrets が無くて CI が落ちた時もここ。
 - **`ci-release-pipeline.md`** — release.yml の署名・notarize ステップ (keychain セットアップ →
   codesign bottom-up → notarytool submit --wait → stapler staple → keychain クリーンアップ always)。
   .app あり (staple 可) と bare binary のみ (zip notarize、staple 不可) の 2 形態。新設/移植時に読む。
