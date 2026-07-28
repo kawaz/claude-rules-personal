@@ -1,6 +1,6 @@
 ---
 title: "docs-structure skill の runbook 命名規則と実態の乖離"
-status: open
+status: discarded
 category: tech-memo
 created: 2026-06-18T13:31:45+09:00
 last_read:
@@ -8,9 +8,9 @@ open_entered: 2026-06-18T13:31:45+09:00
 wip_entered:
 blocked_entered:
 pending_entered:
-discarded_entered:
+discarded_entered: 2026-07-28T23:03:11+09:00
 resolved_entered:
-discard_reason:
+discard_reason: ["RN-Q1 裁定 (2026-07-28, kawaz) = c: 現状維持で乖離を許容 (「気にしない方向で」)。規約側修正も実態側リネームも行わない"]
 pending_reason:
 close_reason:
 blocked_by:
