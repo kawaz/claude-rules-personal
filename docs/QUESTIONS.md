@@ -20,4 +20,14 @@
 
 ## 裁定待ち
 
+### 👺RN-Q1: runbook 命名規則の乖離解消の方向 ([issue](issue/2026-06-18-runbook-naming-convention-vs-reality.md))
+
+実態: kawaz 全リポの runbook 18 件中 12 件が date-less (`<topic>.md`)、規約 (docs-structure skill) は日付必須のまま。
+
+- [ ] a: date-less を正式許容に規約側を修正 (推し。runbook は恒常参照文書で日付の情報価値が薄く、実態と整合)
+- [ ] b: 実態側を規約に合わせて全リネーム
+- [ ] c: 現状維持 (乖離を許容)
+
+a なら SKILL.md とテンプレ名の修正のみで即完了。
+
 ## 確認待ち
