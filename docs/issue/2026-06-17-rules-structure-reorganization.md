@@ -1,11 +1,11 @@
 ---
 title: "ルール群の構造を再編する"
-status: open
+status: wip
 category: design
 created: 2026-06-18T07:16:14+09:00
 last_read:
 open_entered: 2026-06-18T07:16:14+09:00
-wip_entered:
+wip_entered: 2026-07-28T23:10:06+09:00
 blocked_entered:
 pending_entered:
 discarded_entered:
@@ -150,3 +150,13 @@ setup.sh か CI に最小構成で 1 本入れる。
 壊さない。先に着手してよい。2 (2 層切り直し) は wikilink を触るので、
 4 の lint を入れてから着手すると事故を検出できる。3 (プロセス是正) は
 1-2 を実際にやってみて確定した手順を文章化するのが順当。
+
+## 進捗 (2026-07-28)
+
+- スコープ 1 (`for-all/rules/_index.md` 新設、7 フェーズ・全 24 rule 網羅、
+  設計フェーズは 2 層入れ子) とスコープ 3 (`rule-writing-guidelines.md`
+  に所属判断 + index 同時更新の節を追記) を commit `0872dede` で実装。
+- スコープ 4 (lint) は既に実装済みだったことを確認 (`just lint-rules`)。
+- 残スコープはスコープ 2 (同層内統合: design-priority × design-thinking、
+  点検系 2 本の統合検討) のみ。wikilink を触るため lint 稼働下で慎重に、
+  統合可否の設計判断は kawaz 相談が要る可能性あり。
