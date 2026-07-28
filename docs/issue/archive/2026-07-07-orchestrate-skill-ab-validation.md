@@ -1,6 +1,6 @@
 ---
 title: "orchestrate skill の効果を A/B で実測し、発火・命名・ゲート閾値を調整する"
-status: open
+status: discarded
 category: task
 created: 2026-07-07T12:00:00+09:00
 last_read:
@@ -8,11 +8,11 @@ open_entered: 2026-07-07T12:00:00+09:00
 wip_entered:
 blocked_entered:
 pending_entered:
-discarded_entered:
+discarded_entered: 2026-07-29T05:20:11+09:00
 resolved_entered:
-discard_reason:
+discard_reason: ["OA-Q1 裁定 (2026-07-29, kawaz) = c: A/B 検証は実施しない。orchestrate skill は現状維持で運用継続。空振り・過剰プロセスが目立った場合は個別に調整する"]
 pending_reason:
-close_reason:
+close_reason: ["discarded"]
 blocked_by:
 origin: X の /fable skill POST 由来ギャップ分析 (2026-07-07, claude.ai セッション)
 ---
