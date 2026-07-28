@@ -11,4 +11,3 @@ active な issue の一覧。close 済みは archive/ にあり、ここには�
 | 2026-07-03 | design | idea | [sanitize-work-identifiers-hook](./2026-07-03-sanitize-work-identifiers-hook.md) | 業務固有名詞サニタイズの機械判定 hook 化 (claude-sanitize-guard) 設計案 |
 | 2026-07-03 | design | idea | [fleet-audit-automation](./2026-07-03-fleet-audit-automation.md) | fleet-audit runbook の週次自動化 (schedule + subagent 構想) |
 | 2026-06-17 | design | open | [gh-issue-guard-plugin](./2026-06-17-gh-issue-guard-plugin.md) | kawaz/* リポでの `gh issue create` ガード hook |
-| 2026-05-21 | task | open | [commands-to-skills-migration](./2026-05-21-commands-to-skills-migration.md) | 既存 commands を skills に移行する |

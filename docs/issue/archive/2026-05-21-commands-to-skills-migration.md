@@ -1,6 +1,6 @@
 ---
 title: "既存 commands を skills に移行する"
-status: open
+status: resolved
 category: task
 created: 2026-05-28T08:50:04+09:00
 last_read:
@@ -9,10 +9,10 @@ wip_entered:
 blocked_entered:
 pending_entered:
 discarded_entered:
-resolved_entered:
+resolved_entered: 2026-07-28T23:50:48+09:00
 discard_reason:
 pending_reason:
-close_reason:
+close_reason: ["done: CM-Q1 裁定 (2026-07-28, kawaz) = a: prefix 付き呼び出し名 (/rules-personal:<slug>) への変化を許容して移行。残 8 command (decomposition.ja→decomposition-ja + itumono-* 7 本) を skills/ へ plugin skill 化し v0.2.12 で配布 (commit 096f5411)。decomposition-ja は context: fork / agent: general-purpose を frontmatter で維持。旧 commands/*.md は ~/.claude-personal/commands-migrated-backup/ に退避済み (動作確認後に kawaz 判断で削除可)。issue 記載の handoff.md / decomposition.md (非ja) は起票後に消滅済みで対象外"]
 blocked_by:
 origin:
 ---
