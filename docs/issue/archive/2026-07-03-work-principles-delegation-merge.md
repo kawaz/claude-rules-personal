@@ -1,6 +1,6 @@
 ---
 title: "work-principles.md と top-tier-model-delegation.md の委譲ロジック責務分裂を解消する"
-status: idea
+status: resolved
 category: design
 created: 2026-07-03T14:10:51+09:00
 last_read:
@@ -9,10 +9,10 @@ wip_entered:
 blocked_entered:
 pending_entered:
 discarded_entered:
-resolved_entered:
+resolved_entered: 2026-07-28T22:04:27+09:00
 discard_reason:
 pending_reason:
-close_reason:
+close_reason: ["done: issue 起票直後の c57ca5a921 (work-principles / top-tier-model-delegation 統合) と後続 3f6f783 (選定詳細を worker-fleet skill へ切り出し) により委譲ロジックの重複は解消済み。work-principles.md は tier 別強度の要約のみ保持、選定詳細は worker-fleet skill に一本化。実物確認済み (top-tier-model-delegation.md はリポに現存せず)"]
 blocked_by:
 origin: エコシステム横断監査 (2026-07-03)
 ---
