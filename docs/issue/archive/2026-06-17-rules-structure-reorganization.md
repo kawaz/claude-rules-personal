@@ -1,6 +1,6 @@
 ---
 title: "ルール群の構造を再編する"
-status: wip
+status: resolved
 category: design
 created: 2026-06-18T07:16:14+09:00
 last_read:
@@ -9,10 +9,10 @@ wip_entered: 2026-07-28T23:10:06+09:00
 blocked_entered:
 pending_entered:
 discarded_entered:
-resolved_entered:
+resolved_entered: 2026-07-28T23:42:57+09:00
 discard_reason:
 pending_reason:
-close_reason:
+close_reason: ["done:scope1_index_commit_0872dede","done:scope3_rule_writing_guidelines_commit_0872dede","done:scope4_lint_confirmed_existing","discarded:scope2_design_consolidation_RS-Q1_2026-07-28_kawaz_no_merge"]
 blocked_by:
 origin:
 ---
