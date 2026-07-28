@@ -85,8 +85,9 @@ lint-rules:
       ls -d skills/*/ 2>/dev/null | xargs -n1 basename
       grep -vE '^[[:space:]]*(#|$)' .lint-external-slugs 2>/dev/null
     } | sort -u > /tmp/lint-known-slugs.$$
+    # `grep -v '^:.*:$'` は POSIX 文字クラス ([[:space:]] 等の shell 例) の誤検知除外
     grep -rhoE '\[\[[^]]+\]\]' for-all/ for-me/ skills/ agents/ 2>/dev/null |
-        sed 's/^\[\[//; s/\]\]$//' | grep -v '^#' | sort -u > /tmp/lint-used-slugs.$$
+        sed 's/^\[\[//; s/\]\]$//' | grep -v '^#' | grep -v '^:.*:$' | sort -u > /tmp/lint-used-slugs.$$
     dead=$(comm -23 /tmp/lint-used-slugs.$$ /tmp/lint-known-slugs.$$)
     rm -f /tmp/lint-known-slugs.$$ /tmp/lint-used-slugs.$$
     while IFS= read -r slug; do
