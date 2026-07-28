@@ -1,6 +1,6 @@
 ---
 title: "メタ認知系ルールのモデル世代交代時再検証運用"
-status: idea
+status: discarded
 category: idea
 created: 2026-07-03T14:13:51+09:00
 last_read:
@@ -8,11 +8,11 @@ open_entered:
 wip_entered:
 blocked_entered:
 pending_entered:
-discarded_entered:
+discarded_entered: 2026-07-29T05:18:28+09:00
 resolved_entered:
-discard_reason:
+discard_reason: ["MR-Q1 裁定 (2026-07-29, kawaz) = b: 対応不要。対象ルール (sloppy-ai-patterns / synthesis-temptation-guard / default-convergence-guard) は症状駆動で実害がなく、世代交代のたびの棚卸しは過剰プロセス。空振りが目立ったルールは個別に削る運用"]
 pending_reason:
-close_reason:
+close_reason: ["discarded"]
 blocked_by:
 origin: エコシステム横断監査 (2026-07-03)
 ---
