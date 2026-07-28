@@ -20,4 +20,14 @@
 
 ## 裁定待ち
 
+### 👺NK-Q1: nandakke の go/no-go ([issue](issue/2026-07-03-ccmsg-nandakke-priority-review.md))
+
+issue の残り受け入れ条件はこれ 1 点 (ccmsg 側は DR 出荷経路で裁可済みと確認済み)。nandakke の現況: 2026-06-21 から停止、Pre-implementation、ROADMAP Phase 1 未着手、retirement 判定経路にも未登載。
+
+- [ ] a: 継続 (Phase 1 に着手する意思あり、時期は別途)
+- [ ] b: 判定保留のまま retirement 候補リストに登載 (推し。「ぼんやり全体把握」構想自体は常時ロード肥大ペインに刺さっており復活余地を残す価値があるが、現状は判定経路の外で宙に浮いているのが問題)
+- [ ] c: retirement (archive 実行)
+
+裁定で issue を close できます。
+
 ## 確認待ち
