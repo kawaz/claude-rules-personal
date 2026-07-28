@@ -20,19 +20,4 @@
 
 ## 裁定待ち
 
-### 👺RR-C1: `ssh-agent-router` の後継リポはどれか
-
-「cache-warden を案内して archive」との裁定だったが、実物を読むと役割が対応しない。
-
-- [ ] a: `authsock-warden` が後継 (私の推測)
-- [ ] b: `cache-warden` で正しい (私の読み違い)
-- [ ] c: 後継なしで archive する
-
-a を推す根拠: `ssh-agent-router` は「SSH agent から用途制限付きの複数ソケットを作る」、
-`authsock-warden` は「鍵の可視範囲とプロセス単位の署名可否を制御する」で役割が対応する。
-一方 `cache-warden` は「secret のキャッシュ (op CLI が遅い問題の解決)」で別物。
-runbook の canonical 例が `authsock-filter` → `authsock-warden` の引退なので、同系統の整理に見える。
-
-回答後に README へ後継を明記して `gh repo archive` を実行する。
-
 ## 確認待ち
