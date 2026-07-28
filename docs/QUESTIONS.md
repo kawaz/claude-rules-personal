@@ -20,4 +20,12 @@
 
 ## 裁定待ち
 
+### 👺RS-Q1: rules-structure 残スコープ 2 (design 系同層内統合) の要否 ([issue](issue/2026-06-17-rules-structure-reorganization.md))
+
+スコープ 1 (_index.md) / 3 (取り込みプロセス) / 4 (lint) は完了。残る 2 の統合検討の結論:
+
+- [ ] a: 統合しないで issue close (推し。4 本の責務は直交 — 優先軸 / 構造禁則 / コード手癖検出 / ルール片面検出 — で、レビューが指摘した「同じに見える」問題は _index の 2 層表示が解決済み。統合は多責務化の方向)
+- [ ] b: design-priority × design-thinking のみ統合 (参照張り替え 2 件、lint 稼働下で安全に可能)
+- [ ] c: 点検系 2 本も統合
+
 ## 確認待ち
