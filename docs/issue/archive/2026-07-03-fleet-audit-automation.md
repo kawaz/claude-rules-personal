@@ -1,6 +1,6 @@
 ---
 title: "fleet-audit runbook の週次自動化 (schedule + subagent 構想)"
-status: idea
+status: discarded
 category: design
 created: 2026-07-03T14:07:52+09:00
 last_read:
@@ -8,11 +8,11 @@ open_entered:
 wip_entered:
 blocked_entered:
 pending_entered:
-discarded_entered:
+discarded_entered: 2026-07-29T05:14:18+09:00
 resolved_entered:
-discard_reason:
+discard_reason: ["FA-Q1 裁定 (2026-07-29, kawaz) = b: 自動化せず手動運用継続。監査は手動頻度で足りており自動化の保守コストが上回る。runbook (docs/runbooks/fleet-audit.md) の手動運用が正のまま"]
 pending_reason:
-close_reason:
+close_reason: ["discarded"]
 blocked_by:
 origin: "エコシステム横断監査 (2026-07-03)"
 ---
