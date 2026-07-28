@@ -17,20 +17,23 @@ canonical: `kawaz/cache-warden` / `kawaz/authsock-warden` (.app あり)、`kawaz
     APPLE_CERTIFICATE_BASE64: ${{ secrets.APPLE_CERTIFICATE_BASE64 }}
     APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
   run: |
-    CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
-    KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+    CERTIFICATE_PATH="$RUNNER_TEMP/build_certificate.p12"
+    KEYCHAIN_PATH="$RUNNER_TEMP/app-signing.keychain-db"
     KEYCHAIN_PASSWORD=$(openssl rand -base64 32)
 
-    echo -n "$APPLE_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
+    echo -n "$APPLE_CERTIFICATE_BASE64" | base64 --decode -o "$CERTIFICATE_PATH"
 
-    security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-    security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
-    security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+    security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+    security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+    security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
 
-    security import $CERTIFICATE_PATH -P "$APPLE_CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
-    security list-keychain -d user -s $KEYCHAIN_PATH
-    security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+    security import "$CERTIFICATE_PATH" -P "$APPLE_CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+    security list-keychain -d user -s "$KEYCHAIN_PATH"
+    security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
 ```
+
+変数は quote する。**していないと `actionlint` (shellcheck SC2086) が落ちる**ので、
+CI に actionlint を入れているリポではそのまま貼れない。
 
 ## codesign のルール
 
@@ -66,12 +69,12 @@ LaunchAgent 常駐サービス等で TCC の Bundle ID 永続化が必要なプ�
   run: |
     xcrun notarytool store-credentials "notary-profile" \
       --apple-id "$APPLE_ID" --password "$APPLE_APP_SPECIFIC_PASSWORD" --team-id "$APPLE_TEAM_ID" \
-      --keychain $RUNNER_TEMP/app-signing.keychain-db
+      --keychain "$RUNNER_TEMP/app-signing.keychain-db"
 
     cd target/${{ matrix.target }}/release
     ditto -c -k --keepParent MyApp.app notarize.zip
     xcrun notarytool submit notarize.zip \
-      --keychain-profile "notary-profile" --keychain $RUNNER_TEMP/app-signing.keychain-db \
+      --keychain-profile "notary-profile" --keychain "$RUNNER_TEMP/app-signing.keychain-db" \
       --wait --timeout 10m
     xcrun stapler staple MyApp.app    # .app には ticket を埋め込める
     rm notarize.zip
@@ -101,12 +104,12 @@ LaunchAgent 常駐サービス等で TCC の Bundle ID 永続化が必要なプ�
   run: |
     xcrun notarytool store-credentials "notary-profile" \
       --apple-id "$APPLE_ID" --password "$APPLE_APP_SPECIFIC_PASSWORD" --team-id "$APPLE_TEAM_ID" \
-      --keychain $RUNNER_TEMP/app-signing.keychain-db
+      --keychain "$RUNNER_TEMP/app-signing.keychain-db"
 
     cd target/${{ matrix.target }}/release
     zip notarize.zip my-bin
     xcrun notarytool submit notarize.zip \
-      --keychain-profile "notary-profile" --keychain $RUNNER_TEMP/app-signing.keychain-db \
+      --keychain-profile "notary-profile" --keychain "$RUNNER_TEMP/app-signing.keychain-db" \
       --wait --timeout 10m
     rm notarize.zip       # staple なし (bare binary は ticket 埋め込み不可)
 ```
@@ -120,7 +123,7 @@ LaunchAgent 常駐サービス等で TCC の Bundle ID 永続化が必要なプ�
   if: always() && runner.os == 'macOS'
   run: |
     if [ -f "$RUNNER_TEMP/app-signing.keychain-db" ]; then
-      security delete-keychain $RUNNER_TEMP/app-signing.keychain-db
+      security delete-keychain "$RUNNER_TEMP/app-signing.keychain-db"
     fi
 ```
 
