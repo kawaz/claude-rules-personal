@@ -1,17 +1,17 @@
 ---
 title: "業務固有名詞サニタイズの機械判定 hook 化 (claude-sanitize-guard) 設計案"
-status: idea
+status: pending-sublimation
 category: design
 created: 2026-07-03T14:06:03+09:00
 last_read:
 open_entered:
 wip_entered:
 blocked_entered:
-pending_entered:
+pending_entered: 2026-07-29T05:19:24+09:00
 discarded_entered:
 resolved_entered:
 discard_reason:
-pending_reason:
+pending_reason: ["SH-Q1 裁定 (2026-07-29, kawaz) = c: 保留継続。warn-only の補助機構で緊急性なし。gh-issue-guard の運用実績 (false positive 傾向) を見てから同型構成で設計を再検討する"]
 close_reason:
 blocked_by:
 origin: "エコシステム横断監査 (2026-07-03)"
