@@ -1,6 +1,6 @@
 ---
 title: "ccmsg / nandakke の優先度再考 — エコシステム横断監査所見"
-status: idea
+status: resolved
 category: idea
 created: 2026-07-03T14:12:08+09:00
 last_read:
@@ -9,10 +9,10 @@ wip_entered:
 blocked_entered:
 pending_entered:
 discarded_entered:
-resolved_entered:
+resolved_entered: 2026-07-29T03:48:45+09:00
 discard_reason:
 pending_reason:
-close_reason:
+close_reason: ["done:ccmsg中央デーモン化rewriteはDR-0001全面書き直し+28DR出荷の経路で事実上裁可済み(issue本文で確認済み)","done:nandakkeのgo/no-goはNK-Q1裁定(2026-07-29,kawaz)=b:判定保留のままretirement候補に登載、後続issue『nandakkeを次回repo-retirement判定に登載する』を同日起票済み"]
 blocked_by:
 origin: エコシステム横断監査 (2026-07-03)
 ---
@@ -48,9 +48,6 @@ kawaz 製ツール群のうち ccmsg と nandakke の優先度を、監査所見
       `docs/journal/2026-07-03-dr0001-provenance-audit.md` で kawaz 本人が
       旧 DR-0001 を一次資料準拠で全面書き直しさせ、以降 28 DR 出荷という
       経路で事実上裁可済み)
-- [ ] nandakke の相対的な着手優先度 (go/no-go)。現況: claude-nandakke/main は
-      2026-06-21 で停止、README は Pre-implementation (per DR-0001,
-      §YAGNI)、docs/ROADMAP.md の Phase 1 未着手、docs/issue/ の各件も
-      未消化のまま。さらに `2026-07-03-repo-retirement-todo-list` の候補
-      リストに nandakke は含まれておらず archive/削除/継続の判定経路にも
-      乗っていない
+- [x] nandakke の相対的な着手優先度 (go/no-go)。NK-Q1 裁定 (2026-07-29,
+      kawaz) = b: 判定保留のまま retirement 候補に登載。後続 issue
+      『nandakke を次回 repo-retirement 判定に登載する』を同日起票済み
