@@ -91,7 +91,7 @@ opus-high / sonnet-high、意味論の穴探しが主目的の時だけ最上位
   fable は medium でも 4 戦全勝 (検証の徹底が特性差)
 - ベンチ数値は OpenAI 自己測定 + METR がゲーミング指摘あり — 数値より役割構図で選ぶ
 
-## model × effort 選択マトリクス (kawaz 裁定 2026-07-15、2026-08-11 実使用実績で 7 種へ整理)
+## model × effort 選択マトリクス (kawaz 裁定 2026-07-15、2026-08-11 実使用実績で整理)
 
 agent 名は `<model><effort>-worker[-用途]` の形式 (例: `sonnet5-worker-medium`)。
 表中はモデル+effort の略記 (例: `sonnet5-medium`) で書く。
@@ -101,11 +101,19 @@ agent 名は `<model><effort>-worker[-用途]` の形式 (例: `sonnet5-worker-m
 `<plugin>:<name>` が識別子になるため。本文・表中の言及は読みやすさ優先で
 prefix を省くが、実際に spawn する値には必ず付ける。
 
-**現存する agent は 7 種のみ**。かつて model×effort の全マトリクスを揃えていたが、
+**現存する agent は下表の 8 種**。かつて model×effort の全マトリクスを揃えていたが、
 複数プロジェクトの実使用実績アンケート (2026-08-11、3 セッション横断) で
-`fable5-low` / `fable5-xhigh` / `codex-terra` / `codex-luna` / `sonnet5-high` /
-`nitpick-reviewer` が揃って 0 回だったため削除した。役割は下表の 7 種に吸収される
+`fable5-low` / `fable5-xhigh` / `codex-terra` / `codex-luna` / `sonnet5-high` が
+揃って 0 回だったため削除した。役割は下表の agent に吸収される
 (例: 機械的定型作業は `codex-luna` でなく `sonnet5-low` が担う)。
+
+**`nitpick-reviewer` は削除対象から除外した**。model/effort は `fable5-high` と
+同じだが、実体は 198 行の独自指示文 (12 の絶対ルール・15 のレビュアーペルソナ・
+重要度評価基準・出力フォーマット) で、model/effort の組み合わせが同じというだけで
+`fable5-high` に吸収できるものではない。**「使用実績ゼロ」で削除判断する基準は
+model/effort の重複だけを見た指示書に対してのみ有効** — 独自の指示文を持つ
+agent は使用実績が無くても中身を見ずに削らない (2026-08-11、削除直後に
+kawaz の指摘で復元した教訓)。
 
 | 課題の性質 | 選択 |
 |---|---|
@@ -119,7 +127,8 @@ prefix を省くが、実際に spawn する値には必ず付ける。
 | 設計自由度が残る実装・探索的調査・指示が曖昧になりうる作業 | opus5-medium |
 | 検証設計・原因分析・機械確認系レビュー・worker 成果の検査 (差分照合・数値維持・網羅走査) | opus5-high |
 | 複雑な PR 作成・実務文書・長文脈整合が要る統合作業 | opus5 系 — codex より SWE-Bench Pro 級で優位 |
-| 本気レビュー・設計監査 (意味論の穴探し・粗探し双方を含む) | fable5-high / 別モデル系統の二次意見は codex-sol-reviewer |
+| 本気レビュー・設計監査 (意味論の穴探しが主目的) | fable5-high / 別モデル系統の二次意見は codex-sol-reviewer |
+| 粗探し特化のレビュー (辛口ペルソナ、改善余地の網羅) | nitpick-reviewer (fable5-high ベース、独自指示文) |
 | 指揮・タスク分解・統合 (メイン) | fable5 (メイン、通常 medium / 大型タスクは high) |
 
 - 判定の第一分岐は「**何をやればいいか分かっているか**」— 分かっていない (要件・設計から
