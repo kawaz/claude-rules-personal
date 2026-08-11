@@ -7,8 +7,8 @@ description: codex に大入力タスクを `claude -p --bare` で投げる手�
 
 ## いつ使うか
 
-codex 系の委譲はまず agent preset (`codex-sol-reviewer` / `codex-sol-worker` /
-`codex-terra-worker` / `codex-luna-worker`) を検討する。preset の実効 context は
+codex 系の委譲はまず agent preset (`codex-sol-worker` / `codex-sol-reviewer`) を
+検討する。preset の実効 context は
 ~120k (200k − subagent ベースライン注入 ~67-77k)。**入力がそれを超える時だけ**
 本経路に切り替える。`--bare` の開始時消費は ~1k (2026-07-15 実測 989 tokens) で、
 実効 ~199k がプロンプトに使える。
