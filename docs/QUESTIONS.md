@@ -75,4 +75,26 @@ dotfiles で **他セッションが現在編集中** (未コミット) のた�
 - [ ] b: claude-rules-personal の管理下 (plugin の agent 定義) に移してから削除
 - [ ] c: 残す (setup.sh 側の legacy 判定を見直す)
 
+### ER-Q6: `account-isolation.md` が for-all 層にあり、personal 面にも組織名を配っている
+
+emrd リポの `for-all/rules/account-isolation.md` (for-all 層の唯一のファイル) は setup.sh により
+**personal 面にも配布**され、実際に `~/.claude-personal/rules/for-all-from-*/account-isolation.md`
+として毎セッション読み込まれている。このファイルには組織名が **28 箇所**出る。
+
+kawaz の指示「emrd 以外の面で組織名が出なくなれば十分」の基準に照らすと、リポ名を emrd に
+変えただけでは**この経路が残る** (= 今回のリネームの目的が半分しか達成されていない)。
+
+**当方の推し = b (分割)**。理由: for-all は「全面に配る」層なので、そこに片面固有の固有名詞を
+置くのは層の責務違反。personal 面が実際に必要とするのは「業務面リポを触るときは `cd` +
+`direnv exec` で認証が自動切替される」「push / signing は cross-env-ssh-signing skill に従う」
+というポインタだけで、組織名・業務リポ名・連携ベンダー名の内訳は不要。
+懸念は分割後に越境手順の実効性が落ちないかで、そこは分割案を書いてから確認したい。
+
+- [ ] a: ファイルごと for-me に移す (emrd 面だけに配る)。personal 面は越境手順を失うので
+      cross-env-ssh-signing skill 側で代替できるか要確認
+- [ ] b: 分割する — 組織名を含む詳細 (認証境界の内訳・リポ一覧・歴史) を for-me へ、
+      personal 面に要る最小限のポインタだけ for-all に残す **(推し)**
+- [ ] c: 現状維持 (認証境界の説明上どうしても必要な記述であり、面をまたぐ手順書として
+      for-all にあるのが正しい)
+
 ## 確認待ち
