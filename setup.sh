@@ -3,8 +3,8 @@
 #
 # Reads repos_mapping.json (sibling to this script) and lays out
 # for-me/for-all/for-others as directory symlinks under $TARGET/rules and
-# $TARGET/agents. Then installs plugins listed in any for-all/plugins.json
-# across repos.
+# $TARGET/agents. Then installs plugins: for-all/plugins.json from every repo,
+# plus for-me/plugins.json from the repo that owns $TARGET (self-only).
 
 set -euo pipefail
 
@@ -165,12 +165,21 @@ for i in "${!NAMES[@]}"; do
       ln -sfn "$repo_root/for-me/CLAUDE.md" "$TARGET/CLAUDE.md"
       echo "  linked: CLAUDE.md -> $repo_root/for-me/CLAUDE.md"
     fi
+    # self-only plugins: declared here so an overlay's plugin does not get
+    # installed into other environments. A plugin's skill/agent descriptions
+    # are loaded into every session's context, so installing a work-face
+    # plugin into the personal environment leaks that face's vocabulary.
+    if [ -f "$repo_root/for-me/plugins.json" ]; then
+      PLUGIN_JSONS+=("$repo_root/for-me/plugins.json")
+    fi
   else
     link_dir "$DEST" "for-others-from-$name" "$repo_root/for-others/rules"
     link_skills "$name" "$repo_root/for-others/skills"
   fi
 
-  [ -f "$repo_root/for-all/plugins.json" ] && PLUGIN_JSONS+=("$repo_root/for-all/plugins.json")
+  if [ -f "$repo_root/for-all/plugins.json" ]; then
+    PLUGIN_JSONS+=("$repo_root/for-all/plugins.json")
+  fi
 done
 
 # Plugin install (idempotent)
