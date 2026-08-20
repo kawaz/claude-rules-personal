@@ -21,17 +21,3 @@
 ## 裁定待ち
 
 ## 確認待ち
-
-### ER-C1: claude-rules-personal の push
-
-未 push の commit が溜まっている (リネーム本体 + 派生で見つけた不具合修正 + 運用)。
-public リポなので push 判断を仰ぐ。`skills/` と `agents/` を変更しているため
-`check-version-bumped` gate に掛かるので、実行は `just bump-version` → `just push`。
-
-**push まで `rules-personal:sonnet5-worker-xhigh` と
-`rules-personal:codex-luna-reviewer-xhigh` が使えません** (手置きから plugin 管理下へ
-移したため、marketplace 経由で配布されるまで空白になる)。
-
-- [ ] a: push してよい (bump は patch)
-- [ ] b: push してよい (bump 種別を指定: minor / major)
-- [ ] c: まだ待つ
