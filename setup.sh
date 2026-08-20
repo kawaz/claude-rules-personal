@@ -170,7 +170,7 @@ for i in "${!NAMES[@]}"; do
     # are loaded into every session's context, so installing a work-face
     # plugin into the personal environment leaks that face's vocabulary.
     if [ -f "$repo_root/for-me/plugins.json" ]; then
-      PLUGIN_JSONS+=("$repo_root/for-me/plugins.json")
+      PLUGIN_JSONS+=("$repo_root"$'\t'"$repo_root/for-me/plugins.json")
     fi
   else
     link_dir "$DEST" "for-others-from-$name" "$repo_root/for-others/rules"
@@ -178,7 +178,7 @@ for i in "${!NAMES[@]}"; do
   fi
 
   if [ -f "$repo_root/for-all/plugins.json" ]; then
-    PLUGIN_JSONS+=("$repo_root/for-all/plugins.json")
+    PLUGIN_JSONS+=("$repo_root"$'\t'"$repo_root/for-all/plugins.json")
   fi
 done
 
@@ -187,29 +187,63 @@ if [ "${#PLUGIN_JSONS[@]}" -gt 0 ]; then
   echo
   echo "=== Plugin install ==="
 
-  declare -a MARKETPLACES=()
   declare -a INSTALLS=()
-
-  for pj in "${PLUGIN_JSONS[@]}"; do
-    while IFS= read -r mp; do
-      [ -n "$mp" ] && MARKETPLACES+=("$mp")
-    done < <(jq -r '.plugins[]?.marketplace // empty' "$pj")
-    while IFS= read -r pl; do
-      [ -n "$pl" ] && INSTALLS+=("$pl")
-    done < <(jq -r '.plugins[]?.plugin // empty' "$pj")
-  done
 
   # Plugin state lives under $CLAUDE_CONFIG_DIR, so every `claude` call here must
   # target $TARGET explicitly. Without it, `--home <other>` would read and write
   # the *current* environment's plugins and silently report "already installed"
   # for plugins the target environment does not have.
+  #
+  # A private marketplace is cloned over SSH (the `owner/repo` shorthand defaults
+  # to SSH), and which ssh-agent answers is decided by ~/.ssh/config's `Match exec`
+  # on the cwd, plus by what that face's .envrc exports. So a marketplace declared
+  # in the *self* repo's for-me/plugins.json is added from that repo's directory:
+  #
+  #   (cd "$repo_root" && CLAUDE_CONFIG_DIR="$TARGET" direnv exec . claude ...)
+  #
+  # CLAUDE_CONFIG_DIR is set *before* direnv exec on purpose: the face's .envrc
+  # exports its own value and should win. It is $TARGET's own face here, so the two
+  # agree; the explicit value only covers a repo that has no .envrc.
+  #
+  # for-all marketplaces are not run this way: they are shared across faces, so the
+  # declaring repo is not the target's face and letting its .envrc win would
+  # redirect the install to another environment.
+  add_marketplace() {
+    local mp=$1 repo_root=$2
+    if [ -n "$repo_root" ]; then
+      ( cd "$repo_root" && CLAUDE_CONFIG_DIR="$TARGET" direnv exec . \
+          claude plugin marketplace add "$mp" ) 2>&1 |
+        grep -E '✔|✗|already|Adding' || true
+    else
+      CLAUDE_CONFIG_DIR="$TARGET" claude plugin marketplace add "$mp" 2>&1 |
+        grep -E '✔|✗|already|Adding' || true
+    fi
+  }
 
-  # dedup marketplaces
-  if [ "${#MARKETPLACES[@]}" -gt 0 ]; then
-    for mp in $(printf "%s\n" "${MARKETPLACES[@]}" | sort -u); do
-      CLAUDE_CONFIG_DIR="$TARGET" claude plugin marketplace add "$mp" 2>&1 | grep -E '✔|✗|already|Adding' || true
-    done
-  fi
+  ADDED_MARKETPLACES=""
+  for entry in "${PLUGIN_JSONS[@]}"; do
+    pj_root="${entry%%$'\t'*}"
+    pj="${entry#*$'\t'}"
+    # only the self repo's for-me layer gets the repo context (see add_marketplace)
+    case "$pj" in
+      */for-me/plugins.json) mp_ctx="$pj_root" ;;
+      *)                     mp_ctx="" ;;
+    esac
+
+    while IFS= read -r mp; do
+      [ -n "$mp" ] || continue
+      # dedup across repos (same marketplace declared in more than one plugins.json)
+      case "$ADDED_MARKETPLACES" in
+        *"|$mp|"*) continue ;;
+      esac
+      ADDED_MARKETPLACES="$ADDED_MARKETPLACES|$mp|"
+      add_marketplace "$mp" "$mp_ctx"
+    done < <(jq -r '.plugins[]?.marketplace // empty' "$pj")
+
+    while IFS= read -r pl; do
+      [ -n "$pl" ] && INSTALLS+=("$pl")
+    done < <(jq -r '.plugins[]?.plugin // empty' "$pj")
+  done
 
   # install plugins (skip if already installed)
   INSTALLED=$(CLAUDE_CONFIG_DIR="$TARGET" claude plugin list 2>/dev/null | awk '/^  ❯ /{print $2}' || true)
