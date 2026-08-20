@@ -104,9 +104,47 @@ worktree 内の commit は jj 側に自動 import され bookmark として見�
 加えて、hook で `jj workspace add` した場合に「自動削除されない」性質がどう効くか
 (= 呼び出し側が `git worktree remove` 相当を試みると jj workspace が壊れないか) も確認が要る。
 
+## 結論 (2026-08-20)
+
+### jj workspace を返す案は成立しない (決定的)
+
+hook を実装して headless (`claude -p`) から実起動した結果:
+
+```
+作成した wt-agent-* ディレクトリには .git ファイルが存在しないため
+git identity を検証できず、Refusing to use ... as an isolation worktree で拒否された
+```
+
+`isolation: "worktree"` / `EnterWorktree` は **返されたディレクトリが git worktree であること
+(= `.git` を持つこと) を検証する**。jj workspace は `.jj` だけで `.git` を持たないため、
+この時点で弾かれる。**当初の動機だった「hook 経由で worktree 内でも jj を使う」は実現不能**。
+
+### 確定した入出力契約
+
+`claude-plugin-reference` の hooks.md §6.2 に還元済み (v0.2.31)。要点:
+
+- stdin の `name` field に Claude Code が決めた worktree 名が来る。呼び出し側は事前に知りえないので、
+  hook が配置先を決める情報源はこれだけ
+- command 型の出力は **JSON でラップせず生のパスを echo**。`hookSpecificOutput` を返すと
+  その JSON 文字列がパスとして解釈されて失敗する
+- **hook が先にディレクトリを作ってから** echo する
+- パスを返さず exit 0 すると既定動作にフォールバックせず **worktree 作成自体がエラー**
+- **失敗しても副作用は巻き戻らない** (作りかけが孤児として残る) ので hook は冪等に書く必要がある
+
+### 残る選択肢と当リポの判断待ち
+
+hook 案が成立するのは「hook 内で `git worktree add` する」形だけ。この場合に得られるのは
+**配置先の規約準拠のみ**で、worktree 内は git のみで作業する前提は変わらない。
+
+判断が要るのは「配置先の規約準拠だけのために hook を持つ価値があるか」。
+現状の既定 (`.claude/worktrees/` 配下) は gitignore 済みで親リポを汚さず、agent 用の
+一時的な worktree なので、**恒久リポの配置規約を適用する必要性は薄い**というのが当リポ側の
+見立て (= 実装しない方に傾いている)。hook を持てば「失敗しても副作用が残る」性質を
+自分で冪等に面倒見る必要が生じる分、維持コストも増える。
+
 ## 受け入れ条件
 
-- [ ] WorktreeCreate hook の stdin 契約を実機で確認する
+- [x] WorktreeCreate hook の stdin 契約を実機で確認する
 - [ ] WorktreeRemove の後始末 semantics を実機で確認する
 - [ ] 上記を踏まえて、hook 実装の採否と方針を決める (実装するなら本リポの hooks/ に置く)
-- [ ] 確認した契約は claude-plugin-reference 側へ還元する (現在 TODO のため)
+- [x] 確認した契約は claude-plugin-reference 側へ還元する (現在 TODO のため)
