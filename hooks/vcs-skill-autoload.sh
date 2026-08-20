@@ -39,10 +39,14 @@ if [ -z "$repo_root" ]; then
   repo_root=$cwd
 fi
 
-# jj 管理か git 専用かで案内先が変わる。jj workspace は `.jj` が file の
-# ことがある (secondary workspace) ので -e で判定する。
-if [ -e "$repo_root/.jj" ]; then
-  skills="rules-personal:jj-workflow (workspace / bookmark / PR / push 手順), rules-personal:jj-tips (コミット操作・組み替え・復旧)"
+# 構成で案内先が変わる。
+#   colocate (新標準): repo_root に .git と .jj が両方ディレクトリ
+#   bare + jj workspace (旧): .jj が存在 (secondary workspace では file のことがある)
+#   git 専用: それ以外
+if [ -d "$repo_root/.git" ] && [ -d "$repo_root/.jj" ]; then
+  skills="rules-personal:jj-colocate-workflow (colocate 新標準の手順), rules-personal:jj-tips (コミット操作・組み替え・復旧)"
+elif [ -e "$repo_root/.jj" ]; then
+  skills="rules-personal:jj-workflow (bare + jj workspace 旧方式の手順), rules-personal:jj-tips (コミット操作・組み替え・復旧)"
 else
   skills="rules-personal:git-worktree-workflow (worktree / PR 作業手順)"
 fi

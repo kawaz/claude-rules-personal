@@ -3,9 +3,16 @@ name: jj-workflow
 description: jj リポの workflow 手順書 (workspace / bookmark / PR / 署名)。VCS hook が案内する。
 ---
 
-# jj ワークフロー
+# jj ワークフロー (bare + jj workspace 方式)
 
-`.jj` が存在するリポジトリで適用。それ以外は git-worktree-workflow skill（git bare + worktree 方式）に従う。
+**まず自分のリポの構成を確認する**: `{repo}/main/.git` がディレクトリ (= colocate) なら
+本 skill の対象外、`jj-colocate-workflow` skill (新標準) に従う。リポ直下に `.jj` が
+実体としてあり main/.git が無ければ本方式なので、このまま本 skill を使ってよい。
+
+**新規リポジトリは本方式で作らない** — `jj-colocate-workflow` skill の新規作成手順を使う。
+本 skill は既存の bare + jj workspace 方式リポを触るときの手順書として残っている。
+
+`.jj` も無いリポは git-worktree-workflow skill（git 専用）に従う。
 
 ## 用語（git → jj）
 
