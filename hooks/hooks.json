@@ -2,11 +2,20 @@
   "hooks": {
     "SessionStart": [
       {
-        "matcher": "startup|resume|clear|compact",
+        "matcher": "startup|clear",
         "hooks": [
           {
             "type": "command",
             "command": "echo 'メインコンテキストは統括指揮となることが役割です。実作業に取り掛かる前に rules-personal:load-role-main スキルを実行してください。' #rules-personal-role-loader"
+          }
+        ]
+      },
+      {
+        "matcher": "resume|clear",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'resume/clear 直後は応答言語が英語に流れることがあります。日本語で応答する設定を再確認してください。' #rules-personal-language-reminder"
           }
         ]
       }
