@@ -3,7 +3,7 @@ title: pre-clear の「継続作業指示」が、AI の自己判断タスクを
 status: open
 category: bug
 created: 2026-07-28T23:05:22+09:00
-last_read:
+last_read: 2026-08-20T13:08:56+09:00
 open_entered: 2026-07-28T23:05:22+09:00
 wip_entered:
 blocked_entered:
