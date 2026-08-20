@@ -24,8 +24,11 @@ kawaz の Claude Code 用ルール / スキルの **central リポジトリ**。
 
 - `for-all/rules/` — 全環境向けルール (全 `~/.claude*/rules/` に注入)
 - `for-all/skills/<slug>/` — 全環境向けスキル
-- `for-all/plugins.json` — Claude Code plugin の宣言 (setup.sh が install)
+- `for-all/plugins.json` — 全環境に入れる Claude Code plugin の宣言 (setup.sh が install)
 - `for-me/rules/`, `for-me/skills/<slug>/` — その面の専用環境にのみ注入
+- `for-me/plugins.json` — その面の専用環境にのみ install する plugin の宣言。
+  plugin の skill / agent description は全セッションの context に載るので、
+  面固有の plugin はこちらに置く (for-all に置くと他の面にも語彙が漏れる)
 - `for-others/rules/` — 他環境から参照される情報 (固有名詞リスト等のサニタイズ規定)
 
 `for-me` の "me" は「個人 vs 他者」ではなく、kawaz が持つ複数の面
@@ -50,7 +53,8 @@ setup.sh は `repos_mapping.json` の全 overlay を読み:
 
 - `for-*/rules/` を `$TARGET/rules/` 配下にディレクトリ symlink
 - `for-*/skills/<slug>/` を `$TARGET/skills/<repo>-<slug>` に per-skill symlink
-- `for-all/plugins.json` の plugin を `claude plugin install`
+- `for-all/plugins.json` の plugin を `claude plugin install` (加えて、`$TARGET` を
+  所有するリポの `for-me/plugins.json` があればそれも install)
 - 移動・削除された symlink の残骸 (dangling) を掃除
 
 詳細は `./setup.sh --help`。
