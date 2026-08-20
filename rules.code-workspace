@@ -5,16 +5,16 @@
 			"path": "."
 		},
 		{
-			"name": "claude-rules-syun@main",
-			"path": "../../claude-rules-syun/main"
+			"name": "claude-rules-emrd@main",
+			"path": "../../../kawaz123/claude-rules-emrd/main"
 		},
 		{
 			"name": "claude-rules-zunsystem@main",
 			"path": "../../claude-rules-zunsystem/main"
 		},
 		{
-			"name": "claude-rules-kawaz123@main",
-			"path": "../../../kawaz123/claude-rules-kawaz123/main"
+			"name": "claude-rules-syun@main",
+			"path": "../../claude-rules-syun/main"
 		}
 	]
 }
