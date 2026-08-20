@@ -127,11 +127,17 @@ loaded_by:
 kawaz が事前に把握でき、`[AI 自律]` 項目をこの時点で否認できるよう。
 
 その上で、**`$HYOUI_SESSION_ID` が設定されていれば /clear まで自分で実行する**
-(kawaz r119 2026-08-15 で実機確認済みの経路):
+(kawaz r119 2026-08-15 で実機確認済みの経路)。**§継続作業指示の有無で打つ内容を変える**:
 
 ```bash
+# 継続作業指示が「無い」場合 (= ここで区切って終わる)
 hyoui input "$HYOUI_SESSION_ID" text:/clear key:Enter
+
+# 継続作業指示が「ある」場合 (= clear 後に後継セッションが続きをやる)
+hyoui input "$HYOUI_SESSION_ID" 'text:/clear pre-clear出力をロードして継続指示に従ってください' key:Enter
 ```
+
+メッセージ付きの方は引数に空白を含むので、`text:...` 全体を quote する。
 
 - **順序が本質**: 状態ファイル書き込み → latest.md 更新 → 完了報告の本文 → 最後に
   hyoui input。注入された `/clear` はプロンプト行に乗り、**現ターン終了直後に実行**
