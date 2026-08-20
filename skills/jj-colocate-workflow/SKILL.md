@@ -59,12 +59,15 @@ main@origin が untracked (jj 自身が hint を出す)。track するとロー�
 
 旧方式 (bare + jj workspace) のリポは**削除して clone し直す** (in-place 変換はしない)。
 
-1. [ ] 全 workspace で未 push の変更・bookmark が無いか確認
+1. [ ] **remote (origin url) があることを確認** — `git --git-dir={repo}/.git config remote.origin.url`。
+   無いローカル専用リポは clone し直せないので本手順の対象外 (実測: 2026-08-21 の一括移行で
+   url 空のまま退避まで進み、手動復元が要った)
+2. [ ] 全 workspace で未 push の変更・bookmark が無いか確認
    (`jj log -r 'remote_bookmarks()..'` が空、`jj status` が clean)
-2. [ ] 未 push があれば push するか退避してから進む
-3. [ ] リポディレクトリごと削除
-4. [ ] 上の「既存リポジトリの clone」手順で作り直す (track main を忘れない)
-5. [ ] 動作確認: repo 直下で `git status` と `jj st` が**双方エラーで止まる**こと、
+3. [ ] 未 push があれば push するか退避してから進む
+4. [ ] リポディレクトリごと `<repo>.old-bare-<date>` へ mv 退避 (削除しない。削除は kawaz 判断)
+5. [ ] 上の「既存リポジトリの clone」手順で作り直す (track main を忘れない)
+6. [ ] 動作確認: repo 直下で `git status` と `jj st` が**双方エラーで止まる**こと、
    main/ 内で双方動くこと
 
 ## 作業場所の使い分け (最重要)
