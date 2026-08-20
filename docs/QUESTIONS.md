@@ -78,23 +78,34 @@ dotfiles で **他セッションが現在編集中** (未コミット) のた�
 ### ER-Q6: `account-isolation.md` が for-all 層にあり、personal 面にも組織名を配っている
 
 emrd リポの `for-all/rules/account-isolation.md` (for-all 層の唯一のファイル) は setup.sh により
-**personal 面にも配布**され、実際に `~/.claude-personal/rules/for-all-from-*/account-isolation.md`
-として毎セッション読み込まれている。このファイルには組織名が **28 箇所**出る。
+**personal 面にも配布**され、`~/.claude-personal/rules/for-all-from-*/account-isolation.md` として
+毎セッション読み込まれている。組織名の出現は **28 箇所**。
 
-kawaz の指示「emrd 以外の面で組織名が出なくなれば十分」の基準に照らすと、リポ名を emrd に
-変えただけでは**この経路が残る** (= 今回のリネームの目的が半分しか達成されていない)。
+kawaz の指示「emrd 以外の面で組織名が出なくなれば十分」に照らすと、リポ名を emrd に変えただけでは
+**この経路が残る** (= 今回のリネームの目的が半分しか達成されていない)。
 
-**当方の推し = b (分割)**。理由: for-all は「全面に配る」層なので、そこに片面固有の固有名詞を
-置くのは層の責務違反。personal 面が実際に必要とするのは「業務面リポを触るときは `cd` +
-`direnv exec` で認証が自動切替される」「push / signing は cross-env-ssh-signing skill に従う」
-というポインタだけで、組織名・業務リポ名・連携ベンダー名の内訳は不要。
-懸念は分割後に越境手順の実効性が落ちないかで、そこは分割案を書いてから確認したい。
+**当方の推し = a (丸ごと for-me へ移動)**。検証して b (分割) から乗り換えた:
 
-- [ ] a: ファイルごと for-me に移す (emrd 面だけに配る)。personal 面は越境手順を失うので
-      cross-env-ssh-signing skill 側で代替できるか要確認
-- [ ] b: 分割する — 組織名を含む詳細 (認証境界の内訳・リポ一覧・歴史) を for-me へ、
-      personal 面に要る最小限のポインタだけ for-all に残す **(推し)**
-- [ ] c: 現状維持 (認証境界の説明上どうしても必要な記述であり、面をまたぐ手順書として
-      for-all にあるのが正しい)
+1. 当該ファイルは冒頭で「前提は `[[claude-config-dir-isolation]]` を参照。本ファイルは
+   **固有の差分だけ**を扱う」と自己申告している。差分専用ファイルは構造的に for-me の所属
+2. personal 面が越境時に必要とする知識は、既に personal リポ側で完結している —
+   `for-all/rules/claude-config-dir-isolation.md` (概念・禁則・越境の基本形) と
+   `skills/cross-env-ssh-signing` (経路 A / B の切替、signing 失敗時の案 1 / 案 2)。
+   いずれも overlay 名を含まない汎用形で書かれている
+3. 面固有の実値 (ssh agent sock / GH_CONFIG_DIR) は**対象リポの `.envrc` が direnv 経由で
+   供給する**ので、`(cd <repo> && direnv exec . <cmd>)` で足りる。値を文書で知る必要がない
+   (実証: 本セッション (personal 面) から emrd リポへの commit をこの形で実施し、
+   認証切替は自動で成立した)
+
+**a を採る場合に必要な追従** (personal リポ側、当方が実施):
+`skills/cross-env-ssh-signing/SKILL.md` 末尾の「各環境固有の越境手順は当該 overlay の
+`for-all/rules/` を参照する」は for-all 配布を前提にした導線なので、
+「実値は対象リポの `.envrc` が供給するので `(cd <repo> && direnv exec . <cmd>)` で足りる」
+に書き換える。これをやらないと personal 面が読めない場所を指す dead pointer になる。
+
+- [ ] a: ファイルごと for-me に移す + 上記 skill の導線を書き換える **(推し)**
+- [ ] b: 分割する — 組織名を含む詳細を for-me へ、personal 面に要る最小限のポインタだけ
+      for-all に残す (ただし上記 2 のとおり、残すべき内容が実質見当たらない)
+- [ ] c: 現状維持 (面をまたぐ手順書として for-all にあるのが正しい、という立場)
 
 ## 確認待ち
