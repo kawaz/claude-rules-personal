@@ -20,36 +20,6 @@
 
 ## 裁定待ち
 
-### ER-Q1: `~/.ssh/config` が 24 時間後に消える sock を指したまま (要対応)
-
-kawaz 側で warden 設定の kawaz123 化と `agent-emerada.sock` の 24 時間後削除が実施済み。
-実機確認したところ **`~/.ssh/config` の追従が漏れている**:
-
-```
-# 現状 (~/.ssh/config 6-9 行目)
-Match exec "pwd | grep -qE 'github.com/(emeradaco|kawaz123)' || git remote get-url origin ..."
-  IdentityAgent ~/.ssh/agent-emerada.sock     # ← 24 時間後に消える symlink
-  ControlPath ~/.ssh/mux-emerada-%C
-```
-
-- `agent-emerada.sock` は現在 `agent-kawaz123.sock.aw` への **互換 symlink** (2026-08-20 13:33 作成)
-- `agent-kawaz123.sock` という実体を指す symlink が既に存在する
-- `ssh -G git@github.com` を業務リポの cwd で実行すると `identityagent .../agent-emerada.sock`
-  が解決される = **削除された瞬間に業務リポの ssh 認証が壊れる**
-
-修正内容 (当方が適用しようとしたが auto モードの classifier にブロックされた):
-
-```
-  IdentityAgent ~/.ssh/agent-kawaz123.sock
-  ControlPath ~/.ssh/mux-kawaz123-%C
-```
-
-`~/.ssh/config.bak-emrd-rename-<timestamp>` にバックアップは取得済み。
-
-- [ ] a: 上記を kawaz が適用する
-- [ ] b: 当方に適用させる (Bash permission を許可、または一時的に承認)
-- [ ] c: 別の名前にする (`agent-emrd.sock` 等) — その場合 warden 設定側も揃える必要あり
-
 ### ER-Q1b: 残りの `emerada` 系 (急がない)
 
 - `~/.config/gh-emerada` (GH_CONFIG_DIR。業務リポの `.envrc` が export)
@@ -61,23 +31,6 @@ Match exec "pwd | grep -qE 'github.com/(emeradaco|kawaz123)' || git remote get-u
 - [ ] a: kawaz123 に揃える (warden・ssh と同じ方針)
 - [ ] b: emrd に揃える
 - [ ] c: 据え置き
-
-### ER-Q5: 手置き agent 2 件が setup.sh をブロックしている
-
-`~/.claude-personal/agents/` に regular file で置かれた 2 件のせいで `setup.sh` が
-「legacy *.md files exist」で停止し、**overlay リネーム後の symlink 張り替え
-(`for-*-from-emeradaco` → `for-*-from-emrd`) が実行できない**。
-
-対象: `sonnet5-worker-xhigh.md` / `codex-luna-reviewer-xhigh.md`
-(いずれも description に「kawaz 明示指示 (2026-08-16, kuu 値カプセル設計のレビュー) で
-臨時作成。常用しない」とある)
-
-なお現状の symlink は互換 symlink (`claude-rules-emeradaco` → `claude-rules-emrd`) 経由で
-解決できているため、**今すぐ壊れてはいない**。setup.sh を回すまで旧名のまま残るだけ。
-
-- [ ] a: 2 件とも削除してよい (臨時作成・常用しない方針のため)
-- [ ] b: claude-rules-personal の管理下 (plugin の agent 定義) に移してから削除
-- [ ] c: 残す (setup.sh 側の legacy 判定を見直す)
 
 ### ER-Q6: `account-isolation.md` が for-all 層にあり、personal 面にも組織名を配っている
 
