@@ -64,8 +64,13 @@ plugin の skill / agent description は**全セッションの context に常�
 引用しているのに、後者の改訂に追従できていなかった。**実測を持つ側を正**とし、
 もう一方は形の提示と参照に留めた。
 
-## 残課題
+## サニタイズ規約の適用範囲 (作業中に誤解していた点)
 
-`for-all/rules/account-isolation.md` は業務面 overlay の for-all 層にあるため
-**personal 面にも配布され、組織名が個人面の context に載り続ける**。リポ名を変えても
-この経路は残るので、for-me への移動が要る (裁定待ち)。
+業務面 overlay の `for-all/rules/` にあるファイルは personal 面にも配布されるため、
+「個人面の context に組織名が載り続けるのは今回の目的に反するのでは」と一度提起したが、
+**規約の適用対象は public な成果物**であり、private リポの内容や local の config dir に
+配られるルールは対象外 (kawaz 明示)。
+
+今回リポ名のリネームが必要だったのは、**public な central リポ (README /
+repos_mapping.json / for-all rules) がその名前を参照せざるを得なかった**から。
+overlay リポ内部に組織名が残ること自体は問題にならない。
