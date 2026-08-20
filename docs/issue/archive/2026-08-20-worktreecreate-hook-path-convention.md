@@ -146,7 +146,8 @@ git identity を検証できず、Refusing to use ... as an isolation worktree �
 - **配布範囲**: plugin として全リポ一律配布。リポ個別設置は配置が不揃いになるため不採用。
   「hook のバグ = 全リポ影響」は dogfood として受容する
 - **掃除**: 自動化しない。`WorktreeRemove` hook は `ExitWorktree` 経路で発火しないことが
-  実測済みのため。repo 直下に並ぶので放置に気づきやすく、prefix で消してよいものが分かる
+  実測済みのため。repo 直下に並ぶので放置に気づきやすく、prefix で消してよいものが分かる。
+  SessionStart での sweep 等も**現時点では作らない** (kawaz 裁定: ゴミが溜まってからでいい)
 
 ### 実装 (rules-personal v0.2.23)
 
@@ -164,7 +165,14 @@ git identity を検証できず、Refusing to use ... as an isolation worktree �
 **この hook はパスを返せないと既定動作に fallback せず worktree 作成自体が落ちる**ので、
 どの経路でも必ずパスを 1 つ返す構造にしてある。
 
-検証: スクリプト単体で 6 ケース実測済み (規約レイアウトでの作成 / 同一 name 再実行の冪等性 /
+検証: **実 worktree 経路での発火確認まで完了** (別セッションが headless から
+`isolation: "worktree"` agent を起動して確認、全 3 項目 PASS)。
+
+- 配置先: `{repo}/agent-<id>/` = 恒久 workspace の兄弟 (`git worktree list` でも実体確認)
+- branch: `worktree-agent-<id>`
+- hook 起因のエラーなし、agent は正常に起動・完了
+
+加えてスクリプト単体で 6 ケース実測済み (規約レイアウトでの作成 / 同一 name 再実行の冪等性 /
 素の clone でのフォールバック / remote 無し / 規約パスに無関係な既存ディレクトリがある場合に
 既存を壊さず退避 / name のパストラバーサル拒否)。実際の worktree 作成経路での発火確認は
 別セッションに依頼中。
