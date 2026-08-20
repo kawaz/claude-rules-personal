@@ -20,43 +20,47 @@
 
 ## 裁定待ち
 
-### ER-Q1: `emerada` (末尾 co 無し) 系の識別子も emrd に寄せるか
+### ER-Q1: `~/.ssh/config` が 24 時間後に消える sock を指したまま (要対応)
 
-`emeradaco` → `emrd` の一貫作業とは別に、**`emerada` を冠した稼働中インフラ**が残っている。
-一斉に変えないと認証切替 (ssh 鍵 / gh トークン) が壊れるので、まとめて裁定してほしい。
+kawaz 側で warden 設定の kawaz123 化と `agent-emerada.sock` の 24 時間後削除が実施済み。
+実機確認したところ **`~/.ssh/config` の追従が漏れている**:
 
-対象:
+```
+# 現状 (~/.ssh/config 6-9 行目)
+Match exec "pwd | grep -qE 'github.com/(emeradaco|kawaz123)' || git remote get-url origin ..."
+  IdentityAgent ~/.ssh/agent-emerada.sock     # ← 24 時間後に消える symlink
+  ControlPath ~/.ssh/mux-emerada-%C
+```
 
-| 種別 | 実体 |
-|---|---|
-| ssh agent socket | `~/.ssh/agent-emerada.sock` (+ `.cw` / `.aw` variant) |
-| ssh 設定 | `~/.ssh/config` の `IdentityAgent` / `ControlPath mux-emerada-%C` |
-| gh 設定 | `~/.config/gh-emerada` (GH_CONFIG_DIR)、`.dotfiles/.gitignore` |
-| git 設定 | `.dotfiles/config/git/config-user-emerada.gitconfig` |
-| warden 設定 | cache-warden / authsock-warden の config.toml |
-| ルール文書 | emrd リポ `for-me/rules/git-workflow-emerada.md`, `playwright-cli-emerada-profile.md` |
+- `agent-emerada.sock` は現在 `agent-kawaz123.sock.aw` への **互換 symlink** (2026-08-20 13:33 作成)
+- `agent-kawaz123.sock` という実体を指す symlink が既に存在する
+- `ssh -G git@github.com` を業務リポの cwd で実行すると `identityagent .../agent-emerada.sock`
+  が解決される = **削除された瞬間に業務リポの ssh 認証が壊れる**
 
-- [ ] a: 全部 emrd に寄せる (実ファイル・ソケット名まで一括。取りこぼすと認証が切り替わらないので慎重に)
-- [ ] b: 文書・ルールのファイル名だけ emrd に寄せ、実インフラ名 (sock / config dir) は据え置き
-- [ ] c: 今回は据え置き (`emerada` はサニタイズ対象語ではないので急がない)
+修正内容 (当方が適用しようとしたが auto モードの classifier にブロックされた):
 
-### ER-Q2: 残骸 `~/.claude-emeradaco` を削除してよいか
+```
+  IdentityAgent ~/.ssh/agent-kawaz123.sock
+  ControlPath ~/.ssh/mux-kawaz123-%C
+```
 
-実体は `~/.claude-emrd` (2.3G) に移行済み。旧パスは 8KB (`.claude.json` + `backups/`、2026-08-19 作成)
-の空同然の残骸。参照していた `.dotfiles/config/idea-storage/config.ts` (gitignore 対象のローカル設定) は
-`~/.claude-emrd` に修正済み。
+`~/.ssh/config.bak-emrd-rename-<timestamp>` にバックアップは取得済み。
 
-- [ ] a: 削除してよい
-- [ ] b: 残す (中身を確認したい)
+- [ ] a: 上記を kawaz が適用する
+- [ ] b: 当方に適用させる (Bash permission を許可、または一時的に承認)
+- [ ] c: 別の名前にする (`agent-emrd.sock` 等) — その場合 warden 設定側も揃える必要あり
 
-### ER-Q3: `.dotfiles/config/cliproxyapi/config-emeradaco.yml` の扱い
+### ER-Q1b: 残りの `emerada` 系 (急がない)
 
-dotfiles で **他セッションが現在編集中** (未コミット) のため今回は触っていない。
-リネーム対象だが、衝突を避けるため担当を決めたい。
+- `~/.config/gh-emerada` (GH_CONFIG_DIR。業務リポの `.envrc` が export)
+- `.dotfiles/config/git/config-user-emerada.gitconfig`
+- authsock-warden config に**実体の無い source が 1 件**残っている
+  (`agent-emerada.sock.aw` — kawaz123 用は別行に新設済み。cache-warden 側は kawaz123 化済み)
+- emrd リポ `for-me/rules/git-workflow-emerada.md` / `playwright-cli-emerada-profile.md`
 
-- [ ] a: 他セッションの作業が landed してから、こちらでリネームする
-- [ ] b: 編集中のセッションに任せる (ccmsg で依頼)
-- [ ] c: 今は据え置き
+- [ ] a: kawaz123 に揃える (warden・ssh と同じ方針)
+- [ ] b: emrd に揃える
+- [ ] c: 据え置き
 
 ### ER-Q5: 手置き agent 2 件が setup.sh をブロックしている
 
