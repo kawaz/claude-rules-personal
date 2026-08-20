@@ -1,6 +1,6 @@
 ---
 title: pre-clear の「継続作業指示」が、AI の自己判断タスクを次セッションへ「指示」として渡す
-status: open
+status: resolved
 category: bug
 created: 2026-07-28T23:05:22+09:00
 last_read: 2026-08-20T13:08:56+09:00
@@ -9,10 +9,10 @@ wip_entered:
 blocked_entered:
 pending_entered:
 discarded_entered:
-resolved_entered:
+resolved_entered: 2026-08-20T13:11:31+09:00
 discard_reason:
 pending_reason:
-close_reason:
+close_reason: ["done:pre-clear/pre-compact skill の §継続作業指示に出どころラベル([kawaz 指示]/[AI 自律])を導入、ロード側プロトコルを「ラベル無し・[AI 自律]は関連DR/issue/QUESTIONS.mdの裁定と矛盾しないか裏取りしてから着手」に変更 (commit nztqlzpo)"]
 blocked_by:
 origin: 依頼元プロジェクト (llm-gateway 統括セッションからの実機観測報告)
 ---
