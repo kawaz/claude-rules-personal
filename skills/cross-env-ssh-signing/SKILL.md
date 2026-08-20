@@ -73,7 +73,7 @@ SSH_AUTH_SOCK=~/.ssh/agent-env-Y.sock jj config set --repo signing.key "$(SSH_AU
 
 - **デフォルト環境 (個人面) のリポは signing.key を override しない** (global config が正、
   agent も default で正しい鍵を持っているはず)
-- **別アカウント鍵で署名すべきリポ** (例: emeradaco のリポは kawaz123 鍵で署名) で
+- **別アカウント鍵で署名すべきリポ** (例: emrd のリポは kawaz123 鍵で署名) で
   global signing.key が個人鍵を指している場合、repo-local override が一度必要
 
 ## その他注意点
@@ -82,8 +82,8 @@ SSH_AUTH_SOCK=~/.ssh/agent-env-Y.sock jj config set --repo signing.key "$(SSH_AU
   越境作業中も session の rules/settings/memory は元の環境のものを参照する
 - **memory は越境しない**: 各環境の `$CLAUDE_CONFIG_DIR/projects/.../memory/` は別物
 - **rules は越境する**: 概念 rule (`claude-config-dir-isolation`) は `for-all/rules/` にあり、
-  両環境 (personal / emeradaco / ...) の `rules/for-all-from-personal/` に symlink で注入されている
+  両環境 (personal / emrd / ...) の `rules/for-all-from-personal/` に symlink で注入されている
 
-各環境固有の越境手順 (例: emeradaco なら gh トークン / SSH 鍵 / signing.key の
+各環境固有の越境手順 (例: emrd なら gh トークン / SSH 鍵 / signing.key の
 具体的な指定) は当該 overlay の `for-all/rules/` を参照する。
 

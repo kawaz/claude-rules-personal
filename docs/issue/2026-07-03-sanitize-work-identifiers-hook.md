@@ -73,7 +73,7 @@ origin: "エコシステム横断監査 (2026-07-03)"
 
 - [ ] kawaz の設計レビューを経て実装可否・設計詳細が確定する
 - [ ] (実装する場合) `identifiers-*.md` の単語リストパース + 単語境界マッチが
-      各 overlay (personal / emeradaco / zunsystem / syun) で動作する
+      各 overlay (personal / emrd / zunsystem / syun) で動作する
 - [ ] (実装する場合) 誤検知時の warn 表示が「なぜ引っかかったか」を明示し、
       確認誘導 (続行 / 修正) が機能する
 

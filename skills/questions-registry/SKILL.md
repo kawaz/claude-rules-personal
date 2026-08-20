@@ -16,7 +16,7 @@ description: docs/QUESTIONS.md の運用 (裁定待ち Q / 確認待ち C)。loa
 起票も行わない)。メインは `load-role-main` から invoke するので常にロード済み。
 
 `for-all` に置くのは、各業務 overlay がこの一般規約を土台に差分ルールを重ねる
-構成のため (例: emeradaco はファイル名・commit 有無・スコープを差し替える)。
+構成のため (例: emrd はファイル名・commit 有無・スコープを差し替える)。
 `for-me` だと self repo のセッションにしか配布されず、overlay 側の差分ルールが
 土台を失う。
 

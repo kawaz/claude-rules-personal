@@ -173,7 +173,7 @@ check-versions:
     @bump-semver get .claude-plugin/plugin.json .claude-plugin/marketplace.json --no-hint >/dev/null
 
 # plugin cache は $CLAUDE_CONFIG_DIR 配下にあるため、環境ごとに update が要る
-# (personal で叩いても emeradaco 側は古いまま)。環境一覧の正本は repos_mapping.json
+# (personal で叩いても emrd 側は古いまま)。環境一覧の正本は repos_mapping.json
 # の home フィールド (rule 側に環境一覧を複製しない規約)。
 # 各 update は warn 降格: push は既に成功済なので、ここで失敗しても release 自体は
 # 完了している (失敗時に exit 非 0 にすると「push 済みなのに just push 失敗表示 →

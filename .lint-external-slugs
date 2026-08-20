@@ -7,11 +7,11 @@
 # 追加するとき: 対象 overlay の for-*/rules/ に実在することを確認してから書く。
 # 空行と # 始まりは無視される。
 
-# emeradaco (kawaz123/claude-rules-emeradaco)
+# emrd (kawaz123/claude-rules-emrd)
 account-isolation
-identifiers-emeradaco
-questions-local-emeradaco
-vendor-glossary-emeradaco
+identifiers-emrd
+questions-local-emrd
+vendor-glossary-emrd
 
 # syun (kawaz/claude-rules-syun)
 identifiers-syun

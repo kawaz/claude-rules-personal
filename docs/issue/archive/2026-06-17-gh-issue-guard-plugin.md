@@ -49,7 +49,7 @@ claude-gh-monitor は docs/issue/ 採用済 = 当初の例外論拠は失効)。
 |---|---|---|
 | kawaz (個人 OSS 本体) | guard 対象 | block + `docs/issue/<slug>.md` redirect hint |
 | kawaz 個人面 overlay 系 (= `kawaz/claude-rules-*` 等) | guard 対象 | 同上 (= 全部 owner=kawaz なので 1 列で覆われる) |
-| kawaz123 (= emeradaco 業務面) | guard 対象外 | 通常通り (= 業務 issue は GH Issues) |
+| kawaz123 (= emrd 業務面) | guard 対象外 | 通常通り (= 業務 issue は GH Issues) |
 | その他第三者 (= 外部 OSS、非 kawaz owner) | guard 対象外 | 通常通り |
 
 「kawaz が自己所有 (= kawaz owner)」ならローカル起票、それ以外なら通常通り、というだけ。
@@ -71,7 +71,7 @@ owner 1 種類で全部カバーできる (= 余計な list 保守不要)。
 ### 業務面 (kawaz123/*) の扱い
 
 - owner = `kawaz123` は **guard 対象外** = `gh issue create` 通常通り
-- 業務リポ (emeradaco) の運用は GH Issues 主体、kawaz123 個人作業も慣習的に GH Issues 利用
+- 業務リポ (emrd) の運用は GH Issues 主体、kawaz123 個人作業も慣習的に GH Issues 利用
 - 同 hook で `owner != kawaz` なら早期 exit、別 hook を作らない (= シンプル)
 
 ## 採用ポリシー: 候補 A + C (= 確定)
@@ -351,7 +351,7 @@ exit 2
   低い、必要なら別 hook を追加
 - regex の false positive (= heredoc / コメント内文字列で誤発火) → env flag で逃げられる
 - `--repo $REPO` 等の変数展開 → 通す側にフォールバック (= 過剰 block 回避)
-- 業務面 (CLAUDE_CONFIG_DIR=~/.claude-emeradaco) でも plugin が enable されていれば hook が走るが、
+- 業務面 (CLAUDE_CONFIG_DIR=~/.claude-emrd) でも plugin が enable されていれば hook が走るが、
   owner=kawaz の case は業務面では稀 (= 越境作業時のみ)、走っても正しく動く
 
 ### 実装時の検討: トリガ判定を hook の `if` field に寄せられないか (= 2026-06-13 追記)
@@ -397,7 +397,7 @@ push-guard と同じ pattern で `~/.claude-personal/settings.json` に追加:
 - `docs-knowledge-flow.md`: `docs/issue/<file>.md` の **解決時フロー**を規定。本 hook は **入口を強制**
 - `push-workflow.md`: push 時の品質 gate と同じ「違反は仕組みで止める」思想
 - `release-flow-awareness.md`: tag/release を Claude が打たない、と同じ「自動化が打つ」思想
-- `account-isolation.md` (overlay 経由、emeradaco): owner 判定で `kawaz` 自己所有のみ block、`kawaz123` (業務) は通す
+- `account-isolation.md` (overlay 経由、emrd): owner 判定で `kawaz` 自己所有のみ block、`kawaz123` (業務) は通す
 - `git-repo-management.md`: `kawaz` (public OSS) と `kawaz123` (業務 private) の所有者区別と整合
 - **`claude-push-guard` (= 兄弟 plugin)**: 本 guard の構成テンプレ、同じ marketplace pattern
 

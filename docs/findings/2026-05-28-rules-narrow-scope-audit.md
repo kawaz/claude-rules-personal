@@ -108,7 +108,7 @@ frontmatter の `description` で発火条件 (= docs/ 配下のファイル作�
   「SSH 認証の切替メカニズム」の長い手順 (経路 A/B、`SSH_AUTH_SOCK` 一時切替、`signing.key` repo-local
   override) は `for-me/skills/cross-env-ssh-signing/SKILL.md` に分離 (= 越境 push/signing 時のみ必要)。
   rule 側は「SSH 認証の切替メカニズム」section 見出しを残し概念だけ書いて skill を指す形にしたので、
-  emeradaco overlay の `[[claude-config-dir-isolation]]` の同名 section 参照は壊れない。
+  emrd overlay の `[[claude-config-dir-isolation]]` の同名 section 参照は壊れない。
 
 これで findings の改善 task は優先順 1〜6 が消化済み (= 残りは優先順 7 = memory 汎用化のみ)。
 

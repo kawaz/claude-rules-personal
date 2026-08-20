@@ -10,7 +10,7 @@ kawaz の Claude Code 用ルール / スキルの **central リポジトリ**。
 | リポ | 役割 | 専用環境 (CLAUDE_CONFIG_DIR) |
 |------|------|------|
 | **kawaz/claude-rules-personal** (これ) | central。全 overlay を束ね、`setup.sh` / `repos_mapping.json` を持つ | `~/.claude-personal` |
-| kawaz123/claude-rules-emeradaco | emeradaco 業務面の overlay (private) | `~/.claude-emeradaco` |
+| kawaz123/claude-rules-emrd | emrd 業務面の overlay (private) | `~/.claude-emrd` |
 | kawaz/claude-rules-zunsystem | zunsystem 識別子 overlay (private) | (専用環境なし) |
 | kawaz/claude-rules-syun | syun 識別子 overlay (private) | (専用環境なし) |
 
@@ -29,7 +29,7 @@ kawaz の Claude Code 用ルール / スキルの **central リポジトリ**。
 - `for-others/rules/` — 他環境から参照される情報 (固有名詞リスト等のサニタイズ規定)
 
 `for-me` の "me" は「個人 vs 他者」ではなく、kawaz が持つ複数の面
-(個人開発 / emeradaco 業務 / ...) のうちの **その overlay の面**を指す。
+(個人開発 / emrd 業務 / ...) のうちの **その overlay の面**を指す。
 
 personal リポ固有:
 
@@ -43,7 +43,7 @@ personal リポ固有:
 
 ```bash
 CLAUDE_CONFIG_DIR=~/.claude-personal  ./setup.sh
-CLAUDE_CONFIG_DIR=~/.claude-emeradaco ./setup.sh
+CLAUDE_CONFIG_DIR=~/.claude-emrd ./setup.sh
 ```
 
 setup.sh は `repos_mapping.json` の全 overlay を読み:

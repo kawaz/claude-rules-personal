@@ -28,8 +28,8 @@ cd /path/to/dir && command
 SSH_AUTH_SOCK / GH_CONFIG_DIR / CLAUDE_CONFIG_DIR 等) を設定している。
 Claude の Bash は非対話 shell で **cd しても direnv hook が発火しない**ため、
 `(cd dir && git push)` は别アカウント鍵のまま実行される事故につながる
-(実測: emeradaco リポで cd only だと SSH_AUTH_SOCK が kawaz 鍵のまま、
-`direnv exec` なら emerada 鍵に切替。2026-07-23 確認)。
+(実測: emrd リポで cd only だと SSH_AUTH_SOCK が kawaz 鍵のまま、
+`direnv exec` なら業務面の鍵に切替。2026-07-23 確認)。
 逆に `direnv exec` は **env を注入するだけで cwd を変えない**ため、単独では
 cwd 依存ツールが誤った対象を観測する (2026-07-24 実測)。両方の罠を
 `(cd dir && direnv exec . cmd)` の形が同時に塞ぐ。
