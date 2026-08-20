@@ -5,7 +5,7 @@
   },
   "metadata": {
     "description": "kawaz 個人環境のルール層に付随する hook 群 (context 管理の自動化)",
-    "version": "0.2.16"
+    "version": "0.2.17"
   },
   "plugins": [
     {
