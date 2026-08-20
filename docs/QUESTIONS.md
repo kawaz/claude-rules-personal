@@ -58,4 +58,32 @@ dotfiles で **他セッションが現在編集中** (未コミット) のた�
 - [ ] b: 編集中のセッションに任せる (ccmsg で依頼)
 - [ ] c: 今は据え置き
 
+### ER-Q4: skill `emeradaco-fix-prep` の名前も emrd に寄せるか
+
+emrd リポの `for-me/skills/fix-prep/SKILL.md` は **ディレクトリ名が `fix-prep`、frontmatter の
+`name:` が `emeradaco-fix-prep`** と食い違っている (= 過去のリネームが途中で止まっている)。
+`name:` はスラッシュコマンド名 (`/emeradaco-fix-prep`) になるので、変えると kawaz の打鍵が変わる。
+参照する `git-workflow-emerada.md` / `cmux-flowicon-sessionstart.sh` の追従も必要。
+
+- [ ] a: `fix-prep` にする (ディレクトリ名に合わせる。overlay 内なので接頭辞は不要)
+- [ ] b: `emrd-fix-prep` にする (どの面の skill か名前で分かる)
+- [ ] c: 据え置き
+
+### ER-Q5: 手置き agent 2 件が setup.sh をブロックしている
+
+`~/.claude-personal/agents/` に regular file で置かれた 2 件のせいで `setup.sh` が
+「legacy *.md files exist」で停止し、**overlay リネーム後の symlink 張り替え
+(`for-*-from-emeradaco` → `for-*-from-emrd`) が実行できない**。
+
+対象: `sonnet5-worker-xhigh.md` / `codex-luna-reviewer-xhigh.md`
+(いずれも description に「kawaz 明示指示 (2026-08-16, kuu 値カプセル設計のレビュー) で
+臨時作成。常用しない」とある)
+
+なお現状の symlink は互換 symlink (`claude-rules-emeradaco` → `claude-rules-emrd`) 経由で
+解決できているため、**今すぐ壊れてはいない**。setup.sh を回すまで旧名のまま残るだけ。
+
+- [ ] a: 2 件とも削除してよい (臨時作成・常用しない方針のため)
+- [ ] b: claude-rules-personal の管理下 (plugin の agent 定義) に移してから削除
+- [ ] c: 残す (setup.sh 側の legacy 判定を見直す)
+
 ## 確認待ち
