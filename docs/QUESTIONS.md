@@ -58,17 +58,6 @@ dotfiles で **他セッションが現在編集中** (未コミット) のた�
 - [ ] b: 編集中のセッションに任せる (ccmsg で依頼)
 - [ ] c: 今は据え置き
 
-### ER-Q4: skill `emeradaco-fix-prep` の名前も emrd に寄せるか
-
-emrd リポの `for-me/skills/fix-prep/SKILL.md` は **ディレクトリ名が `fix-prep`、frontmatter の
-`name:` が `emeradaco-fix-prep`** と食い違っている (= 過去のリネームが途中で止まっている)。
-`name:` はスラッシュコマンド名 (`/emeradaco-fix-prep`) になるので、変えると kawaz の打鍵が変わる。
-参照する `git-workflow-emerada.md` / `cmux-flowicon-sessionstart.sh` の追従も必要。
-
-- [ ] a: `fix-prep` にする (ディレクトリ名に合わせる。overlay 内なので接頭辞は不要)
-- [ ] b: `emrd-fix-prep` にする (どの面の skill か名前で分かる)
-- [ ] c: 据え置き
-
 ### ER-Q5: 手置き agent 2 件が setup.sh をブロックしている
 
 `~/.claude-personal/agents/` に regular file で置かれた 2 件のせいで `setup.sh` が
