@@ -368,6 +368,25 @@ jj git push
 
 ## AI がハマりやすいアンチパターン
 
+### 読み取りスキャンには `--ignore-working-copy` を付ける
+
+`jj -R <repo> log/st/workspace list` は**読み取りのつもりでも working copy の snapshot を
+発生させる** (jj の通常動作)。複数リポを一括スキャンすると、各リポの default workspace が
+勝手に snapshot され、build 生成物などが working copy commit に取り込まれる
+(実測 2026-08-21: 一括スキャン中に別リポの `target/` 配下を snapshot しかけ、
+巨大ファイルだけ size ガードで拒否された)。
+
+```bash
+# Bad — 観測のつもりで対象リポの状態を変える
+jj -R /path/to/repo log -r '...'
+
+# Good — snapshot を発生させない
+jj -R /path/to/repo --ignore-working-copy log -r '...'
+```
+
+調査・棚卸し・監視スクリプトなど「対象を変えないはず」の jj 呼び出しは全部これを付ける。
+
+
 ### パス指定なしの `jj commit` / `jj split` で他セッション変更を巻き込む
 
 並列 Claude セッション / 別 workspace 運用では、自分が認識していない @ への
