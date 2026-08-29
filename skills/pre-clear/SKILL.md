@@ -126,7 +126,10 @@ loaded_by:
 **引数付き `/clear`** (引数がクリア後の最初のプロンプトとして投入される) の方。
 ポインタは「後継が自力で辿り着ける」保険であって、主経路ではない。
 
-## 4. 完了報告と自己 /clear または /exit
+## 4. 完了報告と自己 /clear または自己停止 (ccmsg stop)
+
+> 終了に `/exit` を使わない (kawaz 指示 2026-08-29): background の掃除をしないと
+> ユーザ確認で止まる率が高く UX が悪い。停止は `ccmsg stop <SID>` に統一。
 
 **§10 Recovery Notes 内の §継続作業指示に何を書いたか (or 書かなかったか) を
 出どころラベル込みで報告に含める** — 次セッションが立ち上げ後に即実行する内容として
@@ -142,8 +145,8 @@ hyoui input "$HYOUI_SESSION_ID" \
   'text:/clear pre-clear出力があれば{ロード、継続指示があれば{実行}else{次の優先作業候補を提案}}' \
   key:Enter
 
-# B. 今日はここで終わり (「作業終了」「もう寝る」等) → /exit
-hyoui input "$HYOUI_SESSION_ID" text:/exit key:Enter
+# B. 今日はここで終わり (「作業終了」「もう寝る」等) → ccmsg stop で自己停止
+ccmsg stop "$CLAUDE_SESSION_ID"  # sid 不明なら ccmsg peers で自 sid を確認して渡す
 ```
 
 - **A で引数を省かない**。素の `/clear` だと後継セッションは SessionStart hook の指示
