@@ -1,6 +1,6 @@
 ---
 title: pre-clear skill の改善 4 点 (llm-gateway セッション実運用フィードバック)
-status: open
+status: resolved
 category: task
 created: 2026-09-03T19:05:16+09:00
 last_read:
@@ -9,10 +9,10 @@ wip_entered:
 blocked_entered:
 pending_entered:
 discarded_entered:
-resolved_entered:
+resolved_entered: 2026-09-03T19:28:11+09:00
 discard_reason:
 pending_reason:
-close_reason:
+close_reason: ["done:起票同日に llm-gateway セッション自身が skills/pre-clear/SKILL.md へ実装 (kawaz 指示: 実感を持つセッションが手順書を書く方が良い)","done:ロード側鮮度チェック (head 照合で失効判定)","done:§1.5 永続化ファースト (state 前に runbook/findings へ落とし参照で指す)","done:§6 Worker & Peer Topology (peer は sid+cwd+約束のみ、cwd 名乗り規約)","done:§8 リポ外成果物の列挙","done:継続指示の粒度規約 (1 項目 1 検証単位 + コマンド例 or runbook 参照形)"]
 blocked_by:
 origin: llm-gateway セッション (2026-09-03、kawaz 合意)
 ---
