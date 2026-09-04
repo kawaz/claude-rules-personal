@@ -3,7 +3,7 @@
 ccmsg の subscribe stream 経由で、次の形の通知が届くことがある:
 
 ```
-[llm-gateway cache keepalive] nonce=`LLMGW-KEEPALIVE-<43 文字>` — automated prompt-cache refresh …
+[llm-gateway keepalive ping] nonce=`LLMGW-KEEPALIVE-<43 文字>` — automated prompt-cache refresh …
 ```
 
 これは **kawaz 自身が運用する LLM proxy (llm-gateway) が、idle 中のセッションの
