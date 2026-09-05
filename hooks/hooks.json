@@ -27,6 +27,11 @@
           {
             "type": "command",
             "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/vcs-skill-autoload.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/guard-mass-kill.sh\" #rules-personal-guard-mass-kill",
+            "timeout": 5
           }
         ]
       }
