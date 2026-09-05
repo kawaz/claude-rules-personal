@@ -21,6 +21,6 @@ pos="(^|[;&|(\`{]|\\\$\\()$sp*((sudo|command|exec|nohup|time|env)$sp+)*"
 w='[^A-Za-z0-9_./-]'
 re="${pos}(pkill|killall)([^A-Za-z0-9_.-]|\$)|${pos}xargs$sp+(-[^[:space:]]+$sp+)*kill([^A-Za-z0-9_.-]|\$)|${pos}kill$sp+(-[^[:space:]]+$sp+)*(\\\$\\(|\`)$sp*(pgrep|pidof|lsof|ps)($w|\$)"
 if printf '%s' "$cmd" | grep -Eq "$re"; then
-  jq -n '{hookSpecificOutput:{hookEventName:"PreToolUse",permissionDecision:"deny",permissionDecisionReason:"pkill / killall / xargs kill / kill $(pgrep|lsof|ps …) はパターン一致で無関係なプロセス (他セッションの ccmsg subscribe 等) を巻き込むため禁止。対象 pid を事前に特定して `kill <pid>` を使うこと。"}}'
+  jq -n '{hookSpecificOutput:{hookEventName:"PreToolUse",permissionDecision:"deny",permissionDecisionReason:"Pattern-based kill is not allowed. Use `kill <pid>` with a known pid."}}'
 fi
 exit 0
