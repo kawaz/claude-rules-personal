@@ -1,7 +1,7 @@
 {
   "name": "rules-personal",
   "description": "kawaz 個人環境のルール層に付随する hook 群 (context 管理の自動化)",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "author": {
     "name": "kawaz"
   },
