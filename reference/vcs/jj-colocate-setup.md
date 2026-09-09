@@ -18,6 +18,8 @@
 
 ## 新規リポジトリ作成
 
+先に `main/` に入ってから初期化する。jj の初期 workspace がディレクトリと同じ `main` に揃い、bookmark `main` と合わせて管理が一貫する。
+
 ```bash
 mkdir -p "$REPO_PARENT/main" && cd "$REPO_PARENT/main"
 git init
