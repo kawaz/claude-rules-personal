@@ -1,6 +1,6 @@
 ---
 title: 読むだけ系 skill の knowledge カタログへの移行
-status: open
+status: resolved
 category: design
 created: 2026-09-09T09:45:46+09:00
 last_read:
@@ -9,10 +9,10 @@ wip_entered:
 blocked_entered:
 pending_entered:
 discarded_entered:
-resolved_entered:
+resolved_entered: 2026-09-09T10:15:48+09:00
 discard_reason:
 pending_reason:
-close_reason:
+close_reason: ["app-file-placement: done", "jj-rebase-options-reference: done", "cross-env-ssh-signing: done", "note: emrd overlay (別リポ) の rules-personal:cross-env-ssh-signing 参照3箇所は本タスク対象外、統括へ報告"]
 blocked_by:
 origin: 自リポ TODO
 ---
