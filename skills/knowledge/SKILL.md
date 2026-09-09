@@ -1,6 +1,6 @@
 ---
 name: knowledge
-description: 読むだけの参照知識のカタログ (索引 + 本文の二段構成)。索引に発火語があるトピックだけ `reference/<slug>.md` を Read する。プロジェクト横断メモリ (ローカル private リポ) の読み書き手順もここ。収録トピックの発火語 — daemon / service サブコマンド体系、常駐プロセスの status・restart・log の CLI 設計、launchd / systemd --user への常駐登録、supervise 監督者構成、XDG Base Directory によるアプリのファイル置き場、jj のリビジョン指定・配置オプション、越境作業の SSH 認証・commit signing 切替、別ディレクトリでのコマンド実行 (direnv exec と cwd)、op run による secret の env 注入、say に渡す頭字語のカタカナ化、CLI 設計の好み (サブコマンド / --help / completion)、kawaz 本人の表記正本、findings の書き方と記録委譲。
+description: 読むだけの参照知識のカタログ (索引 + 本文の二段構成、public の reference/ と private リポの 2 層)。索引に発火語があるトピックだけ `reference/<slug>.md` を Read する。public に置けない知識は private リポ側 (読み書き手順もここ)。収録トピックの発火語 — daemon / service サブコマンド体系、常駐プロセスの status・restart・log の CLI 設計、launchd / systemd --user への常駐登録、supervise 監督者構成、XDG Base Directory によるアプリのファイル置き場、jj のリビジョン指定・配置オプション、越境作業の SSH 認証・commit signing 切替、別ディレクトリでのコマンド実行 (direnv exec と cwd)、op run による secret の env 注入、say に渡す頭字語のカタカナ化、CLI 設計の好み (サブコマンド / --help / completion)、kawaz 本人の表記正本、findings の書き方と記録委譲。
 ---
 
 # knowledge — 参照知識カタログ
@@ -8,27 +8,18 @@ description: 読むだけの参照知識のカタログ (索引 + 本文の二�
 参照知識は 2 層ある。どちらも**索引を見て、必要なトピックのファイルだけ Read** する (context を最小化する)。索引だけ読んで該当が無ければ何も Read しない。
 
 - **`reference/`** (このリポで git 管理、下記「索引」) — 公開してよい体系知識
-- **プロジェクト横断メモリ** (ローカルの private リポ、下記「メモリ」) — kawaz の好み・feedback・環境の癖
+- **private リポ** (`kawaz/privacy-personal`、下記「private の参照知識」) — 公開できない知識 (kawaz の好み・環境の癖・私的な事情)
 
 索引エントリの書き方・追加削除の規約は `for-all/rules/rule-writing-guidelines.md` (常時ロード rule) が正本。
 本文ファイルに書くのは**知識そのものだけ**: 出典・確定待ちの注記・採用側の個別事情・雑談めいたメモは書かず、help や spec の形で足りるものに表や節の装飾を足さない。
 
-## メモリ (プロジェクト横断)
+## private の参照知識
 
-メモリの実体は private リポ `kawaz/privacy-personal` (`${XDG_DATA_HOME:-~/.local/share}/repos/github.com/kawaz/privacy-personal/main`) にあり、全ての面 (CLAUDE_CONFIG_DIR) から読む。業務面でしか効かない事実はその面の overlay リポ (`claude-rules-*` の `for-me/`) に置き、ここには書かない。
+public に置けない参照知識は private リポ `kawaz/privacy-personal` (`${XDG_DATA_HOME:-~/.local/share}/repos/github.com/kawaz/privacy-personal/main`) にあり、構造はこの skill と同じ (`INDEX.md` = 索引、`reference/<slug>.md` = 本文)。全ての面 (CLAUDE_CONFIG_DIR) から読む。業務面でしか効かない知識はその面の overlay リポ (`claude-rules-*` の `for-me/`) に置き、ここには書かない。
 
-読む手順:
+読む: 下の索引と同じ要領で `INDEX.md` を Read し、発火語に該当するエントリだけ `reference/<slug>.md` を Read する (未 clone なら何もしない)。
 
-1. リポの `MEMORY.md` を Read する (索引。`- [Title](file.md) — hook` の 1 行 1 件)。無ければ未 clone — 何もしない
-2. いまの話題に該当するエントリだけ、そのリポの `<slug>.md` を Read する
-
-書く手順: 対象リポに `<slug>.md` を作り (frontmatter は `name` / `description` / `metadata.type: user|feedback|project|reference`、本文は 1 ファイル 1 事実、feedback / project は `**Why:**` と `**How to apply:**` を続ける)、`MEMORY.md` に 1 行足し、その 2 ファイルを**パス指定で** commit する (push は任意)。
-
-書き先の判定:
-
-- **auto-memory** (`$CLAUDE_CONFIG_DIR/projects/<project>/memory/`) — そのプロジェクトでしか意味を持たない事実
-- **メモリリポ** — 別プロジェクトのセッションが読んで役に立つ事実 (kawaz の好み、ツール横断の運用、環境の癖、feedback)
-- 業務面でしか効かない事実 → その面の overlay リポ (private)、個人面にも効く → メモリリポ
+書く: `reference/<slug>.md` を作り `INDEX.md` に 1 エントリ足し、その 2 ファイルをパス指定で commit (push は `just push`)。本文の規約はこの skill の reference と同じ。書き先の判定は [[memory-placement]]。
 
 ## 索引
 
