@@ -1,5 +1,5 @@
 ---
-name: codex-astra-worker
+name: worker-astra-high
 description: codex astra (high) ワーカー
 model: astra
 effort: high

@@ -1,5 +1,5 @@
 ---
-name: opus-worker-high
+name: worker-opus-high
 description: Opus (high) ワーカー
 model: opus[1m]
 effort: high

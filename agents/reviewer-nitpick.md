@@ -1,5 +1,5 @@
 ---
-name: nitpick-reviewer
+name: reviewer-nitpick
 description: 粗探し特化レビュアー (独自ペルソナ、fable high)
 model: fable[1m]
 effort: high

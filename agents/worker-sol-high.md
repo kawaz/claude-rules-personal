@@ -1,5 +1,5 @@
 ---
-name: codex-sol-worker
+name: worker-sol-high
 description: codex sol (high) ワーカー
 model: sol
 effort: high

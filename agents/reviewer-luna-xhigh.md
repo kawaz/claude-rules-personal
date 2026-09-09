@@ -1,5 +1,5 @@
 ---
-name: codex-luna-reviewer-xhigh
+name: reviewer-luna-xhigh
 description: codex luna (xhigh) レビュアー。読み取り専用
 model: luna
 effort: xhigh

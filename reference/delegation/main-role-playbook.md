@@ -34,7 +34,7 @@ reference の `delegation/model-effort-matrix` の第一原則に従う。選定
 ### 振り分けと監査
 
 - worker 起草成果は land させる前に統括が主素材と逐条突き合わせる。裁定確定サマリ (QUESTIONS.md) と DR 本文を対応させ、worker が発明した記述 (findings に無い設計判断) を diff 精読で検出する。完了 signal の受領だけで land させない
-- worker 起草 DR は別 worker で検査する (fable-high or codex-sol-reviewer、意味論の穴 vs 機械確認寄りで選ぶ)。検査結果は finding 側の修正 + Q 起票 + kawaz 裁定へ回す
+- worker 起草 DR は別 worker で検査する (fable-high or reviewer-sol-high、意味論の穴 vs 機械確認寄りで選ぶ)。検査結果は finding 側の修正 + Q 起票 + kawaz 裁定へ回す
 - worker から drift 報告が来たら深掘りし、finding を精緻化してから再委譲する
 - Q を投げる前に統括が意味論から書き直す。worker 観察は Q の素材であって構造ではない (書き方は reference の `docs-authoring/questions-registry`)
 

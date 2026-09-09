@@ -1,5 +1,5 @@
 ---
-name: fable-worker-high
+name: worker-fable-high
 description: Fable (high) ワーカー
 model: fable[1m]
 effort: high

@@ -26,7 +26,7 @@ subagent 側の注入 (~67k) の正体はツールスキーマ + ハーネス機
 
 ## codex 大入力経路 (`~/.claude-bare`)
 
-codex 系の委譲はまず agent preset (`codex-sol-worker` / `codex-sol-reviewer`) を使い、入力が実効余地 ~200k を超える時だけ本経路に切り替える。`~/.claude-bare` は gateway 認証と 1M context env だけを持つ最小構成の `CLAUDE_CONFIG_DIR` (agents 無し、plugin は ccmsg のみ)。
+codex 系の委譲はまず agent preset (`worker-sol-high` / `reviewer-sol-high`) を使い、入力が実効余地 ~200k を超える時だけ本経路に切り替える。`~/.claude-bare` は gateway 認証と 1M context env だけを持つ最小構成の `CLAUDE_CONFIG_DIR` (agents 無し、plugin は ccmsg のみ)。
 
 ```bash
 SP=<scratchpad>   # prompt/結果の置き場

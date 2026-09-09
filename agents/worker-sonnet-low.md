@@ -1,5 +1,5 @@
 ---
-name: sonnet-worker-low
+name: worker-sonnet-low
 description: Sonnet (low) ワーカー
 model: sonnet[1m]
 effort: low
