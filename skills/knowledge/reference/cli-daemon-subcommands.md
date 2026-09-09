@@ -1,8 +1,6 @@
 # CLI の daemon / service サブコマンド体系
 
-出典: kawaz 発言 (ccmsg r285 mid 27, 32〜34、2026-09-09)。確定は ccmsg v2 の仕様待ち。
-kawaz 製 CLI (ccmsg v2 / hyoui / cache-warden / llm-gateway 等) に共通適用する。
-狙い: 設定ファイルの場所を知らないゼロ知識の状態から、起動済み daemon の status 確認や再起動に到達できること。
+kawaz 製 CLI に共通のサブコマンド体系。設定ファイルの場所を知らなくても、起動済み daemon の status 確認や再起動に到達できるようにする。
 
 ```
 <tool> — one instance per <unit>
@@ -23,14 +21,13 @@ COMMANDS
   add <unit>                登録する
   remove <unit>             登録を外す
   list                      → [{id, unit, running, pid}]
-  start <unit> | --all      supervise に instance の起動を要求する (add した unit を起動するトリガー)
+  start <unit> | --all      supervise に instance の起動を要求する
   stop <unit> | --all       supervise に停止を要求する (対象プロセスの停止を待つかはツールの要件次第)
   restart <unit> | --all    stop → start
   status [<unit>] | --all   [{id, unit, running, pid, version, ...}]
   log [<unit>] | --all      instance のログ
 
   start / stop / restart / status は起動中の supervise に対する操作。supervise が未起動ならエラー終了。
-  手元で単体起動したいだけなら run で足りる。
   unit = 登録の単位で、案件ドメインが決める (dir / config ファイル / id など)。
 
 <tool> service
@@ -46,12 +43,5 @@ OPTIONS (共通)
 ```
 
 ドメイン要件によっては launchd に登録する署名済み launcher を別途用意してそれを登録し、launcher は `<tool> daemon supervise` の起動と死活監視に徹する形も検討する。FDA 要求などがバージョンアップ毎に発生するのを回避するための構成。
-
-採用側 (llm-gateway) で決まった補足:
-
-- unit の設定に `binary_path` (既定は自分自身)
-- restart 戦略や優先順位はツール固有
-- 既存の `status` 系コマンドとの語彙衝突は `upstream status` 等に寄せる
-- unit の既定値は「登録が 1 つならそれ、複数なら名前か `--all` を要求」
 
 関連: [[cli-design-preferences]]
