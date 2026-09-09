@@ -6,7 +6,7 @@
 #   - plugin (hooks/ skills/ agents/) — `rules-personal` plugin として配布。
 #     version を持つのはこのため (`claude plugin update` が manifest の version を見る)
 # lint / test / build は無く、翻訳ペア (-ja.md) も無いため check-outdated-translations
-# も無し。Taskfile.pkl は pkf-tasks/pkfire の migrate check 用に過渡的に残存。
+# も無し。
 
 set shell := ["bash", "-euo", "pipefail", "-c"]
 
