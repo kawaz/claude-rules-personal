@@ -4,5 +4,6 @@ active な issue の一覧。close 済みは archive/ にあり、ここには�
 
 | date | category | status | slug | 概要 |
 |---|---|---|---|---|
+| 2026-09-09 | design | open | [readonly-skill-knowledge-migration](./2026-09-09-readonly-skill-knowledge-migration.md) | 読むだけ系 skill の knowledge カタログへの移行 |
 | 2026-08-21 | task | open | [colocate](./2026-08-21-colocate.md) | colocate 新構成への移行台帳 (bare+jj 方式 56 リポの進捗管理) |
 | 2026-07-03 | design | pending-sublimation | [sanitize-work-identifiers-hook](./2026-07-03-sanitize-work-identifiers-hook.md) | 業務固有名詞サニタイズの機械判定 hook 化 (claude-sanitize-guard) 設計案 |
