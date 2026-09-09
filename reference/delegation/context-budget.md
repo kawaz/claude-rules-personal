@@ -9,7 +9,7 @@ model×effort と同時に「タスクが運ぶ入力量 vs 経路の余地」�
 | claude 系 worker `[1m]` (sonnet5/opus5 preset) | 1M | ~70-90k | **~900k** |
 | fable (メイン/subagent) | 1M | メインはルール類で大 | 大 |
 | codex (preset / 対話。MAX_CONTEXT_TOKENS=1M 常設済) | 1M (272K 超は割増) | preset ~67-77k | 割増境界まで **~200k** |
-| codex bare batch (`claude -p --bare`) | 同上 (env 明示要) | ~1k | ~270k (割増境界まで) |
+| codex bare batch (`CLAUDE_CONFIG_DIR=~/.claude-bare claude -p`) | 同上 | ~17k | ~250k (割増境界まで) |
 | Explore (built-in、読み取り調査) | 継承 | ~37k | 広い |
 
 ## 見積り式
@@ -25,4 +25,4 @@ model×effort と同時に「タスクが運ぶ入力量 vs 経路の余地」�
 
 - codex の 272K 超は割増料金 (入力 2×・出力 1.5×、quota にも効く) だが**割増後 sol ≒ fable 通常価格**なので許容する。割増帯が必要な構成はその旨を一言添えて進める
 - 割増帯のコスト序列: sonnet5 `[1m]` 割増 < sol 割増 ≒ fable 通常。200k 超の大 context 帯で最安の高品質枠は sonnet5 `[1m]`
-- codex に大入力を渡す時の経路切替 (preset → bare) と `CLAUDE_CODE_MAX_CONTEXT_TOKENS` による 200k 解除 (壁はクライアント自己抑制、272K 超は割増料金) は reference の `delegation/codex-bare-batch` が正本
+- codex に大入力を渡す時の経路切替 (preset → `~/.claude-bare` 経由の `claude -p`) と `CLAUDE_CODE_MAX_CONTEXT_TOKENS` による 200k 解除 (壁はクライアント自己抑制、272K 超は割増料金) は reference の `delegation/codex-bare-batch` が正本

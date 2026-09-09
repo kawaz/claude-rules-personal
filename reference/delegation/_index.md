@@ -19,5 +19,5 @@
   発火語: Phase 0, 完了条件, 検証方法, やらないこと, リスク順分解, 実行ループ, 全体検証
 - [main-role-playbook](main-role-playbook.md) — 統括の失敗パターン・5 責務・立て直しの型・codex 委譲時のルール・開始時チェックリスト。
   発火語: 統括の立て直し, worker 起草の drift, 逐条監査, 自律進行, QUESTIONS.md, セッション開始チェック
-- [codex-bare-batch](codex-bare-batch.md) — `claude -p --bare` で codex に大入力を渡す定型コマンドと実測済みの罠。
-  発火語: claude -p --bare, codex 大入力, CLAUDE_CODE_MAX_CONTEXT_TOKENS, ANTHROPIC_BASE_URL, disallowedTools, prompt.md
+- [codex-bare-batch](codex-bare-batch.md) — `CLAUDE_CONFIG_DIR=~/.claude-bare claude -p` で codex に大入力を渡す定型コマンドと実測済みの罠。
+  発火語: claude-bare, claude -p で codex, codex 大入力, 272K 割増, disallowedTools, prompt.md
