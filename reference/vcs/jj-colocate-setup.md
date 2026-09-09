@@ -20,10 +20,8 @@
 
 ```bash
 mkdir -p "$REPO_PARENT/main" && cd "$REPO_PARENT/main"
-git init
-git commit -m "Initial empty commit" --allow-empty
-jj git init                # 既定で colocate。main bookmark が自動で立つ (workspace 名は default のまま)
-jj workspace rename main   # default → main (ディレクトリ名と揃える)
+# commit を挟んでから jj git init (main bookmark が立つ)、workspace 名は default のままなので rename まで 1 行で
+git init && git commit -m "Initial empty commit" --allow-empty && jj git init && jj workspace rename main
 cd .. && echo "guard: 上位への .git 探索を止める (実体は main/)" > .git && mkdir .jj
 echo "guard: 上位への .jj 探索を止める (実体は main/)" > .jj/README.md
 ```
@@ -33,9 +31,7 @@ echo "guard: 上位への .jj 探索を止める (実体は main/)" > .jj/README
 ```bash
 mkdir -p "$REPO_PARENT" && git clone <url> "$REPO_PARENT/main"
 cd "$REPO_PARENT/main"
-jj git init                              # 既定で colocate (workspace 名は default のまま)
-jj workspace rename main                 # default → main (ディレクトリ名と揃える)
-jj bookmark track main --remote=origin   # ★ 落とさない (下記)
+jj git init && jj workspace rename main && jj bookmark track main --remote=origin   # rename と track を落とさない (下記)
 cd .. && echo "guard: 上位への .git 探索を止める (実体は main/)" > .git && mkdir .jj
 echo "guard: 上位への .jj 探索を止める (実体は main/)" > .jj/README.md
 ```
