@@ -15,6 +15,22 @@
 		{
 			"name": "rules-syun",
 			"path": "../../claude-rules-syun/main"
+		},
+		{
+			"name": "privacy-personal",
+			"path": "../../privacy-personal/main"
+		},
+		{
+			"name": "privacy-emrd",
+			"path": "../../../kawaz123/privacy-emrd/main"
+		},
+		{
+			"name": "privacy-syun",
+			"path": "../../privacy-syun/main"
+		},
+		{
+			"name": "privacy-zunsystem",
+			"path": "../../privacy-zunsystem/main"
 		}
 	]
 }
