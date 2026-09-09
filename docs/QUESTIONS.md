@@ -20,4 +20,22 @@
 
 ## 裁定待ち
 
+### KN-Q1 読むだけ系 skill を knowledge カタログへ移すか
+
+[docs/issue/2026-09-09-readonly-skill-knowledge-migration.md](issue/2026-09-09-readonly-skill-knowledge-migration.md)。
+境界は「実行資源を伴うか」。統括推し: a と b は移す、c は手順書として残す。
+
+- [ ] a: `app-file-placement` を移す (付属ファイルなし、被参照は自身のみ)
+- [ ] b: `jj-rebase-options-reference` を移す (同上)
+- [ ] c: `cross-env-ssh-signing` を移す (コマンド手順を含むので手順書側が妥当と見ている)
+
 ## 確認待ち
+
+### KN-C1 cli-daemon-subcommands エントリの内容確認
+
+[skills/knowledge/reference/cli-daemon-subcommands.md](../skills/knowledge/reference/cli-daemon-subcommands.md)。
+r285m27 原文を起こし、llm-gateway 側の補足 4 点は別節に分離。見てほしいのは
+「採用側で決まった補足」節が体系本体に昇格してよいものか、と launcher 節を「検討」のままにしてよいか。
+
+- [ ] a: このままで OK (push して配布)
+- [ ] b: 修正あり (チャットで指摘)

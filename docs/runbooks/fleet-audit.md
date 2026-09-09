@@ -100,5 +100,5 @@ kawaz の全ローカルリポ (`~/.local/share/repos/github.com/kawaz/*` + `kaw
 ## 関連
 
 - `docs/runbooks/repo-retirement.md` — 引退リポの後始末手順 (手順 7 の受け皿)
-- `for-me/skills/release-flow/SKILL.md` — release workflow の標準型 (手順 5)
+- `skills/release-flow/SKILL.md` — release workflow の標準型 (手順 5)
 - `for-me/rules/push-workflow.md` — 未 push 残置の扱い (手順 6)

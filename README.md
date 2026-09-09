@@ -23,13 +23,18 @@ kawaz の Claude Code 用ルール / スキルの **central リポジトリ**。
 各リポ共通:
 
 - `for-all/rules/` — 全環境向けルール (全 `~/.claude*/rules/` に注入)
-- `for-all/skills/<slug>/` — 全環境向けスキル
 - `for-all/plugins.json` — 全環境に入れる Claude Code plugin の宣言 (setup.sh が install)
-- `for-me/rules/`, `for-me/skills/<slug>/` — その面の専用環境にのみ注入
+- `for-me/rules/` — その面の専用環境にのみ注入
 - `for-me/plugins.json` — その面の専用環境にのみ install する plugin の宣言。
   plugin の skill / agent description は全セッションの context に載るので、
   面固有の plugin はこちらに置く (for-all に置くと他の面にも語彙が漏れる)
 - `for-others/rules/` — 他環境から参照される情報 (固有名詞リスト等のサニタイズ規定)
+
+skill と agent は **リポ自体を Claude Code plugin として配布**する
+(`.claude-plugin/plugin.json` + リポ直下の `skills/<slug>/` `agents/` `hooks/`)。
+各リポの `for-all/plugins.json` に自リポの plugin を宣言し、setup.sh が install
+することで配備される。Skill tool からは `<plugin名>:<slug>` (例:
+`rules-personal:jj-workflow`) で呼ぶ。
 
 `for-me` の "me" は「個人 vs 他者」ではなく、kawaz が持つ複数の面
 (個人開発 / emrd 業務 / ...) のうちの **その overlay の面**を指す。
@@ -52,10 +57,11 @@ CLAUDE_CONFIG_DIR=~/.claude-emrd ./setup.sh
 setup.sh は `repos_mapping.json` の全 overlay を読み:
 
 - `for-*/rules/` を `$TARGET/rules/` 配下にディレクトリ symlink
-- `for-*/skills/<slug>/` を `$TARGET/skills/<repo>-<slug>` に per-skill symlink
-- `for-all/plugins.json` の plugin を `claude plugin install` (加えて、`$TARGET` を
-  所有するリポの `for-me/plugins.json` があればそれも install)
+- `for-all/plugins.json` の plugin を `claude plugin marketplace add` +
+  `claude plugin install` (加えて、`$TARGET` を所有するリポの
+  `for-me/plugins.json` があればそれも install)
 - 移動・削除された symlink の残骸 (dangling) を掃除
+  (plugin 化前の `$TARGET/skills/<repo>-<slug>` / `$TARGET/agents` の残骸も含む)
 
 詳細は `./setup.sh --help`。
 
