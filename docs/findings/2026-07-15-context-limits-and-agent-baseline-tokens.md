@@ -1,10 +1,10 @@
 # Claude Code の context 上限と agent 経路別ベースライン token の実測
 
-検証日: 2026-07-15。Claude Code v2.1.210 / cliproxyapi (personal 面 8317) / GPT-5.6 GA 直後。
+検証日: 2026-07-15。Claude Code v2.1.210 / Anthropic 互換 gateway 経由 (personal 面) / GPT-5.6 GA 直後。
 
 ## 判明した事実
 
-1. **200k の context 壁は Claude Code クライアント側の自己抑制**。proxy (cliproxyapi) にも
+1. **200k の context 壁は Claude Code クライアント側の自己抑制**。gateway にも
    upstream (codex) にも壁は無い。`CLAUDE_CODE_MAX_CONTEXT_TOKENS` env var で解除できる
 2. env var は `--bare` 専用ではなく**対話・通常モードでも有効** (input 285k の成功を実測)
 3. env var は**全モデル一律**に効く。モデル別に指定する仕組みは無い
@@ -19,7 +19,7 @@
    リスト)。縛りは `--disallowedTools Edit,Write,Bash` が正解 (書き込み拒否を実測)
 7. `--bare` は settings.json の env を読まない → `ANTHROPIC_BASE_URL` +
    `ANTHROPIC_AUTH_TOKEN` の明示が必須 (無いと "Not logged in")
-8. effort は cliproxyapi 越しでも upstream まで届く (thinking budget → reasoning_effort
+8. effort は gateway 越しでも upstream まで届く (thinking budget → reasoning_effort
    2 段変換)。effort は「上限」であり強制消費ではない
 9. GPT-5.6 の素の window は 1.05M。272K は「入力 2 倍・出力 1.5 倍の割増料金境界」で
    あってエラー境界ではない (250k 直投げ HTTP 200)。割増はサブスク quota 消費にも効く
@@ -41,7 +41,7 @@
 
 | 経路 | model | tokens | 備考 |
 |---|---|---|---|
-| `claude -p --bare` (proxy env 明示) | gpt-5.6-luna | 989 | tools は Bash/Edit/Read の 3 つ |
+| `claude -p --bare` (gateway env 明示) | gpt-5.6-luna | 989 | tools は Bash/Edit/Read の 3 つ |
 | Explore (built-in) | haiku 4.5 | 36,632 | stream-json の task_notification で観測 |
 | custom probe 最小定義 (headless, CLAUDE.md 無し) | gpt-5.6-luna | 67,417 | |
 | custom probe + `omitClaudeMd: true` | gpt-5.6-luna | 67,400 | 差 −17 ≈ ノイズ = 無効 |
@@ -58,7 +58,7 @@
 
 | テスト | 結果 |
 |---|---|
-| proxy `/v1/chat/completions` に 250k token 直 POST | HTTP 200、prompt_tokens 250,318 を正常処理 |
+| gateway `/v1/chat/completions` に 250k token 直 POST | HTTP 200、prompt_tokens 250,318 を正常処理 |
 | `--bare` + env var 1M + 240k 入力 | 成功 (input 200,787) |
 | 通常モード (`-p`、bare なし) + env var 1M + 285k 入力 | 成功 (input 285,074) |
 
@@ -66,7 +66,7 @@
 実地検証した。なお anthropics/claude-code リポは issue+CHANGELOG のみでソース非公開のため、
 バイナリ strings 掘りが一次資料になる。
 
-### effort の proxy 越し有効性
+### effort の gateway 越し有効性
 
 Anthropic 互換 `/v1/messages` に thinking budget を変えて投げる:
 
@@ -83,8 +83,3 @@ OpenAI 互換 `/v1/chat/completions` の `reasoning_effort` 直指定も疎通�
 - Explore: `model:"inherit"`, Edit/Write 系 6 tool disallow, `omitClaudeMd:!0`,
   lean prompt, gitStatus 除外 (Explore/Plan のみ)
 - worker: tools `["*"]`, `maxTurns:200`
-
-## 関連
-
-本 findings の主題は Claude Code 側の context 挙動。測定経路として使った
-cliproxyapi そのものの構成・プロバイダ側の知見は `kawaz/llm-notes` (private) が正本。

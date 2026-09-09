@@ -9,7 +9,7 @@ codex 系の委譲はまず agent preset (`codex-sol-worker` / `codex-sol-review
 ```bash
 SP=<scratchpad>   # prompt/結果の置き場。セッションの scratchpad を使う
 (cd <repo> && \
-  ANTHROPIC_BASE_URL=http://127.0.0.1:8317 ANTHROPIC_AUTH_TOKEN=local \
+  ANTHROPIC_BASE_URL=<settings.json env の値> ANTHROPIC_AUTH_TOKEN=<settings.json env の値> \
   CLAUDE_CODE_MAX_CONTEXT_TOKENS=1000000 \
   claude -p --bare --model gpt-5.6-sol \
   < "$SP/prompt.md" > "$SP/result.md" 2>&1)
@@ -17,7 +17,7 @@ SP=<scratchpad>   # prompt/結果の置き場。セッションの scratchpad �
 
 - `CLAUDE_CODE_MAX_CONTEXT_TOKENS`: 200k の壁はクライアント側の自己抑制 (settings.json env に 1M 常設済みだが、`--bare` は settings.json を読まないのでここでも明示する)。272K 超入力は割増料金 (入力 2 倍・出力 1.5 倍が全体に掛かる) — 割増後 sol ≒ fable 通常価格なので許容、割増帯を使う時はその旨を一言添える。実測の詳細は `docs/findings/2026-07-15-context-limits-and-agent-baseline-tokens.md`
 - model は用途で選ぶ: `gpt-5.6-sol` (レビュー・監査・高難度) / `gpt-5.6-terra` (通常) / `gpt-5.6-luna` (軽量)
-- 業務面では port を **8318** に変える (認証境界、面ごとの proxy 構成は `kawaz/llm-notes` の `docs/findings/2026-07-19-cliproxyapi-codex-runtime-notes.md`)
+- `ANTHROPIC_BASE_URL` / `ANTHROPIC_AUTH_TOKEN` は面ごとに値が違う (認証境界)。その面の `$CLAUDE_CONFIG_DIR/settings.json` の env から取る
 - 長い入力は必ずファイル (`prompt.md`) に書いて stdin リダイレクトで渡す (引数渡しは shell 引用の事故源)
 - 実行は Bash tool の `run_in_background: true` が基本 (数分かかる)。完了通知後に `result.md` を Read で回収
 
@@ -45,7 +45,7 @@ SP=<scratchpad>   # prompt/結果の置き場。セッションの scratchpad �
 - 出力はそのまま result.md になる。前置き・後書き不要と明記
 ```
 
-## effort は proxy 越しでも効く (実測)
+## effort は gateway 越しでも効く (実測)
 
 thinking budget 1024 vs 32000 で重い推論問題を比較 → output 925 vs 2,383 tokens (2.6 倍差)。budget → reasoning_effort 変換が upstream まで届いている。agent frontmatter の `effort` も同経路で有効。effort は「上限」であって強制消費ではない (簡単な問題では budget を上げても消費が増えない)。
 
@@ -58,7 +58,3 @@ thinking budget 1024 vs 32000 で重い推論問題を比較 → output 925 vs 2
 | custom agent preset | ~67-90k |
 
 subagent 側の注入 (~67k) の正体はツールスキーマ + ハーネス機構で、CLAUDE.md ではない (CLAUDE.md 無し環境でも 67k を実測)。frontmatter でこれを削る手段は無い (`omitClaudeMd` はユーザ agent では無効を実測) ため、大入力の逃げ道は本経路のみ。
-
-## 補足資料
-
-`kawaz/llm-notes` の `docs/findings/2026-07-19-cliproxyapi-codex-runtime-notes.md` — codex の経路・面分離・特性メモ (private リポ。プロキシ・プロバイダの知見はそちらが正本)。
