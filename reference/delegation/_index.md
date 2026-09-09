@@ -4,11 +4,9 @@
 
 - [model-effort-matrix](model-effort-matrix.md) — 課題の性質から agent を選ぶ表と判定分岐、モデル特性差、tier 分担の禁則、`[1m]` / effort の固定方針、委譲プロンプトに必ず入れる規約。
   発火語: worker 選定, サブエージェント委譲, model と effort, subagent_type, tier 分担, モデル特性, sonnet5 の手抜き, codex は不具合調査に強い, [1m], 委譲プロンプト, 監査側の禁則
-- [context-budget](context-budget.md) — 経路ごとの実効入力余地の表と見積り式、割増帯の扱い。
-  発火語: context が足りない, Prompt is too long, 実効余地, 見積り, 272K 超, 割増料金
+- [context-budget](context-budget.md) — 経路ごとの実効入力余地の表と見積り式、割増帯の扱い、codex に大入力を渡す `~/.claude-bare` 経路の定型コマンドと罠。
+  発火語: context が足りない, Prompt is too long, 実効余地, 見積り, 272K 超, 割増料金, claude-bare, codex 大入力, disallowedTools, prompt.md
 - [orchestration-phases](orchestration-phases.md) — Phase 0-4 の実行順序制御、適用ゲート、常時 rules との分担。
   発火語: Phase 0, 完了条件, 検証方法, やらないこと, リスク順分解, 実行ループ, 全体検証
 - [main-role-playbook](main-role-playbook.md) — 統括の失敗パターン・5 責務・立て直しの型・codex 委譲時のルール・開始時チェックリスト。
   発火語: 統括の立て直し, worker 起草の drift, 逐条監査, 自律進行, QUESTIONS.md, セッション開始チェック
-- [codex-bare-batch](codex-bare-batch.md) — `CLAUDE_CONFIG_DIR=~/.claude-bare claude -p` で codex に大入力を渡す定型コマンドと実測済みの罠。
-  発火語: claude-bare, claude -p で codex, codex 大入力, 272K 割増, disallowedTools, prompt.md
