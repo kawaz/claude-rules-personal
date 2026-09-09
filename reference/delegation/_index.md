@@ -2,12 +2,10 @@
 
 サブエージェントに何を誰へ渡すか、どの順序で進めるか、統括としてどう立て直すか。
 
-- [model-effort-matrix](model-effort-matrix.md) — 課題の性質から agent を選ぶ表と判定分岐、tier 分担の禁則、委譲プロンプトに必ず入れる規約。
-  発火語: worker 選定, サブエージェント委譲, model と effort, subagent_type, tier 分担, 委譲プロンプト, 監査側の禁則
-- [model-characteristics](model-characteristics.md) — sonnet5 / opus5 / fable / codex 系の性格差と effort の効き方。
-  発火語: モデル特性, sonnet5 の手抜き, fable は遅い, codex は不具合調査に強い, effort high が要る, ベンチ数値
-- [context-budget](context-budget.md) — 経路ごとの実効入力余地の表と見積り式、`[1m]` 固定と割増帯の扱い。
-  発火語: context が足りない, Prompt is too long, 実効余地, 見積り, [1m], 272K 超, 割増料金
+- [model-effort-matrix](model-effort-matrix.md) — 課題の性質から agent を選ぶ表と判定分岐、モデル特性差、tier 分担の禁則、`[1m]` / effort の固定方針、委譲プロンプトに必ず入れる規約。
+  発火語: worker 選定, サブエージェント委譲, model と effort, subagent_type, tier 分担, モデル特性, sonnet5 の手抜き, codex は不具合調査に強い, [1m], 委譲プロンプト, 監査側の禁則
+- [context-budget](context-budget.md) — 経路ごとの実効入力余地の表と見積り式、割増帯の扱い。
+  発火語: context が足りない, Prompt is too long, 実効余地, 見積り, 272K 超, 割増料金
 - [orchestration-phases](orchestration-phases.md) — Phase 0-4 の実行順序制御、適用ゲート、常時 rules との分担。
   発火語: Phase 0, 完了条件, 検証方法, やらないこと, リスク順分解, 実行ループ, 全体検証
 - [main-role-playbook](main-role-playbook.md) — 統括の失敗パターン・5 責務・立て直しの型・codex 委譲時のルール・開始時チェックリスト。

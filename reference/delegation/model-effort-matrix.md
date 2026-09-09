@@ -1,6 +1,6 @@
 # worker 選定 — model × effort マトリクスと委譲規約
 
-サブエージェント (worker) 委譲時のモデル選択と、委譲プロンプトに必ず入れる運用規約。モデルごとの性格差は reference の `delegation/model-characteristics`、入力量の見積りは reference の `delegation/context-budget`。
+サブエージェント (worker) 委譲時のモデル選択と、委譲プロンプトに必ず入れる運用規約。入力量の見積りは reference の `delegation/context-budget`。
 
 ## 自 tier 判定と分担原則
 
@@ -52,6 +52,21 @@ agent 名は `<model><effort>-worker[-用途]` (例: `sonnet5-worker-medium`)。
 - 難問・検証必須タスクを codex/opus に出す時は effort high 以上 (medium は検証を省いて誤答する)
 - codex を「不安定」を理由に避けるのは、実測の裏付けが無い限りバイアス
 - 同じ agent で effort だけ一時的に変える手段は無い。必要なら新規 agent 定義を作る
+
+## モデル特性差
+
+- sonnet5: effort を上げれば opus 級の問題も解けるが、解法が素朴で大量トークン消費によりコストが逆転しうる。複雑な課題が複数直列に絡むとルール・指示を無視して手抜きでゴールに向かう。指示の質に品質がそのまま比例する
+- opus5: 高精度推論・複雑な設計判断・エラーコストが高い判断向き。曖昧・矛盾した指示を自力で妥当に解消できる
+- fable: opus より広く複雑な判断と視野を持ち、指揮は fable-medium が opus-high/xhigh より遥かに良い。遅い。コードを直接書かせるより、要件壁打ち・プラン・codex への指示書き・成果のブレ検査に回す方が強い
+- codex (sol): 不具合調査・長時間自走・terminal/GUI 操作・Web リサーチ・コスト効率。claude 系は複雑な PR 作成・実務文書・長文脈整合・検証の厚さ (指示なしでも独立実装クロスチェックを自発的に行う)
+- 「claude 系が指示書 → codex が実装 → claude 系がブレ検査」の 3 段編成は難所を含む大型作業の現実解であって常用テンプレではない。1 worker 直行で足りるなら分けない
+- effort の効き方: sol / opus は medium だと検証を省いて誤答しうる。fable は medium でも検証が厚い
+- 公開ベンチ数値は自己測定・ゲーミング指摘ありなので、数値でなく役割構図で選ぶ
+
+## agent 定義の固定方針
+
+- claude 系はモデル ID の後ろに必ず `[1m]` を付ける (例 `claude-opus-5[1m]`)。haiku は非対応なので付けない。理由: 200k 超過に課金ペナルティは無く、途中で「Prompt is too long」死する損失の方が大きい
+- effort は全 agent 定義で明示する。未指定はメインの effort を継承して不定になる
 
 ## 委譲プロンプトに必ず入れる規約
 
