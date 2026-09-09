@@ -5,11 +5,9 @@ description: 統括メイン (main role) のローダー。必須 skill 群を�
 
 # load-role-main — 統括メインが必須の skill を連続 invoke
 
-**使い方**: 統括メイン (main role) として動く AI は、セッション開始時にこの skill を Skill tool で invoke する ([[role-based-skill-loading]] ルール参照)。以下の必須 skill を Skill tool で**順次 invoke** すること。1 個ずつ Skill tool で invoke = 統括の動作に必要な全知識が context に載る。
+**使い方**: 統括メイン (main role) として動く AI は、セッション開始時にこの skill を Skill tool で invoke する ([[role-based-skill-loading]] ルール参照)。以下を**順次ロード**する (skill は Skill tool で invoke、索引ファイルは Read)。全部載って初めて統括の動作に必要な知識が揃う。
 
-## 統括メインの必須 skill 一覧 (必ず invoke)
-
-以下を Skill tool で 1 個ずつ **必ず全て invoke**:
+## 統括メインの必須ロード一覧 (必ず全部)
 
 1. **`rules-personal:role-main-context`** — 統括メインの 5 責務 + 失敗パターンと立て直しの型
 2. **`rules-personal:worker-fleet`** — worker 選定の第一原則 (タスク難易度で選ぶ、テンプレ禁則)
