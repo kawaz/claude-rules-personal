@@ -28,11 +28,3 @@
 - [ ] b: 「業務用 GitHub アカウント」に一般化し、実名は overlay (private) 側にだけ置く
 
 ## 確認待ち
-
-### KN-C1 cli-daemon-subcommands エントリの内容確認
-
-[skills/knowledge/reference/cli-daemon-subcommands.md](../skills/knowledge/reference/cli-daemon-subcommands.md)。
-r285 mid 27 の help 文に mid 32〜34 (start / stop は supervise への操作) を織り込んだ形。この help 文で OK か。
-
-- [ ] a: このままで OK (push して配布)
-- [ ] b: 修正あり (チャットで指摘)
