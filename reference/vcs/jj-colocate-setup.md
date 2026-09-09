@@ -34,8 +34,7 @@ echo "guard: 上位への .jj 探索を止める (実体は main/)" > .jj/README
 ```bash
 mkdir -p "$REPO_PARENT" && git clone <url> "$REPO_PARENT/main"
 cd "$REPO_PARENT/main"
-jj git init                              # 既定で colocate
-jj workspace rename main                 # default → main
+jj git init                              # 既定で colocate。workspace 名はディレクトリ名 main になる
 jj bookmark track main --remote=origin   # ★ 落とさない (下記)
 cd .. && echo "guard: 上位への .git 探索を止める (実体は main/)" > .git && mkdir .jj
 echo "guard: 上位への .jj 探索を止める (実体は main/)" > .jj/README.md
