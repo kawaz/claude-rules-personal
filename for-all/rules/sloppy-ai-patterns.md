@@ -6,7 +6,7 @@
 kawaz スタンス: 手抜きで蓋をするくらいなら、調査未完了として可視化する方が誠実。
 
 各 pattern の代替手段 (言語別 event-driven primitive 表) と正当な例外の
-詳細は `sloppy-ai-patterns` skill を参照。
+詳細は reference の `agent-runtime/event-driven-alternatives` を参照。
 
 ## sleep / polling で時間待ち
 
@@ -25,14 +25,14 @@ kawaz スタンス: 手抜きで蓋をするくらいなら、調査未完了と
 3. ポーリング interval の値に根拠を言えるか? (言えないなら勘)
 
 正当な例外 (真の定期実行 / polling しか無い外部 API / test の deterministic
-sleep / commit 前提の wip) の判定条件は skill 側。
+sleep / commit 前提の wip) の判定条件は reference 側。
 
 ## 他に発見した anti-pattern の扱い
 
 新パターンに気づいたら追加検討。常時ロードには「症状 / なぜ駄目 / 自警」の
-~10 行だけ足し、代替表・例外の詳細は skill 側に足す (= 常時ロード肥大防止)。
+~10 行だけ足し、代替表・例外の詳細は reference 側に足す (= 常時ロード肥大防止)。
 既に専用 rule がある anti-pattern は重複させず link で済ます:
 
-- flaky 即断 / timeout 延長 / test 改変で green 偽装: test-failure-no-tampering skill
+- flaky 即断 / timeout 延長 / test 改変で green 偽装: [[test-integrity]]
 - 撤退 / 機能削除で逃げる: [[retreat-is-last-resort]]
 - 言語 default に無自覚に流れる: [[default-convergence-guard]]
