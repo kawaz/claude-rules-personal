@@ -1,7 +1,7 @@
 {
   "$schema-hint": "List of plugins to install via `claude plugin marketplace add` then `claude plugin install`. setup.sh runs both commands idempotently. Omit marketplace for built-in marketplaces (e.g. claude-plugins-official).",
   "plugins": [
-    {"marketplace": "kawaz/claude-cmux-msg",            "plugin": "cmux-msg@cmux-msg"},
+    {"marketplace": "kawaz/claude-ccmsg",               "plugin": "claude-ccmsg@claude-ccmsg"},
     {"marketplace": "kawaz/claude-session-analysis",    "plugin": "claude-session-analysis@claude-session-analysis"},
     {"marketplace": "kawaz/claude-gh-monitor",          "plugin": "gh-monitor@gh-monitor"},
     {"marketplace": "kawaz/claude-bash-safety",         "plugin": "bash-safety@bash-safety"},

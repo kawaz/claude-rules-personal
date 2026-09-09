@@ -43,6 +43,6 @@ translation pair の検証は `bump-semver vcs outdated` を justfile recipe (�
 - 検証内容: 正本 commit > 翻訳先 commit を検出 (= 翻訳先が古い = lag、失敗)
 - timestamp は **jj/git log** で取得 (stat mtime は jj workspace 切替で揺れるため避ける)
 - `ensure-clean` を deps に挟む (未コミット状態で timestamp 比較しても意味がない)
-- 相互リンク冒頭 5 行の存在チェックを併用したいリポでは別 recipe を立てる (実例: kawaz/claude-cmux-msg の `_check-translation-headers`)
+- 相互リンク冒頭 5 行の存在チェックを併用したいリポでは別 recipe を立てる
 
 詳細は **kawaz/bump-semver の `justfile`** (`check-outdated-translations` recipe) と `bump-semver vcs outdated --help` を参照。

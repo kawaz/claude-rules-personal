@@ -103,7 +103,7 @@ docs/
 
 ## 配布物の付随ドキュメント
 
-ランタイムが symlink で参照するドキュメント（例: cmux-msg がデータディレクトリ各階層に貼る README）は `docs/design/` 配下にソースを置き、ランタイムが `.docs/v<version>/` にコピー → `.docs/latest` symlink → 各階層 `README.md` symlink で参照する。
+ランタイムが symlink で参照するドキュメント（データディレクトリ各階層に貼る README 等）は `docs/design/` 配下にソースを置き、ランタイムが `.docs/v<version>/` にコピー → `.docs/latest` symlink → 各階層 `README.md` symlink で参照する。
 
 `/usr/share/doc/` のような OS 配布物スタイルは古い（探さない、見に行かない）ので避ける。一方、データディレクトリ自身が cd/ls 動線で自己言及するのは別物で、これは推奨。
 
@@ -124,7 +124,6 @@ docs/
 ## 参考実装
 
 - **kawaz/bump-semver**: `justfile` の **canonical**。task runner / 翻訳 check (`check-outdated-translations`) / version bump gate (`check-version-bumped`) / push gate の基準実装。構造変更はまずここから直し、他リポは追従する
-- kawaz/claude-cmux-msg: bump-semver の justfile を TypeScript + claude-plugin にカスタムした例 (multi-file version bump、`validate` / `check-bundle` / `_check-translation-headers` 相互リンク冒頭 5 行存在チェック)。`docs/decisions/`、`docs/design/data-layout-*.md`、`docs/STRUCTURE.md`、`docs/ROADMAP.md`、`docs/journal/`、`README-ja.md` + `README.md`
 - kawaz/authsock-warden: `docs/decisions/INDEX.md`、`docs/research/`、DR の書き方
 - kawaz/kuu.mbt: 50+ DR の運用、`decisions/archive/` への退避、`research/` への降格、INDEX.md の Active / Archived / Moved to research 3 区分
 - kawaz/zunsystem の業務リポジトリ: `docs/journal/` 運用、`docs/todo/`、`docs/references/`

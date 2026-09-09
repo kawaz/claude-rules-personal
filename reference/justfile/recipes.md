@@ -6,7 +6,7 @@
 ls -lt ~/.local/share/repos/github.com/kawaz/*/main/justfile | head
 ```
 
-bump-semver / cmux-msg / session-analysis 等の justfile を見ると、概ね次の recipe が並ぶ (詳細は実体):
+bump-semver / session-analysis 等の justfile を見ると、概ね次の recipe が並ぶ (詳細は実体):
 
 - `ci` — lint + test
 - `check-outdated-translations` — 翻訳 commit-lag 検出 (`bump-semver vcs outdated`)

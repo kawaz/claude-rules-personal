@@ -1,11 +1,11 @@
 # push 後の workflow watch 運用
 
-push の正規経路はリポの push task (justfile 等)。**push task は実行末尾で `cmux-msg notify --self` により AI に Monitor 起動指示を流すのが canonical**。AI は subscribe stream で能動受信して `just watch` を Monitor で起動する。
+push の正規経路はリポの push task (justfile 等)。**push task は実行末尾で `ccmsg notify --self` により AI に Monitor 起動指示を流すのが canonical**。AI は subscribe stream で能動受信して `just watch` を Monitor で起動する。
 
-`cmux-msg notify --self` を canonical にする理由:
+`ccmsg notify --self` を canonical にする理由:
 
 - `@echo "[hint] ..."` 経路は AI が hint を読み飛ばしたり引数を勝手に arrange する事故源 (= cache-warden で実例観測)
-- `cmux-msg notify --self` は subscribe stream に text 同梱で即届く、AI 側は task 名コピペだけで起動でき誤解釈の余地なし
+- `ccmsg notify --self` は subscribe stream に text 同梱で即届く、AI 側は task 名コピペだけで起動でき誤解釈の余地なし
 - watch 引数 (sha / repo / on-success action) を `just watch` task に集約できる
 
 canonical 実装は `kawaz/bump-semver` の justfile:
@@ -13,7 +13,7 @@ canonical 実装は `kawaz/bump-semver` の justfile:
 ```make
 push: ci check-outdated-translations check-version-bumped
     bump-semver vcs push --branch "$(bump-semver vcs get default-branch)" --jj-bookmark-auto-advance
-    cmux-msg notify --self --text "Monitor で 'just watch' を起動して" 2>/dev/null || true
+    ccmsg notify --self --text "Monitor で 'just watch' を起動して" 2>/dev/null || true
 
 watch:
     watch-workflow.sh --sha $(bump-semver vcs get commit-id --rev "$(bump-semver vcs get default-branch)") --on-success release.yml 'just on-success-release' kawaz/bump-semver
