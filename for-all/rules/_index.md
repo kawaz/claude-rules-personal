@@ -24,6 +24,7 @@
 ## 実装
 
 - [[sloppy-ai-patterns]] — sleep / polling 等で症状に蓋をしかけたとき
+- [[test-integrity]] — テストが fail したとき / テストを追加・削除するとき
 - [[retreat-is-last-resort]] — 機能削除・仕様の限界として諦めたくなったとき
 - [[empirical-verification]] — 挙動を根拠にするとき (推測でなく実機で)
 - [[spec-careful-reading]] — POSIX / RFC / API doc を判断根拠にするとき
@@ -54,6 +55,7 @@
 - [[no-hard-wrap]] — md を書く・話すとき (文中改行しない)
 - [[no-excessive-apology]] — 指摘・「なんで?」を受けたとき
 - [[design-impl-bidirectional-check]] — 「設計済み = 実装済み」と推定しないため
+- [[test-integrity]] — テストの green / ignore の扱いを検分するため
 - [[self-written-rule-blind-spots]] — check list の片面性を疑うため
 
 ## 運用・インフラ
