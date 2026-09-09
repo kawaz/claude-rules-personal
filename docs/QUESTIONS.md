@@ -20,11 +20,4 @@
 
 ## 裁定待ち
 
-### KN-Q2 public リポ (このリポ) に業務用 GitHub アカウント名を書いてよいか
-
-`for-all/rules/kawaz-identity.md` の GitHub 行と `for-me/rules/git-repo-management.md` の owner 表に業務用アカウント名 (overlay の identifiers に列挙されている語) が入っている。sanitize-work-identifiers の「public リポに入る一切」に該当する一方、owner 名で認証境界を判別する実用上の正本でもある。「エメラダ」の社名表記は一般化済み。
-
-- [ ] a: アカウント名は残す (GitHub 上で公開されている識別子なので許容、identifiers の運用例外として扱う)
-- [ ] b: 「業務用 GitHub アカウント」に一般化し、実名は overlay (private) 側にだけ置く
-
 ## 確認待ち

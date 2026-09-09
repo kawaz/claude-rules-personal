@@ -36,8 +36,8 @@ skill と agent は **リポ自体を Claude Code plugin として配布**する
 することで配備される。Skill tool からは `<plugin名>:<slug>` (例:
 `rules-personal:jj-workflow`) で呼ぶ。
 
-公開できない参照知識 (kawaz の好み・環境の癖・私的な事情) は、公開候補のこのリポではなく private リポ `kawaz/privacy-personal` に同じ構造で置く (業務面でしか効かないものは各 overlay の `for-me/`)。
-読み書きの手順は `rules-personal:knowledge` skill の「private の参照知識」節。
+個人情報系の参照知識は、公開候補のこのリポではなく private リポ `kawaz/privacy-personal` に同じ構造で置き、一般化前の横断メモは `${CLAUDE_PLUGIN_DATA}/` (ローカル) に置く (業務面でしか効かないものは各 overlay の `for-me/`)。
+読み書きの手順は `rules-personal:knowledge` skill の「ローカル層」「private 層」節。
 
 `for-me` の "me" は「個人 vs 他者」ではなく、kawaz が持つ複数の面
 (個人開発 / emrd 業務 / ...) のうちの **その overlay の面**を指す。

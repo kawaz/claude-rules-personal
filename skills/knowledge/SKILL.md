@@ -1,25 +1,36 @@
 ---
 name: knowledge
-description: 読むだけの参照知識のカタログ (索引 + 本文の二段構成、public の reference/ と private リポの 2 層)。索引に発火語があるトピックだけ `reference/<slug>.md` を Read する。public に置けない知識は private リポ側 (読み書き手順もここ)。収録トピックの発火語 — daemon / service サブコマンド体系、常駐プロセスの status・restart・log の CLI 設計、launchd / systemd --user への常駐登録、supervise 監督者構成、XDG Base Directory によるアプリのファイル置き場、jj のリビジョン指定・配置オプション、越境作業の SSH 認証・commit signing 切替、別ディレクトリでのコマンド実行 (direnv exec と cwd)、op run による secret の env 注入、say に渡す頭字語のカタカナ化、CLI 設計の好み (サブコマンド / --help / completion)、kawaz 本人の表記正本、findings の書き方と記録委譲。
+description: 読むだけの参照知識のカタログ (索引 + 本文の二段構成、public の reference/、面ごとのローカル層、個人情報の private リポの 3 層)。索引に発火語があるトピックだけ `reference/<slug>.md` を Read する。収録トピックの発火語 — daemon / service サブコマンド体系、常駐プロセスの status・restart・log の CLI 設計、launchd / systemd --user への常駐登録、supervise 監督者構成、XDG Base Directory によるアプリのファイル置き場、jj のリビジョン指定・配置オプション、越境作業の SSH 認証・commit signing 切替、別ディレクトリでのコマンド実行 (direnv exec と cwd)、op run による secret の env 注入、say に渡す頭字語のカタカナ化、CLI 設計の好み (サブコマンド / --help / completion)、kawaz 本人の表記正本、findings の書き方と記録委譲。
 ---
 
 # knowledge — 参照知識カタログ
 
-参照知識は 2 層ある。どちらも**索引を見て、必要なトピックのファイルだけ Read** する (context を最小化する)。索引だけ読んで該当が無ければ何も Read しない。
+参照知識は 3 層ある。どれも**索引を見て、必要なトピックのファイルだけ Read** する (context を最小化する)。索引だけ読んで該当が無ければ何も Read しない。
 
 - **`reference/`** (このリポで git 管理、下記「索引」) — 公開してよい体系知識
-- **private リポ** (`kawaz/privacy-personal`、下記「private の参照知識」) — 公開できない知識 (kawaz の好み・環境の癖・私的な事情)
+- **`${CLAUDE_PLUGIN_DATA}/`** (ローカル、面ごと、下記「ローカル層」) — rule にするほど一般化していないが別プロジェクトでも効く事実
+- **privacy リポ** (`kawaz/privacy-personal`、下記「private 層」) — 個人情報系 (本人の表記・アカウント名・連絡先)
 
 索引エントリの書き方・追加削除の規約は `for-all/rules/rule-writing-guidelines.md` (常時ロード rule) が正本。
 本文ファイルに書くのは**知識そのものだけ**: 出典・確定待ちの注記・採用側の個別事情・雑談めいたメモは書かず、help や spec の形で足りるものに表や節の装飾を足さない。
 
-## private の参照知識
+## ローカル層 (`${CLAUDE_PLUGIN_DATA}/`)
 
-public に置けない参照知識は private リポ `kawaz/privacy-personal` (`${XDG_DATA_HOME:-~/.local/share}/repos/github.com/kawaz/privacy-personal/main`) にあり、構造はこの skill と同じ (`INDEX.md` = 索引、`reference/<slug>.md` = 本文)。全ての面 (CLAUDE_CONFIG_DIR) から読む。業務面でしか効かない知識はその面の overlay リポ (`claude-rules-*` の `for-me/`) に置き、ここには書かない。
+面 (CLAUDE_CONFIG_DIR) ごとのローカルディレクトリ。構造は `reference/` と同じ: `${CLAUDE_PLUGIN_DATA}/INDEX.md` が索引、`${CLAUDE_PLUGIN_DATA}/reference/<slug>.md` が本文。git 管理外なのでこのマシン・この面にしか無い。
 
-読む: 下の索引と同じ要領で `INDEX.md` を Read し、発火語に該当するエントリだけ `reference/<slug>.md` を Read する (未 clone なら何もしない)。
+読む: `${CLAUDE_PLUGIN_DATA}/INDEX.md` を Read し (無ければ何もしない)、発火語に該当するエントリだけ本文を Read する。
 
-書く: `reference/<slug>.md` を作り `INDEX.md` に 1 エントリ足し、その 2 ファイルをパス指定で commit (push は `just push`)。本文の規約はこの skill の reference と同じ。書き先の判定は [[memory-placement]]。
+書く: `${CLAUDE_PLUGIN_DATA}/reference/<slug>.md` を作り `INDEX.md` に 1 エントリ足す。rule / reference に昇格させたらここから消す。
+
+## private 層 (privacy リポ)
+
+個人情報系の参照知識は private リポ `kawaz/privacy-personal` (`${XDG_DATA_HOME:-~/.local/share}/repos/github.com/kawaz/privacy-personal/main`) にあり、構造は `reference/` と同じ (`INDEX.md` + `reference/<slug>.md`)。全ての面から読む。
+
+読む: `INDEX.md` を Read し (未 clone なら何もしない)、該当エントリだけ本文を Read する。
+
+書く: `reference/<slug>.md` を作り `INDEX.md` に 1 エントリ足し、パス指定で commit、`just push`。
+
+書き先の判定は [[memory-placement]]。
 
 ## 索引
 
@@ -39,7 +50,5 @@ public に置けない参照知識は private リポ `kawaz/privacy-personal` (`
   発火語: say, 音声通知, 読み上げ, 頭字語のカタカナ化
 - [cli-design-preferences](reference/cli-design-preferences.md) — kawaz の CLI 設計の好み (サブコマンド構成 / `--help` の節構成 / bool フラグ / 引数位置 / completion)。
   発火語: CLI 設計, サブコマンド, --help, オプション, bool フラグ, completion, 引数パーサ
-- [kawaz-identity](reference/kawaz-identity.md) — kawaz 本人の表記正本 (漢字 / かな / ローマ字 / 用途別の選び方 / 誤記)。
-  発火語: 署名, 対外メール, 実名表記, 差出人名, ローマ字表記
 - [findings-recording](reference/findings-recording.md) — findings ファイルの構成テンプレと、記録をサブエージェントに委譲するプロンプトの型。
   発火語: findings, 調査結果を記録, 検証記録, docs/findings, 記録委譲
