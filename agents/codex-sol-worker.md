@@ -1,6 +1,6 @@
 ---
 name: codex-sol-worker
-description: codex gpt-5.6-sol (high)。向いている作業 = プラン確定済みの本実装・自走実行 (指示書は fable に書かせる)、不具合調査・デバッグ・原因の再現追跡 (圧倒的に強い)、長時間エージェント自走、terminal 操作、Web リサーチ。不向き = 要件から考える作業 (claude 系へ)、大入力 (実効 ~120k、超えるなら codex-bare-batch skill)。レビュー特化は codex-sol-reviewer。
+description: codex gpt-5.6-sol (high)。向いている作業 = プラン確定済みの本実装・自走実行 (指示書は fable に書かせる)、不具合調査・デバッグ・原因の再現追跡 (圧倒的に強い)、長時間エージェント自走、terminal 操作、Web リサーチ。不向き = 要件から考える作業 (claude 系へ)、大入力 (実効 ~120k、超えるなら reference の delegation/codex-bare-batch)。レビュー特化は codex-sol-reviewer。
 model: gpt-5.6-sol
 effort: high
 ---

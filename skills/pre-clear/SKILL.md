@@ -96,7 +96,7 @@ loaded_by:
   どの issue から導いたか) を併記する
 
 **粒度**: 1 項目 = 1 検証可能単位 (完了をどう確認するかが 1 行で書ける粒度。
-orchestrate skill Phase 0 と同じ基準)。複雑な手順は**具体的な実行コマンド例と
+reference の `delegation/orchestration-phases` Phase 0 と同じ基準)。複雑な手順は**具体的な実行コマンド例と
 結果の見方**まで書く — 省くと後継が手探りのやり直しをする。ただし手順そのものが
 再利用価値を持つなら、指示に直書きせず §1.5 で runbook / findings に落とし、
 継続指示は「`docs/runbooks/<file>` を読んで実行」の参照形にする (そちらの方が
@@ -110,7 +110,7 @@ orchestrate skill Phase 0 と同じ基準)。複雑な手順は**具体的な実
 
 state はロード 1 回で消費される揮発ハンドオフであり、**永続知識の置き場ではない**。
 書き始める前に、現コンテキストにしか無い以下をリポ側へ落とす (分類は
-`docs-knowledge-flow` skill):
+reference の `docs-authoring/knowledge-timing`):
 
 - 確立した手順・復旧手順 → `docs/runbooks/`
 - 調査で確定した事実・数値 → `docs/findings/` / `docs/knowledge/`

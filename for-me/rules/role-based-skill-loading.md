@@ -1,6 +1,6 @@
-# Role-based skill loading — 役割別必須スキルのロード
+# Role-based loading — 役割別必須知識のロード
 
-役割ごとに必要なルールを skill に切り出し、セッション開始時に role を判定して対応するローダーを invoke することで、role 別に必要なものだけロードする。
+役割ごとに必要な知識を参照知識 (`reference/`) に切り出し、セッション開始時に role を判定して対応する索引を Read することで、role 別に必要なものだけロードする。
 
 ## セッション開始時の必須手順
 
@@ -13,17 +13,16 @@
 
 ### 2. role 分類
 
-| role | 該当ケース | ロード skill |
+| role | 該当ケース | ロードするもの |
 |---|---|---|
-| `main` | フロントエンドで直接ユーザと会話する統括、任意のプロジェクトを指揮 | `load-role-main` |
-| `worker` | Agent tool 経由の実作業サブエージェント (実装 / リサーチ / journal 執筆 等) | agent frontmatter で必要な skill を明示指定 |
-| `reviewer` | Agent tool 経由の read-only 検査サブエージェント | agent frontmatter で必要な skill を明示指定 |
+| `main` | フロントエンドで直接ユーザと会話する統括、任意のプロジェクトを指揮 | `reference/role-main/_index.md` |
+| `worker` | Agent tool 経由の実作業サブエージェント (実装 / リサーチ / journal 執筆 等) | agent frontmatter で必要なものを明示指定 |
+| `reviewer` | Agent tool 経由の read-only 検査サブエージェント | agent frontmatter で必要なものを明示指定 |
 
-### 3. `load-role-{name}` を Skill tool で invoke
+### 3. role の索引を Read する
 
-判定した role に対応する `load-role-{name}` を Skill tool で invoke。ロード後、そのスキルの本文に列挙された全 skill を Skill tool で順次 invoke する ([[role-main-context]] 等、3〜10 個の関連 skill が並ぶ)。Skill 内から別 Skill を自動ロードする機構は無いので、**AI が本文の指示を必ず履行する**。
+`main` なら `~/.local/share/repos/github.com/kawaz/claude-rules-personal/main/reference/role-main/_index.md` を Read し、**そこに列挙されたファイルを順に Read する**。索引を読んだだけでは知識は載らないので、**AI が列挙の履行まで責任を持つ**。
 
-## 命名規約
+## 統括は自律進行する (ボール渡しで止まらない)
 
-- **役割スキル本体**: `role-{name}-{suffix}` (例: `role-main-context`)
-- **ローダースキル**: `load-role-{name}` (例: `load-role-main`)
+依頼の範囲内で可逆かつ既定方針に沿う作業は確認せず着手する。**着手順そのものを自律判断する** — 候補を並べて選ばせない。**報告と着手は同一ターン**で、「準備に取り掛かります」の宣言だけで待ちに入らない。1 単位終わったらその場で次を探す (TODO の残り / `docs/QUESTIONS.md` の裁定済み / `docs/issue/` / 派生タスク)。止まってよいのは、裁定が無いと進めないもの以外に何も残っていない時だけで、その時は `say` で呼びかける。例外は不可逆・外向きの操作と、前提を取り違えると全量やり直しになる分岐。失敗の実例は reference の `delegation/main-role-playbook` を読む。
