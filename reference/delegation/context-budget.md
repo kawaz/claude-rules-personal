@@ -18,8 +18,8 @@ model×effort と同時に「タスクが運ぶ入力量 vs 経路の余地」�
 
 ## モデル ID と effort の固定方針
 
-- **claude 系 worker は常に `[1m]` 付きモデル ID を使う** (sonnet/opus/fable いずれも)。200k 超過に課金ペナルティは無く、途中で「Prompt is too long」死する損失の方が大きい。agent 定義 frontmatter は `claude-sonnet-5[1m]` / `claude-opus-5[1m]` の形で書く
-- **effort は全 agent 定義で明示する**。未指定はメインの effort を継承するため、メインが fable/opus を目的別 effort で運用している以上 worker の effort が起動元の状態次第で不定になる (意図せず xhigh や low で走る)。Agent tool に effort パラメータは無いので frontmatter が唯一の制御点
+- claude 系はモデル ID の後ろに必ず `[1m]` を付ける (例 `claude-opus-5[1m]`)。haiku は非対応なので付けない。理由: 200k 超過に課金ペナルティは無く、途中で「Prompt is too long」死する損失の方が大きい
+- effort は全 agent 定義で明示する。未指定はメインの effort を継承して不定になる。Agent tool に effort パラメータは無いので frontmatter が唯一の制御点
 
 ## 割増帯 (272K 超) の扱い
 

@@ -2,13 +2,6 @@
 
 サブエージェントに何を誰へ渡すか、どの順序で進めるか、統括としてどう立て直すか。
 
-入口は 4 つ:
-
-- **worker を選ぶ** → `model-effort-matrix` (表と判定分岐)。性格差の背景を知りたければ `model-characteristics`、入力量が心配なら `context-budget`
-- **順序を決める** → `orchestration-phases` (Phase 0-4)
-- **統括として立て直す** → `main-role-playbook` (失敗パターン・5 責務・立て直しの型)
-- **codex に大入力を渡す** → `codex-bare-batch`
-
 - [model-effort-matrix](model-effort-matrix.md) — 課題の性質から agent を選ぶ表と判定分岐、tier 分担の禁則、委譲プロンプトに必ず入れる規約。
   発火語: worker 選定, サブエージェント委譲, model と effort, subagent_type, tier 分担, 委譲プロンプト, 監査側の禁則
 - [model-characteristics](model-characteristics.md) — sonnet5 / opus5 / fable / codex 系の性格差と effort の効き方。
