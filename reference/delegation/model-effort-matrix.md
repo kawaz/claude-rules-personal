@@ -25,7 +25,7 @@
 
 agent 名は `<model>-worker-<effort>` / `<model>-reviewer[-<effort>]` (例: `sonnet-worker-medium`)。表中は `sonnet-medium` と略記する。Agent tool の `subagent_type` には `rules-personal:` を付ける (例: `rules-personal:sonnet-worker-medium`)。
 
-agent 定義は `agents/` 配下 (臨時作成のものは description に「常用しない」と明記)。`nitpick-reviewer` は model/effort が `fable-high` と同じだが独自の指示文 (12 の絶対ルール・15 のペルソナ) を持つので別物。独自の指示文を持つ agent は使用実績だけで削らない。
+agent 定義は `agents/` 配下。`nitpick-reviewer` は model/effort が `fable-high` と同じだが独自の指示文 (12 の絶対ルール・15 のペルソナ) を持つので別物。独自の指示文を持つ agent は使用実績だけで削らない。
 
 ## 課題の性質 × 選択
 
