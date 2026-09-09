@@ -42,7 +42,7 @@
 
 ## private 層 (`~/.local/share/repos/github.com/kawaz/privacy-personal/main/reference/`)
 
-本文は private リポにあり、索引だけをここに写す (privacy 側の `INDEX.md` を更新したら同じ変更でこちらも更新する)。未 clone なら何もしない。
+本文は private リポにあり、索引だけをここに写す (privacy 側の `reference/_index.md` を更新したら同じ変更でこちらも更新する)。未 clone なら何もしない。
 
 - [kawaz-identity](~/.local/share/repos/github.com/kawaz/privacy-personal/main/reference/kawaz-identity.md) — kawaz 本人の表記正本 (漢字 / かな / ローマ字 / GitHub アカウント / 用途別の選び方 / 誤記)。
   発火語: 署名, 対外メール, 実名表記, 差出人名, ローマ字表記, GitHub アカウント名, 業務用アカウント
