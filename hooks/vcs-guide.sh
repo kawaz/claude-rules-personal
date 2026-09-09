@@ -76,7 +76,7 @@ elif has "$changing"; then
   else
     kind=normal
   fi
-elif has "$git_status" && [ "$layout" != git-only ]; then
+elif has "$git_status" && [ "$layout" = git-only ]; then
   kind=git-status
 else
   exit 0
@@ -84,18 +84,15 @@ fi
 
 # 手順書の案内は個人面のリポだけ (許可リスト)。他の面のリポは別ワークフローで
 # 運用しており、本 hook の案内は当てはまらない。
-# 例外は git-status — jj 管理下なら場所を問わず jj を使うべきなので常に案内する。
-if [ "$kind" != git-status ]; then
-  printf '%s' "$target" |
-    grep -qE '/github\.com/kawaz/|/\.dotfiles/|/zunsystem/' || exit 0
-fi
+printf '%s' "$target" |
+  grep -qE '/github\.com/kawaz/|/\.dotfiles/|/zunsystem/' || exit 0
 
 case $kind in
 git-init)
   message="新規リポジトリは jj colocate + 親ガード方式で始めます。$ref_dir/jj-colocate-setup.md の「新規リポジトリ作成」節 (clone なら「既存リポジトリの clone」節) を Read して、その手順で作成してください。"
   ;;
 git-status)
-  message="jj 管理下なので \`git status\` ではなく \`jj status\` を使ってください (コミット操作は $ref_dir/jj-commit-basics.md を参照)。"
+  message="このリポは jj 管理されていません (git 専用)。kawaz 管理のリポは jj colocate + 親ガード方式が標準なので、$ref_dir/jj-colocate-setup.md の「移行 (旧方式リポの入れ替え)」節 (新規なら「新規リポジトリ作成」節) を Read して colocate 化を検討してください。"
   ;;
 migrate)
   message="このリポは旧方式 (git bare + jj workspace) です。手順書が未ロードなら次を Read してください: $ref_dir/jj-bare-workspace-setup.md (旧方式の手順), $ref_dir/jj-commit-basics.md (コミット操作), $ref_dir/jj-restructure.md (組み替え), $ref_dir/jj-recovery.md (復旧)。あわせて $ref_dir/jj-colocate-setup.md の「移行 (旧方式リポの入れ替え)」節を読み、colocate 方式への移行を検討してください。"

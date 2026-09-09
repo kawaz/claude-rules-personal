@@ -19,6 +19,7 @@ mkdir -p "$OWN/colocate/.jj" && git init -q "$OWN/colocate"
 mkdir -p "$OWN/bare/.jj"
 mkdir -p "$OWN/gitonly" && git init -q "$OWN/gitonly"
 mkdir -p "$OTHER/x/.jj" && git init -q "$OTHER/x"
+mkdir -p "$OTHER/gitonly" && git init -q "$OTHER/gitonly"
 
 run() { # run <cwd> <command> [session_id]
   jq -n --arg c "$2" --arg d "$1" --arg s "${3:-sess-default}" \
@@ -85,17 +86,16 @@ assert_contains "git init は colocate 新規作成へ誘導" \
   "jj-colocate-setup.md の「新規リポジトリ作成」節"
 
 # --- git status -------------------------------------------------------------
-assert_contains "jj 管理下の git status は jj status を案内" \
-  "$(run "$OWN/colocate" "git status" s10)" \
-  "\`jj status\` を使ってください"
-assert_contains "jj 管理下の git status は jj-commit-basics を案内" \
-  "$(run "$OWN/colocate" "git status" s11)" \
-  "jj-commit-basics.md"
-assert_empty "git 専用リポの git status は無案内" \
-  "$(run "$OWN/gitonly" "git status" s12)"
-assert_contains "許可リスト外のパスでも jj 管理下の git status は案内" \
-  "$(run "$OTHER/x" "git status" s12b)" \
-  "\`jj status\` を使ってください"
+assert_contains "git 専用リポの git status は colocate 化を案内" \
+  "$(run "$OWN/gitonly" "git status" s10)" \
+  "jj 管理されていません"
+assert_contains "git 専用リポの git status は移行節を案内" \
+  "$(run "$OWN/gitonly" "git status" s11)" \
+  "jj-colocate-setup.md"
+assert_empty "jj 管理下 (colocate) の git status は無案内" \
+  "$(run "$OWN/colocate" "git status" s12)"
+assert_empty "許可リスト外の git 専用リポの git status は無案内" \
+  "$(run "$OTHER/gitonly" "git status" s12b)"
 
 # --- 読み取り系は無案内 -----------------------------------------------------
 assert_empty "jj log は無案内" "$(run "$OWN/colocate" "jj log -r @" s13)"
@@ -126,8 +126,8 @@ second=$(run "$OWN/colocate" "jj commit -m y f" dedup-sess)
 assert_contains "dedup: 同一セッション同一リポの 1 回目は案内" "$first" "jj-colocate-setup.md"
 assert_empty "dedup: 同一セッション同一リポの 2 回目は無案内" "$second"
 assert_contains "dedup: 種別が違えば同じリポでも案内する" \
-  "$(run "$OWN/colocate" "git status" dedup-sess)" \
-  "\`jj status\` を使ってください"
+  "$(run "$OWN/colocate" "git init" dedup-sess)" \
+  "新規リポジトリ作成"
 
 echo
 echo "passed: $pass, failed: $fail"
