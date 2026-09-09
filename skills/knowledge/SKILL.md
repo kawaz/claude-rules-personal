@@ -26,7 +26,7 @@ description: 読むだけの参照知識のカタログ (索引 + 本文の二�
 
 個人情報系の参照知識は private リポ `kawaz/privacy-personal` (`${XDG_DATA_HOME:-~/.local/share}/repos/github.com/kawaz/privacy-personal/main`) にあり、構造は `reference/` と同じ (`INDEX.md` + `reference/<slug>.md`)。全ての面から読む。
 
-読む: `INDEX.md` を Read し (未 clone なら何もしない)、該当エントリだけ本文を Read する。
+索引は下の「索引 — private 層」に写してある (索引は public でよく、本文だけ private)。該当エントリの本文を Read する (未 clone なら何もしない)。privacy 側の `INDEX.md` を更新したら同じ変更でこちらも更新する。
 
 書く: `reference/<slug>.md` を作り `INDEX.md` に 1 エントリ足し、パス指定で commit、`just push`。
 
@@ -52,3 +52,8 @@ description: 読むだけの参照知識のカタログ (索引 + 本文の二�
   発火語: CLI 設計, サブコマンド, --help, オプション, bool フラグ, completion, 引数パーサ
 - [findings-recording](reference/findings-recording.md) — findings ファイルの構成テンプレと、記録をサブエージェントに委譲するプロンプトの型。
   発火語: findings, 調査結果を記録, 検証記録, docs/findings, 記録委譲
+
+### 索引 — private 層 (`~/.local/share/repos/github.com/kawaz/privacy-personal/main/reference/`)
+
+- [kawaz-identity](~/.local/share/repos/github.com/kawaz/privacy-personal/main/reference/kawaz-identity.md) — kawaz 本人の表記正本 (漢字 / かな / ローマ字 / GitHub アカウント / 用途別の選び方 / 誤記)。
+  発火語: 署名, 対外メール, 実名表記, 差出人名, ローマ字表記, GitHub アカウント名, 業務用アカウント

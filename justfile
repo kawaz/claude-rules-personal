@@ -135,7 +135,7 @@ lint-rules:
             echo "FATAL knowledge dead link: SKILL.md の reference/${slug}.md が実在しない"
             fatal=1
         fi
-    done < <(rg -o 'reference/([^)]+)\.md' -r '$1' skills/knowledge/SKILL.md 2>/dev/null | sort -u)
+    done < <(rg -o '\(reference/([^)]+)\.md\)' -r '$1' skills/knowledge/SKILL.md 2>/dev/null | sort -u)
     if [ "$fatal" -ne 0 ]; then
         echo "lint-rules: FATAL 違反あり (上記参照)" >&2
         exit 1
