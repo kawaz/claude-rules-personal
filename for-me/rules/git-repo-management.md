@@ -2,7 +2,7 @@
 
 ## workflow の選択
 
-worktree / commit / PR 作業は reference の `vcs/_index` で構成を見分け、該当する本文に従う。
+VCS コマンド実行時に hook (`hooks/vcs-guide.sh`) が構成に応じた reference を案内する。
 
 ## パス規約
 

@@ -26,7 +26,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/vcs-skill-autoload.sh\""
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/vcs-guide.sh\""
           },
           {
             "type": "command",
