@@ -30,4 +30,4 @@ direnv exec だけの片方では事故る (どちらがどう壊れるかの実
 が正本)。`~/.ssh/config` の Match exec (cwd/remote 判定) は cd でも効くが、
 env 由来の切替 (jj signing 等) は direnv exec が要る。rules は全環境に
 注入されるが memory は越境しない。**push / commit signing を伴う越境**は
-認証が2経路あり、`cross-env-ssh-signing` skill の手順に従う。
+認証が2経路あり、`knowledge` skill の `cross-env-ssh-signing` を参照。
