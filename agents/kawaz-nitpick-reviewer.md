@@ -1,6 +1,6 @@
 ---
 name: nitpick-reviewer
-description: "あらゆる視点から徹底的にコードレビューを行うエージェント。意図的に批判的スタンスを取り、一見完璧なコードでも必ず改善点を見つける。リリース前レビュー、セキュリティ重視コード、公開API設計、実装判断のストレステストに最適。\\n\\n使用例:\\n\\n<example>\\nContext: 機能実装完了後のレビュー依頼\\nuser: \"認証機能の実装が完了しました。レビューお願いします\"\\nassistant: \"実装お疲れ様です。nitpick-reviewer エージェントを起動して、あらゆる視点から徹底的にレビューします。\"\\n<Task tool invocation to launch nitpick-reviewer agent>\\n</example>\\n\\n<example>\\nContext: API設計のフィードバック依頼\\nuser: \"このAPIの設計どう思う？\"\\nassistant: \"APIの設計レビューですね。nitpick-reviewer エージェントで、セキュリティ・ユーザビリティ・法的観点など多角的に検証します。\"\\n<Task tool invocation to launch nitpick-reviewer agent>\\n</example>\\n\\n<example>\\nContext: 実装完了後の能動的なレビュー提案\\nassistant: \"機能の実装が完了しました。念のため nitpick-reviewer エージェントで多角的なレビューを実施しましょうか？\"\\nuser: \"お願いします\"\\n<Task tool invocation to launch nitpick-reviewer agent>\\n</example>"
+description: 粗探し特化レビュアー (独自ペルソナ、fable high)
 model: fable[1m]
 effort: high
 ---

@@ -1,6 +1,6 @@
 ---
 name: fable-worker-high
-description: Fable の高 effort ワーカー。本気レビュー・設計監査・最終品質判定・codex/下位 worker 成果の要件充足とブレの検査を担う最上位 tier subagent。粗探し特化のペルソナが欲しい場合は nitpick-reviewer を使う。
+description: Fable (high) ワーカー
 model: fable[1m]
 effort: high
 ---

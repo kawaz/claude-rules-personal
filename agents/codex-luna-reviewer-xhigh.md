@@ -1,6 +1,6 @@
 ---
 name: codex-luna-reviewer-xhigh
-description: codex gpt-5.6-luna (xhigh) のレビュー特化。kawaz 明示指示 (2026-08-16、kuu 値カプセル設計の多系統レビュー) で臨時作成。常用しない。読み取り専用。
+description: codex luna (xhigh) レビュアー。読み取り専用
 model: gpt-5.6-luna
 effort: xhigh
 ---

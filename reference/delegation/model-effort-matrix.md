@@ -23,7 +23,7 @@
 
 ## agent 名と prefix 規約
 
-agent 名は `<model><effort>-worker[-用途]` (例: `sonnet-worker-medium`)。表中は `sonnet-medium` と略記する。Agent tool の `subagent_type` には `rules-personal:` を付ける (例: `rules-personal:sonnet-worker-medium`)。
+agent 名は `<model>-worker-<effort>` / `<model>-reviewer[-<effort>]` (例: `sonnet-worker-medium`)。表中は `sonnet-medium` と略記する。Agent tool の `subagent_type` には `rules-personal:` を付ける (例: `rules-personal:sonnet-worker-medium`)。
 
 agent 定義は `agents/` 配下 (臨時作成のものは description に「常用しない」と明記)。`nitpick-reviewer` は model/effort が `fable-high` と同じだが独自の指示文 (12 の絶対ルール・15 のペルソナ) を持つので別物。独自の指示文を持つ agent は使用実績だけで削らない。
 
@@ -42,6 +42,7 @@ agent 定義は `agents/` 配下 (臨時作成のものは description に「常
 | 検証設計・原因分析・機械確認系レビュー・worker 成果の検査 | opus-high |
 | 複雑な PR 作成・実務文書・長文脈整合が要る統合作業 | opus 系 |
 | 本気レビュー・設計監査 (意味論の穴探し) | fable-high / 別系統の二次意見は codex-sol-reviewer |
+| codex の高度枠で sol より上を試す (sol の 2 倍コスト) | codex-astra-worker |
 | 穴探しを安く数で当てる (多系統レビューの 1 系統) | codex-luna-reviewer-xhigh |
 | 粗探し特化のレビュー | nitpick-reviewer |
 | 指揮・タスク分解・統合 (メイン) | fable (通常 medium / 大型タスクは high) |

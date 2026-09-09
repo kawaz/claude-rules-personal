@@ -1,6 +1,6 @@
 ---
 name: sonnet-worker-xhigh
-description: Sonnet (xhigh)。kawaz 明示指示 (2026-08-16、kuu 値カプセル設計の 4 系統レビュー) で臨時作成した高 effort レビュー用定義。常用しない。
+description: Sonnet (xhigh) レビュー用。常用しない
 model: sonnet[1m]
 effort: xhigh
 ---

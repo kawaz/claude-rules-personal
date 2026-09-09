@@ -1,6 +1,6 @@
 ---
 name: codex-sol-reviewer
-description: codex gpt-5.6-sol (high) のレビュー特化。向いている作業 = claude 系の成果への二次意見 (別モデル系統の視点)、設計文書・schema・コードの全方位辛口レビュー。読み取り専用。実装や調査は codex-sol-worker、最終品質判定は fable-worker-high へ。
+description: codex sol (high) レビュアー。読み取り専用
 model: gpt-5.6-sol
 effort: high
 ---
