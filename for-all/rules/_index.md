@@ -51,6 +51,7 @@
 - [[feedback-evaluation]] — ユーザの意見・提案を取り入れる前の賛否表明
 - [[discussion-style]] — 議論レーンでの応答 (畳まない / 走らない)
 - [[report-and-decomposition-form]] — 状況・原因・複数案を報告する形
+- [[no-hard-wrap]] — md を書く・話すとき (文中改行しない)
 - [[no-excessive-apology]] — 指摘・「なんで?」を受けたとき
 - [[design-impl-bidirectional-check]] — 「設計済み = 実装済み」と推定しないため
 - [[self-written-rule-blind-spots]] — check list の片面性を疑うため
@@ -67,6 +68,7 @@
 
 - [[work-principles]] — 全フェーズ横断の作業原則 (指示遵守 / TODO / 委譲)
 - [[rule-writing-guidelines]] — rule / skill を書く・改廃するとき
+- [[no-hard-wrap]] — rule / skill / docs の md で行長を揃える改行をしない
 - [[research-documentation]] — 調査・検証結果を記録するとき
 - [[no-historical-noise]] — docs に history narrative を書きたくなったとき
 - [[self-written-rule-blind-spots]] — ルールを起草した直後
