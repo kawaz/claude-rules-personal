@@ -92,7 +92,7 @@ assert_contains "最後の cd 先で構成を判定する" \
 # --- git init ---------------------------------------------------------------
 assert_contains "git init は colocate 新規作成へ誘導" \
   "$(run "$OWN/gitonly" "git init" s9)" \
-  "jj-colocate-setup.md の「新規リポジトリ作成」節"
+  "jj-colocate-setup.md"
 
 # --- git status -------------------------------------------------------------
 assert_contains "git 専用リポの git status は colocate 化を案内" \
@@ -106,15 +106,9 @@ assert_empty "jj 管理下 (colocate) の git status は無案内" \
 assert_contains "除外リスト外の git 専用リポの git status は colocate 化を案内" \
   "$(run "$OTHER/gitonly" "git status" s12b)" \
   "jj 管理されていません"
-assert_contains "repos 配下の git 専用リポは main/ レイアウトの移行節を案内" \
-  "$(run "$OWN/gitonly" "git status" s12c)" \
-  "main/"
-assert_contains "repos 外の適当なディレクトリは jj git init --colocate だけを案内" \
+assert_contains "repos 外の適当なディレクトリでも同じ案内 (適用範囲は reference 側)" \
   "$(run "$ADHOC/g" "git status" s12d)" \
-  "jj git init --colocate"
-assert_contains "repos 外の git init は main/ レイアウトを求めない" \
-  "$(run "$ADHOC" "git init" s12e)" \
-  "main/ レイアウトの規約は不要"
+  "jj-colocate-setup.md"
 
 # --- 読み取り系は無案内 -----------------------------------------------------
 assert_empty "jj log は無案内" "$(run "$OWN/colocate" "jj log -r @" s13)"
@@ -146,7 +140,7 @@ assert_contains "dedup: 同一セッション同一リポの 1 回目は案内" 
 assert_empty "dedup: 同一セッション同一リポの 2 回目は無案内" "$second"
 assert_contains "dedup: 種別が違えば同じリポでも案内する" \
   "$(run "$OWN/colocate" "git init" dedup-sess)" \
-  "新規リポジトリ作成"
+  "jj colocate で始めます"
 
 echo
 echo "passed: $pass, failed: $fail"

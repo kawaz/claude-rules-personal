@@ -1,6 +1,6 @@
 # jj colocate + 親ガード方式のセットアップと運用 (新標準)
 
-適用: **`{repo}/main/.git` と `{repo}/main/.jj` が両方ディレクトリ** (= colocate) のリポ。リポ直下に `.jj` があり `main/.git` が無い場合は旧方式なので reference の `vcs/jj-bare-workspace-setup` に従う (既存リポを本方式へ移す手順は下記「移行」)。
+適用: **`{repo}/main/.git` と `{repo}/main/.jj` が両方ディレクトリ** (= colocate) のリポ。`{repo}/main/` を起点にする親ガード方式のレイアウトは `~/.local/share/repos/` 配下のリポだけの規約で、それ以外の場所 (とりあえずバージョン管理したい適当なディレクトリ等) は `git init && jj git init --colocate` をその場で行えばよく、main/ も親ガードも要らない。リポ直下に `.jj` があり `main/.git` が無い場合は旧方式なので reference の `vcs/jj-bare-workspace-setup` に従う (既存リポを本方式へ移す手順は下記「移行」)。
 
 ## レイアウト
 
