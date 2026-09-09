@@ -6,7 +6,7 @@ model×effort と同時に「タスクが運ぶ入力量 vs 経路の余地」�
 
 | 経路 | 上限 | ベースライン注入 | 実効余地 |
 |---|---|---|---|
-| claude 系 worker `[1m]` (sonnet5/opus5 preset) | 1M | ~70-90k | ~900k |
+| claude 系 worker `[1m]` (sonnet/opus preset) | 1M | ~70-90k | ~900k |
 | fable (メイン/subagent) | 1M | メインはルール類で大 | 大 |
 | codex (preset / 対話) | 1M (272K 超は割増) | preset ~67-77k | 割増境界まで ~200k |
 | codex 大入力経路 (`CLAUDE_CONFIG_DIR=~/.claude-bare claude -p`) | 同上 | ~17k | 割増境界まで ~250k |
@@ -22,7 +22,7 @@ subagent 側の注入 (~67k) の正体はツールスキーマ + ハーネス機
 
 - 200k の壁は Claude Code クライアント側の自己抑制で、`CLAUDE_CODE_MAX_CONTEXT_TOKENS=1000000` (settings.json に常設済み) で解除される。実測の詳細は `docs/findings/2026-07-15-context-limits-and-agent-baseline-tokens.md`
 - codex の 272K 超は割増料金 (入力 2×・出力 1.5×、quota にも効く) だが割増後 sol ≒ fable 通常価格なので許容する。割増帯を使う時はその旨を一言添える
-- 割増帯のコスト序列: sonnet5 `[1m]` 割増 < sol 割増 ≒ fable 通常
+- 割増帯のコスト序列: sonnet `[1m]` 割増 < sol 割増 ≒ fable 通常
 
 ## codex 大入力経路 (`~/.claude-bare`)
 
@@ -36,13 +36,12 @@ SP=<scratchpad>   # prompt/結果の置き場
   < "$SP/prompt.md" > "$SP/result.md" 2>&1)
 ```
 
-- model: `gpt-5.6-sol` (レビュー・監査・高難度) / `gpt-5.6-terra` (通常) / `gpt-5.6-luna` (軽量、xhigh で穴探しに強い) / `gpt-5.6-astra` (sol の 2 倍コスト、未実測)
+- model: `gpt-5.6-sol` / `gpt-5.6-astra` (高度) / `gpt-5.6-luna` (軽作業、または xhigh で穴探し)
 - 長い入力は必ずファイル (`prompt.md`) に書いて stdin リダイレクトで渡す
 - Bash tool の `run_in_background: true` で実行し、完了通知後に `result.md` を Read で回収
 - stderr の `[claude-code:unrecognized_model]` 1 行は無害
 - read-only 縛りは `--disallowedTools Edit,Write,Bash`。`--allowedTools` は確認スキップリストであって制限ではない
 - kawaz ルール群 (rules-personal plugin) は届かない。cwd の CLAUDE.md は読まれる。sanitize / 禁則が絡む出力は prompt.md に制約を明記する
-- `~/.claude-bare` は personal 面の gateway namespace を向く。業務リポの内容は渡さない
 
 prompt.md の型:
 

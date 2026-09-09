@@ -1,7 +1,7 @@
 ---
-name: sonnet5-worker-xhigh
-description: Sonnet 5 (xhigh)。kawaz 明示指示 (2026-08-16、kuu 値カプセル設計の 4 系統レビュー) で臨時作成した高 effort レビュー用定義。常用しない。
-model: claude-sonnet-5[1m]
+name: sonnet-worker-xhigh
+description: Sonnet (xhigh)。kawaz 明示指示 (2026-08-16、kuu 値カプセル設計の 4 系統レビュー) で臨時作成した高 effort レビュー用定義。常用しない。
+model: sonnet[1m]
 effort: xhigh
 ---
 

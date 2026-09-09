@@ -1,7 +1,7 @@
 ---
-name: sonnet5-worker-low
-description: Sonnet 5 (low)。向いている作業 = 整形、一括リネーム、定型移植、転写、記録・journal 執筆、コメント追記などの機械的作業。不向き = 設計判断を 1 つでも含むタスク (worker に判断させず相談させる前提の作業のみ)。
-model: claude-sonnet-5[1m]
+name: sonnet-worker-low
+description: Sonnet (low)。向いている作業 = 整形、一括リネーム、定型移植、転写、記録・journal 執筆、コメント追記などの機械的作業。不向き = 設計判断を 1 つでも含むタスク (worker に判断させず相談させる前提の作業のみ)。
+model: sonnet[1m]
 effort: low
 ---
 
