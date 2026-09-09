@@ -1,14 +1,35 @@
 ---
 name: knowledge
-description: 読むだけの参照知識のカタログ (索引 + 本文の二段構成)。索引に発火語があるトピックだけ `reference/<slug>.md` を Read する。収録トピックの発火語 — daemon / service サブコマンド体系、常駐プロセスの status・restart・log の CLI 設計、launchd / systemd --user への常駐登録、supervise 監督者構成、XDG Base Directory によるアプリのファイル置き場、jj のリビジョン指定・配置オプション、越境作業の SSH 認証・commit signing 切替、別ディレクトリでのコマンド実行 (direnv exec と cwd)、op run による secret の env 注入、say に渡す頭字語のカタカナ化、CLI 設計の好み (サブコマンド / --help / completion)、kawaz 本人の表記正本、findings の書き方と記録委譲。
+description: 読むだけの参照知識のカタログ (索引 + 本文の二段構成)。索引に発火語があるトピックだけ `reference/<slug>.md` を Read する。プロジェクト横断メモリ (ローカル private リポ) の読み書き手順もここ。収録トピックの発火語 — daemon / service サブコマンド体系、常駐プロセスの status・restart・log の CLI 設計、launchd / systemd --user への常駐登録、supervise 監督者構成、XDG Base Directory によるアプリのファイル置き場、jj のリビジョン指定・配置オプション、越境作業の SSH 認証・commit signing 切替、別ディレクトリでのコマンド実行 (direnv exec と cwd)、op run による secret の env 注入、say に渡す頭字語のカタカナ化、CLI 設計の好み (サブコマンド / --help / completion)、kawaz 本人の表記正本、findings の書き方と記録委譲。
 ---
 
 # knowledge — 参照知識カタログ
 
-`${CLAUDE_SKILL_DIR}/reference/` 配下のうち、**いま必要なトピックのファイルのみ Read** する (索引 + 本文の二段構成で context を最小化する)。索引だけ読んで該当が無ければ何も Read しない。
+参照知識は 2 層ある。どちらも**索引を見て、必要なトピックのファイルだけ Read** する (context を最小化する)。索引だけ読んで該当が無ければ何も Read しない。
+
+- **`reference/`** (このリポで git 管理、下記「索引」) — 公開してよい体系知識
+- **プロジェクト横断メモリ** (ローカルの private リポ、下記「メモリ」) — kawaz の好み・feedback・環境の癖
 
 索引エントリの書き方・追加削除の規約は `for-all/rules/rule-writing-guidelines.md` (常時ロード rule) が正本。
 本文ファイルに書くのは**知識そのものだけ**: 出典・確定待ちの注記・採用側の個別事情・雑談めいたメモは書かず、help や spec の形で足りるものに表や節の装飾を足さない。
+
+## メモリ (プロジェクト横断)
+
+メモリの実体は面ごとの private リポにあり、どのリポを見るかは `${CLAUDE_PLUGIN_DATA}/memory-repos` (= `$CLAUDE_CONFIG_DIR/plugins/data/rules-personal-rules-personal/memory-repos`、1 行 1 ローカル絶対パス) が持つ。
+
+読む手順:
+
+1. `${CLAUDE_PLUGIN_DATA}/memory-repos` を Read する。無ければメモリ未設定 — 何もしない
+2. 列挙された各パスの `MEMORY.md` を Read する (索引。`- [Title](file.md) — hook` の 1 行 1 件)
+3. いまの話題に該当するエントリだけ、そのリポの `<slug>.md` を Read する
+
+書く手順: 対象リポに `<slug>.md` を作り (frontmatter は `name` / `description` / `metadata.type: user|feedback|project|reference`、本文は 1 ファイル 1 事実、feedback / project は `**Why:**` と `**How to apply:**` を続ける)、`MEMORY.md` に 1 行足し、その 2 ファイルを**パス指定で** commit する (push は任意)。
+
+書き先の判定:
+
+- **auto-memory** (`$CLAUDE_CONFIG_DIR/projects/<project>/memory/`) — そのプロジェクトでしか意味を持たない事実
+- **メモリリポ** — 別プロジェクトのセッションが読んで役に立つ事実 (kawaz の好み、ツール横断の運用、環境の癖、feedback)
+- リポが複数列挙されている場合は、**その事実が効く最も広い面**に置く (業務でしか効かない → 業務面のリポ、個人面にも効く → personal)
 
 ## 索引
 

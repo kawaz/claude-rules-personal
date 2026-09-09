@@ -8,7 +8,7 @@ rule / skill を書く・改廃するときの正本。
 
 - **常時ロード (`for-*/rules/`)** = **行動制約 (constitution)**。毎ターンの判断に効く禁則・自警・評価軸。例: 経験的検証、test 改変禁則、萎縮禁止
 - **手順書 skill (`skills/<slug>/SKILL.md`)** = **実行資源を伴う手順**。コマンド・スクリプト・テンプレ・付属ファイルを持つ。例: 越境 push 手順、リリースフロー、watch 運用
-- **参照知識 (`skills/knowledge/reference/<slug>.md`)** = **読むだけの知識**。実行資源を伴わない。個別 skill を増やさず `knowledge` skill の索引に登録し、必要時にそのファイルだけ Read させる
+- **参照知識** = **読むだけの知識**。実行資源を伴わない。2 層あり、公開してよい体系知識は git 管理の `skills/knowledge/reference/<slug>.md`、kawaz の好み・feedback・環境の癖はローカル private リポのプロジェクト横断メモリ (置き場と手順は `knowledge` skill が案内)。どちらも個別 skill を増やさず索引に登録し、必要時にそのファイルだけ Read させる
 
 判定は 2 段階:
 

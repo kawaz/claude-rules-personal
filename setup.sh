@@ -38,6 +38,13 @@ Plugins:
   Every repo's for-all/plugins.json is merged and applied via
   \`claude plugin marketplace add\` + \`claude plugin install\` (idempotent).
 
+Memory repos:
+  The self entry's optional 'memoryRepos' (owner/name each) names the
+  cross-project memory repos this face reads. Their local paths are written,
+  one per line, to \$TARGET/plugins/data/rules-personal-rules-personal/memory-repos
+  for the \`knowledge\` skill. Missing repos are warned about, never cloned
+  (they are private and live behind another auth boundary).
+
 Env:
   REPO_BASE  Default: \$HOME/.dotfiles/local/share/repos/github.com
   WORKSPACE  Default: main (jj workspace under each repo root)
@@ -254,6 +261,34 @@ if [ "${#PLUGIN_JSONS[@]}" -gt 0 ]; then
       CLAUDE_CONFIG_DIR="$TARGET" claude plugin install "$pl" 2>&1 | tail -1 || true
     fi
   done
+fi
+
+# Cross-project memory repos for this face.
+#
+# The list of repos lives in repos_mapping.json ('memoryRepos' on the self
+# entry); what gets written here is the resolved local path of each, one per
+# line, for the `knowledge` skill to Read. Memory repos are never cloned by
+# this script: they are private and sit behind a different auth boundary than
+# the one this run may be able to reach, so a missing one is only warned about.
+MEMORY_DIR="$TARGET/plugins/data/rules-personal-rules-personal"
+MEMORY_FILE="$MEMORY_DIR/memory-repos"
+MEMORY_BASE="${XDG_DATA_HOME:-$HOME/.local/share}/repos/github.com"
+
+MEMORY_LINES=""
+while IFS= read -r mr; do
+  [ -n "$mr" ] || continue
+  mr_path="$MEMORY_BASE/$mr/$WORKSPACE"
+  [ -d "$mr_path" ] || echo "  WARN: memory repo missing: $mr_path  (clone from gh:$mr)" >&2
+  MEMORY_LINES="$MEMORY_LINES$mr_path"$'\n'
+done < <(jq -r --arg self "$SELF" '.repos[] | select(.name == $self) | .memoryRepos[]? // empty' "$MAPPING")
+
+if [ -n "$MEMORY_LINES" ]; then
+  echo
+  echo "=== Memory repos ==="
+  mkdir -p "$MEMORY_DIR"
+  printf '%s' "$MEMORY_LINES" > "$MEMORY_FILE"
+  echo "  wrote: $MEMORY_FILE"
+  sed 's/^/    /' "$MEMORY_FILE"
 fi
 
 # Prune dangling symlinks left by moved/removed rules and skills

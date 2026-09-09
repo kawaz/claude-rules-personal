@@ -1,17 +1,19 @@
 {
-  "$schema-hint": "Master list of all claude-rules-* repos and which CLAUDE_CONFIG_DIR each one owns. setup.sh reads this to decide where to symlink for-me/for-others/for-all layers.",
+  "$schema-hint": "Master list of all claude-rules-* repos and which CLAUDE_CONFIG_DIR each one owns. setup.sh reads this to decide where to symlink for-me/for-others/for-all layers. Optional 'memoryRepos' lists the cross-project memory repos (owner/name) that face reads; setup.sh writes their local paths to plugins/data/rules-personal-rules-personal/memory-repos.",
   "repos": [
     {
       "name": "personal",
       "repo": "kawaz/claude-rules-personal",
       "home": "~/.claude-personal",
-      "ghAccount": "kawaz"
+      "ghAccount": "kawaz",
+      "memoryRepos": ["kawaz/privacy-personal"]
     },
     {
       "name": "emrd",
       "repo": "kawaz123/claude-rules-emrd",
       "home": "~/.claude-emrd",
-      "ghAccount": "kawaz123"
+      "ghAccount": "kawaz123",
+      "memoryRepos": ["kawaz123/privacy-emrd", "kawaz/privacy-personal"]
     },
     {
       "name": "zunsystem",

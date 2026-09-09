@@ -69,6 +69,7 @@
 - [[work-principles]] — 全フェーズ横断の作業原則 (指示遵守 / TODO / 委譲)
 - [[rule-writing-guidelines]] — rule / skill を書く・改廃するとき
 - [[no-hard-wrap]] — rule / skill / docs の md で行長を揃える改行をしない
+- [[memory-placement]] — 覚えておくべき事実に気づいたとき (auto-memory か横断メモリか)
 - [[research-documentation]] — 調査・検証結果を記録するとき
 - [[no-historical-noise]] — docs に history narrative を書きたくなったとき
 - [[self-written-rule-blind-spots]] — ルールを起草した直後
