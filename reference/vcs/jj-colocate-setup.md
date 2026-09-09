@@ -1,6 +1,6 @@
 # jj colocate + 親ガード方式のセットアップと運用 (新標準)
 
-適用: **`{repo}/main/.git` と `{repo}/main/.jj` が両方ディレクトリ** (= colocate) のリポ。`{repo}/main/` を起点にする親ガード方式のレイアウトは `~/.local/share/repos/` 配下のリポだけの規約で、それ以外の場所 (とりあえずバージョン管理したい適当なディレクトリ等) は main/ も親ガードも要らず、その場で `git init && git commit -m "Initial empty commit" --allow-empty && jj git init --colocate` を行う。**`git init` 直後に commit を挟まず `jj git init` すると、workspace 名が `default` になり `main` bookmark も作られない** (後から `main` に直すのは手間が大きい) ので、順番だけは守る。リポ直下に `.jj` があり `main/.git` が無い場合は旧方式なので reference の `vcs/jj-bare-workspace-setup` に従う (既存リポを本方式へ移す手順は下記「移行」)。
+適用: **`{repo}/main/.git` と `{repo}/main/.jj` が両方ディレクトリ** (= colocate) のリポ。`{repo}/main/` を起点にする親ガード方式のレイアウトは `~/.local/share/repos/` 配下のリポだけの規約で、それ以外の場所 (とりあえずバージョン管理したい適当なディレクトリ等) は main/ も親ガードも要らず、その場で `git init && git commit -m "Initial empty commit" --allow-empty && jj git init --colocate` を行う。**`git init` 直後に commit を挟まず `jj git init` すると `main` bookmark が作られない** (後から立て直す手間が大きい) ので、順番だけは守る。workspace 名はどの順でも `default` になるので、repos 配下では `jj workspace rename main` でディレクトリ名と揃える。リポ直下に `.jj` があり `main/.git` が無い場合は旧方式なので reference の `vcs/jj-bare-workspace-setup` に従う (既存リポを本方式へ移す手順は下記「移行」)。
 
 ## レイアウト
 
@@ -18,13 +18,12 @@
 
 ## 新規リポジトリ作成
 
-先に `main/` に入ってから初期化する。jj の初期 workspace がディレクトリと同じ `main` に揃い、bookmark `main` と合わせて管理が一貫する。
-
 ```bash
 mkdir -p "$REPO_PARENT/main" && cd "$REPO_PARENT/main"
 git init
 git commit -m "Initial empty commit" --allow-empty
-jj git init                # 既定で colocate。main bookmark が自動で立ち、workspace 名もディレクトリ名 main になる
+jj git init                # 既定で colocate。main bookmark が自動で立つ (workspace 名は default のまま)
+jj workspace rename main   # default → main (ディレクトリ名と揃える)
 cd .. && echo "guard: 上位への .git 探索を止める (実体は main/)" > .git && mkdir .jj
 echo "guard: 上位への .jj 探索を止める (実体は main/)" > .jj/README.md
 ```
@@ -34,7 +33,8 @@ echo "guard: 上位への .jj 探索を止める (実体は main/)" > .jj/README
 ```bash
 mkdir -p "$REPO_PARENT" && git clone <url> "$REPO_PARENT/main"
 cd "$REPO_PARENT/main"
-jj git init                              # 既定で colocate。workspace 名はディレクトリ名 main になる
+jj git init                              # 既定で colocate (workspace 名は default のまま)
+jj workspace rename main                 # default → main (ディレクトリ名と揃える)
 jj bookmark track main --remote=origin   # ★ 落とさない (下記)
 cd .. && echo "guard: 上位への .git 探索を止める (実体は main/)" > .git && mkdir .jj
 echo "guard: 上位への .jj 探索を止める (実体は main/)" > .jj/README.md
