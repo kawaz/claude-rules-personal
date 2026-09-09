@@ -8,5 +8,5 @@
   発火語: context が足りない, Prompt is too long, 実効余地, 見積り, 272K 超, 割増料金, claude-bare, codex 大入力, disallowedTools, prompt.md
 - [orchestration-phases](orchestration-phases.md) — Phase 0-4 の実行順序制御、適用ゲート、常時 rules との分担。
   発火語: Phase 0, 完了条件, 検証方法, やらないこと, リスク順分解, 実行ループ, 全体検証
-- [main-role-playbook](main-role-playbook.md) — 統括の失敗パターン・5 責務・立て直しの型・codex 委譲時のルール・開始時チェックリスト。
+- [main-role-playbook](main-role-playbook.md) — 統括の 5 責務・立て直しの型・codex 委譲時のルール・開始時チェックリスト。
   発火語: 統括の立て直し, worker 起草の drift, 逐条監査, 自律進行, QUESTIONS.md, セッション開始チェック
