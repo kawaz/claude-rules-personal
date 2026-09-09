@@ -20,6 +20,8 @@
   発火語: sleep で待つ, polling, event-driven, Monitor tool, playwright-cli, PLAYWRIGHT_MCP_EXTENSION_TOKEN, Chrome プロファイル
 - [macos-signing](macos-signing/_index.md) — macOS 配布物の codesign + notarize (証明書・Secrets・CI・TCC・トラブルシュート)。
   発火語: codesign, notarize, Developer ID, App-Specific Password, stapler, Gatekeeper, TCC, System Extension
+- [auth-patterns](auth-patterns/_index.md) — 他プロダクトにも効く認証設計パターン (passkey の登録、peer 間相互認証、自分の endpoint の確定)。
+  発火語: passkey, WebAuthn, 登録フロー, refresh token, cookie, peer 認証, mesh, TLS, iss/aud, self の確定, endpoint, instance id, 引っ越し
 - [role-main](role-main/_index.md) — 統括メイン (main role) がセッション開始時に順に Read する必須ロード一覧。
   発火語: セッション開始, 統括, main role, 必須ロード, load-role-main
 
