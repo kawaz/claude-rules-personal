@@ -1,19 +1,19 @@
 {
 	"folders": [
 		{
-			"name": "claude-rules-personal@main",
+			"name": "rules-personal",
 			"path": "."
 		},
 		{
-			"name": "claude-rules-emrd@main",
+			"name": "rules-emrd",
 			"path": "../../../kawaz123/claude-rules-emrd/main"
 		},
 		{
-			"name": "claude-rules-zunsystem@main",
+			"name": "rules-zunsystem",
 			"path": "../../claude-rules-zunsystem/main"
 		},
 		{
-			"name": "claude-rules-syun@main",
+			"name": "rules-syun",
 			"path": "../../claude-rules-syun/main"
 		}
 	]
