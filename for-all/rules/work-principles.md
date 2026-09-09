@@ -32,24 +32,14 @@
 - 軽微編集 (= 数行修正 / 小ファイル 1 個 / one-shot script)
 - 設計と実装が不可分な箇所 (= 設計判断しながら書く必要があるもの)
 
-判定は最終的に「メインモデル自身の感覚」に従う。下位モデルが固定の数値基準を
-書いて最上位 tier の判断を縛るのは越権 (= 最上位 tier の dogfooding で見えた
-場面に応じて kawaz が随時調整する)。**迷ったら委譲** を safety net に。
+判定は最終的に「メインモデル自身の感覚」に従う。下位モデルが固定の数値基準を書いて最上位 tier の判断を縛るのは越権 (= 最上位 tier の dogfooding で見えた場面に応じて kawaz が随時調整する)。**迷ったら委譲** を safety net に。
 
 ### 理由
 
 - メインコンテキスト節約で長期セッション維持
 - ユーザーチャット優先（長時間作業を同期的に待つと追加指示不可）
-- 最上位 tier メインはサブエージェント分も含めると支配的コストになる
-  (`worker-fleet` skill の Why 参照)
+- 最上位 tier メインはサブエージェント分も含めると支配的コストになる (`worker-fleet` skill の Why 参照)
 
 ### サブエージェントとの入出力（重要）
 
-**`Full transcript available at:`のファイルは絶対に読んではいけない**
-
-- 起動時の`output_file:`のパス
-- 完了時の`<task-notification>`と一緒に通知される`Full transcript available at:`のパス
-
-これらのファイルにはJSONL形式で全会話履歴（Read/Bashなど全ツールの入出力）が含まれ、メインコンテキストが溢れて動作不能になる。
-
-サブエージェントの最終応答は`<task-notification>`の`<result>`タグ内に全文含まれるため、それを使用する。
+**起動時の `output_file:` / 完了時の `Full transcript available at:` のファイルは絶対に読まない** (全会話履歴の JSONL でメインの context が溢れて動作不能になる)。結果は `<task-notification>` の `<result>` タグ内に全文入っているのでそれを使う。

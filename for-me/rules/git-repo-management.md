@@ -14,7 +14,7 @@ worktree / commit / PR 作業は `.jj/` 有 → `jj-workflow` skill、
 | owner | 公開設定 | 備考 |
 |-------|---------|------|
 | kawaz | public | 個人OSS |
-| kawaz123 | **private** | エメラダ仕事用アカウント |
+| kawaz123 | **private** | 業務用アカウント |
 | その他 | private | |
 
 ## ライセンス
