@@ -8,6 +8,8 @@
 | memory | `~/.local/share/repos/github.com/kawaz/claude-rules-personal/main/memory/` | rule にするほど一般化していないが別プロジェクトでも効く横断メモ |
 | privacy | `~/.local/share/repos/github.com/kawaz/privacy-personal/main/reference/` | 個人情報系 (本人の表記、アカウント名、連絡先。private git) |
 
+索引で引けなくても知識がありそうな時は、`rg -il '<語>' <rules リポ>/reference <rules リポ>/memory` で本文を直接当ててよい (ヒットのうち該当する 1 ファイルだけ Read する。発火語の漏れに気づいたら索引に足す)。
+
 索引はそれぞれ `reference/_index.md` / `memory/_index.md` / privacy リポの `INDEX.md` (privacy の索引は `reference/_index.md` の「private 層」節にも写す。索引は public でよく、本文だけ private)。
 
 ## 書き先の判定
