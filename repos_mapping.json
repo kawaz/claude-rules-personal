@@ -5,15 +5,13 @@
       "name": "personal",
       "repo": "kawaz/claude-rules-personal",
       "home": "~/.claude-personal",
-      "ghAccount": "kawaz",
-      "memoryRepos": ["kawaz/privacy-personal"]
+      "ghAccount": "kawaz"
     },
     {
       "name": "emrd",
       "repo": "kawaz123/claude-rules-emrd",
       "home": "~/.claude-emrd",
-      "ghAccount": "kawaz123",
-      "memoryRepos": ["kawaz123/privacy-emrd", "kawaz/privacy-personal"]
+      "ghAccount": "kawaz123"
     },
     {
       "name": "zunsystem",
