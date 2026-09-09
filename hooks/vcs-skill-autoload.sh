@@ -1,14 +1,10 @@
 #!/bin/bash
-# PreToolUse(Bash) hook: jj / git コマンドの実行を検知して、対応する skill の
-# invoke を additionalContext で促す。
+# PreToolUse(Bash) hook: jj / git コマンドの実行を検知して、対応する参照知識の
+# Read を additionalContext で促す。
 #
-# 目的 — skill の `description` は全セッションの context に常時載る。jj-tips /
-# jj-workflow のような「特定コマンドを打つ時だけ要る手順書」は、description を
-# 意味判断の材料として太らせる代わりに、本 hook が発火経路を担う。これで jj/git を
-# 使わないセッションでは 1 字も context を食わない。
-#
-# frontmatter に「コマンド実行を trigger にする」フィールドは存在しない
-# (`paths` はファイル glob のみ) ため、hook がこの経路の唯一の実装手段。
+# 目的 — VCS の手順書は「特定コマンドを打つ時だけ要る」ので、常時 context に
+# 載せる代わりに本 hook が発火経路を担う。これで jj/git を使わないセッションでは
+# 1 字も context を食わない。
 #
 # ブロックはしない (exit 0)。案内は 1 セッション 1 回 (リポごと)。
 #
@@ -39,16 +35,18 @@ if [ -z "$repo_root" ]; then
   repo_root=$cwd
 fi
 
+ref_dir="$HOME/.local/share/repos/github.com/kawaz/claude-rules-personal/main/reference/vcs"
+
 # 構成で案内先が変わる。
 #   colocate (新標準): repo_root に .git と .jj が両方ディレクトリ
 #   bare + jj workspace (旧): .jj が存在 (secondary workspace では file のことがある)
 #   git 専用: それ以外
 if [ -d "$repo_root/.git" ] && [ -d "$repo_root/.jj" ]; then
-  skills="rules-personal:jj-colocate-workflow (colocate 新標準の手順), rules-personal:jj-tips (コミット操作・組み替え・復旧)"
+  refs="$ref_dir/jj-colocate-setup.md (colocate 新標準の手順), $ref_dir/jj-commit-basics.md (コミット操作), $ref_dir/jj-restructure.md (組み替え), $ref_dir/jj-recovery.md (復旧)"
 elif [ -e "$repo_root/.jj" ]; then
-  skills="rules-personal:jj-workflow (bare + jj workspace 旧方式の手順), rules-personal:jj-tips (コミット操作・組み替え・復旧)"
+  refs="$ref_dir/jj-bare-workspace-setup.md (bare + jj workspace 旧方式の手順), $ref_dir/jj-commit-basics.md (コミット操作), $ref_dir/jj-restructure.md (組み替え), $ref_dir/jj-recovery.md (復旧)"
 else
-  skills="rules-personal:git-worktree-workflow (worktree / PR 作業手順)"
+  refs="$ref_dir/git-worktree-setup.md (worktree / PR 作業手順)"
 fi
 
 # 1 セッション 1 リポにつき 1 回だけ案内する。
@@ -63,10 +61,10 @@ if [ -n "$session_id" ]; then
   mkdir -p "$state_dir" 2>/dev/null && : >"$marker" 2>/dev/null
 fi
 
-jq -n --arg skills "$skills" '{
+jq -n --arg refs "$refs" --arg idx "$ref_dir/_index.md" '{
   hookSpecificOutput: {
     hookEventName: "PreToolUse",
-    additionalContext: ("このリポで VCS コマンドを実行しようとしています。手順書 skill が未ロードなら Skill tool で invoke してください: " + $skills + "。既にロード済み、または単純な状態確認 (status / log / diff) だけなら不要です。")
+    additionalContext: ("このリポで VCS コマンドを実行しようとしています。手順書が未ロードなら次を Read してください: " + $refs + "。他の場面 (rebase オプション、越境 push 等) は " + $idx + " から引けます。既に読み込み済み、または単純な状態確認 (status / log / diff) だけなら不要です。")
   }
 }' 2>/dev/null || exit 0
 exit 0

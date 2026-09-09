@@ -1,33 +1,21 @@
----
-name: jj-workflow
-description: jj リポの workflow 手順書 (workspace / bookmark / PR / 署名)。VCS hook が案内する。
----
+# jj bare + workspace 方式のセットアップと運用 (旧方式)
 
-# jj ワークフロー (bare + jj workspace 方式)
+適用: リポ直下に `.jj` が実体としてあり `main/.git` が無いリポ。`{repo}/main/.git` がディレクトリ (= colocate) なら reference の `vcs/jj-colocate-setup` (新標準)、`.jj` も無いリポは reference の `vcs/git-worktree-setup` に従う。
 
-**まず自分のリポの構成を確認する**: `{repo}/main/.git` がディレクトリ (= colocate) なら
-本 skill の対象外、`jj-colocate-workflow` skill (新標準) に従う。リポ直下に `.jj` が
-実体としてあり main/.git が無ければ本方式なので、このまま本 skill を使ってよい。
+**新規リポジトリは本方式で作らない** — colocate + 親ガード方式の新規作成手順を使う。ここは既存の bare + jj workspace 方式リポを触るときの手順。
 
-**新規リポジトリは本方式で作らない** — `jj-colocate-workflow` skill の新規作成手順を使う。
-本 skill は既存の bare + jj workspace 方式リポを触るときの手順書として残っている。
-
-`.jj` も無いリポは git-worktree-workflow skill（git 専用）に従う。
-
-## 用語（git → jj）
+## 用語 (git → jj)
 
 | git 用語 | jj 用語 |
 |---|---|
 | branch | bookmark |
 | worktree | workspace |
 
-方式名: git bare + worktree 方式（git-worktree-workflow skill）/ git bare + jj workspace 方式（本ファイル）
+方式名: git bare + worktree 方式 (git 専用リポ) / git bare + jj workspace 方式 (本方式)。
 
 ## ディレクトリ構成
 
-### 1. git bare + jj workspace 方式（新規、自分管理リポジトリ）
-
-適用: `github.com/{kawaz,kawaz123,zunsystem}/*` の新規リポジトリ
+適用: `github.com/{kawaz,kawaz123,zunsystem}/*` の (本方式で作られた) リポジトリ
 
 ```
 ~/.local/share/repos/{host}/{org-user}/{repo}/
@@ -40,30 +28,30 @@ description: jj リポの workflow 手順書 (workspace / bookmark / PR / 署名
 ```
 
 repo 直下に `.git`(bare) + `.jj` を配置。利点:
-- 上位ディレクトリへの `.git` / `.jj` の探索を打ち止め（上位のリポジトリが存在した場合の誤操作を防ぐ）
+
+- 上位ディレクトリへの `.git` / `.jj` の探索を打ち止め (上位のリポジトリが存在した場合の誤操作を防ぐ)
 - repo 直下から直接 `jj workspace add` できる
 - git は bare なので repo 直下で作業ツリーとしては機能しない
 
 ## セットアップ
 
-`jj git init` 直後に `jj new -r 'root()'` で default WS の working copy を空にする。
-default WS の `.jj` は repo 直下に残り、上位ディレクトリの `.jj` や `.git` への誤操作を防ぐガードとして機能する。削除してはならない。
+`jj git init` 直後に `jj new -r 'root()'` で default WS の working copy を空にする。default WS の `.jj` は repo 直下に残り、上位ディレクトリの `.jj` や `.git` への誤操作を防ぐガードとして機能する。削除してはならない。
 
-### git bare + jj workspace 方式（新規リポジトリ作成）
+### 新規リポジトリ作成
 
 ```bash
 (cd "$REPO_PARENT" && git init --bare .git && jj git init --git-repo .git && jj commit -m "Initial empty commit" && jj workspace add main)
 ```
 
-### git bare + jj workspace 方式（既存リポジトリの clone）
+### 既存リポジトリの clone
 
 ```bash
 (cd "$REPO_PARENT" && git clone --bare <url> .git && git --git-dir=.git config --add remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*' && git --git-dir=.git config remote.origin.tagOpt --tags && jj git init --git-repo .git && jj workspace add {main} && jj new -r 'root()')
 ```
 
-`tagOpt --tags` を入れる理由: `jj git fetch` は内部で git の fetch refspec / tagOpt を読む。標準の `+refs/heads/*:...` だけだと **tag が自動取得されない** (jj 0.41 で確認、jj-tips skill のトラブルシュート節参照)。bare git に tagOpt を設定しておけば `jj git fetch` 1 発で tag も来る。
+`tagOpt --tags` を入れる理由: `jj git fetch` は内部で git の fetch refspec / tagOpt を読む。標準の `+refs/heads/*:...` だけだと **tag が自動取得されない** (jj 0.41 で確認、下記トラブルシューティング節)。bare git に tagOpt を設定しておけば `jj git fetch` 1 発で tag も来る。
 
-### git bare + jj workspace 方式（fork して clone）
+### fork して clone
 
 他者リポジトリを fork してからセットアップする場合:
 
@@ -74,19 +62,18 @@ jj -R "$REPO_PARENT/{main}" git remote add upstream https://github.com/{owner}/{
 jj -R "$REPO_PARENT/{main}" git fetch --remote upstream
 ```
 
-### colocate 方式（使用しない）
+### colocate 方式 (本方式では使用しない)
 
 ```bash
 jj git clone <url> "$REPO_PARENT/{main-branch}"
 ```
 
-jj 側の制限として --git-repo と --colocate は共存不可の為、現在のリポジトリ管理方針と合わないため使用しない。
+jj 側の制限として `--git-repo` と `--colocate` は共存不可のため、本方式のリポジトリ管理方針とは合わない (colocate を使うリポは reference の `vcs/jj-colocate-setup` が正本)。
 
 ## ワークスペース
 
 ### 作成
 
-git bare + jj workspace 方式:
 ```bash
 # repo 直下（default workspace）から
 jj workspace add {name}
@@ -117,9 +104,9 @@ jj bookmark set feature/xxx -r @
 
 ## PR
 
-### 新規PR
+### 新規 PR
 
-メインワークスペースで実行。PR番号を先に取得してワークスペース名に使う:
+メインワークスペースで実行。PR 番号を先に取得してワークスペース名に使う:
 
 ```bash
 # 現在の位置にタグを付ける（後で戻れるようにするため）
@@ -138,7 +125,7 @@ jj new main@origin
 jj tag delete "$cur_tag"
 ```
 
-### wip → PR昇格
+### wip → PR 昇格
 
 ```bash
 jj bookmark set {branch} -r @
@@ -149,11 +136,11 @@ mv "$REPO_PARENT/wip-xxx" "$REPO_PARENT/{PR番号}-{branch}"
 jj -R "$REPO_PARENT/{PR番号}-{branch}" workspace update-stale
 ```
 
-move 前に新パス（フルパス）を案内。mv 後だとカレントディレクトリを失い、エージェントが稼働できなくなるため。
+move 前に新パス (フルパス) を案内。mv 後だとカレントディレクトリを失い、エージェントが稼働できなくなるため。
 
-### push後
+### push 後
 
-PRのURL表示。ブランチ名の数字は Issue 番号の可能性があるので `gh pr` で確認。
+PR の URL 表示。ブランチ名の数字は Issue 番号の可能性があるので `gh pr` で確認。
 
 ### 作業後の push
 
@@ -167,27 +154,15 @@ jj git push
 ## コミット操作
 
 - jj では作業中の状態も常にコミット。uncommitted な状態は存在しない
-- **基本フロー: `jj commit -m "msg" <files...>` でパス指定して固定**。
-  パスなしの `jj commit -m "msg"` は他セッション (= 別 workspace / 別 Claude)
-  が @ に追加した未認識ファイルを巻き込むので **禁則** (詳細は
-  [[jj-tips]] の「パス指定なしの巻き込み事故」)
+- **基本フロー: `jj commit -m "msg" <files...>` でパス指定して固定**。パスなしの `jj commit -m "msg"` は他セッション (= 別 workspace / 別 Claude) が @ に追加した未認識ファイルを巻き込むので **禁則** (詳細は reference の `vcs/jj-commit-basics`)
 - 修正を親に吸収: `jj squash`
-- bookmark を末端に追随させながら部分 commit したい時のみ `jj split -m "msg" <files...>` を選ぶ
-  (commit と違って bookmark が @ = remaining 側に前進する。詳細は [[jj-tips]] の commit vs split 節)
-
-### ユーザーが「コミット」と言った場合
-
-1. 適切な関心事単位でコミットを分割する（chore/feat/refactor/docs 等）
-2. 末端 change から順に `jj commit -m "msg" <files...>` でパス指定して確定 (@ も自動で空に進む)
-3. 最後に @ が空 change のまま (= 次の作業の入れ物として開いている) であることを確認
-4. @ に他セッションが追加した未 commit ファイルが残っていれば、放置せず読む
-   (= 別 commit で固定するか、削除するか判断)。push-workflow.md 参照
+- bookmark を末端に追随させながら部分 commit したい時のみ `jj split -m "msg" <files...>` を選ぶ (commit と違って bookmark が @ = remaining 側に前進する。詳細は reference の `vcs/jj-commit-basics` の commit vs split 節)
 
 ## 署名
 
 `signing.behavior = "drop"` + `git.sign-on-push = true` で運用。
 
-- commit/rebase/squash 時は署名しない（1Password 不要）
+- commit/rebase/squash 時は署名しない (1Password 不要)
 - `jj git push` 時に未署名の mutable コミットをまとめて署名
 
 ## データ保護と bookmark 運用
@@ -231,8 +206,7 @@ jj git push
 
 ### "stale info" エラーで push が拒否される
 
-git bare + jj workspace 方式のセットアップ直後や `git clone --bare` 後に発生しやすい。
-git bare リポジトリの fetch refspec にブランチ用設定が不足していることが原因。
+git bare + jj workspace 方式のセットアップ直後や `git clone --bare` 後に発生しやすい。git bare リポジトリの fetch refspec にブランチ用設定が不足していることが原因。
 
 ```bash
 # 原因確認: refs/heads 用の refspec があるか
@@ -253,7 +227,7 @@ jj git push --bookmark {bookmark}
 
 `jj git fetch` は内部で git の `remote.<name>.tagOpt` / fetch refspec を読む。標準の `+refs/heads/*:...` だけだと **tag は自動取得されない** (jj 0.41 で確認、git の `fetch` と同じ挙動)。具体的には bump-semver の `vcs:latest-tag()` 等で「jj 経由で最新 tag を見る」ものが古い tag を返す現象に出る。
 
-**恒久対処** (新規 clone 時に仕込む、`既存リポジトリの clone` 節参照):
+**恒久対処** (新規 clone 時に仕込む、「既存リポジトリの clone」節参照):
 
 ```bash
 git --git-dir="$REPO_PARENT/.git" config remote.origin.tagOpt --tags
@@ -276,24 +250,3 @@ jj git fetch
 `jj git import` は「外部 git で起きた変更を jj 側に取り込む」公式コマンド (colocate **off** で必要、colocate **on** だと毎コマンド自動実行)。tag は immutable なので bookmark conflict / 自動 rebase は起きず、副作用は op log エントリ追加のみで安全。
 
 `jj git export` は向きが逆 (jj → git、bookmark 等の反映用)、tag fetch には**使わない**。
-
-## ツール連携
-
-### jj-worktree（git worktree → jj workspace shim）
-
-`git worktree add/remove` を `jj workspace add/forget` に置き換える shim。Claude Code の EnterWorktree 等、内部で git worktree を呼ぶツールが jj workspace として自然に動作する。
-
-jj 管理リポジトリでも以下の worktree 機能は使用を避ける必要はない:
-- `EnterWorktree` / `ExitWorktree` — セッション内で隔離ワークスペースに切り替え
-- Agent ツールの `isolation: "worktree"` — サブエージェントを隔離 workspace で実行
-
-特に複数サブエージェントが同じファイルを編集する可能性がある場合は `isolation: "worktree"` を積極的に使う。
-
-### jj-guard（git コマンドブロック）
-
-jj 管理リポジトリで git コマンドの実行をブロックするフック。git 操作を試みると jj での代替を促される。
-
-## 注意事項
-
-- **pre-commit フック未対応**: jj は Git の pre-commit フックを実行しない。push 前に手動で lint/format を確認、または `jj fix` を使用
-- **IDE の git fetch**: bookmark conflict が発生したら `jj git fetch` で解消

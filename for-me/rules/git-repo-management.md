@@ -2,8 +2,7 @@
 
 ## workflow の選択
 
-worktree / commit / PR 作業は `.jj/` 有 → `jj-workflow` skill、
-無 (`.git` のみ) → `git-worktree-workflow` skill に従う。
+worktree / commit / PR 作業は reference の `vcs/_index` で構成を見分け、該当する本文に従う。
 
 ## パス規約
 

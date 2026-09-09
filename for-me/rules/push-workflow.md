@@ -9,7 +9,7 @@ push の前提は固定された commit。**自分が修正したファイルだ
 
 - **jj リポ**: `jj commit -m "msg" <files...>` 必須。`jj split` も同様。
   `jj describe` 単体は @ にラベルを貼るだけ (= 固定ではない)。詳細は
-  `jj-tips` skill
+  reference の `vcs/jj-commit-basics` / `vcs/jj-restructure`
 - **git リポ**: `git commit -m "msg" <files...>` 必須。`-a` / `git add .` は避ける
 - 例外 (パス指定なし可): @ の全ファイルが自セッション生成かつ他セッション
   接触なしと確認済みの時のみ。通常は判断コストの方が高いので常にパス指定
@@ -28,4 +28,4 @@ push の前提は固定された commit。**自分が修正したファイルだ
   [[rule-writing-guidelines]])
 - push 後、subscribe stream に `Monitor で 'just watch' を起動して` が届いたら
   task 名そのまま Monitor (persistent=true) で起動する。watch 運用の詳細・
-  notify が無いリポでの手動手順は `push-watch` skill 参照
+  notify が無いリポでの手動手順は reference の `justfile/push-watch` 参照
