@@ -31,7 +31,9 @@ echo "guard: 上位への .jj 探索を止める (実体は main/)" > .jj/README
 ```bash
 mkdir -p "$REPO_PARENT" && git clone <url> "$REPO_PARENT/main"
 cd "$REPO_PARENT/main"
-jj git init && jj workspace rename main && jj bookmark track main --remote=origin   # rename と track を落とさない (下記)
+# 既定ブランチは main とは限らない (master / develop 等) ので origin/HEAD から取る。workspace 名はディレクトリに合わせて main 固定
+default_branch=$(git symbolic-ref --short refs/remotes/origin/HEAD | sed 's|^origin/||')
+jj git init && jj workspace rename main && jj bookmark track "$default_branch" --remote=origin   # rename と track を落とさない (下記)
 cd .. && echo "guard: 上位への .git 探索を止める (実体は main/)" > .git && mkdir .jj
 echo "guard: 上位への .jj 探索を止める (実体は main/)" > .jj/README.md
 ```
