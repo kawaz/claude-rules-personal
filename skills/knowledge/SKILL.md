@@ -15,18 +15,11 @@ description: 読むだけの参照知識のカタログ (索引 + 本文の二�
 
 ## メモリ (プロジェクト横断)
 
-メモリの実体は面ごとの private リポにある (パスは `${XDG_DATA_HOME:-~/.local/share}/repos/github.com/` 配下):
-
-| 面 (CLAUDE_CONFIG_DIR) | 読むリポ |
-|---|---|
-| `~/.claude-personal` | `kawaz/privacy-personal/main` |
-| `~/.claude-emrd` | `kawaz123/privacy-emrd/main`、`kawaz/privacy-personal/main` |
-
-自分の面に無いリポは読まない (業務面のメモリを個人面に持ち込まない)。
+メモリの実体は private リポ `kawaz/privacy-personal` (`${XDG_DATA_HOME:-~/.local/share}/repos/github.com/kawaz/privacy-personal/main`) にあり、全ての面 (CLAUDE_CONFIG_DIR) から読む。業務面でしか効かない事実はその面の overlay リポ (`claude-rules-*` の `for-me/`) に置き、ここには書かない。
 
 読む手順:
 
-1. 自分の面のリポの `MEMORY.md` を Read する (索引。`- [Title](file.md) — hook` の 1 行 1 件)。無ければ未 clone — 何もしない
+1. リポの `MEMORY.md` を Read する (索引。`- [Title](file.md) — hook` の 1 行 1 件)。無ければ未 clone — 何もしない
 2. いまの話題に該当するエントリだけ、そのリポの `<slug>.md` を Read する
 
 書く手順: 対象リポに `<slug>.md` を作り (frontmatter は `name` / `description` / `metadata.type: user|feedback|project|reference`、本文は 1 ファイル 1 事実、feedback / project は `**Why:**` と `**How to apply:**` を続ける)、`MEMORY.md` に 1 行足し、その 2 ファイルを**パス指定で** commit する (push は任意)。
@@ -35,7 +28,7 @@ description: 読むだけの参照知識のカタログ (索引 + 本文の二�
 
 - **auto-memory** (`$CLAUDE_CONFIG_DIR/projects/<project>/memory/`) — そのプロジェクトでしか意味を持たない事実
 - **メモリリポ** — 別プロジェクトのセッションが読んで役に立つ事実 (kawaz の好み、ツール横断の運用、環境の癖、feedback)
-- 面に複数リポがある場合は、**その事実が効く最も広い面**に置く (業務でしか効かない → 業務面のリポ、個人面にも効く → personal)
+- 業務面でしか効かない事実 → その面の overlay リポ (private)、個人面にも効く → メモリリポ
 
 ## 索引
 

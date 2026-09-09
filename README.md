@@ -36,7 +36,7 @@ skill と agent は **リポ自体を Claude Code plugin として配布**する
 することで配備される。Skill tool からは `<plugin名>:<slug>` (例:
 `rules-personal:jj-workflow`) で呼ぶ。
 
-プロジェクト横断メモリ (kawaz の好み・feedback・環境の癖) は、公開候補のこのリポではなく**面ごとの private リポ**に置く (個人面 `kawaz/privacy-personal` 等)。
+プロジェクト横断メモリ (kawaz の好み・feedback・環境の癖) は、公開候補のこのリポではなくprivate リポ `kawaz/privacy-personal` に置く (業務面でしか効かないものは各 overlay の `for-me/`)。
 読み書きの手順は `rules-personal:knowledge` skill の「メモリ」節。
 
 `for-me` の "me" は「個人 vs 他者」ではなく、kawaz が持つ複数の面
