@@ -36,7 +36,7 @@ SP=<scratchpad>   # prompt/結果の置き場
   < "$SP/prompt.md" > "$SP/result.md" 2>&1)
 ```
 
-- model: `gpt-5.6-sol` (レビュー・監査・高難度) / `gpt-5.6-terra` (通常) / `gpt-5.6-luna` (軽量)
+- model: `gpt-5.6-sol` (レビュー・監査・高難度) / `gpt-5.6-terra` (通常) / `gpt-5.6-luna` (軽量、xhigh で穴探しに強い) / `gpt-5.6-astra` (sol の 2 倍コスト、未実測)
 - 長い入力は必ずファイル (`prompt.md`) に書いて stdin リダイレクトで渡す
 - Bash tool の `run_in_background: true` で実行し、完了通知後に `result.md` を Read で回収
 - stderr の `[claude-code:unrecognized_model]` 1 行は無害

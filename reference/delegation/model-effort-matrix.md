@@ -25,7 +25,7 @@
 
 agent 名は `<model><effort>-worker[-用途]` (例: `sonnet5-worker-medium`)。表中は `sonnet5-medium` と略記する。Agent tool の `subagent_type` には `rules-personal:` を付ける (例: `rules-personal:sonnet5-worker-medium`)。
 
-常設 agent は下表の 8 種のみ。`nitpick-reviewer` は model/effort が `fable5-high` と同じだが独自の指示文 (12 の絶対ルール・15 のペルソナ) を持つので別物。独自の指示文を持つ agent は使用実績だけで削らない。
+agent 定義は `agents/` 配下 (臨時作成のものは description に「常用しない」と明記)。`nitpick-reviewer` は model/effort が `fable5-high` と同じだが独自の指示文 (12 の絶対ルール・15 のペルソナ) を持つので別物。独自の指示文を持つ agent は使用実績だけで削らない。
 
 ## 課題の性質 × 選択
 
@@ -42,6 +42,7 @@ agent 名は `<model><effort>-worker[-用途]` (例: `sonnet5-worker-medium`)。
 | 検証設計・原因分析・機械確認系レビュー・worker 成果の検査 | opus5-high |
 | 複雑な PR 作成・実務文書・長文脈整合が要る統合作業 | opus5 系 |
 | 本気レビュー・設計監査 (意味論の穴探し) | fable5-high / 別系統の二次意見は codex-sol-reviewer |
+| 穴探しを安く数で当てる (多系統レビューの 1 系統) | codex-luna-reviewer-xhigh |
 | 粗探し特化のレビュー | nitpick-reviewer |
 | 指揮・タスク分解・統合 (メイン) | fable5 (通常 medium / 大型タスクは high) |
 
@@ -60,6 +61,8 @@ agent 名は `<model><effort>-worker[-用途]` (例: `sonnet5-worker-medium`)。
 - fable: opus より広く複雑な判断と視野を持ち、指揮は fable-medium が opus-high/xhigh より遥かに良い。遅い。コードを直接書かせるより、要件壁打ち・プラン・codex への指示書き・成果のブレ検査に回す方が強い
 - codex (sol): 不具合調査・長時間自走・terminal/GUI 操作・Web リサーチ・コスト効率。claude 系は複雑な PR 作成・実務文書・長文脈整合・検証の厚さ (指示なしでも独立実装クロスチェックを自発的に行う)
 - 「claude 系が指示書 → codex が実装 → claude 系がブレ検査」の 3 段編成は難所を含む大型作業の現実解であって常用テンプレではない。1 worker 直行で足りるなら分けない
+- luna: 安いが effort を xhigh にすると穴探しなどで上位 tier と並ぶ成果を出すことが多い。深く考えるのと同程度に試行量が効く
+- astra: sol の 2 倍コスト。未使用で実測なし (かなり強いと噂)
 - effort の効き方: sol / opus は medium だと検証を省いて誤答しうる。fable は medium でも検証が厚い
 - 公開ベンチ数値は自己測定・ゲーミング指摘ありなので、数値でなく役割構図で選ぶ
 
