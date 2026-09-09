@@ -22,18 +22,19 @@ COMMANDS
   remove <unit>             登録を外す
   list                      → [{id, unit, running, pid}]
   start <unit> | --all      supervise に instance の起動を要求する
-  stop <unit> | --all       supervise に停止を要求する (対象プロセスの停止を待つかはツールの要件次第)
+  stop <unit> | --all       supervise に停止を要求する (停止を待つ --wait や --force の追加は要件次第)
   restart <unit> | --all    stop → start
   status [<unit>] | --all   [{id, unit, running, pid, version, ...}]
   log [<unit>] | --all      instance のログ
 
   start / stop / restart / status は起動中の supervise に対する操作。supervise が未起動ならエラー終了。
   unit = 登録の単位で、案件ドメインが決める (dir / config ファイル / id など)。
+  reload (設定再読み込み、再起動なし) や graceful_upgrade など、要件に応じたサブコマンドの追加・削除はしてよい。
 
 <tool> service
   register | unregister     監督者 (`<tool> daemon supervise`) を launchd / systemd に登録する
   start | stop              監督者の起動 / 停止
-  status                    → {registered, running, pid, service: {OS 側の loaded, running, pid, last_exit}, instances: [...]}
+  status                    → {registered, running, pid, service: {launchd / systemd 側から取れる情報 (loaded, running, pid, last_exit など)}, instances: [...]}
   log [--follow]            監督者と OS 側のログ
 
 OPTIONS (共通)
