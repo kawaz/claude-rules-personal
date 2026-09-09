@@ -64,6 +64,17 @@ unit = **登録の単位**で、案件ドメインが決める (dir / config フ
 
 ドメイン要件によっては、launchd に登録する **署名済み launcher** を別途用意してそれを登録し、launcher は `<tool> daemon supervise` の起動と死活監視に徹する形も検討する。FDA 要求などがバージョンアップ毎に発生するのを回避するための構成。
 
+## 改定候補: start / stop を supervise への操作にする (r285 mid 32〜34、検討中)
+
+上の `<tool> daemon` 表は起票時点の形。その後 kawaz が次の変更を提案している
+(「どう思う?」段階、確定は ccmsg v2 待ち):
+
+- `daemon start / stop` (status / restart も同様) は **起動中の supervise に対する操作**
+  にする方が収まりが良い。`add` した unit を起動するトリガーが `start` になる
+- supervise が未起動なら `status` / `stop` は**エラー終了でよい**
+- 手元で instance を単体起動するのは `run` で足りる。supervise が子を上げるのも
+  `run` を起動するだけ
+
 ## 採用側で決まった補足 (llm-gateway)
 
 体系本体ではなく、採用側ツールで個別に決まった事項:
