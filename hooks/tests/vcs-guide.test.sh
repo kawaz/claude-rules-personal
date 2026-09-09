@@ -15,11 +15,16 @@ fail=0
 # 許可リスト (/github.com/kawaz/) を通るパスに置く
 OWN="$TMP/github.com/kawaz"
 OTHER="$TMP/github.com/other-org"
+GITONLY_ORG="$TMP/github.com/git-only-org"
+export XDG_CONFIG_HOME="$TMP/xdg-config"
+mkdir -p "$XDG_CONFIG_HOME/claude-rules-personal" && printf "# test\n/git-only-org/\n" > "$XDG_CONFIG_HOME/claude-rules-personal/vcs-guide-git-only"
 mkdir -p "$OWN/colocate/.jj" && git init -q "$OWN/colocate"
 mkdir -p "$OWN/bare/.jj"
 mkdir -p "$OWN/gitonly" && git init -q "$OWN/gitonly"
 mkdir -p "$OTHER/x/.jj" && git init -q "$OTHER/x"
 mkdir -p "$OTHER/gitonly" && git init -q "$OTHER/gitonly"
+mkdir -p "$GITONLY_ORG/x/.jj" && git init -q "$GITONLY_ORG/x"
+mkdir -p "$GITONLY_ORG/g" && git init -q "$GITONLY_ORG/g"
 
 run() { # run <cwd> <command> [session_id]
   jq -n --arg c "$2" --arg d "$1" --arg s "${3:-sess-default}" \
@@ -56,16 +61,19 @@ assert_empty() { # assert_empty <name> <output>
   fi
 }
 
-# --- 許可リスト -------------------------------------------------------------
-assert_empty "許可リスト外の cwd は無案内" \
-  "$(run "$OTHER/x" "jj commit -m x f" s1)"
-assert_empty "許可リスト外へ cd する command は無案内" \
-  "$(run "$OWN/colocate" "(cd $OTHER/x && jj commit -m x f)" s2)"
-assert_contains "許可リスト外の cwd でも cd 先が許可リストなら案内" \
-  "$(run "$OTHER/x" "(cd $OWN/colocate && jj commit -m x f)" s3)" \
-  "jj-colocate-setup.md (colocate 新標準の手順)"
-
-# --- cd 先の解決 ------------------------------------------------------------
+# --- git 専用 (除外リスト) ------------------------------------------------------
+assert_empty "除外リスト該当の cwd は無案内" \
+  "$(run "$GITONLY_ORG/x" "jj commit -m x f" s1)"
+assert_empty "除外リスト該当へ cd する command は無案内" \
+  "$(run "$OWN/colocate" "(cd $GITONLY_ORG/x && jj commit -m x f)" s2)"
+assert_empty "除外リスト該当の git 専用リポで git status しても無案内" \
+  "$(run "$GITONLY_ORG/g" "git status" s2b)"
+assert_contains "除外リスト該当の cwd でも cd 先が対象なら案内" \
+  "$(run "$GITONLY_ORG/x" "(cd $OWN/colocate && jj commit -m x f)" s3)" \
+  "jj-colocate-setup.md"
+assert_contains "除外リスト外なら owner を問わず案内" \
+  "$(run "$OTHER/x" "jj commit -m x f" s3b)" \
+  "jj-colocate-setup.md"
 assert_empty "相対パスへの cd は判定不能なので無案内" \
   "$(run "$OWN/colocate" "cd ../bare && jj commit -m x f" s4)"
 assert_empty "解決できない変数展開への cd は無案内" \
@@ -94,8 +102,9 @@ assert_contains "git 専用リポの git status は移行節を案内" \
   "jj-colocate-setup.md"
 assert_empty "jj 管理下 (colocate) の git status は無案内" \
   "$(run "$OWN/colocate" "git status" s12)"
-assert_empty "許可リスト外の git 専用リポの git status は無案内" \
-  "$(run "$OTHER/gitonly" "git status" s12b)"
+assert_contains "除外リスト外の git 専用リポの git status は colocate 化を案内" \
+  "$(run "$OTHER/gitonly" "git status" s12b)" \
+  "jj 管理されていません"
 
 # --- 読み取り系は無案内 -----------------------------------------------------
 assert_empty "jj log は無案内" "$(run "$OWN/colocate" "jj log -r @" s13)"

@@ -82,10 +82,16 @@ else
   exit 0
 fi
 
-# 手順書の案内は個人面のリポだけ (許可リスト)。他の面のリポは別ワークフローで
-# 運用しており、本 hook の案内は当てはまらない。
-printf '%s' "$target" |
-  grep -qE '/github\.com/kawaz/|/\.dotfiles/|/zunsystem/' || exit 0
+# git のまま運用する場所 (業務面のリポ等) では案内しない。対象パスの正規表現は
+# ローカル設定 ${XDG_CONFIG_HOME:-~/.config}/claude-rules-personal/vcs-guide-git-only
+# に 1 行 1 パターンで書く (リポには含めない。無ければ除外なし = どこでも案内)。
+git_only_list="${XDG_CONFIG_HOME:-$HOME/.config}/claude-rules-personal/vcs-guide-git-only"
+if [ -f "$git_only_list" ]; then
+  while IFS= read -r pat; do
+    case "$pat" in ''|'#'*) continue ;; esac
+    if printf '%s' "$target" | grep -qE "$pat"; then exit 0; fi
+  done < "$git_only_list"
+fi
 
 case $kind in
 git-init)
