@@ -34,7 +34,8 @@ skill と agent は **リポ自体を Claude Code plugin として配布**する
 (`.claude-plugin/plugin.json` + リポ直下の `skills/<slug>/` `agents/` `hooks/`)。
 各リポの `for-all/plugins.json` に自リポの plugin を宣言し、setup.sh が install
 することで配備される。Skill tool からは `<plugin名>:<slug>` (例:
-`rules-personal:jj-workflow`) で呼ぶ。
+`rules-personal:eli5`) で呼ぶ。skill はユーザが `/名前` で起動する実行系だけを置き、
+読むだけの手順書は `reference/` に置く (判定は `for-all/rules/rule-writing-guidelines.md`)。
 
 読むだけの参照知識はこのリポの直下に平置きする (索引と本文の 2 段構成、本文は必要時にだけ Read):
 

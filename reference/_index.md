@@ -1,13 +1,34 @@
 # 参照知識の索引
 
+## トピック (`<topic>/_index.md` を読んでから本文 1 ファイルへ)
+
+- [vcs](vcs/_index.md) — jj / git の構成の見分け方と、コミット操作・組み替え・復旧・各方式のセットアップ・越境 push。
+  発火語: jj commit, jj split, jj rebase, jj workspace, bookmark, colocate, worktree, PR 作成, push が拒否される, op restore, stale info, 越境 push
+- [delegation](delegation/_index.md) — サブエージェント委譲の選定・context 見積り・Phase による順序制御・統括の立て直し。
+  発火語: worker 選定, サブエージェント委譲, model と effort, context が足りない, Prompt is too long, Phase 0, 完了条件, 統括の立て直し, codex に大入力
+- [testing](testing/_index.md) — テスト設計の網羅観点、テストを仕様書にするコメント様式、失敗時の説明責任。
+  発火語: テスト設計, 境界値, 同値分割, デシジョンテーブル, テストコメント, flaky, たまに失敗する, timeout を伸ばす, ignore 化
+- [design-spec](design-spec/_index.md) — 設計文書 (DR / プロトコル / 仕様) の着手前チェックと仕上げチェック。
+  発火語: DR を書く, 仕様書, プロトコル設計, スコープの粒度, 不採用表, 節番号の参照, 設計文書のレビュー
+- [docs-authoring](docs-authoring/_index.md) — `docs/` の構造標準・テンプレ・翻訳ペア・何をいつ書き残すか・裁定待ちの管理。
+  発火語: docs 構造, DR を立てる, findings, journal, runbook, 翻訳ペア, README-ja, QUESTIONS.md, 裁定待ち
+- [justfile](justfile/_index.md) — task runner の recipe 設計、リリースの標準ループ、push 後の watch 運用。
+  発火語: justfile, just push, recipe, check-version-bumped, release.yml, リリースが出ない, tag が作られない, just watch
+- [gh-ops](gh-ops/_index.md) — GitHub 上の画像の取得・投稿と、homebrew tap への自動 push 用 deploy key。
+  発火語: GitHub の画像を取得, 画像を貼る, user-attachments, camo, raw.githubusercontent, HOMEBREW_TAP_DEPLOY_KEY, Permission to homebrew-tap denied
+- [agent-runtime](agent-runtime/_index.md) — sleep / polling の代替 primitive と、ブラウザ自動化のプロファイル運用。
+  発火語: sleep で待つ, polling, event-driven, Monitor tool, playwright-cli, PLAYWRIGHT_MCP_EXTENSION_TOKEN, Chrome プロファイル
+- [macos-signing](macos-signing/_index.md) — macOS 配布物の codesign + notarize (証明書・Secrets・CI・TCC・トラブルシュート)。
+  発火語: codesign, notarize, Developer ID, App-Specific Password, stapler, Gatekeeper, TCC, System Extension
+- [role-main](role-main/_index.md) — 統括メイン (main role) がセッション開始時に順に Read する必須ロード一覧。
+  発火語: セッション開始, 統括, main role, 必須ロード, load-role-main
+
+## 単独の本文
+
 - [cli-daemon-subcommands](cli-daemon-subcommands.md) — kawaz 製 CLI 共通の `daemon` / `service` サブコマンド体系 (1 instance = 1 unit、JSON 出力規約、OS 常駐登録)。
   発火語: daemon サブコマンド, service サブコマンド, supervise, 常駐プロセスの status / restart / log, launchd / systemd --user 登録, unit
 - [app-file-placement](app-file-placement.md) — アプリのファイル置き場 (設定 / データ / 状態 / キャッシュ / socket・pid) を XDG Base Directory で判定する。
   発火語: config / data / state / cache / runtime の使い分け, XDG_CONFIG_HOME, XDG_STATE_HOME, XDG_RUNTIME_DIR が無い, unix socket path 長制限
-- [jj-rebase-options](jj-rebase-options.md) — jj のリビジョン指定オプション (`-r` / `-s` / `-b` / `--onto` / `--insert-after` 等) の完全リファレンス。
-  発火語: jj rebase, --onto, --insert-after, --insert-before, --source, --branch, jj のリビジョン指定
-- [cross-env-ssh-signing](cross-env-ssh-signing.md) — 複数 CLAUDE_CONFIG_DIR 環境をまたいだ push / commit signing の切替手順。
-  発火語: 越境 push, SSH sign failed, No private key found, IdentityAgent, signing.key, SSH_AUTH_SOCK
 - [direnv-exec-cwd](direnv-exec-cwd.md) — 別ディレクトリでコマンドを実行する形と、cd だけ / direnv exec だけで踏む罠。
   発火語: direnv exec, 別ディレクトリでコマンド実行, cd したのに .envrc が効かない, SSH_AUTH_SOCK が切り替わらない, git -C, direnv allow
 - [op-run-secret-injection](op-run-secret-injection.md) — op run で secret を env に注入する形と、masking の 2 段運用。
