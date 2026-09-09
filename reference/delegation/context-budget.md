@@ -32,11 +32,11 @@ codex 系の委譲はまず agent preset (`codex-sol-worker` / `codex-sol-review
 SP=<scratchpad>   # prompt/結果の置き場
 (cd <repo> && \
   CLAUDE_CONFIG_DIR="$HOME/.claude-bare" \
-  claude -p --model gpt-5.6-sol \
+  claude -p --model sol \
   < "$SP/prompt.md" > "$SP/result.md" 2>&1)
 ```
 
-- model: `gpt-5.6-sol` / `gpt-5.6-astra` (高度) / `gpt-5.6-luna` (軽作業、または xhigh で穴探し)
+- model: `sol` / `astra` (高度) / `luna` (軽作業、または xhigh で穴探し)
 - 長い入力は必ずファイル (`prompt.md`) に書いて stdin リダイレクトで渡す
 - Bash tool の `run_in_background: true` で実行し、完了通知後に `result.md` を Read で回収
 - stderr の `[claude-code:unrecognized_model]` 1 行は無害

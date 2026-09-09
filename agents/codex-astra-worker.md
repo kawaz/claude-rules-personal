@@ -1,7 +1,7 @@
 ---
 name: codex-astra-worker
 description: codex astra (high) ワーカー
-model: gpt-5.6-astra
+model: astra
 effort: high
 ---
 

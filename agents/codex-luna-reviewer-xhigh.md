@@ -1,7 +1,7 @@
 ---
 name: codex-luna-reviewer-xhigh
 description: codex luna (xhigh) レビュアー。読み取り専用
-model: gpt-5.6-luna
+model: luna
 effort: xhigh
 ---
 

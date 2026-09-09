@@ -1,7 +1,7 @@
 ---
 name: codex-sol-worker
 description: codex sol (high) ワーカー
-model: gpt-5.6-sol
+model: sol
 effort: high
 ---
 
