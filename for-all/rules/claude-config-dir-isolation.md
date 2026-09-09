@@ -12,4 +12,4 @@ kawaz の環境は Claude Code の親ディレクトリ走査による設定汚�
 
 ## 越境作業
 
-別環境のリポを触る指示が来たら `(cd /path/to/env-Y/<repo> && direnv exec . <command>)` を基本形にする ([[tooling-tips]] が正本)。rules は全環境に注入されるが memory は越境しない。**push / commit signing を伴う越境**は認証が 2 経路あり、`knowledge` skill の `cross-env-ssh-signing` を参照。
+別環境のリポを触る指示が来たら `(cd /path/to/env-Y/<repo> && direnv exec . <command>)` を基本形にする ([[tooling-tips]] が正本)。rules は全環境に注入されるが memory は越境しない。**push / commit signing を伴う越境**は認証が 2 経路あり、reference の `cross-env-ssh-signing` ([[knowledge-guide]] のパス) を参照。

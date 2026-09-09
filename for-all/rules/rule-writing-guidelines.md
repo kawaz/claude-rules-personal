@@ -8,18 +8,18 @@ rule / skill を書く・改廃するときの正本。
 
 - **常時ロード (`for-*/rules/`)** = **行動制約 (constitution)**。毎ターンの判断に効く禁則・自警・評価軸。例: 経験的検証、test 改変禁則、萎縮禁止
 - **手順書 skill (`skills/<slug>/SKILL.md`)** = **実行資源を伴う手順**。コマンド・スクリプト・テンプレ・付属ファイルを持つ。例: 越境 push 手順、リリースフロー、watch 運用
-- **参照知識** = **読むだけの知識**。実行資源を伴わない。2 層あり、公開してよい体系知識は git 管理の `skills/knowledge/reference/<slug>.md`、一般化前の横断メモは `${CLAUDE_PLUGIN_DATA}/` (ローカル)、個人情報系は private リポ `kawaz/privacy-personal` に、いずれも同じ構造で置く (置き場と手順は `knowledge` skill が案内)。どちらも個別 skill を増やさず索引に登録し、必要時にそのファイルだけ Read させる
+- **参照知識** = **読むだけの知識**。実行資源を伴わない。個別 skill を増やさず、`reference/` (公開してよい体系知識) / `memory/` (一般化前の横断メモ) / privacy リポ (個人情報系) のいずれかに本文を置き、各 `_index.md` に索引エントリを足す。必要時にそのファイルだけ Read させる (3 層のパスと書き先の判定は [[knowledge-guide]])
 
 判定は 2 段階:
 
 1. **常時 vs それ以外**: 「この内容が context に無いターンで事故が起きるか?」— 起きるなら常時、特定作業の開始時に読めば足りるなら skill 側。1ファイル内に両方が同居しそうになったら**分割する** (= 禁則だけ rule に残す)
 2. **手順書 skill vs 参照知識**: 「**実行資源 (コマンド・スクリプト・テンプレ・付属ファイル) を伴うか**」で機械的に決める。伴う → 手順書 skill、伴わない → 参照知識
 
-## `knowledge` 索引の規約
+## 参照知識の索引の規約
 
-参照知識を足す・消すときの規約:
+参照知識を足す・消すときの規約 (置き場は [[knowledge-guide]]):
 
-- `skills/knowledge/reference/<slug>.md` と `SKILL.md` 索引の **1:1**。追加・削除・改名は**両方を同じ変更で**更新する
+- 本文 `<slug>.md` と同ディレクトリの `_index.md` エントリの **1:1**。追加・削除・改名は**両方を同じ変更で**更新する
 - 索引エントリは **slug + 1 行要旨 + 発火語**。索引は常時コストなので 1〜2 行に収める。発火語は「そのトピックを読むべき場面で口に出る語」を並べる
 - 本文は **必要時にしか読まれない前提で自己完結**に書く (索引を読み返さないと意味が取れない書き方をしない)
 - 本文は**知識そのものだけ**。出典・確定待ちの注記・採用側の個別事情・雑談めいたメモは書かない (journal / issue / DR 側へ)。help や spec の形で足りるものに表や節の装飾を足さない
@@ -40,7 +40,7 @@ rule / skill を書く・改廃するときの正本。
 5. **`.draft-` を rules 配下に置かない** (常時ロードされる)。draft は `docs/issue/` へ
 6. **行長を揃える改行をしない** ([[no-hard-wrap]])
 
-3 の越境検査・4・5 と「5KB 超 warning」、`knowledge` 索引と `reference/*.md` の 1:1 整合は claude-rules-personal リポの `just lint-rules` task が機械検査する (同リポの push の deps で自動実行、他リポにこの task は無い)。3 の「skill 参照は名前で書く」は目視。「未来予告 / 過去 narrative」([[no-historical-noise]]) だけは機械判定が難しいので目視で確認する。
+3 の越境検査・4・5 と「5KB 超 warning」、`reference/` `memory/` の本文と `_index.md` の 1:1 整合は claude-rules-personal リポの `just lint-rules` task が機械検査する (同リポの push の deps で自動実行、他リポにこの task は無い)。3 の「skill 参照は名前で書く」は目視。「未来予告 / 過去 narrative」([[no-historical-noise]]) だけは機械判定が難しいので目視で確認する。
 
 ## 「該当なし」「やらないこと」明示の優先順位
 

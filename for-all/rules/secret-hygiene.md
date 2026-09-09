@@ -8,7 +8,7 @@ op run はデフォルトで **子プロセスの stdout/stderr に現れた値�
 
 **間違い**: `SOMEVAR=$(op read "op://...")` の `$()` 展開は op の masking フィルタを経由せず生値が shell 変数に入る (= AI / log / history に露出)。`op://` 参照は env に書いて op run 経由で渡す。
 
-op run 経由の具体手順 (env-file の書き方、`--no-masking` を付ける / 付けない 2 段運用) は `knowledge` skill の `op-run-secret-injection` を読む。
+op run 経由の具体手順 (env-file の書き方、`--no-masking` を付ける / 付けない 2 段運用) は reference の `op-run-secret-injection` ([[knowledge-guide]] のパス) を読む。
 
 ## 機微キーワード (反応対象)
 

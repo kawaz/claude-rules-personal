@@ -73,4 +73,4 @@ journal で「同じ問題が複数回出てきた」と気づいたら runbook 
 
 「単発の調査をしてその確定事実だけ残したい」場合に `docs/findings/YYYY-MM-DD-title.md`。journal が「経緯」中心、findings が「確定事実」中心、と棲み分け。
 
-記録先と委譲の原則は `research-documentation` ルール、ファイル構成のテンプレは `knowledge` skill の `findings-recording` に従う。
+記録先と委譲の原則は `research-documentation` ルール、ファイル構成のテンプレは reference の `findings-recording` ([[knowledge-guide]] のパス) に従う。

@@ -4,4 +4,4 @@
 - 記録先: `docs/findings/` 等、プロジェクト内のナレッジディレクトリ
 - 記録はバックグラウンドのサブエージェントに委譲し、ユーザーとの会話をブロックしない
 
-ファイル構成のテンプレ・命名・委譲プロンプトの型は `knowledge` skill の `findings-recording` を読む。
+ファイル構成のテンプレ・命名・委譲プロンプトの型は reference の `findings-recording` ([[knowledge-guide]] のパス) を読む。

@@ -16,7 +16,7 @@ description: 統括メイン (main role) のローダー。必須 skill 群を�
 3. **`rules-personal:orchestrate`** — 中〜大規模タスクのオーケストレーション (Phase 0-4)
 4. **`rules-personal:docs-structure`** — docs 構造 (どこに何を置くか)
 5. **`rules-personal:questions-registry`** — 裁定待ち (Q) / 確認待ち (C) の集約運用
-6. **`rules-personal:knowledge`** — 参照知識の索引。本文は必要時に `reference/` を Read
+6. `~/.local/share/repos/github.com/kawaz/claude-rules-personal/main/reference/_index.md` と同 `memory/_index.md` を **Read する** (skill ではなくファイル。参照知識の索引を context に持ち、本文は必要時にその 1 ファイルだけ Read する)
 
 ## 補足
 
