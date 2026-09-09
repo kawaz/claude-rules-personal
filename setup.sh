@@ -272,12 +272,11 @@ fi
 # the one this run may be able to reach, so a missing one is only warned about.
 MEMORY_DIR="$TARGET/plugins/data/rules-personal-rules-personal"
 MEMORY_FILE="$MEMORY_DIR/memory-repos"
-MEMORY_BASE="${XDG_DATA_HOME:-$HOME/.local/share}/repos/github.com"
 
 MEMORY_LINES=""
 while IFS= read -r mr; do
   [ -n "$mr" ] || continue
-  mr_path="$MEMORY_BASE/$mr/$WORKSPACE"
+  mr_path="$REPO_BASE/$mr/$WORKSPACE"
   [ -d "$mr_path" ] || echo "  WARN: memory repo missing: $mr_path  (clone from gh:$mr)" >&2
   MEMORY_LINES="$MEMORY_LINES$mr_path"$'\n'
 done < <(jq -r --arg self "$SELF" '.repos[] | select(.name == $self) | .memoryRepos[]? // empty' "$MAPPING")
