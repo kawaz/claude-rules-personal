@@ -24,8 +24,7 @@
 mkdir -p "$REPO_PARENT/main" && cd "$REPO_PARENT/main"
 git init
 git commit -m "Initial empty commit" --allow-empty
-jj git init                # 既定で colocate。main bookmark が自動で立つ
-jj workspace rename main   # default → main
+jj git init                # 既定で colocate。main bookmark が自動で立ち、workspace 名もディレクトリ名 main になる
 cd .. && echo "guard: 上位への .git 探索を止める (実体は main/)" > .git && mkdir .jj
 echo "guard: 上位への .jj 探索を止める (実体は main/)" > .jj/README.md
 ```
