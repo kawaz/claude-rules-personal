@@ -117,6 +117,25 @@ lint-rules:
     if [ "$total" -gt "$budget" ]; then
         echo "WARN 常時ロード rules 合計 ${total} bytes が予算 ${budget} を超過 (skill への降格を検討)"
     fi
+    # (g) knowledge 索引整合: reference/*.md と SKILL.md の索引リンクが 1:1。
+    #     片方だけ足すと「本文はあるが誰も辿れない」「リンク先が無い」になる。
+    for f in skills/knowledge/reference/*.md; do
+        [ -f "$f" ] || continue
+        slug=$(basename "$f" .md)
+        if ! rg -qF "reference/${slug}.md" skills/knowledge/SKILL.md; then
+            echo "FATAL knowledge 索引漏れ: $f が SKILL.md の索引に無い"
+            fatal=1
+        fi
+    done
+    while IFS= read -r slug; do
+        [ -n "$slug" ] || continue
+        # `reference/<slug>.md` のようなプレースホルダ表記は実体を持たない
+        case "$slug" in *'<'*) continue ;; esac
+        if [ ! -f "skills/knowledge/reference/${slug}.md" ]; then
+            echo "FATAL knowledge dead link: SKILL.md の reference/${slug}.md が実在しない"
+            fatal=1
+        fi
+    done < <(rg -o 'reference/([^)]+)\.md' -r '$1' skills/knowledge/SKILL.md 2>/dev/null | sort -u)
     if [ "$fatal" -ne 0 ]; then
         echo "lint-rules: FATAL 違反あり (上記参照)" >&2
         exit 1
