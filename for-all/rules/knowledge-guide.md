@@ -18,7 +18,11 @@
 - 公開してよい体系知識 → `reference/`
 - 全セッションで毎ターン効く行動制約 → rule
 
-昇格させたら下層の元エントリは消す (正本の二重化を避ける)。`memory/` は気軽に書いてよく、rule / reference への昇格・整理は気づいた人がその時にやる。
+昇格させたら下層の元エントリは消す (正本の二重化を避ける)。雑に扱ってよいのは `memory/` だけ (気軽に書く、rule / reference への昇格・整理は気づいた人がその時にやる)。`reference/` は遅延ロードの rule に相当する (skill と違い plugin の update / reload が要らない) ので、本文の質は rule と同じ水準で書く。
+
+## reference の階層化
+
+1 つのツール / ドメインの知識は 1 つの巨大 md にせず、`reference/<topic>/` にケース・目的・章ごとの md へ分割し、`reference/<topic>/_index.md` をそのトピックの索引にする。トップの `reference/_index.md` に載せるのは `<topic>/_index.md` へのエントリだけ (= 索引 → トピック索引 → 本文、と段階的に深める)。索引の形式はどの階層でも同じ。
 
 ## memory / reference への書き込みは確認なしで完結させる
 

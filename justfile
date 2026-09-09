@@ -117,29 +117,42 @@ lint-rules:
     if [ "$total" -gt "$budget" ]; then
         echo "WARN 常時ロード rules 合計 ${total} bytes が予算 ${budget} を超過 (skill への降格を検討)"
     fi
-    # (g) 参照知識の索引整合: <dir>/*.md と <dir>/_index.md のリンクが 1:1。
-    #     片方だけ足すと「本文はあるが誰も辿れない」「リンク先が無い」になる。
-    #     private 層のフルパスリンクは本文がこのリポに無いので対象外。
-    for dir in reference memory; do
+    # (g) 参照知識の索引整合: 各ディレクトリ (reference/ memory/ とその下の topic dir) で、
+    #     <dir>/*.md ↔ <dir>/_index.md のリンクが 1:1、サブディレクトリは <sub>/_index.md として
+    #     親の索引に載る。片方だけ足すと「本文はあるが誰も辿れない」「リンク先が無い」になる。
+    #     private 層のフルパスリンク (スラッシュ始まり・~ 始まり) は本文がこのリポに無いので対象外。
+    while IFS= read -r dir; do
+        idx="$dir/_index.md"
+        if [ ! -f "$idx" ]; then
+            echo "FATAL 参照知識の索引欠落: $dir/ に _index.md が無い"
+            fatal=1; continue
+        fi
         for f in "$dir"/*.md; do
             [ -f "$f" ] || continue
             slug=$(basename "$f" .md)
             [ "$slug" = "_index" ] && continue
-            if ! rg -qF "(${slug}.md)" "$dir/_index.md"; then
-                echo "FATAL 参照知識の索引漏れ: $f が $dir/_index.md の索引に無い"
+            if ! rg -qF "(${slug}.md)" "$idx"; then
+                echo "FATAL 参照知識の索引漏れ: $f が $idx に無い"
                 fatal=1
             fi
         done
-        while IFS= read -r slug; do
-            [ -n "$slug" ] || continue
-            # `<slug>.md` のようなプレースホルダ表記は実体を持たない
-            case "$slug" in *'<'*) continue ;; esac
-            if [ ! -f "$dir/${slug}.md" ]; then
-                echo "FATAL 参照知識の dead link: $dir/_index.md の ${slug}.md が実在しない"
+        for sub in "$dir"/*/; do
+            [ -d "$sub" ] || continue
+            sub=$(basename "$sub")
+            if ! rg -qF "(${sub}/_index.md)" "$idx"; then
+                echo "FATAL 参照知識の索引漏れ: $dir/$sub/_index.md が $idx に無い"
                 fatal=1
             fi
-        done < <(rg -o '^- \[[^]]+\]\(([^)/]+)\.md\)' -r '$1' "$dir/_index.md" 2>/dev/null | sort -u)
-    done
+        done
+        while IFS= read -r rel; do
+            [ -n "$rel" ] || continue
+            case "$rel" in *'<'*) continue ;; esac
+            if [ ! -f "$dir/$rel" ]; then
+                echo "FATAL 参照知識の dead link: $idx の $rel が実在しない"
+                fatal=1
+            fi
+        done < <(rg -o '^- \[[^]]+\]\(([^)~/][^)]*\.md)\)' -r '$1' "$idx" 2>/dev/null | sort -u)
+    done < <(find reference memory -type d 2>/dev/null | sort)
     if [ "$fatal" -ne 0 ]; then
         echo "lint-rules: FATAL 違反あり (上記参照)" >&2
         exit 1
