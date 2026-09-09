@@ -35,7 +35,8 @@
 
 [skills/knowledge/reference/cli-daemon-subcommands.md](../skills/knowledge/reference/cli-daemon-subcommands.md)。
 r285m27 原文を起こし、llm-gateway 側の補足 4 点は別節に分離。見てほしいのは
-「採用側で決まった補足」節が体系本体に昇格してよいものか、と launcher 節を「検討」のままにしてよいか。
+「採用側で決まった補足」節が体系本体に昇格してよいものか、launcher 節を「検討」のままにしてよいか、
+r285 mid 32〜34 の「start / stop を supervise 操作にする」変更を確定として表本体に反映してよいか。
 
 - [ ] a: このままで OK (push して配布)
 - [ ] b: 修正あり (チャットで指摘)
