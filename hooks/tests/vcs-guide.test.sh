@@ -13,7 +13,7 @@ pass=0
 fail=0
 
 # 許可リスト (/github.com/kawaz/) を通るパスに置く
-OWN="$TMP/github.com/kawaz"
+OWN="$TMP/share/repos/github.com/kawaz"
 OTHER="$TMP/github.com/other-org"
 GITONLY_ORG="$TMP/github.com/git-only-org"
 export XDG_CONFIG_HOME="$TMP/xdg-config"
@@ -23,6 +23,7 @@ mkdir -p "$OWN/bare/.jj"
 mkdir -p "$OWN/gitonly" && git init -q "$OWN/gitonly"
 mkdir -p "$OTHER/x/.jj" && git init -q "$OTHER/x"
 mkdir -p "$OTHER/gitonly" && git init -q "$OTHER/gitonly"
+ADHOC="$TMP/scratch"; mkdir -p "$ADHOC/g" && git init -q "$ADHOC/g"
 mkdir -p "$GITONLY_ORG/x/.jj" && git init -q "$GITONLY_ORG/x"
 mkdir -p "$GITONLY_ORG/g" && git init -q "$GITONLY_ORG/g"
 
@@ -105,6 +106,15 @@ assert_empty "jj 管理下 (colocate) の git status は無案内" \
 assert_contains "除外リスト外の git 専用リポの git status は colocate 化を案内" \
   "$(run "$OTHER/gitonly" "git status" s12b)" \
   "jj 管理されていません"
+assert_contains "repos 配下の git 専用リポは main/ レイアウトの移行節を案内" \
+  "$(run "$OWN/gitonly" "git status" s12c)" \
+  "main/"
+assert_contains "repos 外の適当なディレクトリは jj git init --colocate だけを案内" \
+  "$(run "$ADHOC/g" "git status" s12d)" \
+  "jj git init --colocate"
+assert_contains "repos 外の git init は main/ レイアウトを求めない" \
+  "$(run "$ADHOC" "git init" s12e)" \
+  "main/ レイアウトの規約は不要"
 
 # --- 読み取り系は無案内 -----------------------------------------------------
 assert_empty "jj log は無案内" "$(run "$OWN/colocate" "jj log -r @" s13)"

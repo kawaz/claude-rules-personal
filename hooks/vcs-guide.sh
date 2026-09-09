@@ -93,12 +93,24 @@ if [ -f "$git_only_list" ]; then
   done < "$git_only_list"
 fi
 
+# main/ 起点のレイアウト規約が効くのは repos 配下のリポだけ。
+in_repos=0
+printf '%s' "$target" | grep -qE '/share/repos/' && in_repos=1
+
 case $kind in
 git-init)
-  message="新規リポジトリは jj colocate + 親ガード方式で始めます。$ref_dir/jj-colocate-setup.md の「新規リポジトリ作成」節 (clone なら「既存リポジトリの clone」節) を Read して、その手順で作成してください。"
+  if [ "$in_repos" = 1 ]; then
+    message="新規リポジトリは jj colocate + 親ガード方式 (\`{repo}/main/\` 起点) で始めます。$ref_dir/jj-colocate-setup.md の「新規リポジトリ作成」節 (clone なら「既存リポジトリの clone」節) を Read して、その手順で作成してください。"
+  else
+    message="git 単独ではなく jj colocate で始めてください: \`git init\` の後に \`jj git init --colocate\` (repos 配下ではないので main/ レイアウトの規約は不要)。コミット操作は $ref_dir/jj-commit-basics.md。"
+  fi
   ;;
 git-status)
-  message="このリポは jj 管理されていません (git 専用)。kawaz 管理のリポは jj colocate + 親ガード方式が標準なので、$ref_dir/jj-colocate-setup.md の「移行 (旧方式リポの入れ替え)」節 (新規なら「新規リポジトリ作成」節) を Read して colocate 化を検討してください。"
+  if [ "$in_repos" = 1 ]; then
+    message="このリポは jj 管理されていません (git 専用)。repos 配下は jj colocate + 親ガード方式 (\`{repo}/main/\` 起点) が標準なので、$ref_dir/jj-colocate-setup.md の「移行 (旧方式リポの入れ替え)」節を Read して colocate 化を検討してください。"
+  else
+    message="このディレクトリは jj 管理されていません (git 専用)。\`jj git init --colocate\` で jj 管理にしてください (repos 配下ではないので main/ レイアウトの規約は不要)。コミット操作は $ref_dir/jj-commit-basics.md。"
+  fi
   ;;
 migrate)
   message="このリポは旧方式 (git bare + jj workspace) です。手順書が未ロードなら次を Read してください: $ref_dir/jj-bare-workspace-setup.md (旧方式の手順), $ref_dir/jj-commit-basics.md (コミット操作), $ref_dir/jj-restructure.md (組み替え), $ref_dir/jj-recovery.md (復旧)。あわせて $ref_dir/jj-colocate-setup.md の「移行 (旧方式リポの入れ替え)」節を読み、colocate 方式への移行を検討してください。"
