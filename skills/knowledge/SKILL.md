@@ -7,7 +7,7 @@ description: 読むだけの参照知識のカタログ (索引 + 本文の二�
 
 参照知識は 3 層ある:
 
-- **public** — `${CLAUDE_SKILL_DIR}/reference/<slug>.md` (下記「索引」)。公開してよい体系知識。編集は git 側 `~/.local/share/repos/github.com/kawaz/claude-rules-personal/main/skills/knowledge/reference/` で行い、plugin として配布される
+- **public** — `${CLAUDE_SKILL_DIR}/reference/<slug>.md` (下記「索引」)。公開してよい体系知識
 - **ローカル層** — `${CLAUDE_PLUGIN_DATA}/` (面ごと、git 外)。rule にするほど一般化していないが別プロジェクトでも効く事実
 - **private 層** — `~/.local/share/repos/github.com/kawaz/privacy-personal/main/` (private git)。個人情報系 (本人の表記・アカウント名・連絡先)
 
