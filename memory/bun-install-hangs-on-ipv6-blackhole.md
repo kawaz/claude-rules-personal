@@ -30,7 +30,7 @@ createServer((req, res) => {
 ```bash
 node /tmp/bun-registry-proxy.mjs 4873 > /tmp/bun-registry-proxy.log 2>&1 &
 bun add --registry http://127.0.0.1:4873 <pkg>
-perl -pi -e 's{http://127\.0\.0\.1:4873/}{}g' bun.lock   # resolved URL を既定表現 (空) に戻す
+perl -pi -e 's{, "http://127\.0\.0\.1:4873/[^"]*\.tgz", \{}{, "", {}g' bun.lock   # tarball URL ごと既定表現 (空文字) に戻す。prefix だけ消すと `@types/bun/-/bun-1.4.2.tgz` のような相対値が残り CI の bun install が落ちる
 bun install --frozen-lockfile --offline                  # "no changes"
 grep -c 127.0.0.1 bun.lock                               # 0 を確認してから commit
 kill %1; rm /tmp/bun-registry-proxy.mjs /tmp/bun-registry-proxy.log
