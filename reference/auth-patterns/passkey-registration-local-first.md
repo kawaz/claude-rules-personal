@@ -47,6 +47,7 @@ WebAuthn の RP ID は origin ではなく **domain** で、credential は「今
 3. `userHandle` が record の `user_id` と一致する
 4. 署名 (`authData || sha256(clientDataJSON)`) を ES256 (加えて RS256 / Ed25519) で検証する
 5. signCount は **record の値が非 0 なら「提示値 > record」を要求**する (提示 0 も退行として拒否)。record が 0 なら提示値をそのまま保存する。同期される passkey は常に 0 を返すので、0 のまま据え置く経路が要る
+6. `authenticatorData` の flags のうち **BE (backup eligible) / BS (backup state) を登録時・認証時ともに record へ記録**する。同期 passkey (BE=1) かデバイス束縛 (BE=0) かが保守 UI の手がかりになる。signCount が常に 0 なのが同期 passkey の常態であることは、BE=1 と対で読むと説明が付く。BE / BS は認証の可否判定には使わない (手がかりに留める)
 
 `user_id` (WebAuthn の user handle) は **server が sub ごとに 1 度だけ決めた 16 byte の乱数**を使い回す。authenticator は handle を server の手の届かない場所に保存するので、同じ人に 2 つの値を配ると端末上で 2 つのアカウントに見える。同じ sub への追加登録では既存の handle を再利用する。
 
@@ -59,6 +60,7 @@ access / refresh token は署名せず、乱数 (base64url) を **token family**
 - family = `{ id, sub, iss (mint した instance), access: { value, exp }, refresh: { value, exp }, 退役世代の記録 }`
 - **access はブラウザのメモリにだけ置き**、WebSocket の handshake に subprotocol (`<名前空間>.token.<値>`) で載せる。server は選んだ subprotocol を echo する。proxy が `Sec-WebSocket-Protocol` を透過することが要件になる
 - **refresh は httpOnly cookie**。名前は `__Secure-` prefix + 「発行者 id と sub のハッシュ」(同じブラウザが複数の instance / 利用者を持てるように)、`HttpOnly; Secure; SameSite=Strict`、`Path` は認証経路の prefix。**`Path` は認可境界ではない** (同一 origin の JS は任意のパスに fetch できる)。絞るのは帯域と露出面のため
+- **`__Host-` prefix ではなく `__Secure-` + `Path` を選ぶ**。同一ホストの別パス prefix (`https://h.example/` と `https://h.example/personal/`) を別の入口 (= 別登録) として扱うには cookie を `Path` で分ける必要があるが、`__Host-` は `Path=/` を強制するのでそれができない。`Path` が認可境界にならない以上この分離は帯域・露出面の絞り込みに留まり、cookie tossing (他ホストが同名 cookie を broader な `Path` で上書きする攻撃) は eTLD+1 の分離 (信頼するアプリと sandbox で登録ドメイン自体を分ける) で構造的に封じるのが前提になる
 - localStorage には置かない。XSS 1 つで長期 token が抜ける
 
 ### rotate と再利用検知
