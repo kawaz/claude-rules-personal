@@ -69,6 +69,8 @@ refresh は使うたびに rotate する。family は **退役した値のダイ
 
 family を書けるのは **mint した instance だけ (単一 writer)**。複数 instance で並行に rotate すると、LWW で複製した時に合流で片方が消え、再利用検知が誤発火する。失効は record の削除ではなく **tombstone** にして複製する — 削除だと、分断中の peer が持っていた生きた写しが復帰時に新しい書き込みとして戻ってくる。
 
+同じ人が複数のページを開いている時、access を 1 本に保ったまま refresh する手順は `multi-tab-token-refresh` を読む。
+
 ### 接続の期限
 
 認証済みの長命接続には access token の `exp` を接続の期限として持たせ、クライアントは `exp` の前に refresh して **同じ接続上の refresh op で期限を延ばす**。切断はしない。`exp` で必ず切ると画面が周期的に瞬く。切るのは延長を怠った接続だけで、切られた側は refresh → 再接続、refresh も無効なら passkey で認証し直す。
