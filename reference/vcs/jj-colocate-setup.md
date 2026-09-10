@@ -33,11 +33,12 @@ echo "guard: 上位への .jj 探索を止める (実体は main/)" > .jj/README
 {
   "folders": [
     { "name": "{repo}@{ws}", "path": "../../../{owner}/{repo}/{ws}" },
-    // アプリのリポなら、そのアプリの XDG 置き場を大文字の名前で常に並べる (無いものはツリーに何も出ないだけなので存在確認は要らない)
-    { "name": "CONFIG", "path": "/Users/{user}/.config/{app}" },
-    { "name": "DATA", "path": "/Users/{user}/.local/share/{app}" },
-    { "name": "STATE", "path": "/Users/{user}/.local/state/{app}" },
-    { "name": "CACHE", "path": "/Users/{user}/.cache/{app}" }
+    // アプリのリポなら、そのアプリの XDG 置き場を大文字の名前で常に並べる (無いものはツリーに何も出ないだけなので存在確認は要らない)。
+    // workspace ファイルでは変数展開されないので、作成時に ${XDG_*_HOME} と ${APP} を実値に展開して書く
+    { "name": "CONFIG", "path": "${XDG_CONFIG_HOME:-$HOME/.config}/${APP}" },
+    { "name": "DATA", "path": "${XDG_DATA_HOME:-$HOME/.local/share}/${APP}" },
+    { "name": "STATE", "path": "${XDG_STATE_HOME:-$HOME/.local/state}/${APP}" },
+    { "name": "CACHE", "path": "${XDG_CACHE_HOME:-$HOME/.cache}/${APP}" }
   ],
   "settings": {
     "prettier.enable": false
