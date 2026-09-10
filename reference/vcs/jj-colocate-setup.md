@@ -33,7 +33,7 @@ echo "guard: 上位への .jj 探索を止める (実体は main/)" > .jj/README
 {
   "folders": [
     { "name": "{repo}@{ws}", "path": "../../../{owner}/{repo}/{ws}" },
-    // アプリのリポなら、そのアプリの XDG 置き場を大文字の名前で並べる (存在するものだけ)
+    // アプリのリポなら、そのアプリの XDG 置き場を大文字の名前で常に並べる (無いものはツリーに何も出ないだけなので存在確認は要らない)
     { "name": "CONFIG", "path": "/Users/{user}/.config/{app}" },
     { "name": "DATA", "path": "/Users/{user}/.local/share/{app}" },
     { "name": "STATE", "path": "/Users/{user}/.local/state/{app}" },
