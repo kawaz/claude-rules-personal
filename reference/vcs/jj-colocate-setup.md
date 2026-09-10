@@ -32,7 +32,12 @@ echo "guard: 上位への .jj 探索を止める (実体は main/)" > .jj/README
 // {repo}.local.code-workspace (main/ 直下)
 {
   "folders": [
-    { "name": "{repo}@{ws}", "path": "../../../{owner}/{repo}/{ws}" }
+    { "name": "{repo}@{ws}", "path": "../../../{owner}/{repo}/{ws}" },
+    // アプリのリポなら、そのアプリの XDG 置き場を大文字の名前で並べる (存在するものだけ)
+    { "name": "CONFIG", "path": "/Users/{user}/.config/{app}" },
+    { "name": "DATA", "path": "/Users/{user}/.local/share/{app}" },
+    { "name": "STATE", "path": "/Users/{user}/.local/state/{app}" },
+    { "name": "CACHE", "path": "/Users/{user}/.cache/{app}" }
   ],
   "settings": {
     "prettier.enable": false
