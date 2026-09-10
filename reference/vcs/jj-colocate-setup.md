@@ -26,10 +26,10 @@ cd .. && echo "guard: 上位への .git 探索を止める (実体は main/)" > 
 echo "guard: 上位への .jj 探索を止める (実体は main/)" > .jj/README.md
 ```
 
-続けて VS Code の workspace ファイルを作る。名前は `{repo}@{ws}.local.code-workspace` (グローバル gitignore の `*.local.*` に載るので commit されない。リポに追跡させる workspace ファイルは作らない):
+続けて VS Code の workspace ファイルを作る。名前は `{repo}.local.code-workspace` (グローバル gitignore の `*.local.*` に載るので commit されない。リポに追跡させる workspace ファイルは作らない):
 
 ```jsonc
-// {repo}@{ws}.local.code-workspace (main/ 直下)
+// {repo}.local.code-workspace (main/ 直下)
 {
   "folders": [
     { "name": "{repo}@{ws}", "path": "../../../{owner}/{repo}/{ws}" }
