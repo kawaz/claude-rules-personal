@@ -14,21 +14,14 @@
 
 1. SKILL.md の本文を `reference/<topic>/` へ分割して移す。**frontmatter は外す** (name / description / allowed-tools は skill の起動用メタなので参照知識には要らない)
 2. `scripts/` 等の付属ファイルはディレクトリごと同じトピックへ移し、索引には載せない (reference-layout)
-3. 移した skill の SKILL.md は、frontmatter を残したまま本文を案内だけにする:
-
-   ```markdown
-   この skill は reference の `<topic>` へ移動した。
-   `<絶対パス>/reference/<topic>/_index.md` を Read すること。
-   ```
-
-   案内を残すのは 1 版だけ。**次の release で skill ディレクトリごと削除する** (install 済みのスナップショットや履歴から旧名で起動された時に、行き先が分かる猶予を 1 版だけ置く)
-4. skill 名で参照している箇所を洗って書き換える:
+3. skill 名で参照している箇所を洗って書き換える:
 
    ```bash
    rg -n '<name>' <リポ>/for-*/rules <リポ>/skills <リポ>/reference
    ```
 
    「`<name>` skill」→「reference の `<topic>`」。**`[[<skill 名>]]` の wikilink は必ず名前参照に直す** (skill ディレクトリを消した時点で dead wikilink になり lint が FATAL になる)
+4. **skill ディレクトリごと削除して `just plugin-release`** を通す。案内だけの SKILL.md を残さない (既存セッションは古い plugin スナップショットを見ているので案内に到達せず、新しいセッションは書き換え済みの rule / 索引から reference を辿るので案内が効く場面が無い)
 5. 他リポからの参照は書き換えの対象と影響範囲が違うので、勝手に直さず所有者に報告する
 
 ## 配布の差 (どこまでやれば効くか)
@@ -41,7 +34,7 @@
 
 skill を編集しただけでは install 済みのスナップショットが古いままで、どこにも効かない (version が同じだと `plugin update` も「最新です」と言って何もしない)。plugin 側の反映には Claude Code の restart か `/reload-plugins` も要る。
 
-**skill を参照知識へ移す変更は、案内だけの SKILL.md も plugin 配布物**なので release を通す。rule と reference だけを触った変更に release は要らない。
+**skill を削除する変更も plugin 配布物の変更**なので release を通す。rule と reference だけを触った変更に release は要らない。
 
 ## 既存リポの移行
 

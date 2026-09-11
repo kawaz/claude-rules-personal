@@ -10,5 +10,5 @@ rule / skill / 参照知識 (reference / memory / privacy) を書く・移す・
   発火語: _index.md, 索引, 発火語, 索引漏れ, lint-rules, FATAL, dead wikilink, .lint-external-slugs
 - [role-main-loading](role-main-loading.md) — 3 段のロードリスト、必読 / 必要時の 2 節構成、必要時から必読への昇格。
   発火語: ロードリスト, role-main, 必読, 必要時, 段 1, 段 2, 昇格, 読んでない
-- [migration](migration.md) — rule / skill を reference へ降ろす手順、skill 案内の残し方、配布の差 (symlink / plugin-release)。
+- [migration](migration.md) — rule / skill を reference へ降ろす手順、参照の書き換えと skill 削除、配布の差 (symlink / plugin-release)。
   発火語: reference へ移す, skill をやめる, 降ろす, plugin-release, 反映されない, 触ったついで移行
