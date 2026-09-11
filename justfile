@@ -121,10 +121,10 @@ lint-rules:
     #     <dir>/*.md ↔ <dir>/_index.md のリンクが 1:1、サブディレクトリは <sub>/_index.md として
     #     親の索引に載る。片方だけ足すと「本文はあるが誰も辿れない」「リンク先が無い」になる。
     #     private 層のフルパスリンク (スラッシュ始まり・~ 始まり) は本文がこのリポに無いので対象外。
-    #     `templates/` `assets/` はテンプレ・付属ファイルの置き場で読み物ではないので、
-    #     ディレクトリごと索引の対象外にする (中身も再帰的に対象外)。
+    #     `scripts/` `templates/` `assets/` はスクリプト・テンプレ・付属ファイルの置き場で
+    #     読み物ではないので、ディレクトリごと索引の対象外にする (中身も再帰的に対象外)。
     while IFS= read -r dir; do
-        case "$dir" in */templates|*/templates/*|*/assets|*/assets/*) continue ;; esac
+        case "$dir" in */scripts|*/scripts/*|*/templates|*/templates/*|*/assets|*/assets/*) continue ;; esac
         idx="$dir/_index.md"
         if [ ! -f "$idx" ]; then
             echo "FATAL 参照知識の索引欠落: $dir/ に _index.md が無い"
@@ -142,7 +142,7 @@ lint-rules:
         for sub in "$dir"/*/; do
             [ -d "$sub" ] || continue
             sub=$(basename "$sub")
-            case "$sub" in templates|assets) continue ;; esac
+            case "$sub" in scripts|templates|assets) continue ;; esac
             if ! rg -qF "(${sub}/_index.md)" "$idx"; then
                 echo "FATAL 参照知識の索引漏れ: $dir/$sub/_index.md が $idx に無い"
                 fatal=1

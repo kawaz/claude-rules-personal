@@ -69,9 +69,9 @@
 ## メタ (ルール・docs 運用そのもの)
 
 - [[work-principles]] — 全フェーズ横断の作業原則 (指示遵守 / TODO / 委譲)
-- [[rule-writing-guidelines]] — rule / skill を書く・改廃するとき
+- [[rule-writing-guidelines]] — rule / skill / 参照知識を書く・移す・改廃するとき (禁則と、reference の `rules-authoring` への入口)
 - [[no-hard-wrap]] — rule / skill / docs の md で行長を揃える改行をしない
-- [[knowledge-guide]] — 覚えておくべき事実に気づいたとき (reference / memory / privacy / rule のどこに書くか)
+- [[knowledge-guide]] — 覚えておくべき事実に気づいたとき (reference / memory / privacy の 3 層のパス)
 - [[research-documentation]] — 調査・検証結果を記録するとき
 - [[no-historical-noise]] — docs に history narrative を書きたくなったとき
 - [[self-written-rule-blind-spots]] — ルールを起草した直後

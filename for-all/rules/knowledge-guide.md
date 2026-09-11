@@ -8,28 +8,6 @@
 | memory | `~/.local/share/repos/github.com/kawaz/claude-rules-personal/main/memory/` | rule にするほど一般化していないが別プロジェクトでも効く横断メモ |
 | privacy | `~/.local/share/repos/github.com/kawaz/privacy-personal/main/` (`reference/` + `memory/`、上と同構造) | 個人情報系 (本人の表記、アカウント名、連絡先。private git)。業務面は各 overlay の rule が案内する privacy-<面> リポ |
 
-索引で引けなくても知識がありそうな時は、`rg -il '<語>' <rules リポ>/reference <rules リポ>/memory` で本文を直接当ててよい (ヒットのうち該当する 1 ファイルだけ Read する。発火語の漏れに気づいたら索引に足す)。
+索引はどの層・どのリポでも `reference/_index.md` / `memory/_index.md`。
 
-索引はどの層・どのリポでも `reference/_index.md` / `memory/_index.md` (privacy の `reference/` 索引は `reference/_index.md` の「private 層」節にも写す。索引は public でよく、本文だけ private)。
-
-## 書き先の判定
-
-- そのプロジェクトでしか意味を持たない → そのプロジェクトの auto-memory
-- 別プロジェクトでも効くが一般化前 → `memory/`
-- 個人情報系 → privacy リポ
-- 公開してよい体系知識 → `reference/`
-- 全セッションで毎ターン効く行動制約 → rule
-
-昇格させたら下層の元エントリは消す (正本の二重化を避ける)。雑に扱ってよいのは `memory/` だけ (気軽に書く、rule / reference への昇格・整理は気づいた人がその時にやる)。`reference/` は遅延ロードの rule に相当する (skill と違い plugin の update / reload が要らない) ので、本文の質は rule と同じ水準で書く。
-
-## reference の階層化
-
-1 つのツール / ドメインの知識は 1 つの巨大 md にせず、`reference/<topic>/` にケース・目的・章ごとの md へ分割し、`reference/<topic>/_index.md` をそのトピックの索引にする。トップの `reference/_index.md` に載せるのは `<topic>/_index.md` へのエントリだけ (= 索引 → トピック索引 → 本文、と段階的に深める)。索引の形式はどの階層でも同じ。
-
-## memory / reference への書き込みは確認なしで完結させる
-
-どのプロジェクトのセッションからでも、`memory/` `reference/` への追記は**ユーザに確認せず**行う: ファイルを書き、`_index.md` を更新し、その場でパス指定 commit (`jj commit -m "memory: <slug>" memory/<slug>.md memory/_index.md`)、そのまま `(cd <rules リポ> && just push)` まで通してよい (これらのパスは version bump gate の対象外)。「越境なので commit しますか」「push しますか」と聞かない。業務固有名詞・個人情報が混ざる時だけ止まる (書き先が privacy / overlay になるため)。
-
-## 索引と本文の 1:1
-
-本文の追加・削除・改名は、同じ変更で該当 `_index.md` も更新する。本文の書き方 (知識そのものだけ、hard-wrap しない) は [[rule-writing-guidelines]] が正本。
+**どの層に書くか・どう分割するか・索引と commit をどうするかは reference の `rules-authoring` が正本**。知識を書き足す・移す時はそれを読む。

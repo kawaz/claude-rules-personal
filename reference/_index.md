@@ -12,6 +12,8 @@
   発火語: DR を書く, 仕様書, プロトコル設計, スコープの粒度, 不採用表, 節番号の参照, 設計文書のレビュー
 - [docs-authoring](docs-authoring/_index.md) — `docs/` の構造標準・テンプレ・翻訳ペア・何をいつ書き残すか・裁定待ちの管理。
   発火語: docs 構造, DR を立てる, findings, journal, runbook, 翻訳ペア, README-ja, QUESTIONS.md, 裁定待ち
+- [rules-authoring](rules-authoring/_index.md) — rule / skill / 参照知識の分類と書式、reference の構成と分割、ロードリストの規律、reference への移設手順。
+  発火語: rule を書く, skill を作る, reference に移す, 索引, _index, 常時ロードが重い, skill か reference か, ロードリスト, 必読
 - [justfile](justfile/_index.md) — task runner の recipe 設計、リリースの標準ループ、push 後の watch 運用。
   発火語: justfile, just push, recipe, check-version-bumped, release.yml, リリースが出ない, tag が作られない, just watch
 - [gh-ops](gh-ops/_index.md) — GitHub 上の画像の取得・投稿 (`gh --attach`) と、homebrew tap への自動 push 用 deploy key。
