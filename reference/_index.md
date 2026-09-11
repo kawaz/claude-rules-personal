@@ -22,8 +22,8 @@
   発火語: codesign, notarize, Developer ID, App-Specific Password, stapler, Gatekeeper, TCC, System Extension
 - [auth-patterns](auth-patterns/_index.md) — 他プロダクトにも効く認証設計パターン (passkey の登録、peer 間相互認証、自分の endpoint の確定)。
   発火語: passkey, WebAuthn, 登録フロー, refresh token, cookie, peer 認証, mesh, TLS, iss/aud, self の確定, endpoint, instance id, 引っ越し
-- [role-main](role-main/_index.md) — 統括メイン (main role) がセッション開始時に順に Read する必須ロード一覧。
-  発火語: セッション開始, 統括, main role, 必須ロード, load-role-main
+- [role-main](role-main/_index.md) — 統括メイン (main role) のロードリスト段 1 (全面共通の必読 / 必要時 + 段 2 = 面の overlay、段 3 = プロジェクト CLAUDE.md への連鎖)。
+  発火語: セッション開始, 統括, main role, 必須ロード, ロードリスト, 段 1, load-role-main
 
 ## 単独の本文
 
