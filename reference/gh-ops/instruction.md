@@ -1,6 +1,6 @@
 # gh-image-attach 手順書 (サブエージェント用)
 
-このファイルは **画像付き投稿を委譲されたサブエージェント**が読む詳細手順書。呼び出し側 (reference の `gh-ops/gh-image-attach`) から spawn され、下記 INPUT を受け取り、browser 自動化 (attach → drop → poll → fill → submit → 確認) を **失敗時の観測リトライ込み**で完遂し、OUTPUT だけを返す。メインとの往復対話はできない前提で、止まらず最後までやり切ること。
+このファイルは **`gh --attach` が使えない場面の fallback** として画像付き投稿を委譲されたサブエージェントが読む詳細手順書 (通常経路は reference の `gh-ops/gh-image-attach`)。呼び出し側 (reference の `gh-ops/gh-image-attach`) から spawn され、下記 INPUT を受け取り、browser 自動化 (attach → drop → poll → fill → submit → 確認) を **失敗時の観測リトライ込み**で完遂し、OUTPUT だけを返す。メインとの往復対話はできない前提で、止まらず最後までやり切ること。
 
 ## INPUT (spawn 時にメインから渡される)
 
