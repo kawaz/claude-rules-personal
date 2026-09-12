@@ -1,0 +1,765 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Eval report — rules-personal v0.8.10</title>
+</head>
+<body>
+<style>
+:root{--plane:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink-2:#52514e;--ink-3:#6b6a64;--hairline:rgba(11,11,11,.10);--grid:#e1e0d9;--inset:rgba(11,11,11,.04);--accent:#2a78d6;--base-fill:#6b6a64;--delta-good:#006300;--good:#067d06;--warning:#8a6100;--critical:#d03b3b;
+  color-scheme:light dark;
+}
+@media (prefers-color-scheme:dark){:root{--plane:#0d0d0d;--surface:#1a1a19;--ink:#ffffff;--ink-2:#c3c2b7;--ink-3:#898781;--hairline:rgba(255,255,255,.10);--grid:#2c2c2a;--inset:rgba(255,255,255,.05);--accent:#3987e5;--base-fill:#898781;--delta-good:#0ca30c;--good:#0ca30c;--warning:#fab219;--critical:#e06c6c;color-scheme:dark}}
+:root[data-theme="dark"]{--plane:#0d0d0d;--surface:#1a1a19;--ink:#ffffff;--ink-2:#c3c2b7;--ink-3:#898781;--hairline:rgba(255,255,255,.10);--grid:#2c2c2a;--inset:rgba(255,255,255,.05);--accent:#3987e5;--base-fill:#898781;--delta-good:#0ca30c;--good:#0ca30c;--warning:#fab219;--critical:#e06c6c;color-scheme:dark}
+:root[data-theme="light"]{--plane:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink-2:#52514e;--ink-3:#6b6a64;--hairline:rgba(11,11,11,.10);--grid:#e1e0d9;--inset:rgba(11,11,11,.04);--accent:#2a78d6;--base-fill:#6b6a64;--delta-good:#006300;--good:#067d06;--warning:#8a6100;--critical:#d03b3b;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--plane);color:var(--ink);
+  font:14px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;
+  -webkit-text-size-adjust:100%}
+.wrap{max-width:880px;margin:0 auto;padding:40px 24px 64px;display:flex;flex-direction:column;gap:20px}
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+header h1{margin:2px 0 0;font-size:24px;font-weight:600;line-height:1.25;text-wrap:balance}
+.meta{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:8px;color:var(--ink-2);font-size:13px}
+.meta .num{font-variant-numeric:tabular-nums lining-nums}
+.banner{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:8px;
+  border:1px solid var(--hairline);background:var(--surface);font-size:13px}
+.banner .chip-warn{color:var(--warning);font-weight:600}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.tile{background:var(--surface);border:1px solid var(--hairline);border-radius:10px;padding:14px 16px;
+  display:flex;flex-direction:column;gap:4px}
+.tile .label{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.tile .value{font-size:26px;font-weight:600;font-variant-numeric:tabular-nums lining-nums;line-height:1.1}
+.tile.hero .value{font-family:Georgia,"Times New Roman",serif;font-weight:400;font-size:48px}
+.tile .sub{font-size:12px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.tile .value.delta-pos{color:var(--delta-good)}
+.tile .value.delta-neg{color:var(--critical)}
+.toolbar{display:flex;gap:8px;justify-content:flex-end}
+.toolbar button{font:12px system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink-2);
+  background:var(--surface);border:1px solid var(--hairline);border-radius:6px;padding:4px 10px;cursor:pointer}
+.toolbar button:hover{color:var(--ink)}
+.toolbar button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.case{background:var(--surface);border:1px solid var(--hairline);border-radius:10px;padding:18px 20px;
+  display:flex;flex-direction:column;gap:10px}
+.case-regressed{border-left:3px solid var(--critical)}
+.verdict{margin:6px 0 0;font-size:15px}
+.verdict .delta{font-size:15px}
+.flag{font-size:11px;font-weight:600;color:var(--warning);white-space:nowrap}
+.star{color:var(--warning);font-size:.45em;vertical-align:super;line-height:0;cursor:help}
+.legend summary{cursor:pointer;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2)}
+.legend-list{margin:8px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:5px;font-size:13px;color:var(--ink-2)}
+.case-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.case-head h2{margin:0;font-size:16px;font-weight:600}
+.case-head .spacer{flex:1}
+.case-score{font-size:15px;font-weight:600}
+.mono{font:12px "SF Mono",ui-monospace,Menlo,Consolas,monospace}
+.num{font-variant-numeric:tabular-nums lining-nums}
+.muted{color:var(--ink-3);font-size:12px}
+.meter{display:inline-block;position:relative;width:120px;height:6px;border-radius:4px;background:var(--grid);
+  vertical-align:middle}
+.meter>span{display:block;height:100%;border-radius:4px;max-width:100%}
+.meter .tick{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--ink-3);border-radius:1px}
+.m-accent>span{background:var(--accent)}
+.m-base>span{background:var(--base-fill)}
+.delta{font-size:12px;font-weight:600;font-variant-numeric:tabular-nums}
+.delta-pos{color:var(--delta-good)}
+.delta-neg{color:var(--critical)}
+.delta-zero{color:var(--ink-3)}
+details.section{border-top:1px solid var(--grid);padding-top:10px}
+details.section>summary{cursor:pointer;font-size:12px;font-weight:600;letter-spacing:.04em;
+  text-transform:uppercase;color:var(--ink-2);list-style-position:outside;margin-left:2px}
+details.section>summary:hover{color:var(--ink)}
+details.section[open]>summary{margin-bottom:8px}
+.md{display:flex;flex-direction:column;gap:8px;background:var(--inset);border-radius:8px;
+  padding:12px 14px;overflow-wrap:break-word}
+.md>:first-child{margin-top:0}
+.md h1,.md h2,.md h3,.md h4,.md h5,.md h6{margin:4px 0 0;font-size:1em;font-weight:600;line-height:1.3}
+.md p,.md ul,.md ol,.md blockquote,.md table,.md pre,.md hr{margin:0}
+.md ul,.md ol{display:flex;flex-direction:column;gap:4px;padding-left:20px}
+.md blockquote{border-left:2px solid var(--hairline);padding-left:10px;color:var(--ink-2)}
+.md :not(pre)>code{background:var(--inset);padding:1px 4px;border-radius:4px;
+  font:.92em "SF Mono",ui-monospace,Menlo,Consolas,monospace}
+.md pre{background:var(--inset);border:1px solid var(--hairline);padding:10px 12px;border-radius:6px;
+  overflow-x:auto;font:12px/1.5 "SF Mono",ui-monospace,Menlo,Consolas,monospace}
+.md pre code{background:none;padding:0;font:inherit}
+.md table{width:100%;border-collapse:collapse}
+.md th,.md td{padding:5px 8px;text-align:left;vertical-align:top;border-bottom:1px solid var(--grid)}
+.md th{font-weight:600;color:var(--ink-2)}
+.md a{color:var(--accent);text-decoration:none}
+.md a:hover{text-decoration:underline}
+.grader-def{display:flex;flex-direction:column;gap:6px;padding:8px 0}
+.grader-def+.grader-def{border-top:1px solid var(--grid)}
+.grader-def-head{display:flex;align-items:baseline;gap:8px}
+.grader-name{font:13px "SF Mono",ui-monospace,Menlo,Consolas,monospace;font-weight:600}
+.badge{font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2);
+  border:1px solid var(--hairline);border-radius:999px;padding:1px 8px}
+.config{display:flex;flex-direction:column;gap:2px;background:var(--inset);border-radius:8px;padding:10px 14px}
+.config code{font:12px "SF Mono",ui-monospace,Menlo,Consolas,monospace;overflow-wrap:anywhere}
+.arm{display:flex;flex-direction:column;gap:8px;padding:6px 0}
+.arm+.arm{border-top:1px dashed var(--grid);margin-top:4px;padding-top:12px}
+.arm-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.arm-label{font-size:13px;font-weight:600}
+.run{border:1px solid var(--grid);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.run-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.run-title{font-size:12px;font-weight:600;color:var(--ink-2)}
+.run-error .explanation{color:var(--ink-2)}
+.note{font-size:12px;color:var(--ink-2)}
+.graders{display:flex;flex-direction:column;gap:4px}
+details.grader{border-radius:6px}
+details.grader>summary{cursor:pointer;display:flex;align-items:baseline;gap:8px;padding:3px 4px;
+  border-radius:6px;list-style:none}
+details.grader>summary::-webkit-details-marker{display:none}
+details.grader>summary::before{content:'▸';font-size:10px;color:var(--ink-3);flex:none;
+  transition:transform .12s ease}
+details.grader[open]>summary::before{transform:rotate(90deg)}
+details.grader>summary:hover{background:var(--inset)}
+details.grader>summary:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.grader-body{padding:6px 8px 8px 24px;display:flex;flex-direction:column;gap:6px}
+.chip{font-size:11px;font-weight:600;border-radius:999px;padding:1px 8px;white-space:nowrap}
+.chip-pass{color:var(--good);border:1px solid currentColor}
+.chip-fail{color:var(--critical);border:1px solid currentColor}
+.chip.chip-warn{color:var(--warning);border:1px solid currentColor}
+.explanation{margin:0;font-size:13px;color:var(--ink-2);white-space:pre-wrap;overflow-wrap:break-word}
+.kv{display:flex;gap:8px;font-size:12px;color:var(--ink-3)}
+.votes{font-variant-numeric:tabular-nums;letter-spacing:.1em}
+pre.evidence{margin:0;background:var(--inset);border:1px solid var(--hairline);border-radius:6px;
+  padding:8px 10px;overflow-x:auto;max-height:320px;
+  font:12px/1.5 "SF Mono",ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;overflow-wrap:break-word}
+footer{color:var(--ink-3);font-size:12px;text-align:center;padding-top:8px}
+@media (prefers-reduced-motion:no-preference){
+  details.grader>summary,.toolbar button{transition:background .12s ease,color .12s ease}
+}
+@media (prefers-reduced-motion:reduce){
+  details.grader>summary::before{transition:none}
+}
+@media print{
+  :root,:root[data-theme="dark"],:root[data-theme="light"]{--plane:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink-2:#52514e;--ink-3:#6b6a64;--hairline:rgba(11,11,11,.10);--grid:#e1e0d9;--inset:rgba(11,11,11,.04);--accent:#2a78d6;--base-fill:#6b6a64;--delta-good:#006300;--good:#067d06;--warning:#8a6100;--critical:#d03b3b;color-scheme:light}
+  body{background:#fff}
+  .toolbar{display:none}
+  .case,.run,.grader-def{break-inside:avoid}
+  pre.evidence{max-height:none}
+}
+</style>
+<div class="wrap">
+<header>
+<div class="eyebrow">Plugin eval report</div>
+<h1>rules-personal v0.8.10</h1>
+<p class="verdict">Plugin effect: <span class="delta delta-zero">· 0.0 pts</span> vs baseline — improved 0 · flat 2 · regressed 0 of 2 cases.</p>
+<div class="meta">
+<span class="mono">.</span>
+<span>Claude Code v2.1.269</span>
+<span class="num">2026-09-12 10:55 UTC</span>
+<span class="num">3m 26s</span>
+<span class="num">$1.34</span>
+<span class="num">8 runs</span>
+<span class="num">2 in flight</span>
+
+
+<span>judge default</span>
+<span class="num">threshold 100%</span>
+
+</div>
+</header>
+
+<section class="tiles">
+<div class="tile hero"><span class="label">Suite score · with plugin</span><span class="value">100%</span><span class="sub">mean of per-case scores</span></div>
+<div class="tile"><span class="label">Ablation Δ</span><span class="value num delta-zero">0.0</span><span class="sub">score points vs baseline, 2 of 2 cases</span></div>
+<div class="tile"><span class="label">Baseline score</span><span class="value num">100%</span><span class="sub">without the plugin</span></div>
+<div class="tile"><span class="label">Cases</span><span class="value num">2</span><span class="sub">2 of 2 ≥ 100% threshold</span></div>
+<div class="tile"><span class="label">Perfect runs</span><span class="value num">100%</span><span class="sub">runs where every grader passed</span></div>
+</section>
+<details class="section legend">
+<summary>How to read this report</summary>
+<ul class="legend-list">
+<li>A run's score is the weighted fraction of its graders that passed; a "perfect" run passed every grader.</li>
+<li>A case's score is the mean of its runs; a case passes when its score is at or above the 100% threshold (the tick on each case bar).</li>
+<li>The suite score is the mean of the per-case scores.</li>
+<li>Judge votes are independent samples of the LLM judge; the majority decides pass or fail.</li>
+<li>"With plugin" and "Baseline" runs are identical except for the plugin being loaded; Δ is the with-plugin score minus the baseline score.</li>
+
+</ul>
+</details>
+<div class="toolbar"><button type="button" data-act="expand">Expand all</button><button type="button" data-act="collapse">Collapse all</button></div>
+<article class="case" id="case-1">
+<div class="case-head">
+<h2>decompose-fires</h2>
+<span class="muted mono">evals/decompose-fires</span>
+<span class="spacer"></span>
+
+<span class="delta delta-zero">· 0.0 pts</span>
+<span class="muted">with plugin</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span><i class="tick" style="left:100.0%"></i></span>
+<span class="num case-score">100%</span>
+</div>
+
+<details class="section" open>
+<summary>Results</summary>
+<section class="arm">
+<div class="arm-head">
+<span class="arm-label">With plugin</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">100% of runs perfect</span>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 1</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">5 turns · $0.36 · 10:55:06 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">criteria</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">分解スキルを実行したところ、作業ディレクトリ `/private/tmp/e-vfCa4v/home/cwd` が空で、対象の CLI のコードが見つかりませんでした（コミット履歴なし、README・completion・パッケージマニフェストいずれもなし）。
+
+実ファイル名に紐づけた分解はできないので、**ファイルパスをプレースホルダにした汎用版**を下に出します。リポジトリのパスをもらえれば、実在のファイル・関数・テストコマンドに置き換えた版を作り直します。
+
+---
+
+## 前提（ここが違うなら TODO も変わります）
+
+- `--json` は**全サブコマンド共通のグローバルフラグ**
+- `--json` 指定時は **stdout は JSON のみ**、ログ・進捗は stderr へ
+- completion は bash / zsh / fish を**手書きで保守**している
+
+---
+
+## TODO
+
+### 1. 出力箇所の棚卸し
+現状の CLI で「人間向けに stdout へ書いている箇所」を全部洗い出し、サブコマンド × 出力内容の一覧を作る。`print`/`console.log`/`fmt.Println` 相当を grep し、どれが「結果」でどれが「進捗・ログ」かを分類する。成果物は一覧メモ（`docs/json-output-inventory.md` 等）。以降の TODO はこの一覧を入力にする。
+
+### 2. JSON 出力契約（スキーマ）の設計
+TODO 1 の一覧をもとに、サブコマンドごとの JSON 構造を決めて文書化する。決めること: トップレベルはオブジェクトか配列か、キー命名規則（snake_case / camelCase を既存の設定ファイル形式に合わせる）、バージョンフィールドの有無、日付・数値の型、空結果の表現、エラー時の形（例: `{&quot;error&quot;: {&quot;code&quot;: ..., &quot;message&quot;: ...}}`）。完了条件は `docs/json-schema.md` にサンプル出力付きで確定していること。
+
+### 3. 出力層の抽象化（振る舞いは変えない）
+`--json` の実装前に、結果出力を直接 print している箇所を「データを組み立てる」→「フォーマッタが出力する」の 2 段に分離する。この TODO の完了時点で出力は**現状と 1 バイトも変わらない**こと（既存テストが全部パスすること）が完了条件。
+
+### 4. `--json` フラグのパース追加
+引数パーサにグローバルフラグ `--json` を追加し、ヘルプテキストにも記載する。この時点では値を保持するだけで挙動は変えない。完了条件: `--json` を付けても従来どおり動き、`--help` に説明が出ること。
+
+### 5. JSON フォーマッタの実装（正常系）
+TODO 2 のスキーマに従って、TODO 3 で分離したデータ構造を JSON に出力するフォーマッタを実装し、`--json` 指定時に人間向けフォーマッタと差し替える。完了条件: 全サブコマンドで `cmd &lt;sub&gt; --json | jq .` がエラーなく通ること。
+
+### 6. エラー系の JSON 出力と終了コード
+異常終了時も `--json` 指定なら JSON でエラーを吐くようにする（stdout か stderr かは TODO 2 の決定に従う）。終了コードは従来と同じ値を維持する。完了条件: 代表的な失敗ケース（引数不正・対象が見つからない・外部 I/O 失敗）でスキーマどおりの JSON と正しい exit code が出ること。
+
+### 7. stdout 汚染の防止
+`--json` 時に進捗バー・スピナー・INFO ログ・確認プロンプトが stdout へ出ないようにする（stderr へ回す、もしくは抑止）。非 TTY 時の既存挙動と矛盾しないか確認する。完了条件: `cmd &lt;sub&gt; --json 2&gt;/dev/null | jq .` がパースエラーにならないこと。
+
+### 8. 自動テストの追加
+サブコマンドごとに `--json` 出力のテストを追加する。最低限、(a) 出力が妥当な JSON であること、(b) TODO 2 のスキーマのキーが揃っていること、(c) 正常系・空結果・エラー系の 3 パターン。スナップショットテストを使う場合は非決定値（時刻・パス・ID）のマスクも行う。
+
+### 9. README への追記
+`--json` の説明をグローバルオプション一覧に追加し、使用例セクションに実際の出力サンプルと `jq` との組み合わせ例を 1 つ載せる。stdout/stderr の分離仕様とエラー時の形にも触れる。出力サンプルは実際にコマンドを実行して貼ること（手書きしない）。
+
+### 10. bash completion の追従
+completion スクリプトのオプション候補に `--json` を追加する。サブコマンド固有ではなくグローバルなら、全サブコマンドの候補に出る位置に置く。完了条件: `cmd &lt;sub&gt; --j&lt;TAB&gt;` で補完されること。
+
+### 11. zsh completion の追従
+同上。zsh は説明文付き（`&apos;--json[output in JSON format]&apos;` 形式）なので、説明文も書く。完了条件: 実際に zsh を起動して補完が出ること。
+
+### 12. fish completion の追従
+同上。`complete -c cmd -l json -d &apos;...&apos;` を追加する。
+
+&gt; 補足: completion がフレームワーク（cobra / clap / click 等）による**自動生成**なら TODO 10〜12 は「生成スクリプトを再実行してコミットされている completion ファイルを更新する」1 件に統合される。TODO 1 の調査時にどちらか判定すること。
+
+### 13. CHANGELOG とバージョン
+CHANGELOG に `Added: --json output option` を追記する。リリース単位でバージョンを上げる運用なら minor バージョンを上げる。
+
+### 14. 手動 E2E 確認
+実際のシェルで全サブコマンドに `--json` を付けて実行し、`jq` に通す・パイプ先でブロックしない・`--json` なしの出力が退行していないことを目視確認する。TODO 1 の一覧をチェックリストとして使う。
+
+---
+
+## 確定させたい点
+
+1. **リポジトリのパス** — これがあれば上記を実ファイル名に落とし込めます
+2. `--json` は全サブコマンド共通か、特定サブコマンドだけか
+3. エラー時の JSON は stdout / stderr のどちらへ出すか
+4. completion は手書き保守か、フレームワークの自動生成か</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">skill-used</span>  <span class="badge">plugin-fired indicator</span></summary>
+<div class="grader-body">
+<p class="explanation">Skill called 1x (expected 1..∞)</p>
+
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 2</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">5 turns · $0.42 · 10:55:06 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">criteria</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">## 前提の確認（先に1点）
+
+作業ディレクトリ `/private/tmp/e-ejUcug/home/cwd` は空で、対象の CLI ツール・README・completion ファイルがこの環境に存在しませんでした（git にもコミットなし）。そのため**実ファイルパス・実関数名に紐づいた分解はできません**。
+
+以下は「どの言語でも成立する粒度」で分解したものです。リポジトリのパスを教えていただければ、実在のファイル名・サブコマンド名に置き換えた版を作り直します。
+
+**置いた仮定**（違う場合は該当 TODO を差し替えてください）
+- `--json` は全サブコマンド共通のグローバルフラグ
+- 既存の人間向け出力は残し、`--json` 指定時のみ切り替え
+- completion は bash / zsh / fish の3つ
+
+---
+
+## TODO 一覧
+
+### T1. 現状出力の棚卸し
+CLI の全サブコマンド・全コードパスを走査し、標準出力に書いている箇所を一覧化する。「サブコマンド名 / 出力トリガ条件 / 出力しているデータ構造 / 書き出し関数」の4列の表を作り、作業メモに残す。`print`/`fmt.Print`/`console.log`/`echo` 等の直接出力が散在しているか、既に1箇所に集約されているかを判定結果として明記する。**完了条件**: 表が全サブコマンドを網羅し、JSON 化漏れの候補がゼロであること。
+
+### T2. JSON スキーマの決定
+T1 の表をもとに、各サブコマンドの JSON 出力形を決めて設計メモに書く。決めること: (a) トップレベルを単一オブジェクトにするか NDJSON にするか、(b) 共通のエンベロープ（`version` / `data` / `error` 等）を持たせるか、(c) キーの命名規則（snake_case か camelCase か）、(d) 日時・数値・null の表現、(e) 空結果の表し方（`[]` か `null` か）。**完了条件**: 全サブコマンドについてサンプル JSON が1つずつ書かれていること。
+
+### T3. 出力層の分離（リファクタ、機能追加なし）
+T1 で洗い出した直接出力を、単一のレンダラ抽象（例: `Renderer` インターフェース + `TextRenderer` 実装）経由に置き換える。この TODO では**出力内容を1バイトも変えない**。既存テストが全て通ることをもって回帰なしを確認する。**完了条件**: 直接出力呼び出しが残っていないこと（grep で確認）、既存テスト全緑。
+*依存: T1*
+
+### T4. `--json` グローバルフラグの追加
+CLI フレームワークの永続フラグ/グローバルオプションとして `--json`（bool、デフォルト false）を定義し、ヘルプ文言を付ける。この時点では値を受け取るだけで挙動は変えない。`--help` に表示されること、`--json` を付けても既存の出力が壊れないことを確認する。**完了条件**: `cli --help` と `cli &lt;sub&gt; --help` の両方に `--json` が現れる。
+*依存: T3*
+
+### T5. JSON レンダラの実装と結線
+T2 のスキーマに従う `JsonRenderer` を実装し、`--json` が true のときにレンダラを差し替える。整形は1行出力（非 pretty）をデフォルトとする。全サブコマンドで `cli &lt;sub&gt; --json | jq .` が成功することを手動確認する。**完了条件**: 全サブコマンドの `--json` 出力が `jq` でパース可能。
+*依存: T2, T4*
+
+### T6. stdout / stderr の分離
+`--json` 指定時に、進捗表示・警告・ログ・プロンプトが stdout へ混入しないよう、それらを全て stderr へ振り分ける。`cli &lt;sub&gt; --json 2&gt;/dev/null | jq .` が成功することを全サブコマンドで確認する。**完了条件**: stdout に JSON 以外のバイトが出るパスがゼロ。
+*依存: T5*
+
+### T7. 色・TTY 検出の抑止
+`--json` 指定時は ANSI カラー、スピナー、テーブル罫線、プログレスバーを無効化する。TTY 判定より `--json` を優先させる。パイプ経由でなく TTY 直結で `cli &lt;sub&gt; --json` を実行してもエスケープシーケンスが混ざらないことを確認する。**完了条件**: 出力に `\x1b` が含まれない。
+*依存: T5*
+
+### T8. エラー時の JSON 出力と終了コード
+異常系でも `--json` 指定時は JSON を返すようにする。T2 で決めたエラー形（例: `{&quot;error&quot;: {&quot;code&quot;: ..., &quot;message&quot;: ...}}`）を実装し、終了コードは従来の値を維持する。対象: 引数不正・対象が見つからない・外部通信失敗・権限エラーの4系統。**完了条件**: 4系統それぞれで stdout が valid JSON、かつ exit code が非 JSON 時と一致。
+*依存: T5*
+
+### T9. `--json` のテスト追加
+各サブコマンドの正常系と、T8 の異常系4系統について、出力をパースして期待キー・期待値を検証するテストを書く。文字列完全一致ではなくパース後の構造比較にする（キー順の揺れで落ちないため）。**完了条件**: 新規テストが全緑、カバレッジが `JsonRenderer` の全分岐に到達。
+*依存: T5, T8*
+
+### T10. README の `--json` 節を追加
+README に `--json` の説明を追加する。含めるもの: グローバルフラグである旨、実行例1つ以上、実際の出力サンプル（T2 のサンプルではなく**実行して得た本物の出力**を貼る）、`jq` との組み合わせ例、エラー時の形。既存のオプション一覧表にも `--json` の行を追加する。**完了条件**: README 中の全コマンド例が、コピペして実際に動く。
+*依存: T5, T8*
+
+### T11. bash completion の追従
+bash completion 定義に `--json` を追加する。CLI が completion を動的生成する方式（`cli completion bash`）ならフラグ定義から自動で拾えるかを確認し、拾えていれば「確認済み」で完了、静的ファイル管理なら該当ファイルを手で更新する。**完了条件**: `cli &lt;sub&gt; --j&lt;TAB&gt;` が `--json` に補完される。
+*依存: T4*
+
+### T12. zsh completion の追従
+T11 と同じ内容を zsh 向けに行う。zsh は説明文付き補完（`--json[Output in JSON format]`）が可能なため、ヘルプ文言と一致する説明を付ける。**完了条件**: zsh で `--j&lt;TAB&gt;` が説明付きで補完される。
+*依存: T4*
+
+### T13. fish completion の追従
+T11 と同じ内容を fish 向けに行う。`complete -c &lt;cli&gt; -l json -d &apos;...&apos;` 形式。**完了条件**: fish で `--j&lt;TAB&gt;` が補完される。
+*依存: T4*
+
+### T14. completion の再生成漏れを防ぐ仕組み
+completion ファイルをリポジトリにコミットしている場合、CI に「completion を再生成して diff が出たら失敗」するチェックを追加する。動的生成のみでファイルを持たない場合は、この TODO は不要と判断した旨をメモに残してクローズする。**完了条件**: CI ジョブが追加され、意図的に古い completion を置くと落ちること。
+*依存: T11, T12, T13*
+
+### T15. CHANGELOG とバージョン
+CHANGELOG の Unreleased セクションに `--json` 追加を Added として記載する。T2 でエンベロープに `version` を入れた場合は、その初期値と互換性ポリシー（破壊的変更時の扱い）も1行書く。**完了条件**: CHANGELOG が更新され、リリース手順に沿ったバージョン記載がある。
+*依存: T5*
+
+---
+
+## 実行順序
+
+```
+T1 → T3 → T4 →┬→ T11, T12, T13 → T14
+              └→ (T2 →) T5 →┬→ T6, T7, T8 → T9
+                            ├→ T10
+                            └→ T15
+```
+
+T2 は T1 の直後から着手可能で、T5 までに終わっていればよい。T11〜T13、T6〜T8 はそれぞれ並列実行できる。
+
+**T10（README）は必ず T5・T8 の後**にしてください。実際の出力を貼るため、先に書くとサンプルが実装とずれます。
+
+---
+
+リポジトリのパスを教えていただければ、上記を実ファイル名・実サブコマンド名に落とし込んだ版に作り直します。</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">skill-used</span>  <span class="badge">plugin-fired indicator</span></summary>
+<div class="grader-body">
+<p class="explanation">Skill called 1x (expected 1..∞)</p>
+
+</div>
+</details></div>
+</div>
+</section><section class="arm">
+<div class="arm-head">
+<span class="arm-label">Baseline (no plugin)</span>
+<span class="meter m-base" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">100% of runs perfect</span>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 1</span>
+<span class="meter m-base" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">3 turns · $0.13 · 10:56:58 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">criteria</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">作業ディレクトリ (`/private/tmp/e-ZTy9Oe/home/cwd`) が空でコードを確認できなかったため、一般的な CLI 構成を前提にした分解です。リポジトリを指定してもらえれば実ファイル名に落とし込みます。
+
+## 前提づくり（他の作業の土台）
+
+**1. 出力箇所の棚卸し**
+- `print`/`fmt.Println`/`console.log` 相当を全サブコマンドで洗い出し、「stdout に出す結果」と「stderr に出す進捗・警告」を一覧化する
+- 完了条件: コマンド × 出力種別の表ができている
+- 依存: なし
+
+**2. JSON スキーマの設計**
+- 各サブコマンドの出力に対応するトップレベル構造を決める（結果本体、`schema_version` などのバージョンフィールド、エラー時の形）
+- 空結果の表現（`[]` か `null` か）、日時フォーマット (RFC 3339)、数値・真偽値の型を固定
+- 完了条件: スキーマをドキュメント or 型定義としてコミット。実装はまだ不要
+- 依存: 1
+
+**3. 出力層の抽象化**
+- `Formatter` インターフェース（`Human` / `JSON` の 2 実装）を導入し、既存の human 出力をその実装として移植する
+- この時点で挙動は変わらない（純粋なリファクタ）
+- 完了条件: 既存テストが全部通る。差分に文言変更が含まれない
+- 依存: 1, 2
+
+## フラグと出力の実装
+
+**4. `--json` フラグの追加（パースのみ）**
+- グローバルオプションとして定義、`--help` に掲載、環境変数での既定値が要るなら合わせて決める
+- 未対応コマンドで指定された場合の挙動（エラーにする / 無視する）を決めて実装
+- 完了条件: フラグが認識され、値が Formatter 選択に渡る
+- 依存: 3
+
+**5. サブコマンドごとの JSON 出力実装**
+- **コマンド 1 つにつき 1 TODO に割る**。各々「そのコマンドの JSON 出力 + ゴールデンテスト」で完結する
+- 依存: 4（相互には独立、並行可能）
+
+**6. エラーと終了コードの JSON 化**
+- `--json` 時のエラーを構造化して出力（`{&quot;error&quot;: {&quot;code&quot;, &quot;message&quot;}}`）、stdout / stderr のどちらに出すかを 2 で決めた方針どおりに統一
+- 終了コードは human モードと一致させる
+- 依存: 4
+
+**7. stdout の純度確保**
+- `--json` 時は進捗表示・スピナー・カラー・対話プロンプトを抑止し、stdout が単独で `jq` に通ることを保証
+- 完了条件: `cmd --json | jq .` が全コマンドで成功するテスト
+- 依存: 5, 6
+
+## テスト
+
+**8. スキーマ適合テスト**
+- 2 のスキーマに対する検証を CI に組み込み、フィールド名の意図しない変更を検出できるようにする
+- 依存: 5
+
+## ドキュメントと補完
+
+**9. README 更新**
+- `--json` の説明、代表的な出力例（1〜2 コマンド分）、`jq` との組み合わせ例、スキーマ安定性のポリシー（`schema_version` の扱い）を追記
+- 依存: 5（出力が固まってから）
+
+**10. shell completion 追従**
+- 補完が生成式（`cobra`/`clap_complete` 等）なら再生成してコミットするだけの TODO
+- 手書きスクリプトなら **bash / zsh / fish で 1 TODO ずつ**に分割し、それぞれフラグ追加 + 動作確認
+- 依存: 4
+
+**11. man ページ / `--help` テキスト / CHANGELOG**
+- 生成物があれば再生成、CHANGELOG に新機能として記載
+- 依存: 4, 9
+
+---
+
+並行実行の目安: 1→2→3 は直列。3 が入れば 4、その後 **5 の各コマンド・10・11 は並行**。9 は 5 の完了待ちです。最小の出荷可能単位を先に作りたい場合は、1→2→3→4→5（主要コマンド 1 つ）→7→9→10 で一度リリースし、残りコマンドを追加していく形が扱いやすいです。</pre>
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 2</span>
+<span class="meter m-base" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">3 turns · $0.15 · 10:57:18 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">criteria</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">作業ディレクトリ (`/private/tmp/e-EMtUJ0/home/cwd`) が空なので、リポジトリ固有の情報 (引数パーサ、completion が手書きか自動生成か等) は確認できませんでした。一般的な CLI の構成を前提に分解し、実装の分岐点になる箇所は TODO 内に明記しています。
+
+## 前提調査
+
+**T0. 現状の出力経路の棚卸し**
+- サブコマンド一覧と、それぞれが標準出力に書いている箇所を洗い出す。`print` 相当が各コマンドに散っているか、既に出力層が分離されているかを判定する。
+- 完了条件: 「コマンド × 出力箇所」の一覧と、T3 を出力層の抽象化から始めるか個別対応で済ませるかの結論がある。
+
+## 設計
+
+**T1. JSON スキーマの設計**
+- 各サブコマンドの出力構造 (トップレベルはオブジェクトかリストか、キーの命名規則: snake_case / camelCase)、空結果の表現、将来の互換性方針 (キー追加は非破壊とする等) を決める。
+- 完了条件: コマンドごとのサンプル JSON がドキュメント (または設計メモ) として存在する。
+
+**T2. エラー時と終了コードの取り決め**
+- `--json` 指定時のエラーを JSON で出すか (`{&quot;error&quot;: {...}}`)、stdout / stderr のどちらに出すか、終了コードは従来と同じにするかを決める。
+- 完了条件: 正常系・異常系それぞれの出力先と exit code が表にまとまっている。T1 と並行可。
+
+## 実装
+
+**T3. 出力層の導入**
+- text / json を切り替えるフォーマッタ (writer) を用意し、既存の text 出力をそこへ通す。この時点で挙動は変えない (リファクタのみ)。
+- 完了条件: 既存テストが全て緑で、text 出力が 1 バイトも変わらない。
+
+**T4. `--json` フラグの追加**
+- グローバルオプションとして定義し、`--format=json` 等の既存オプションと衝突する場合は相互排他バリデーションを入れる。ヘルプテキストも追加。
+- 完了条件: `--json` を付けても落ちず (中身は未対応でよい)、`--help` に説明が出る。
+
+**T5. サブコマンドごとの JSON 出力実装**
+- T1 のスキーマに沿って各コマンドを対応させる。コマンド数が多い場合はここをコマンド単位でさらに分割する (1 コマンド = 1 TODO)。
+- 完了条件: 各コマンドの `--json` 出力が JSON としてパースでき、スキーマ通りのキーを持つ。
+
+**T6. エラー出力の JSON 対応**
+- T2 の取り決めを実装。異常終了パスも含めて漏れがないようにする。
+- 完了条件: 主要なエラーケースで JSON が出て、exit code が仕様通り。
+
+**T7. stdout の汚染防止**
+- `--json` 時に進捗表示・スピナー・警告・ログが stdout に混ざらないようにする (stderr へ退避、または抑制)。パイプ渡しで壊れる典型的な原因なので独立扱い。
+- 完了条件: `cmd --json | &lt;JSON パーサ&gt;` が全サブコマンドで成功する。
+
+## テスト
+
+**T8. `--json` のテスト追加**
+- パース可能性、スキーマ一致、空結果、エラーケース、stdout に余計な出力がないことを検証。
+- 完了条件: 上記ケースのテストが追加され緑。
+
+## 追従作業
+
+**T9. README の更新**
+- `--json` の説明、サンプル出力、`jq` との組み合わせ例、互換性方針 (T1 で決めたもの) を追記。オプション一覧表があればそこにも追加。
+- 完了条件: README に `--json` の記述があり、載せたサンプルが実際の出力と一致する。
+
+**T10. shell completion の追従**
+- completion が自動生成 (clap_complete / cobra / `argcomplete` 等) なら、コミット済みの生成物を再生成して差分をコミット。手書きスクリプトなら bash / zsh / fish それぞれに `--json` を追加する。
+- 完了条件: 各シェルで `cmd --js&lt;TAB&gt;` が `--json` を補完する。
+
+**T11. CHANGELOG / リリースノート追記**
+- 新機能として 1 エントリ追加。
+- 完了条件: 次リリース欄に記載がある。
+
+## 依存関係
+
+- `T0 → T1, T2` (並行可) → `T3 → T4 → T5 → T6, T7` → `T8`
+- `T9`, `T10`, `T11` は T5 完了後なら並行して着手可。T10 は T4 (フラグ定義) だけあれば先行できます。
+- 単独で価値が出る最小セットは **T3 + T4 + T5 の一部 + T7**。T7 を後回しにすると「JSON が出るがパイプで壊れる」状態になるので、リリースには含めることをおすすめします。</pre>
+</div>
+</details></div>
+</div>
+</section>
+</details>
+<details class="section" open>
+<summary>Prompt</summary>
+<div class="md"><p>次の作業を、それぞれ単独で実行できる粒度の TODO に分解してください: 「CLI ツールに <code>--json</code> 出力オプションを追加し、README と shell completion も追従させる」</p>
+</div>
+</details>
+<details class="section" open>
+<summary>Graders — what "good" means for this case</summary>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">criteria</span><span class="badge">llm</span></div>
+<div class="md"><p>応答が以下を満たしていれば合格:</p>
+<ul>
+<li>3 つ以上の TODO 項目に分解されている</li>
+<li>各項目が、その説明文だけで着手できる粒度 (対象ファイル / 変更内容 / 完了の確認方法のいずれかが書かれている)</li>
+<li>実装・README・completion の 3 要素すべてが TODO に現れている</li>
+</ul>
+</div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">skill-used</span><span class="badge">tool_used</span></div>
+<div class="config"><div class="kv"><span>tool</span><code>&quot;Skill&quot;</code></div></div>
+</div>
+</details>
+</article>
+<article class="case" id="case-2">
+<div class="case-head">
+<h2>decompose-silent</h2>
+<span class="muted mono">evals/decompose-silent</span>
+<span class="spacer"></span>
+
+<span class="delta delta-zero">· 0.0 pts</span>
+<span class="muted">with plugin</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span><i class="tick" style="left:100.0%"></i></span>
+<span class="num case-score">100%</span>
+</div>
+
+<details class="section" open>
+<summary>Results</summary>
+<section class="arm">
+<div class="arm-head">
+<span class="arm-label">With plugin</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">100% of runs perfect</span>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 1</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">2 turns · $0.07 · 10:57:47 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">criteria</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">- `Option&lt;T&gt;` は「値があるかないか」を表す型で、`Some(T)` / `None` の 2 択。値が無い理由は持たない。
+- `Result&lt;T, E&gt;` は「成功か失敗か」を表す型で、`Ok(T)` / `Err(E)` の 2 択。失敗時に理由 `E` を運べる。
+- 使い分けは「不在が正常なら `Option`、失敗理由を呼び出し側に伝えたいなら `Result`」。相互変換は `ok_or(err)` と `.ok()` で行える。
+
+（注：セッション開始フックが指定した `~/.local/share/repos/.../role-main/_index.md` は存在しなかったため、読み込みはスキップしています。）</pre>
+</div>
+</details>
+<details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">no-skill</span>  <span class="badge">plugin-fired indicator</span></summary>
+<div class="grader-body">
+<p class="explanation">Skill called 0x (expected 1..0)</p>
+
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 2</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">2 turns · $0.10 · 10:58:03 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">criteria</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">role-main の `_index.md` を読もうとしましたが、ファイルが存在しませんでした（`~/.local/share/repos/github.com/kawaz/claude-rules-personal/main/reference/role-main/_index.md`）。指揮ルールは読み込めていない状態です。質問自体は単発の説明なので、そのまま回答します。
+
+- **`Option&lt;T&gt;`** は「値があるかないか」を表す型で、`Some(T)` / `None` の 2 択。欠損は起こりうるが、その理由を伝える必要がない場合に使う。
+- **`Result&lt;T, E&gt;`** は「成功か失敗か」を表す型で、`Ok(T)` / `Err(E)` の 2 択。失敗時に原因 `E` を呼び出し元へ伝えられる。
+- どちらも `?` 演算子で早期リターンでき、`opt.ok_or(e)` / `res.ok()` で相互変換できる。</pre>
+</div>
+</details>
+<details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">no-skill</span>  <span class="badge">plugin-fired indicator</span></summary>
+<div class="grader-body">
+<p class="explanation">Skill called 0x (expected 1..0)</p>
+
+</div>
+</details></div>
+</div>
+</section><section class="arm">
+<div class="arm-head">
+<span class="arm-label">Baseline (no plugin)</span>
+<span class="meter m-base" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">100% of runs perfect</span>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 1</span>
+<span class="meter m-base" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">1 turns · $0.05 · 10:58:17 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">criteria</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">- `Option&lt;T&gt;` は「値があるかないか」を表す型で、`Some(T)` / `None` の 2 択。欠損それ自体に理由がない場合に使う。
+- `Result&lt;T, E&gt;` は「成功か失敗か」を表す型で、`Ok(T)` / `Err(E)` の 2 択。失敗時に `E` として原因の情報を持ち運べる。
+- どちらも `?` 演算子で早期リターンでき、`ok_or`/`ok_or_else` で Option → Result、`ok()` で Result → Option へ相互変換できる。</pre>
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 2</span>
+<span class="meter m-base" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">1 turns · $0.06 · 10:58:20 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">criteria</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">- `Option&lt;T&gt;` は「値があるかないか」を表し、`Some(T)` / `None` の 2 つのバリアントを持つ。欠損そのものに理由がないケース(検索でヒットしなかった等)に使う。
+- `Result&lt;T, E&gt;` は「成功したか失敗したか」を表し、`Ok(T)` / `Err(E)` を持つ。失敗側に型 `E` で理由を載せられるのが最大の違い(I/O やパースなど)。
+- 相互変換も容易で、`opt.ok_or(err)` で `Option` → `Result`、`res.ok()` で `Result` → `Option`。どちらも `?` 演算子で早期リターンできる。</pre>
+</div>
+</details></div>
+</div>
+</section>
+</details>
+<details class="section" open>
+<summary>Prompt</summary>
+<div class="md"><p>Rust の <code>Option&lt;T&gt;</code> と <code>Result&lt;T, E&gt;</code> の違いを 3 行で説明してください。</p>
+</div>
+</details>
+<details class="section" open>
+<summary>Graders — what "good" means for this case</summary>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">criteria</span><span class="badge">llm</span></div>
+<div class="md"><p>応答が Option と Result の違い (値の不在 vs 失敗理由を持つエラー) を簡潔に説明していれば合格。TODO 分解や作業計画の形になっていたら不合格。</p>
+</div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">no-skill</span><span class="badge">tool_used</span></div>
+<div class="config"><div class="kv"><span>tool</span><code>&quot;Skill&quot;</code></div><div class="kv"><span>max</span><code>0</code></div></div>
+</div>
+</details>
+</article>
+<footer>Generated by <code>claude plugin eval</code> · schema v1 · scores are not comparable across different suites</footer>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+  var bar=document.querySelector('.toolbar');
+  if(!bar)return;
+  bar.addEventListener('click',function(e){
+    var b=e.target&&e.target.closest('button');
+    if(!b)return;
+    var open=b.dataset.act==='expand';
+    document.querySelectorAll('details.section, details.grader').forEach(function(d){d.open=open});
+  });
+});
+// Collapsed details vanish from print/PDF; these pages are share artifacts.
+window.addEventListener('beforeprint',function(){
+  document.querySelectorAll('details').forEach(function(d){
+    if(!d.open){d.dataset.printOpened='1';d.open=true}
+  });
+});
+window.addEventListener('afterprint',function(){
+  document.querySelectorAll('details[data-print-opened]').forEach(function(d){
+    d.open=false;delete d.dataset.printOpened;
+  });
+});
+</script>
+</body>
+</html>

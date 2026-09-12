@@ -1,0 +1,371 @@
+{
+  "schemaVersion": 1,
+  "claudeVersion": "2.1.269",
+  "startedAt": "2026-09-12T10:55:06.413Z",
+  "durationSeconds": 206,
+  "costUsd": 1.33642675,
+  "partial": false,
+  "suite": {
+    "root": "/Users/kawaz/.local/share/repos/github.com/kawaz/claude-rules-personal/main",
+    "ablation": "with-without",
+    "threshold": 1,
+    "concurrency": 2,
+    "plugins": [
+      {
+        "name": "rules-personal",
+        "version": "0.8.10",
+        "path": "/Users/kawaz/.local/share/repos/github.com/kawaz/claude-rules-personal/main"
+      }
+    ]
+  },
+  "cases": [
+    {
+      "name": "decompose-fires",
+      "dir": "evals/decompose-fires",
+      "source": "prose",
+      "promptMarkdown": "次の作業を、それぞれ単独で実行できる粒度の TODO に分解してください: 「CLI ツールに `--json` 出力オプションを追加し、README と shell completion も追従させる」",
+      "runsPerCase": 3,
+      "timeoutSeconds": 300,
+      "maxTurns": 10,
+      "graders": [
+        {
+          "name": "criteria",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "応答が以下を満たしていれば合格:\n- 3 つ以上の TODO 項目に分解されている\n- 各項目が、その説明文だけで着手できる粒度 (対象ファイル / 変更内容 / 完了の確認方法のいずれかが書かれている)\n- 実装・README・completion の 3 要素すべてが TODO に現れている",
+          "config": {
+            "criteria": "応答が以下を満たしていれば合格:\n- 3 つ以上の TODO 項目に分解されている\n- 各項目が、その説明文だけで着手できる粒度 (対象ファイル / 変更内容 / 完了の確認方法のいずれかが書かれている)\n- 実装・README・completion の 3 要素すべてが TODO に現れている",
+            "focus": "last_message"
+          }
+        },
+        {
+          "name": "skill-used",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 5,
+            "costUsd": 0.35875900000000005,
+            "judgeCostUsd": 0.03771,
+            "durationSeconds": 112,
+            "startedAt": "2026-09-12T10:55:06.447Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-vfCa4v/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "criteria",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "分解スキルを実行したところ、作業ディレクトリ `/private/tmp/e-vfCa4v/home/cwd` が空で、対象の CLI のコードが見つかりませんでした（コミット履歴なし、README・completion・パッケージマニフェストいずれもなし）。\n\n実ファイル名に紐づけた分解はできないので、**ファイルパスをプレースホルダにした汎用版**を下に出します。リポジトリのパスをもらえれば、実在のファイル・関数・テストコマンドに置き換えた版を作り直します。\n\n---\n\n## 前提（ここが違うなら TODO も変わります）\n\n- `--json` は**全サブコマンド共通のグローバルフラグ**\n- `--json` 指定時は **stdout は JSON のみ**、ログ・進捗は stderr へ\n- completion は bash / zsh / fish を**手書きで保守**している\n\n---\n\n## TODO\n\n### 1. 出力箇所の棚卸し\n現状の CLI で「人間向けに stdout へ書いている箇所」を全部洗い出し、サブコマンド × 出力内容の一覧を作る。`print`/`console.log`/`fmt.Println` 相当を grep し、どれが「結果」でどれが「進捗・ログ」かを分類する。成果物は一覧メモ（`docs/json-output-inventory.md` 等）。以降の TODO はこの一覧を入力にする。\n\n### 2. JSON 出力契約（スキーマ）の設計\nTODO 1 の一覧をもとに、サブコマンドごとの JSON 構造を決めて文書化する。決めること: トップレベルはオブジェクトか配列か、キー命名規則（snake_case / camelCase を既存の設定ファイル形式に合わせる）、バージョンフィールドの有無、日付・数値の型、空結果の表現、エラー時の形（例: `{\"error\": {\"code\": ..., \"message\": ...}}`）。完了条件は `docs/json-schema.md` にサンプル出力付きで確定していること。\n\n### 3. 出力層の抽象化（振る舞いは変えない）\n`--json` の実装前に、結果出力を直接 print している箇所を「データを組み立てる」→「フォーマッタが出力する」の 2 段に分離する。この TODO の完了時点で出力は**現状と 1 バイトも変わらない**こと（既存テストが全部パスすること）が完了条件。\n\n### 4. `--json` フラグのパース追加\n引数パーサにグローバルフラグ `--json` を追加し、ヘルプテキストにも記載する。この時点では値を保持するだけで挙動は変えない。完了条件: `--json` を付けても従来どおり動き、`--help` に説明が出ること。\n\n### 5. JSON フォーマッタの実装（正常系）\nTODO 2 のスキーマに従って、TODO 3 で分離したデータ構造を JSON に出力するフォーマッタを実装し、`--json` 指定時に人間向けフォーマッタと差し替える。完了条件: 全サブコマンドで `cmd <sub> --json | jq .` がエラーなく通ること。\n\n### 6. エラー系の JSON 出力と終了コード\n異常終了時も `--json` 指定なら JSON でエラーを吐くようにする（stdout か stderr かは TODO 2 の決定に従う）。終了コードは従来と同じ値を維持する。完了条件: 代表的な失敗ケース（引数不正・対象が見つからない・外部 I/O 失敗）でスキーマどおりの JSON と正しい exit code が出ること。\n\n### 7. stdout 汚染の防止\n`--json` 時に進捗バー・スピナー・INFO ログ・確認プロンプトが stdout へ出ないようにする（stderr へ回す、もしくは抑止）。非 TTY 時の既存挙動と矛盾しないか確認する。完了条件: `cmd <sub> --json 2>/dev/null | jq .` がパースエラーにならないこと。\n\n### 8. 自動テストの追加\nサブコマンドごとに `--json` 出力のテストを追加する。最低限、(a) 出力が妥当な JSON であること、(b) TODO 2 のスキーマのキーが揃っていること、(c) 正常系・空結果・エラー系の 3 パターン。スナップショットテストを使う場合は非決定値（時刻・パス・ID）のマスクも行う。\n\n### 9. README への追記\n`--json` の説明をグローバルオプション一覧に追加し、使用例セクションに実際の出力サンプルと `jq` との組み合わせ例を 1 つ載せる。stdout/stderr の分離仕様とエラー時の形にも触れる。出力サンプルは実際にコマンドを実行して貼ること（手書きしない）。\n\n### 10. bash completion の追従\ncompletion スクリプトのオプション候補に `--json` を追加する。サブコマンド固有ではなくグローバルなら、全サブコマンドの候補に出る位置に置く。完了条件: `cmd <sub> --j<TAB>` で補完されること。\n\n### 11. zsh completion の追従\n同上。zsh は説明文付き（`'--json[output in JSON format]'` 形式）なので、説明文も書く。完了条件: 実際に zsh を起動して補完が出ること。\n\n### 12. fish completion の追従\n同上。`complete -c cmd -l json -d '...'` を追加する。\n\n> 補足: completion がフレームワーク（cobra / clap / click 等）による**自動生成**なら TODO 10〜12 は「生成スクリプトを再実行してコミットされている completion ファイルを更新する」1 件に統合される。TODO 1 の調査時にどちらか判定すること。\n\n### 13. CHANGELOG とバージョン\nCHANGELOG に `Added: --json output option` を追記する。リリース単位でバージョンを上げる運用なら minor バージョンを上げる。\n\n### 14. 手動 E2E 確認\n実際のシェルで全サブコマンドに `--json` を付けて実行し、`jq` に通す・パイプ先でブロックしない・`--json` なしの出力が退行していないことを目視確認する。TODO 1 の一覧をチェックリストとして使う。\n\n---\n\n## 確定させたい点\n\n1. **リポジトリのパス** — これがあれば上記を実ファイル名に落とし込めます\n2. `--json` は全サブコマンド共通か、特定サブコマンドだけか\n3. エラー時の JSON は stdout / stderr のどちらへ出すか\n4. completion は手書き保守か、フレームワークの自動生成か"
+              },
+              {
+                "name": "skill-used",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": true,
+                "scored": false
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 5,
+            "costUsd": 0.42019550000000006,
+            "judgeCostUsd": 0.049260000000000005,
+            "durationSeconds": 132,
+            "startedAt": "2026-09-12T10:55:06.447Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-ejUcug/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "criteria",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "## 前提の確認（先に1点）\n\n作業ディレクトリ `/private/tmp/e-ejUcug/home/cwd` は空で、対象の CLI ツール・README・completion ファイルがこの環境に存在しませんでした（git にもコミットなし）。そのため**実ファイルパス・実関数名に紐づいた分解はできません**。\n\n以下は「どの言語でも成立する粒度」で分解したものです。リポジトリのパスを教えていただければ、実在のファイル名・サブコマンド名に置き換えた版を作り直します。\n\n**置いた仮定**（違う場合は該当 TODO を差し替えてください）\n- `--json` は全サブコマンド共通のグローバルフラグ\n- 既存の人間向け出力は残し、`--json` 指定時のみ切り替え\n- completion は bash / zsh / fish の3つ\n\n---\n\n## TODO 一覧\n\n### T1. 現状出力の棚卸し\nCLI の全サブコマンド・全コードパスを走査し、標準出力に書いている箇所を一覧化する。「サブコマンド名 / 出力トリガ条件 / 出力しているデータ構造 / 書き出し関数」の4列の表を作り、作業メモに残す。`print`/`fmt.Print`/`console.log`/`echo` 等の直接出力が散在しているか、既に1箇所に集約されているかを判定結果として明記する。**完了条件**: 表が全サブコマンドを網羅し、JSON 化漏れの候補がゼロであること。\n\n### T2. JSON スキーマの決定\nT1 の表をもとに、各サブコマンドの JSON 出力形を決めて設計メモに書く。決めること: (a) トップレベルを単一オブジェクトにするか NDJSON にするか、(b) 共通のエンベロープ（`version` / `data` / `error` 等）を持たせるか、(c) キーの命名規則（snake_case か camelCase か）、(d) 日時・数値・null の表現、(e) 空結果の表し方（`[]` か `null` か）。**完了条件**: 全サブコマンドについてサンプル JSON が1つずつ書かれていること。\n\n### T3. 出力層の分離（リファクタ、機能追加なし）\nT1 で洗い出した直接出力を、単一のレンダラ抽象（例: `Renderer` インターフェース + `TextRenderer` 実装）経由に置き換える。この TODO では**出力内容を1バイトも変えない**。既存テストが全て通ることをもって回帰なしを確認する。**完了条件**: 直接出力呼び出しが残っていないこと（grep で確認）、既存テスト全緑。\n*依存: T1*\n\n### T4. `--json` グローバルフラグの追加\nCLI フレームワークの永続フラグ/グローバルオプションとして `--json`（bool、デフォルト false）を定義し、ヘルプ文言を付ける。この時点では値を受け取るだけで挙動は変えない。`--help` に表示されること、`--json` を付けても既存の出力が壊れないことを確認する。**完了条件**: `cli --help` と `cli <sub> --help` の両方に `--json` が現れる。\n*依存: T3*\n\n### T5. JSON レンダラの実装と結線\nT2 のスキーマに従う `JsonRenderer` を実装し、`--json` が true のときにレンダラを差し替える。整形は1行出力（非 pretty）をデフォルトとする。全サブコマンドで `cli <sub> --json | jq .` が成功することを手動確認する。**完了条件**: 全サブコマンドの `--json` 出力が `jq` でパース可能。\n*依存: T2, T4*\n\n### T6. stdout / stderr の分離\n`--json` 指定時に、進捗表示・警告・ログ・プロンプトが stdout へ混入しないよう、それらを全て stderr へ振り分ける。`cli <sub> --json 2>/dev/null | jq .` が成功することを全サブコマンドで確認する。**完了条件**: stdout に JSON 以外のバイトが出るパスがゼロ。\n*依存: T5*\n\n### T7. 色・TTY 検出の抑止\n`--json` 指定時は ANSI カラー、スピナー、テーブル罫線、プログレスバーを無効化する。TTY 判定より `--json` を優先させる。パイプ経由でなく TTY 直結で `cli <sub> --json` を実行してもエスケープシーケンスが混ざらないことを確認する。**完了条件**: 出力に `\\x1b` が含まれない。\n*依存: T5*\n\n### T8. エラー時の JSON 出力と終了コード\n異常系でも `--json` 指定時は JSON を返すようにする。T2 で決めたエラー形（例: `{\"error\": {\"code\": ..., \"message\": ...}}`）を実装し、終了コードは従来の値を維持する。対象: 引数不正・対象が見つからない・外部通信失敗・権限エラーの4系統。**完了条件**: 4系統それぞれで stdout が valid JSON、かつ exit code が非 JSON 時と一致。\n*依存: T5*\n\n### T9. `--json` のテスト追加\n各サブコマンドの正常系と、T8 の異常系4系統について、出力をパースして期待キー・期待値を検証するテストを書く。文字列完全一致ではなくパース後の構造比較にする（キー順の揺れで落ちないため）。**完了条件**: 新規テストが全緑、カバレッジが `JsonRenderer` の全分岐に到達。\n*依存: T5, T8*\n\n### T10. README の `--json` 節を追加\nREADME に `--json` の説明を追加する。含めるもの: グローバルフラグである旨、実行例1つ以上、実際の出力サンプル（T2 のサンプルではなく**実行して得た本物の出力**を貼る）、`jq` との組み合わせ例、エラー時の形。既存のオプション一覧表にも `--json` の行を追加する。**完了条件**: README 中の全コマンド例が、コピペして実際に動く。\n*依存: T5, T8*\n\n### T11. bash completion の追従\nbash completion 定義に `--json` を追加する。CLI が completion を動的生成する方式（`cli completion bash`）ならフラグ定義から自動で拾えるかを確認し、拾えていれば「確認済み」で完了、静的ファイル管理なら該当ファイルを手で更新する。**完了条件**: `cli <sub> --j<TAB>` が `--json` に補完される。\n*依存: T4*\n\n### T12. zsh completion の追従\nT11 と同じ内容を zsh 向けに行う。zsh は説明文付き補完（`--json[Output in JSON format]`）が可能なため、ヘルプ文言と一致する説明を付ける。**完了条件**: zsh で `--j<TAB>` が説明付きで補完される。\n*依存: T4*\n\n### T13. fish completion の追従\nT11 と同じ内容を fish 向けに行う。`complete -c <cli> -l json -d '...'` 形式。**完了条件**: fish で `--j<TAB>` が補完される。\n*依存: T4*\n\n### T14. completion の再生成漏れを防ぐ仕組み\ncompletion ファイルをリポジトリにコミットしている場合、CI に「completion を再生成して diff が出たら失敗」するチェックを追加する。動的生成のみでファイルを持たない場合は、この TODO は不要と判断した旨をメモに残してクローズする。**完了条件**: CI ジョブが追加され、意図的に古い completion を置くと落ちること。\n*依存: T11, T12, T13*\n\n### T15. CHANGELOG とバージョン\nCHANGELOG の Unreleased セクションに `--json` 追加を Added として記載する。T2 でエンベロープに `version` を入れた場合は、その初期値と互換性ポリシー（破壊的変更時の扱い）も1行書く。**完了条件**: CHANGELOG が更新され、リリース手順に沿ったバージョン記載がある。\n*依存: T5*\n\n---\n\n## 実行順序\n\n```\nT1 → T3 → T4 →┬→ T11, T12, T13 → T14\n              └→ (T2 →) T5 →┬→ T6, T7, T8 → T9\n                            ├→ T10\n                            └→ T15\n```\n\nT2 は T1 の直後から着手可能で、T5 までに終わっていればよい。T11〜T13、T6〜T8 はそれぞれ並列実行できる。\n\n**T10（README）は必ず T5・T8 の後**にしてください。実際の出力を貼るため、先に書くとサンプルが実装とずれます。\n\n---\n\nリポジトリのパスを教えていただければ、上記を実ファイル名・実サブコマンド名に落とし込んだ版に作り直します。"
+              },
+              {
+                "name": "skill-used",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": true,
+                "scored": false
+              }
+            ]
+          }
+        ],
+        "without": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 3,
+            "costUsd": 0.12901875,
+            "judgeCostUsd": 0.026504999999999987,
+            "durationSeconds": 49,
+            "startedAt": "2026-09-12T10:56:58.513Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-ZTy9Oe/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "criteria",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "作業ディレクトリ (`/private/tmp/e-ZTy9Oe/home/cwd`) が空でコードを確認できなかったため、一般的な CLI 構成を前提にした分解です。リポジトリを指定してもらえれば実ファイル名に落とし込みます。\n\n## 前提づくり（他の作業の土台）\n\n**1. 出力箇所の棚卸し**\n- `print`/`fmt.Println`/`console.log` 相当を全サブコマンドで洗い出し、「stdout に出す結果」と「stderr に出す進捗・警告」を一覧化する\n- 完了条件: コマンド × 出力種別の表ができている\n- 依存: なし\n\n**2. JSON スキーマの設計**\n- 各サブコマンドの出力に対応するトップレベル構造を決める（結果本体、`schema_version` などのバージョンフィールド、エラー時の形）\n- 空結果の表現（`[]` か `null` か）、日時フォーマット (RFC 3339)、数値・真偽値の型を固定\n- 完了条件: スキーマをドキュメント or 型定義としてコミット。実装はまだ不要\n- 依存: 1\n\n**3. 出力層の抽象化**\n- `Formatter` インターフェース（`Human` / `JSON` の 2 実装）を導入し、既存の human 出力をその実装として移植する\n- この時点で挙動は変わらない（純粋なリファクタ）\n- 完了条件: 既存テストが全部通る。差分に文言変更が含まれない\n- 依存: 1, 2\n\n## フラグと出力の実装\n\n**4. `--json` フラグの追加（パースのみ）**\n- グローバルオプションとして定義、`--help` に掲載、環境変数での既定値が要るなら合わせて決める\n- 未対応コマンドで指定された場合の挙動（エラーにする / 無視する）を決めて実装\n- 完了条件: フラグが認識され、値が Formatter 選択に渡る\n- 依存: 3\n\n**5. サブコマンドごとの JSON 出力実装**\n- **コマンド 1 つにつき 1 TODO に割る**。各々「そのコマンドの JSON 出力 + ゴールデンテスト」で完結する\n- 依存: 4（相互には独立、並行可能）\n\n**6. エラーと終了コードの JSON 化**\n- `--json` 時のエラーを構造化して出力（`{\"error\": {\"code\", \"message\"}}`）、stdout / stderr のどちらに出すかを 2 で決めた方針どおりに統一\n- 終了コードは human モードと一致させる\n- 依存: 4\n\n**7. stdout の純度確保**\n- `--json` 時は進捗表示・スピナー・カラー・対話プロンプトを抑止し、stdout が単独で `jq` に通ることを保証\n- 完了条件: `cmd --json | jq .` が全コマンドで成功するテスト\n- 依存: 5, 6\n\n## テスト\n\n**8. スキーマ適合テスト**\n- 2 のスキーマに対する検証を CI に組み込み、フィールド名の意図しない変更を検出できるようにする\n- 依存: 5\n\n## ドキュメントと補完\n\n**9. README 更新**\n- `--json` の説明、代表的な出力例（1〜2 コマンド分）、`jq` との組み合わせ例、スキーマ安定性のポリシー（`schema_version` の扱い）を追記\n- 依存: 5（出力が固まってから）\n\n**10. shell completion 追従**\n- 補完が生成式（`cobra`/`clap_complete` 等）なら再生成してコミットするだけの TODO\n- 手書きスクリプトなら **bash / zsh / fish で 1 TODO ずつ**に分割し、それぞれフラグ追加 + 動作確認\n- 依存: 4\n\n**11. man ページ / `--help` テキスト / CHANGELOG**\n- 生成物があれば再生成、CHANGELOG に新機能として記載\n- 依存: 4, 9\n\n---\n\n並行実行の目安: 1→2→3 は直列。3 が入れば 4、その後 **5 の各コマンド・10・11 は並行**。9 は 5 の完了待ちです。最小の出荷可能単位を先に作りたい場合は、1→2→3→4→5（主要コマンド 1 つ）→7→9→10 で一度リリースし、残りコマンドを追加していく形が扱いやすいです。"
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 3,
+            "costUsd": 0.150331,
+            "judgeCostUsd": 0.03282500000000001,
+            "durationSeconds": 59,
+            "startedAt": "2026-09-12T10:57:18.653Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-EMtUJ0/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "criteria",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "作業ディレクトリ (`/private/tmp/e-EMtUJ0/home/cwd`) が空なので、リポジトリ固有の情報 (引数パーサ、completion が手書きか自動生成か等) は確認できませんでした。一般的な CLI の構成を前提に分解し、実装の分岐点になる箇所は TODO 内に明記しています。\n\n## 前提調査\n\n**T0. 現状の出力経路の棚卸し**\n- サブコマンド一覧と、それぞれが標準出力に書いている箇所を洗い出す。`print` 相当が各コマンドに散っているか、既に出力層が分離されているかを判定する。\n- 完了条件: 「コマンド × 出力箇所」の一覧と、T3 を出力層の抽象化から始めるか個別対応で済ませるかの結論がある。\n\n## 設計\n\n**T1. JSON スキーマの設計**\n- 各サブコマンドの出力構造 (トップレベルはオブジェクトかリストか、キーの命名規則: snake_case / camelCase)、空結果の表現、将来の互換性方針 (キー追加は非破壊とする等) を決める。\n- 完了条件: コマンドごとのサンプル JSON がドキュメント (または設計メモ) として存在する。\n\n**T2. エラー時と終了コードの取り決め**\n- `--json` 指定時のエラーを JSON で出すか (`{\"error\": {...}}`)、stdout / stderr のどちらに出すか、終了コードは従来と同じにするかを決める。\n- 完了条件: 正常系・異常系それぞれの出力先と exit code が表にまとまっている。T1 と並行可。\n\n## 実装\n\n**T3. 出力層の導入**\n- text / json を切り替えるフォーマッタ (writer) を用意し、既存の text 出力をそこへ通す。この時点で挙動は変えない (リファクタのみ)。\n- 完了条件: 既存テストが全て緑で、text 出力が 1 バイトも変わらない。\n\n**T4. `--json` フラグの追加**\n- グローバルオプションとして定義し、`--format=json` 等の既存オプションと衝突する場合は相互排他バリデーションを入れる。ヘルプテキストも追加。\n- 完了条件: `--json` を付けても落ちず (中身は未対応でよい)、`--help` に説明が出る。\n\n**T5. サブコマンドごとの JSON 出力実装**\n- T1 のスキーマに沿って各コマンドを対応させる。コマンド数が多い場合はここをコマンド単位でさらに分割する (1 コマンド = 1 TODO)。\n- 完了条件: 各コマンドの `--json` 出力が JSON としてパースでき、スキーマ通りのキーを持つ。\n\n**T6. エラー出力の JSON 対応**\n- T2 の取り決めを実装。異常終了パスも含めて漏れがないようにする。\n- 完了条件: 主要なエラーケースで JSON が出て、exit code が仕様通り。\n\n**T7. stdout の汚染防止**\n- `--json` 時に進捗表示・スピナー・警告・ログが stdout に混ざらないようにする (stderr へ退避、または抑制)。パイプ渡しで壊れる典型的な原因なので独立扱い。\n- 完了条件: `cmd --json | <JSON パーサ>` が全サブコマンドで成功する。\n\n## テスト\n\n**T8. `--json` のテスト追加**\n- パース可能性、スキーマ一致、空結果、エラーケース、stdout に余計な出力がないことを検証。\n- 完了条件: 上記ケースのテストが追加され緑。\n\n## 追従作業\n\n**T9. README の更新**\n- `--json` の説明、サンプル出力、`jq` との組み合わせ例、互換性方針 (T1 で決めたもの) を追記。オプション一覧表があればそこにも追加。\n- 完了条件: README に `--json` の記述があり、載せたサンプルが実際の出力と一致する。\n\n**T10. shell completion の追従**\n- completion が自動生成 (clap_complete / cobra / `argcomplete` 等) なら、コミット済みの生成物を再生成して差分をコミット。手書きスクリプトなら bash / zsh / fish それぞれに `--json` を追加する。\n- 完了条件: 各シェルで `cmd --js<TAB>` が `--json` を補完する。\n\n**T11. CHANGELOG / リリースノート追記**\n- 新機能として 1 エントリ追加。\n- 完了条件: 次リリース欄に記載がある。\n\n## 依存関係\n\n- `T0 → T1, T2` (並行可) → `T3 → T4 → T5 → T6, T7` → `T8`\n- `T9`, `T10`, `T11` は T5 完了後なら並行して着手可。T10 は T4 (フラグ定義) だけあれば先行できます。\n- 単独で価値が出る最小セットは **T3 + T4 + T5 の一部 + T7**。T7 を後回しにすると「JSON が出るがパイプで壊れる」状態になるので、リリースには含めることをおすすめします。"
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1,
+        "scoreWithout": 1,
+        "passRateWithout": 1,
+        "delta": 0
+      }
+    },
+    {
+      "name": "decompose-silent",
+      "dir": "evals/decompose-silent",
+      "source": "prose",
+      "promptMarkdown": "Rust の `Option<T>` と `Result<T, E>` の違いを 3 行で説明してください。",
+      "runsPerCase": 3,
+      "timeoutSeconds": 300,
+      "maxTurns": 5,
+      "graders": [
+        {
+          "name": "criteria",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "応答が Option と Result の違い (値の不在 vs 失敗理由を持つエラー) を簡潔に説明していれば合格。TODO 分解や作業計画の形になっていたら不合格。",
+          "config": {
+            "criteria": "応答が Option と Result の違い (値の不在 vs 失敗理由を持つエラー) を簡潔に説明していれば合格。TODO 分解や作業計画の形になっていたら不合格。",
+            "focus": "last_message"
+          }
+        },
+        {
+          "name": "no-skill",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "max": 0
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 2,
+            "costUsd": 0.0731615,
+            "judgeCostUsd": 0.006779999999999994,
+            "durationSeconds": 16,
+            "startedAt": "2026-09-12T10:57:47.446Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-3BJ1DX/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "criteria",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "- `Option<T>` は「値があるかないか」を表す型で、`Some(T)` / `None` の 2 択。値が無い理由は持たない。\n- `Result<T, E>` は「成功か失敗か」を表す型で、`Ok(T)` / `Err(E)` の 2 択。失敗時に理由 `E` を運べる。\n- 使い分けは「不在が正常なら `Option`、失敗理由を呼び出し側に伝えたいなら `Result`」。相互変換は `ok_or(err)` と `.ok()` で行える。\n\n（注：セッション開始フックが指定した `~/.local/share/repos/.../role-main/_index.md` は存在しなかったため、読み込みはスキップしています。）"
+              },
+              {
+                "name": "no-skill",
+                "passed": false,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 1..0)",
+                "withOnly": true,
+                "scored": false
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 2,
+            "costUsd": 0.09612374999999998,
+            "judgeCostUsd": 0.027949999999999975,
+            "durationSeconds": 18,
+            "startedAt": "2026-09-12T10:58:03.274Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-ACe1A7/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "criteria",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "role-main の `_index.md` を読もうとしましたが、ファイルが存在しませんでした（`~/.local/share/repos/github.com/kawaz/claude-rules-personal/main/reference/role-main/_index.md`）。指揮ルールは読み込めていない状態です。質問自体は単発の説明なので、そのまま回答します。\n\n- **`Option<T>`** は「値があるかないか」を表す型で、`Some(T)` / `None` の 2 択。欠損は起こりうるが、その理由を伝える必要がない場合に使う。\n- **`Result<T, E>`** は「成功か失敗か」を表す型で、`Ok(T)` / `Err(E)` の 2 択。失敗時に原因 `E` を呼び出し元へ伝えられる。\n- どちらも `?` 演算子で早期リターンでき、`opt.ok_or(e)` / `res.ok()` で相互変換できる。"
+              },
+              {
+                "name": "no-skill",
+                "passed": false,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 1..0)",
+                "withOnly": true,
+                "scored": false
+              }
+            ]
+          }
+        ],
+        "without": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 1,
+            "costUsd": 0.052988,
+            "judgeCostUsd": 0.008184999999999998,
+            "durationSeconds": 11,
+            "startedAt": "2026-09-12T10:58:17.251Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-s4qAAs/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "criteria",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "- `Option<T>` は「値があるかないか」を表す型で、`Some(T)` / `None` の 2 択。欠損それ自体に理由がない場合に使う。\n- `Result<T, E>` は「成功か失敗か」を表す型で、`Ok(T)` / `Err(E)` の 2 択。失敗時に `E` として原因の情報を持ち運べる。\n- どちらも `?` 演算子で早期リターンでき、`ok_or`/`ok_or_else` で Option → Result、`ok()` で Result → Option へ相互変換できる。"
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 1,
+            "costUsd": 0.05584925000000002,
+            "judgeCostUsd": 0.010590000000000016,
+            "durationSeconds": 11,
+            "startedAt": "2026-09-12T10:58:20.937Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-qj1v63/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "criteria",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "- `Option<T>` は「値があるかないか」を表し、`Some(T)` / `None` の 2 つのバリアントを持つ。欠損そのものに理由がないケース(検索でヒットしなかった等)に使う。\n- `Result<T, E>` は「成功したか失敗したか」を表し、`Ok(T)` / `Err(E)` を持つ。失敗側に型 `E` で理由を載せられるのが最大の違い(I/O やパースなど)。\n- 相互変換も容易で、`opt.ok_or(err)` で `Option` → `Result`、`res.ok()` で `Result` → `Option`。どちらも `?` 演算子で早期リターンできる。"
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1,
+        "scoreWithout": 1,
+        "passRateWithout": 1,
+        "delta": 0
+      }
+    }
+  ],
+  "aggregates": {
+    "casesTotal": 2,
+    "casesPassed": 2,
+    "overallScore": 1,
+    "overallPassRate": 1,
+    "meanDelta": 0
+  }
+}
