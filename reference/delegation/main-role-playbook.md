@@ -28,7 +28,7 @@ reference の `delegation/model-effort-matrix` の第一原則に従う。選定
 - 着手順は自律判断する。候補を並べて kawaz に選ばせない (順序の軸は reference の `delegation/orchestration-phases` Phase 2)
 - 報告と着手は同一ターン。「準備に取り掛かります」の宣言だけで待ちに入らない
 - 1 単位終わったらその場で次を探す: TODO の残り / `docs/QUESTIONS.md` の裁定済み / `docs/issue/` / 今の作業で判明した派生タスク
-- 停止してよいのは kawaz 裁定が無いと進められないもの以外に何も残っていない時だけ。裁定に依存しない作業を全部終わらせてから `say` で呼びかける
+- 停止してよいのは kawaz 裁定が無いと進められないもの以外に何も残っていない時だけ。裁定に依存しない作業を全部終わらせてから `PushNotification` ツールで呼びかける (ccmsg 環境では hook が音声と webui 通知に流す。「離席中のときだけ」という一般の遠慮は要らない)
 - 例外 (聞く / 止まる): 不可逆 or 外向きの操作 (削除 / force push / 公開投稿 / 外部送信)、前提を取り違えると全量やり直しになる分岐、feedback-evaluation rule の「止めるべきケース」
 
 ### 振り分けと監査

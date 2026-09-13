@@ -367,7 +367,7 @@ gh issue view N --repo owner/repo --json body --jq .body | grep -F 'user-attachm
 | URL 埋め込みが意図と違う | §7 を組み直して §8 から再実行 |
 | upload 失敗 (CDN エラー) | snapshot 確認、画像が壊れていれば `failed:` で返す (リサイズはメイン責務) |
 
-ログイン切れ・profile 前面化要求など **対話が要る失敗は `failed:` でメインに返す** (サブエージェントは `say` を打てず kawaz と直接対話できないため)。
+ログイン切れ・profile 前面化要求など **対話が要る失敗は `failed:` でメインに返す** (サブエージェントは kawaz と直接対話できないため)。
 
 ## 12. 後始末
 

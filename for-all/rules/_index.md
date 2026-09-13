@@ -43,7 +43,7 @@
 
 ## CI・リリース
 
-- [[notification-tips]] — `say` 通知・1Password エラーに遭ったとき
+- [[notification-tips]] — 音声通知 (`PushNotification`)・1Password エラーに遭ったとき
 - [[empirical-verification]] — 失敗を「たぶんこう」で片付けそうなとき
 - [[public-repo-contribution]] — 公共パッケージリポへ publish するとき
 

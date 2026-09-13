@@ -37,8 +37,8 @@
   発火語: direnv exec, 別ディレクトリでコマンド実行, cd したのに .envrc が効かない, SSH_AUTH_SOCK が切り替わらない, git -C, direnv allow
 - [op-run-secret-injection](op-run-secret-injection.md) — op run で secret を env に注入する形と、masking の 2 段運用。
   発火語: op run, 1Password CLI, op://, --no-masking, env-file, secret を env に注入
-- [say-katakana](say-katakana.md) — `say` に渡す頭字語のカタカナ変換表と変換の適用範囲。
-  発火語: say, 音声通知, 読み上げ, 頭字語のカタカナ化
+- [say-katakana](say-katakana.md) — 音声通知 (`PushNotification` → hook の `say`) に渡す頭字語のカタカナ変換表と変換の適用範囲。
+  発火語: say, PushNotification, 音声通知, 読み上げ, 頭字語のカタカナ化
 - [cli-design-preferences](cli-design-preferences.md) — kawaz の CLI 設計の好み (サブコマンド構成 / `--help` の節構成 / bool フラグ / 引数位置 / completion)。
   発火語: CLI 設計, サブコマンド, --help, オプション, bool フラグ, completion, 引数パーサ
 - [findings-recording](findings-recording.md) — findings ファイルの構成テンプレと、記録をサブエージェントに委譲するプロンプトの型。
