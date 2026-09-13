@@ -1,7 +1,7 @@
 # claude-rules-personal justfile
 #
 # 2 系統の配布を持つ:
-#   - rules (for-*/rules/) — setup.sh が $CLAUDE_CONFIG_DIR へ symlink。plugin には
+#   - rules (for-*/rules/) — scripts/rules.sh が $CLAUDE_CONFIG_DIR へ symlink。plugin には
 #     rule を注入する機構が無いのでこちらは symlink 継続
 #   - plugin (hooks/ skills/ agents/) — `rules-personal` plugin として配布。
 #     version を持つのはこのため (`claude plugin update` が manifest の version を見る)
@@ -206,23 +206,38 @@ lint-agents:
 validate:
     claude plugin validate .
 
-# plugin の install 状態を宣言と突き合わせる (rules 面: plugins.json の宣言が入っているか /
-# bare 面: repos_mapping.json の pluginOnlyHomes に列挙した ccmsg だけが入っているか)
-check-plugins:
-    scripts/check-plugins.sh
+# ---- 配備 (subject ごとに scripts/<subject>.sh、大枠の setup / check / update が束ねる) ----
+# home 省略時は repos_mapping.json に宣言された全面が対象。宣言外に手で入れたものと
+# plugin の enable/disable 状態は触らない。
 
-# bare 面 (~/.claude-bare) の ccmsg を install / update する。rules は入れない
-[script]
-setup-bare:
-    home=$(jq -r '.pluginOnlyHomes[] | select(.name == "bare") | .home' repos_mapping.json)
-    dir="${home/#\~/$HOME}"
-    export CLAUDE_CONFIG_DIR="$dir"
-    claude plugin marketplace add kawaz/claude-ccmsg 2>&1 | tail -1
-    claude plugin install claude-ccmsg@claude-ccmsg 2>&1 | tail -1
-    claude plugin marketplace update claude-ccmsg 2>&1 | tail -1
-    claude plugin update claude-ccmsg@claude-ccmsg 2>&1 | tail -1
-    claude plugin update ccmsg@ccmsg 2>&1 | tail -1 || true
-    scripts/check-plugins.sh --home "$dir"
+# 全 subject の配備 (rules の symlink + plugin の install)
+setup home="": (rules-setup home) (plugins-setup home)
+
+# 全 subject の配備状態を検査 (変更はしない)
+check home="": (rules-check home) (plugins-check home)
+
+# 更新が意味を持つ subject の update (rules は symlink なので対象外)
+update home="": (plugins-update home)
+
+# rules / skills 層を各 CLAUDE_CONFIG_DIR へ symlink で配備し、dangling link を掃除
+rules-setup home="":
+    scripts/rules.sh setup {{ if home != "" { "--home " + home } else { "" } }}
+
+# 期待する symlink が揃って実体を指しているか (dangling / 未配備 / 誤った先を検出)
+rules-check home="":
+    scripts/rules.sh check {{ if home != "" { "--home " + home } else { "" } }}
+
+# 宣言された plugin を marketplace add + install (未 install のものだけ)、最後に check
+plugins-setup home="":
+    scripts/plugins.sh setup {{ if home != "" { "--home " + home } else { "" } }}
+
+# 宣言された plugin が入っているか (rules 面は不足だけ / bare 面は ccmsg 以外が無いことも)
+plugins-check home="":
+    scripts/plugins.sh check {{ if home != "" { "--home " + home } else { "" } }}
+
+# 宣言された plugin を marketplace update + plugin update
+plugins-update home="":
+    scripts/plugins.sh update {{ if home != "" { "--home " + home } else { "" } }}
 
 # plugin.json と marketplace.json の version 一致を保証 (multi-file 整合性)。
 # bump-semver get は multi-file 時に内部で整合チェック (不一致は error 表示で exit 非 0)。

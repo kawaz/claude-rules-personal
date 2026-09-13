@@ -1,7 +1,7 @@
 # claude-rules-personal
 
 kawaz の Claude Code 用ルール / スキルの **central リポジトリ**。
-`claude-rules-*` overlay 群を束ね、`setup.sh` で各 `CLAUDE_CONFIG_DIR` に配備する。
+`claude-rules-*` overlay 群を束ね、`just setup` で各 `CLAUDE_CONFIG_DIR` に配備する。
 
 ## リポジトリ群の構成
 
@@ -9,13 +9,13 @@ kawaz の Claude Code 用ルール / スキルの **central リポジトリ**。
 
 | リポ | 役割 | 専用環境 (CLAUDE_CONFIG_DIR) |
 |------|------|------|
-| **kawaz/claude-rules-personal** (これ) | central。全 overlay を束ね、`setup.sh` / `repos_mapping.json` を持つ | `~/.claude-personal` |
+| **kawaz/claude-rules-personal** (これ) | central。全 overlay を束ね、配備 recipe (`justfile` + `scripts/`) / `repos_mapping.json` を持つ | `~/.claude-personal` |
 | kawaz123/claude-rules-emrd | emrd 業務面の overlay (private) | `~/.claude-emrd` |
 | kawaz/claude-rules-zunsystem | zunsystem 識別子 overlay (private) | (専用環境なし) |
 | kawaz/claude-rules-syun | syun 識別子 overlay (private) | (専用環境なし) |
 
-- `setup.sh` と `repos_mapping.json` は **この personal リポにのみ置く** (2 重管理しない)
-- どの overlay のルール/スキルを変更しても、反映は **personal の `setup.sh` を実行**する
+- 配備 recipe と `repos_mapping.json` は **この personal リポにのみ置く** (2 重管理しない)
+- どの overlay のルール/スキルを変更しても、反映は **personal で `just setup` を実行**する
 - 整理方法・設計判断などの詳細ドキュメントは **personal の `docs/` に集約**する
 
 ## レイアウト
@@ -23,7 +23,7 @@ kawaz の Claude Code 用ルール / スキルの **central リポジトリ**。
 各リポ共通:
 
 - `for-all/rules/` — 全環境向けルール (全 `~/.claude*/rules/` に注入)
-- `for-all/plugins.json` — 全環境に入れる Claude Code plugin の宣言 (setup.sh が install)
+- `for-all/plugins.json` — 全環境に入れる Claude Code plugin の宣言 (`just plugins-setup` が install)
 - `for-me/rules/` — その面の専用環境にのみ注入
 - `for-me/plugins.json` — その面の専用環境にのみ install する plugin の宣言。
   plugin の skill / agent description は全セッションの context に載るので、
@@ -32,7 +32,7 @@ kawaz の Claude Code 用ルール / スキルの **central リポジトリ**。
 
 skill と agent は **リポ自体を Claude Code plugin として配布**する
 (`.claude-plugin/plugin.json` + リポ直下の `skills/<slug>/` `agents/` `hooks/`)。
-各リポの `for-all/plugins.json` に自リポの plugin を宣言し、setup.sh が install
+各リポの `for-all/plugins.json` に自リポの plugin を宣言し、`just plugins-setup` が install
 することで配備される。Skill tool からは `<plugin名>:<slug>` (例:
 `rules-personal:eli5`) で呼ぶ。skill はユーザが `/名前` で起動する実行系だけを置き、
 読むだけの手順書は `reference/` に置く (判定は `for-all/rules/rule-writing-guidelines.md`)。
@@ -50,29 +50,24 @@ skill と agent は **リポ自体を Claude Code plugin として配布**する
 
 personal リポ固有:
 
-- `setup.sh` — symlink ベースの配備スクリプト
+- `scripts/rules.sh` / `scripts/plugins.sh` — 配備スクリプト (subject ごと。`justfile` の recipe から呼ぶ)
 - `repos_mapping.json` — 全 overlay リポと各 `home` (CLAUDE_CONFIG_DIR) の定義
 - `docs/` — 設計判断・課題 (`issue/`)、運用手順 (`runbooks/`) 等
 
 ## セットアップ
 
-配備先の `CLAUDE_CONFIG_DIR` を指定して `setup.sh` を実行する:
+配備は `just` の recipe で行う。subject (rules / plugins) ごとに `<subject>-{setup,check,update}` があり、`setup` / `check` / `update` がそれらを束ねる。`home` 引数を省略すると `repos_mapping.json` に宣言された全面が対象:
 
 ```bash
-CLAUDE_CONFIG_DIR=~/.claude-personal  ./setup.sh
-CLAUDE_CONFIG_DIR=~/.claude-emrd ./setup.sh
+just setup                      # 全面: rules の symlink + plugin の install
+just check                      # 全面: 配備状態の検査 (変更しない)
+just update                     # 全面: plugin の update
+just rules-setup ~/.claude-emrd # 1 面だけ
 ```
 
-setup.sh は `repos_mapping.json` の全 overlay を読み:
-
-- `for-*/rules/` を `$TARGET/rules/` 配下にディレクトリ symlink
-- `for-all/plugins.json` の plugin を `claude plugin marketplace add` +
-  `claude plugin install` (加えて、`$TARGET` を所有するリポの
-  `for-me/plugins.json` があればそれも install)
-- 移動・削除された symlink の残骸 (dangling) を掃除
-  (plugin 化前の `$TARGET/skills/<repo>-<slug>` / `$TARGET/agents` の残骸も含む)
-
-詳細は `./setup.sh --help`。
+- `rules-setup`: `for-*/rules/` を `$HOME_DIR/rules/` 配下にディレクトリ symlink し、dangling link を掃除 (`rules-check` は期待する link が揃って実体を指しているかを検査)
+- `plugins-setup`: `for-all/plugins.json` (全 repo) と自面の `for-me/plugins.json` に宣言された plugin を `marketplace add` + `install`。bare 面 (`~/.claude-bare`) は `repos_mapping.json` の `pluginOnlyHomes` に列挙した ccmsg だけを入れる
+- `plugins-check`: rules 面は宣言の不足だけ、bare 面は ccmsg 以外が入っていないことも検査。宣言外に手で入れた plugin と enable / disable 状態は触らない
 
 ## ドキュメント
 

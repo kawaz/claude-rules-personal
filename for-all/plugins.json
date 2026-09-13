@@ -1,5 +1,5 @@
 {
-  "$schema-hint": "List of plugins to install via `claude plugin marketplace add` then `claude plugin install`. setup.sh runs both commands idempotently. Omit marketplace for built-in marketplaces (e.g. claude-plugins-official).",
+  "$schema-hint": "List of plugins to install via `claude plugin marketplace add` then `claude plugin install`. `just plugins-setup` (scripts/plugins.sh) runs both idempotently. Omit marketplace for built-in marketplaces (e.g. claude-plugins-official).",
   "plugins": [
     {"marketplace": "kawaz/claude-ccmsg",               "plugin": "claude-ccmsg@claude-ccmsg"},
     {"marketplace": "kawaz/claude-context-notify",      "plugin": "context-notify@context-notify"},

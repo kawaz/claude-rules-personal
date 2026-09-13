@@ -28,7 +28,7 @@
 
 | 配布物 | 経路 | 反映 |
 |---|---|---|
-| `for-*/rules/` | setup.sh の symlink | 実体を直接読むので保存した時点で効く |
+| `for-*/rules/` | `just rules-setup` の symlink | 実体を直接読むので保存した時点で効く |
 | `reference/` `memory/` | なし (絶対パスで Read) | 同上 |
 | `skills/` `.claude-plugin/` | marketplace 経由の plugin | `just plugin-release` (bump → commit → push → update) が要る |
 
