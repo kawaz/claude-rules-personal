@@ -206,6 +206,24 @@ lint-agents:
 validate:
     claude plugin validate .
 
+# plugin の install 状態を宣言と突き合わせる (rules 面: plugins.json の宣言が入っているか /
+# bare 面: repos_mapping.json の pluginOnlyHomes に列挙した ccmsg だけが入っているか)
+check-plugins:
+    scripts/check-plugins.sh
+
+# bare 面 (~/.claude-bare) の ccmsg を install / update する。rules は入れない
+[script]
+setup-bare:
+    home=$(jq -r '.pluginOnlyHomes[] | select(.name == "bare") | .home' repos_mapping.json)
+    dir="${home/#\~/$HOME}"
+    export CLAUDE_CONFIG_DIR="$dir"
+    claude plugin marketplace add kawaz/claude-ccmsg 2>&1 | tail -1
+    claude plugin install claude-ccmsg@claude-ccmsg 2>&1 | tail -1
+    claude plugin marketplace update claude-ccmsg 2>&1 | tail -1
+    claude plugin update claude-ccmsg@claude-ccmsg 2>&1 | tail -1
+    claude plugin update ccmsg@ccmsg 2>&1 | tail -1 || true
+    scripts/check-plugins.sh --home "$dir"
+
 # plugin.json と marketplace.json の version 一致を保証 (multi-file 整合性)。
 # bump-semver get は multi-file 時に内部で整合チェック (不一致は error 表示で exit 非 0)。
 [private]

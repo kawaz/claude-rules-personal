@@ -271,3 +271,7 @@ echo "--- agents ---"
 ls -la "$AGENTS_DEST" | grep -vE '^total|^d.*\.\.?$' | head -30
 echo "--- skills ---"
 ls -la "$SKILLS_DEST" | grep -vE '^total|^d.*\.\.?$' | head -30
+
+echo
+echo "=== Plugin check ==="
+"$(dirname "$0")/scripts/check-plugins.sh" --home "$TARGET" || true

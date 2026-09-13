@@ -1,5 +1,5 @@
 {
-  "$schema-hint": "Master list of all claude-rules-* repos and which CLAUDE_CONFIG_DIR each one owns. setup.sh reads this to decide where to symlink for-me/for-others/for-all layers. Optional 'memoryRepos' lists the cross-project memory repos (owner/name) that face reads; setup.sh writes their local paths to plugins/data/rules-personal-rules-personal/memory-repos.",
+  "$schema-hint": "Master list of all claude-rules-* repos and which CLAUDE_CONFIG_DIR each one owns. setup.sh reads this to decide where to symlink for-me/for-others/for-all layers. Optional 'memoryRepos' lists the cross-project memory repos (owner/name) that face reads; setup.sh writes their local paths to plugins/data/rules-personal-rules-personal/memory-repos. 'pluginOnlyHomes' lists CLAUDE_CONFIG_DIRs that get no rules layers, only the listed plugins (scripts/check-plugins.sh verifies them).",
   "repos": [
     {
       "name": "personal",
@@ -22,6 +22,16 @@
       "name": "syun",
       "repo": "kawaz/claude-rules-syun",
       "ghAccount": "kawaz"
+    }
+  ],
+  "pluginOnlyHomes": [
+    {
+      "name": "bare",
+      "home": "~/.claude-bare",
+      "plugins": [
+        "ccmsg@ccmsg",
+        "claude-ccmsg@claude-ccmsg"
+      ]
     }
   ]
 }
