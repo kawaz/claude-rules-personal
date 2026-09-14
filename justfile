@@ -282,9 +282,9 @@ _bump-version bump *version_files:
 
 # trigger paths に diff が無い push は自動 skip される (= rules/ や docs/ のみの
 # 変更では bump 不要)。
-# plugin 配布物 (hooks/ skills/ agents/ commands/) を変えたのに version 未 bump なら push を止める
+# plugin 配布物 (hooks/ skills/ agents/) を変えたのに version 未 bump なら push を止める
 [private]
-check-version-bumped: (_check-version-bumped "hooks/" "skills/" "agents/" "commands/")
+check-version-bumped: (_check-version-bumped "hooks/" "skills/" "agents/")
 
 [private]
 [script]
@@ -303,7 +303,7 @@ _check-version-bumped *trigger_paths:
         exit 0
     fi
     bump-semver compare gt .claude-plugin/plugin.json vcs:main@origin:.claude-plugin/plugin.json --no-hint && exit 0
-    echo 'ERROR: plugin 配布物 (hooks/ skills/ agents/ commands/) が変わっているが version 未 bump。"just bump-version" を実行してください' >&2
+    echo 'ERROR: plugin 配布物 (hooks/ skills/ agents/) が変わっているが version 未 bump。"just bump-version" を実行してください' >&2
     exit 1
 
 # gates: check-on-default-branch + ensure-clean + lint-rules + lint-agents

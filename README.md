@@ -30,13 +30,13 @@ kawaz の Claude Code 用ルール / スキルの **central リポジトリ**。
   面固有の plugin はこちらに置く (for-all に置くと他の面にも語彙が漏れる)
 - `for-others/rules/` — 他環境から参照される情報 (固有名詞リスト等のサニタイズ規定)
 
-skill と command と agent は **リポ自体を Claude Code plugin として配布**する
-(`.claude-plugin/plugin.json` + リポ直下の `skills/<slug>/` `commands/` `agents/` `hooks/`)。
+skill と agent は **リポ自体を Claude Code plugin として配布**する
+(`.claude-plugin/plugin.json` + リポ直下の `skills/<slug>/` `agents/` `hooks/`)。
 各リポの `for-all/plugins.json` に自リポの plugin を宣言し、`just plugins-setup` が install
 することで配備される。Skill tool からは `<plugin名>:<slug>` (例:
 `rules-personal:eli5`) で呼ぶ。skill はユーザが `/名前` で起動する実行系だけを置き、
 読むだけの手順書は `reference/` に置く (判定は `for-all/rules/rule-writing-guidelines.md`)。
-`commands/<name>.md` は AI に自動起動させたくないユーザ専用の入口 (`disable-model-invocation: true`) で、
+AI に自動起動させたくないユーザ専用の skill は frontmatter に `disable-model-invocation: true` を付け (AI の一覧から消える)、
 本文は reference の該当ファイルを読ませる 1〜2 行に留める。
 
 読むだけの参照知識はこのリポの直下に平置きする (索引と本文の 2 段構成、本文は必要時にだけ Read):

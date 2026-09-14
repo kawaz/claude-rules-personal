@@ -1,4 +1,5 @@
 ---
+name: pre-compact
 description: compaction の前にセッション状態ファイルを書く
 disable-model-invocation: true
 ---

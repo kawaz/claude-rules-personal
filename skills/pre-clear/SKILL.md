@@ -1,4 +1,5 @@
 ---
+name: pre-clear
 description: /clear の前にセッション状態ファイルを書く
 disable-model-invocation: true
 ---
