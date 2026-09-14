@@ -64,7 +64,7 @@ reference の `delegation/model-effort-matrix` の第一原則に従う。選定
 
 ## セッション開始時のチェックリスト
 
-1. cache/latest state ファイル (`~/.cache/claude-session-state/<project>/latest.md`) があれば読む
+1. 状態ファイル (`~/.cache/claude-session-state/<project>/latest.md`) があれば reference の `session-state/load` の手順で引き継ぐ
 2. 現行の main hash / working copy 状態 / QUESTIONS.md の裁定待ちを確認する
 3. 進行中 task list と blockedBy 依存を確認する
 4. 次の 1 手を明確にしてから作業開始する
