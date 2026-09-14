@@ -23,7 +23,7 @@ docs/
   STRUCTURE.md          リポジトリの物理構造
   ROADMAP.md            将来検討項目
   MANUAL{,-ja}.md       エンドユーザ向けマニュアル（任意、英訳必須）
-  decisions/            設計判断の記録（DR）。設計判断が複数あれば作成
+  decisions/            設計判断の記録（DR）。する / しないの決定ごとに 1 本、理由込みで書く
     DR-NNNN-title.md    DR 本体（4 桁ゼロパディング）
     INDEX.md            DR 一覧（必須）
   research/<f>          中期テーマの深掘り（長文）。長文調査が出てきたら
