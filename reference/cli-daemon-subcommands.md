@@ -43,6 +43,16 @@ OPTIONS (共通)
   --help        そのレベルの help
 ```
 
+## `daemon supervise` を置く目的
+
+**OS 登録の契約を binary 更新から切り離す。** 監督者は OS に「`<tool> daemon supervise` を常駐させる」という 1 点だけを約束する。unit の実体や数がどう変わっても、tool の binary を入れ替えても、この契約は変わらないので `service register` をやり直さない。OS 登録レベルの更新 (plist / unit ファイルの書き換え、署名や FDA 等の権限付与のやり直し) をバージョンアップ毎に発生させない。
+
+**status とログのスコープを分離する。** `service` はサービスとしての面 (OS への登録の有無、監督者が上がっているか、OS 側から取れる last_exit 等) だけを担当する。`daemon` は子である instance の生存と再起動だけを担当する。OS の機能と重複しない — OS が見るのは監督者だけ、監督者が見るのは unit だけで、見る対象が階層で分かれている。
+
+**障害時の単一入口にする。** daemon を複数管理すると、launchd 側だけで扱おうとした場合「今どの unit が登録されているか」「どの plist がどれに対応するか」を思い出し、その plist を指定して status を見る、という作業が先に挟まる。この手の操作は普段から頻繁にやるものではないので、障害に気づいて急いで見たい場面で launchd の使い方の確認から始まってしまう。`<tool> daemon status` / `log` / `restart` で全 unit を一発で扱えること、= 目的のコマンドの状態確認・ログ確認・再起動にサクッと到達できることが第一の目的。
+
+**「監督者は OS の KeepAlive の再発明」は誤読。** 守る対象が違う。OS の KeepAlive が守るのは監督者 1 プロセス、監督者が守るのは登録された unit 群。片方を消すともう片方の対象が無監督になるので、どちらも要る。
+
 ドメイン要件によっては launchd に登録する署名済み launcher を別途用意してそれを登録し、launcher は `<tool> daemon supervise` の起動と死活監視に徹する形も検討する。FDA 要求などがバージョンアップ毎に発生するのを回避するための構成。
 
 関連: [cli-design-preferences](cli-design-preferences.md)
