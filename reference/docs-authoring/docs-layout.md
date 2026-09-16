@@ -58,6 +58,7 @@ docs/
 | MANUAL en | `MANUAL.template.md` |
 | DR 本体 | `decisions/DR-NNNN-template.md` |
 | DR INDEX | `decisions/INDEX.template.md` |
+| DR archive INDEX | `decisions/archive/INDEX.template.md` |
 | issue | `issue/YYYY-MM-DD-template.md` |
 | journal | `journal/YYYY-MM-DD-template.md` |
 | findings | `findings/YYYY-MM-DD-template.md` |

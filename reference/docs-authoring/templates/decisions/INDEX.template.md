@@ -1,17 +1,16 @@
 # Decision Records 一覧
 
-## Active
+Status は各 DR ファイルの `Status:` 行が正本。ここに載るのは今立っている DR だけで、置き換えられた DR は [archive/INDEX.md](archive/INDEX.md) にある。
 
-- [DR-0001-...](./DR-0001-....md) — {一行サマリ}
+状態は絵文字とラベルだけ。日付・Phase・裁定の内訳は各 DR 本文に書く。
 
-## Archived
+- `✅ 実装済`: Decision の全部に実装エビデンスがある
+- `🟡 部分実装`: 一部のみ実装
+- `⬜ 未実装`: 設計のみ、実装エビデンスなし
+- `🚧 進行中`: 実装の途中
+- `N/A`: 実装対象でない (命名・思想・プロセス等)
+- `❌ 撤退`: 撤退判断済
 
-<!-- 現役の文脈を汚す古い DR は decisions/archive/ に退避し、ここに記載 -->
-
-## Moved to research/
-
-<!-- 判断記録の体を成さなくなり research/ に降格した DR -->
-
-## Superseded
-
-<!-- 後続 DR に上書きされた DR (Status: Superseded by DR-XXXX) -->
+| DR | 状態 | 説明 |
+|---|---|---|
+| [DR-0001](DR-0001-{slug}.md) | ⬜ 未実装 | {一行サマリ} |
