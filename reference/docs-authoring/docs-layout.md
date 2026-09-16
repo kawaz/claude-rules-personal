@@ -73,9 +73,9 @@ docs/
 
 `decisions/`:
 
-- INDEX.md は `## Active` / `## Archived` / `## Moved to research/` などの区分で構造化（実例: kuu.mbt）
-- 古い DR で「参照すると現役の文脈を汚す」ものは `decisions/archive/` に退避（番号は維持、ファイル名そのまま移動）
-- DR が議論ログ・調査寄りに育って判断記録の体を成さなくなったら `research/YYYY-MM-DD-<slug>.md` に降格。INDEX.md の `Moved to research/` 区分で追跡
+- INDEX.md は現役の DR だけを載せる。archive や research に移した DR は INDEX に写さない (番号が飛ぶのは許容。所在はファイル自身の `Status:` と `archive/` の一覧で分かる)
+- 後の DR に上書きされた DR は `Status: Superseded by DR-NNNN` を書いて `decisions/archive/` に退避（番号は維持、ファイル名そのまま移動）。複数の DR を続けて読まないと分からない状態は残さず、新しい 1 本に統合して古い方を退避する
+- DR が議論ログ・調査寄りに育って判断記録の体を成さなくなったら `research/YYYY-MM-DD-<slug>.md` に降格
 
 `issue/`:
 
@@ -125,6 +125,6 @@ docs/
 
 - **kawaz/bump-semver**: `justfile` の **canonical**。task runner / 翻訳 check (`check-outdated-translations`) / version bump gate (`check-version-bumped`) / push gate の基準実装。構造変更はまずここから直し、他リポは追従する
 - kawaz/authsock-warden: `docs/decisions/INDEX.md`、`docs/research/`、DR の書き方
-- kawaz/kuu.mbt: 50+ DR の運用、`decisions/archive/` への退避、`research/` への降格、INDEX.md の Active / Archived / Moved to research 3 区分
+- kawaz/kuu.mbt: 50+ DR の運用、`decisions/archive/` への退避、`research/` への降格
 - kawaz/zunsystem の業務リポジトリ: `docs/journal/` 運用、`docs/todo/`、`docs/references/`
 - kawaz/idea-storage: `docs/issue/` 運用検討
