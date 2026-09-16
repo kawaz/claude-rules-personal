@@ -76,6 +76,7 @@ docs/
 - INDEX.md は現役の DR だけを載せる。archive や research に移した DR は INDEX に写さない (番号が飛ぶのは許容)。`archive/INDEX.md` に退避した DR の「番号 / タイトル / 一言 / 置き換え先」の表を置き、現役の INDEX からはそこへの 1 行リンクだけを張る
 - 後の DR に上書きされた DR は `Status: Superseded by DR-NNNN` を書いて `decisions/archive/` に退避（番号は維持、ファイル名そのまま移動）。複数の DR を続けて読まないと分からない状態は残さず、新しい 1 本に統合して古い方を退避する
 - DR が議論ログ・調査寄りに育って判断記録の体を成さなくなったら `research/YYYY-MM-DD-<slug>.md` に降格
+- 現役の文書 (DESIGN / src の doc / 現役の DR) から archive や research に移した DR を番号で名指ししない。指すなら置き換え先の現役 DR を指す。「DR-A は DR-B を置き換えた」の類は経緯 (`no-historical-noise` rule) なので書かない。名指ししてよいのは archive 側の `Status:` 行と `archive/INDEX.md` だけ
 
 `issue/`:
 
