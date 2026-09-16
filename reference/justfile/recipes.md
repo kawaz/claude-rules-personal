@@ -17,6 +17,10 @@ bump-semver / session-analysis 等の justfile を見ると、概ね次の recip
 
 **push 順序の注意 (mutating lint との関係)**: `ci` が `gofmt -w` 等で tree を mutate するリポでは `ensure-clean` を `ci` の **後** に置く (bump-semver は `check-outdated-translations` の transitive 依存で `ensure-clean` が `ci` 後に走る形)。`prettier --check` / `cargo fmt --check` / `oxfmt --check` 等 non-mutating lint のみのリポは `push` の先頭で `ensure-clean` を回しても問題ない。
 
+## recipe の本文はコマンドの列挙と依存で組む
+
+recipe は「1 行 1 コマンドの列挙」と `deps` の連鎖で回す。shebang (`#!/usr/bin/env bash`) 付きのスクリプト本文、`if` / ループ / パイプの組み立てを recipe の中に書かない。条件分岐や複数段の処理が要るなら、それは recipe でなく**コマンド側** (kawaz 製 CLI の sub-command、または `scripts/` の実行ファイル) に持たせ、recipe はそれを 1 行で呼ぶ (例: `check-version-bumped` は `bump-semver vcs ...` の 1 行)。理由: justfile は「何をどの順に走らせるか」の一覧であって、読めば依存の全体が分かる形を保つ。中にスクリプトが育つと recipe ごとに読み込みが要り、一覧としての価値が落ちる。
+
 ## just 変数は使わない
 
 just の変数 (`name := value`) は文字列のみ扱え、shell 内 embed で quote 問題を起こす。値の受け渡しは **positional argument** 経由にする (`set positional-arguments` で `$1` / `"$@"` が使える)。
