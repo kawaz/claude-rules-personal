@@ -8,3 +8,5 @@
   発火語: 質問, なんで, 必要ある?, どう思う, 指摘と受け取る, 即対応
 - [no-chat-refs-in-docs](no-chat-refs-in-docs.md) — docs (DR / DESIGN / issue) に room・メッセージ番号 (rNNN mNN) を書かず日付と要点だけ。
   発火語: r303, room 番号, メッセージ番号, 出典, 裁定の記録, DR の Context
+- [grep-wrapper-skips-binary-looking-files](grep-wrapper-skips-binary-looking-files.md) — Bash の `grep` は ugrep ラッパで、NUL を含むファイルや ignore 済みファイルを無言で飛ばす。「該当なし」の前に `file` と `command grep` で裏を取る。
+  発火語: grep で見つからない, 該当なし, Binary file, ugrep, --ignore-files, NUL, file が data と言う
