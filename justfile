@@ -123,8 +123,10 @@ lint-rules:
     #     private 層のフルパスリンク (スラッシュ始まり・~ 始まり) は本文がこのリポに無いので対象外。
     #     `scripts/` `templates/` `assets/` はスクリプト・テンプレ・付属ファイルの置き場で
     #     読み物ではないので、ディレクトリごと索引の対象外にする (中身も再帰的に対象外)。
+    #     `runbooks/` は必要な時だけ開く手順書の置き場で、索引には載せず本文からのリンクで辿る。
+    #     索引の代わりに (h) で「同じ topic の本文から少なくとも 1 箇所リンクされている」を検査する。
     while IFS= read -r dir; do
-        case "$dir" in */scripts|*/scripts/*|*/templates|*/templates/*|*/assets|*/assets/*) continue ;; esac
+        case "$dir" in */scripts|*/scripts/*|*/templates|*/templates/*|*/assets|*/assets/*|*/runbooks|*/runbooks/*) continue ;; esac
         idx="$dir/_index.md"
         if [ ! -f "$idx" ]; then
             echo "FATAL 参照知識の索引欠落: $dir/ に _index.md が無い"
@@ -142,7 +144,7 @@ lint-rules:
         for sub in "$dir"/*/; do
             [ -d "$sub" ] || continue
             sub=$(basename "$sub")
-            case "$sub" in scripts|templates|assets) continue ;; esac
+            case "$sub" in scripts|templates|assets|runbooks) continue ;; esac
             if ! rg -qF "(${sub}/_index.md)" "$idx"; then
                 echo "FATAL 参照知識の索引漏れ: $dir/$sub/_index.md が $idx に無い"
                 fatal=1
@@ -157,6 +159,16 @@ lint-rules:
             fi
         done < <(rg -o '^- \[[^]]+\]\(([^)~/][^)]*\.md)\)' -r '$1' "$idx" 2>/dev/null | sort -u)
     done < <(find reference memory -type d 2>/dev/null | sort)
+    # (h) runbooks/ の本文は索引に載らないので、同じ topic の本文 (_index.md 以外) からリンクされて
+    #     いないと誰も辿れない dead file になる。逆向きの検査で置き去りを止める。
+    while IFS= read -r f; do
+        topic=$(dirname "$(dirname "$f")")
+        name=$(basename "$f")
+        if ! rg -qF "runbooks/${name})" --glob '!_index.md' --glob '!runbooks/**' "$topic" 2>/dev/null; then
+            echo "FATAL runbook の置き去り: $f が $topic/ の本文からリンクされていない"
+            fatal=1
+        fi
+    done < <(find reference memory -path '*/runbooks/*.md' -type f -not -path '*/templates/*' 2>/dev/null | sort)
     if [ "$fatal" -ne 0 ]; then
         echo "lint-rules: FATAL 違反あり (上記参照)" >&2
         exit 1

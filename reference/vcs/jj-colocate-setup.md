@@ -73,6 +73,8 @@ echo "guard: 上位への .jj 探索を止める (実体は main/)" > .jj/README
 5. [ ] 上の「既存リポジトリの clone」手順で作り直す (track main を忘れない)
 6. [ ] 動作確認: repo 直下で `git status` と `jj st` が**双方エラーで止まる**こと、main/ 内で双方動くこと
 
+そのリポを cwd にしている Claude セッション自身が実行する場合 (cwd の消失、clone で戻らない追跡外ファイル、外部が参照する生成物の再生成) は [colocate-migrate-in-session](runbooks/colocate-migrate-in-session.md)。
+
 ## 作業場所の使い分け (最重要)
 
 | 作業場所 | 作り方 | 中で使える VCS |
