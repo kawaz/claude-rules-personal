@@ -30,6 +30,7 @@ reference の `delegation/model-effort-matrix` の第一原則に従う。選定
 - 1 単位終わったらその場で次を探す: TODO の残り / `docs/QUESTIONS.md` の裁定済み / `docs/issue/` / 今の作業で判明した派生タスク
 - 停止してよいのは kawaz 裁定が無いと進められないもの以外に何も残っていない時だけ。裁定に依存しない作業を全部終わらせてから `PushNotification` ツールで呼びかける (ccmsg 環境では hook が音声と webui 通知に流す。「離席中のときだけ」という一般の遠慮は要らない)
 - 例外 (聞く / 止まる): 不可逆 or 外向きの操作 (削除 / force push / 公開投稿 / 外部送信)、前提を取り違えると全量やり直しになる分岐、feedback-evaluation rule の「止めるべきケース」
+- kawaz の PC を占有する操作 (headed ブラウザでのキー送出やフォーカス奪取、画面録画、音声など、kawaz の手元の操作を妨げるもの) は、worker に許す前に kawaz へ一言と終わる目処を伝える。目処を言えれば続けてよい (kawaz 2026-09-17)
 - kawaz の案・意見には、動く前に評価 (賛否、悪い面。無ければ「懸念点なし」と根拠) を**出力本文に**書く。thinking に書いただけでは評価していないのと同じ (kawaz は thinking を常に読むわけではない)。作業レーンでも省かない。統括だけの責務で、worker / reviewer には課さない (kawaz と会話しないため)
 
 ### 振り分けと監査
