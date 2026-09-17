@@ -98,7 +98,7 @@ git-init)
   message="新規リポジトリは git 単独でなく jj colocate で始めます。$ref_dir/jj-colocate-setup.md (適用範囲・新規作成・clone の節) を Read して、その手順で作成してください。"
   ;;
 git-status)
-  message="このリポは jj 管理されていません (git 専用)。jj colocate が標準なので、$ref_dir/jj-colocate-setup.md (適用範囲と「移行」節) を Read して colocate 化を検討してください。"
+  message="このリポは jj 管理されていません (git 専用)。jj colocate が標準なので、$ref_dir/jj-colocate-setup.md (適用範囲と「移行」節) を Read して colocate 化を検討してください。git のまま運用する場所 (業務面のリポ等) なら、この案内は誤りです: $git_only_list にパスの正規表現を 1 行足すと以後出なくなります (勝手に足さず kawaz に伝えてください)。"
   ;;
 migrate)
   message="このリポは旧方式 (git bare + jj workspace) です。手順書が未ロードなら次を Read してください: $ref_dir/jj-bare-workspace-setup.md (旧方式の手順), $ref_dir/jj-commit-basics.md (コミット操作), $ref_dir/jj-restructure.md (組み替え), $ref_dir/jj-recovery.md (復旧)。あわせて $ref_dir/jj-colocate-setup.md の「移行 (旧方式リポの入れ替え)」節を読み、colocate 方式への移行を検討してください。"
