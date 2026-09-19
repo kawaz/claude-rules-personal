@@ -8,7 +8,7 @@
   発火語: 質問, なんで, 必要ある?, どう思う, 指摘と受け取る, 即対応
 - [ai-cli-pass-long-text-by-file](ai-cli-pass-long-text-by-file.md) — AI が長文を渡す kawaz 製 CLI は引数や stdin でなくファイルパス (必須なら位置パラメータ) で受ける。`-` の特別扱いは無し、人間は `/dev/stdin` を渡す。
   発火語: 長文を渡す, 本文を引数で, エスケープ事故, バッククォート, stdin, --body-file, Write してから渡す
-- [commit-push-scope-by-repo-kind](commit-push-scope-by-repo-kind.md) — rules・privacy リポは commit も push も可、プロダクトリポは docs の commit まで (push はリリースを伴うので kawaz のタイミング)。
+- [commit-push-scope-by-repo-kind](commit-push-scope-by-repo-kind.md) — rules・privacy リポは commit も push も可、プロダクトリポは docs の commit まで。push は他の未 push commit が無ければ可、あれば次の push に相乗り。
   発火語: push してよいか, 他リポに commit, issue 起票の push, リリース窓, プロダクトリポ
 - [ccmsg-backtick-command-substitution](ccmsg-backtick-command-substitution.md) — ccmsg 本文をダブルクォートで渡すとバッククォート部分がコマンド置換されて空になる (送信は成功するので気づきにくい)。
   発火語: ccmsg, post, reply, メッセージが欠けた, バッククォート, コマンド置換, エージェント間メッセージ
