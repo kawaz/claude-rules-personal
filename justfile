@@ -219,7 +219,7 @@ validate:
     claude plugin validate .
 
 # ---- 配備 (subject ごとに scripts/<subject>.sh、大枠の setup / check / update が束ねる) ----
-# home 省略時は repos_mapping.json に宣言された全面が対象。宣言外に手で入れたものと
+# home 省略時は repos_mapping.local.json に宣言された全面が対象。宣言外に手で入れたものと
 # plugin の enable/disable 状態は触らない。
 
 # 全 subject の配備 (rules の symlink + plugin の install)
@@ -258,7 +258,7 @@ check-versions:
     @bump-semver get .claude-plugin/plugin.json .claude-plugin/marketplace.json --no-hint >/dev/null
 
 # plugin cache は $CLAUDE_CONFIG_DIR 配下にあるため、環境ごとに update が要る
-# (personal で叩いても emrd 側は古いまま)。環境一覧の正本は repos_mapping.json
+# (personal で叩いても emrd 側は古いまま)。環境一覧の正本は repos_mapping.local.json
 # の home フィールド (rule 側に環境一覧を複製しない規約)。
 # 各 update は warn 降格: push は既に成功済なので、ここで失敗しても release 自体は
 # 完了している (失敗時に exit 非 0 にすると「push 済みなのに just push 失敗表示 →
@@ -273,7 +273,7 @@ on-success-release:
         echo "--- $home"
         CLAUDE_CONFIG_DIR="$dir" claude plugin marketplace update rules-personal || fail=1
         CLAUDE_CONFIG_DIR="$dir" claude plugin update rules-personal@rules-personal || fail=1
-    done < <(jq -r '.repos[] | select(.home != null and .home != "") | .home' repos_mapping.json)
+    done < <(jq -r '.repos[] | select(.home != null and .home != "") | .home' repos_mapping.local.json)
     if [ "$fail" -ne 0 ]; then
         echo "[warn] 一部環境で update 失敗。push は成功済み。'just on-success-release' で単独再実行可" >&2
     fi

@@ -9,12 +9,12 @@ kawaz の Claude Code 用ルール / スキルの **central リポジトリ**。
 
 | リポ | 役割 | 専用環境 (CLAUDE_CONFIG_DIR) |
 |------|------|------|
-| **kawaz/claude-rules-personal** (これ) | central。全 overlay を束ね、配備 recipe (`justfile` + `scripts/`) / `repos_mapping.json` を持つ | `~/.claude-personal` |
+| **kawaz/claude-rules-personal** (これ) | central。全 overlay を束ね、配備 recipe (`justfile` + `scripts/`) / `repos_mapping.local.json` を持つ | `~/.claude-personal` |
 | 業務用 overlay (private) | 業務面のルール差分 | 専用環境 |
 | kawaz/claude-rules-zunsystem | zunsystem 識別子 overlay (private) | (専用環境なし) |
 | 業務識別子 overlay (private) | 特定業務面の識別子差分 | (専用環境なし) |
 
-- 配備 recipe と `repos_mapping.json` は **この personal リポにのみ置く** (2 重管理しない)
+- 配備 recipe と `repos_mapping.local.json` は **この personal リポにのみ置く** (2 重管理しない)
 - どの overlay のルール/スキルを変更しても、反映は **personal で `just setup` を実行**する
 - 整理方法・設計判断などの詳細ドキュメントは **personal の `docs/` に集約**する
 
@@ -53,12 +53,12 @@ AI に自動起動させたくないユーザ専用の skill は frontmatter に
 personal リポ固有:
 
 - `scripts/rules.sh` / `scripts/plugins.sh` — 配備スクリプト (subject ごと。`justfile` の recipe から呼ぶ)
-- `repos_mapping.json` — 全 overlay リポと各 `home` (CLAUDE_CONFIG_DIR) の定義
+- `repos_mapping.local.json` — 全 overlay リポと各 `home` (CLAUDE_CONFIG_DIR) の定義
 - `docs/` — 設計判断・課題 (`issue/`)、運用手順 (`runbooks/`) 等
 
 ## セットアップ
 
-配備は `just` の recipe で行う。subject (rules / plugins) ごとに `<subject>-{setup,check,update}` があり、`setup` / `check` / `update` がそれらを束ねる。`home` 引数を省略すると `repos_mapping.json` に宣言された全面が対象:
+配備は `just` の recipe で行う。subject (rules / plugins) ごとに `<subject>-{setup,check,update}` があり、`setup` / `check` / `update` がそれらを束ねる。`home` 引数を省略すると `repos_mapping.local.json` に宣言された全面が対象:
 
 ```bash
 just setup                      # 全面: rules の symlink + plugin の install
@@ -68,7 +68,7 @@ just rules-setup ~/.claude-emrd # 1 面だけ
 ```
 
 - `rules-setup`: `for-*/rules/` を `$HOME_DIR/rules/` 配下にディレクトリ symlink し、dangling link を掃除 (`rules-check` は期待する link が揃って実体を指しているかを検査)
-- `plugins-setup`: `for-all/plugins.json` (全 repo) と自面の `for-me/plugins.json` に宣言された plugin を `marketplace add` + `install`。bare 面 (`~/.claude-bare`) は `repos_mapping.json` の `pluginOnlyHomes` に列挙した ccmsg だけを入れる
+- `plugins-setup`: `for-all/plugins.json` (全 repo) と自面の `for-me/plugins.json` に宣言された plugin を `marketplace add` + `install`。bare 面 (`~/.claude-bare`) は `repos_mapping.local.json` の `pluginOnlyHomes` に列挙した ccmsg だけを入れる
 - `plugins-check`: rules 面は宣言の不足だけ、bare 面は ccmsg 以外が入っていないことも検査。宣言外に手で入れた plugin と enable / disable 状態は触らない
 
 ## ドキュメント

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# plugins.sh — plugin の宣言 (plugins.json / repos_mapping.json) と各 CLAUDE_CONFIG_DIR の
+# plugins.sh — plugin の宣言 (plugins.json / repos_mapping.local.json) と各 CLAUDE_CONFIG_DIR の
 # install 状態をつなぐ。`just plugins-{check,setup,update}` から呼ぶ。
 #
 #   check  : 宣言された plugin が入っているか (rules 面は不足だけ、bare 面は過不足)
@@ -7,9 +7,9 @@
 #   update : 宣言された plugin の marketplace update + plugin update
 #
 # 宣言の所在:
-#   rules 面 (repos_mapping.json .repos[] で home を持つ面): 全 repo の for-all/plugins.json +
+#   rules 面 (repos_mapping.local.json .repos[] で home を持つ面): 全 repo の for-all/plugins.json +
 #     その面を所有する repo の for-me/plugins.json
-#   bare 面 (repos_mapping.json .pluginOnlyHomes[]): entry の plugins[] (marketplace は
+#   bare 面 (repos_mapping.local.json .pluginOnlyHomes[]): entry の plugins[] (marketplace は
 #     "<plugin>@<marketplace>" の marketplace 部を owner/repo に引く map を entry の marketplaces に持つ)
 #
 # 宣言外に手で入れた plugin と、enable / disable の状態は一切触らない (disabled は install 済み扱い)。
@@ -23,7 +23,7 @@ ONLY_HOME=""
 if [ "${1:-}" = "--home" ]; then ONLY_HOME="${2/#\~/$HOME}"; fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-MAPPING="${MAPPING:-$SCRIPT_DIR/../repos_mapping.json}"
+MAPPING="${MAPPING:-$SCRIPT_DIR/../repos_mapping.local.json}"
 REPO_BASE="${REPO_BASE:-${XDG_DATA_HOME:-$HOME/.local/share}/repos/github.com}"
 WORKSPACE="${WORKSPACE:-main}"
 

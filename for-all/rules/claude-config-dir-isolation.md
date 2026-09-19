@@ -8,7 +8,7 @@ kawaz の環境は Claude Code の親ディレクトリ走査による設定汚�
 
 - **`~/.claude` は意図的に regular file として置いてある**。`mkdir ~/.claude` や directory としての再作成は禁止。`~/.claude/foo` を作ろうとするツールを見つけたら、そのツールを直すかオプションで切る
 - **`~/.claude` を symlink で置き換えない** (`~/.claude -> ~/.claude-personal` 等)。symlink 経由でも walk-up 探索でヒットし、`$HOME` 配下全域で個人ルールが意図せず読み込まれる汚染が再発する
-- 環境ごとの `CLAUDE_CONFIG_DIR` は `~/.zshrc` (個人面デフォルト) と各 overlay の `.envrc` (direnv) が正本。rule 側に環境一覧を複製しない (repos_mapping.json 参照)
+- 環境ごとの `CLAUDE_CONFIG_DIR` は `~/.zshrc` (個人面デフォルト) と各 overlay の `.envrc` (direnv) が正本。rule 側に環境一覧を複製しない (repos_mapping.local.json 参照)
 
 ## 越境作業
 

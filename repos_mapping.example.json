@@ -1,4 +1,5 @@
 {
+  "_comment": "参考用。実運用の一覧は repos_mapping.local.json (gitignore)",
   "$schema-hint": "Master list of all claude-rules-* repos and which CLAUDE_CONFIG_DIR each one owns. scripts/rules.sh (just rules-*) reads this to decide where to symlink for-me/for-others/for-all layers. 'pluginOnlyHomes' lists CLAUDE_CONFIG_DIRs that get no rules layers, only the listed plugins (scripts/plugins.sh, via `just plugins-*`, checks/installs/updates them; 'marketplaces' maps a marketplace name to owner/repo for `marketplace add` — omit entries that are registered by the tool itself, e.g. ccmsg's directory marketplace).",
   "repos": [
     {
@@ -8,20 +9,10 @@
       "ghAccount": "kawaz"
     },
     {
-      "name": "emrd",
-      "repo": "kawaz123/claude-rules-emrd",
-      "home": "~/.claude-emrd",
-      "ghAccount": "kawaz123"
-    },
-    {
-      "name": "zunsystem",
-      "repo": "kawaz/claude-rules-zunsystem",
-      "ghAccount": "kawaz"
-    },
-    {
-      "name": "syun",
-      "repo": "kawaz/claude-rules-syun",
-      "ghAccount": "kawaz"
+      "name": "work-a",
+      "repo": "<work-account>/claude-rules-work-a",
+      "home": "~/.claude-work-a",
+      "ghAccount": "<work-account>"
     }
   ],
   "pluginOnlyHomes": [

@@ -2,7 +2,7 @@
 # rules.sh — claude-rules-* の rules / skills 層を各 CLAUDE_CONFIG_DIR に symlink で配備する。
 # `just rules-{setup,check}` から呼ぶ。
 #
-#   setup : repos_mapping.json の各面 (home を持つ repo) に symlink を張り、dangling link を掃除する
+#   setup : repos_mapping.local.json の各面 (home を持つ repo) に symlink を張り、dangling link を掃除する
 #   check : 各面に期待する symlink が揃っていて、実体を指しているか (dangling / 未配備を検出)
 #
 # 配備先レイアウト (rules: ディレクトリ symlink / skills: skill ごとの symlink):
@@ -25,7 +25,7 @@ ONLY_HOME=""
 if [ "${1:-}" = "--home" ]; then ONLY_HOME="${2/#\~/$HOME}"; fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
-MAPPING="${MAPPING:-$SCRIPT_DIR/../repos_mapping.json}"
+MAPPING="${MAPPING:-$SCRIPT_DIR/../repos_mapping.local.json}"
 REPO_BASE="${REPO_BASE:-${XDG_DATA_HOME:-$HOME/.local/share}/repos/github.com}"
 WORKSPACE="${WORKSPACE:-main}"
 [ -f "$MAPPING" ] || { echo "Missing mapping: $MAPPING" >&2; exit 1; }
