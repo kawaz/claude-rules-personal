@@ -13,7 +13,7 @@ README に「着手せず廃止」と後継 / 代替を明記して archive)。
 
 ## 前提
 
-- `gh` CLI が対象リポ owner (kawaz / kawaz123) で認証済み
+- `gh` CLI が対象リポ owner に対応するアカウントで認証済み
 - ローカルクローンパス規約: `${XDG_DATA_HOME:-$HOME/.local/share}/repos/{host}/{owner}/{repo}/`
 
 ## チェックリスト

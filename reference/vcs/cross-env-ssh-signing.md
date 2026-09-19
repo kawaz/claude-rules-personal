@@ -58,7 +58,7 @@ SSH_AUTH_SOCK=~/.ssh/agent-env-Y.sock jj config set --repo signing.key "$(SSH_AU
 ```
 
 - **デフォルト環境 (個人面) のリポは signing.key を override しない** (global config が正、agent も default で正しい鍵を持っているはず)
-- **別アカウント鍵で署名すべきリポ** (例: emrd のリポは kawaz123 鍵で署名) で global signing.key が個人鍵を指している場合、repo-local override が一度必要
+- **別アカウント鍵で署名すべきリポ** で global signing.key が個人鍵を指している場合、repo-local override が一度必要
 
 ## その他注意点
 

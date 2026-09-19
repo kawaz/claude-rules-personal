@@ -15,7 +15,7 @@
 
 ## ディレクトリ構成
 
-適用: `github.com/{kawaz,kawaz123,zunsystem}/*` の (本方式で作られた) リポジトリ
+適用: `github.com/<owner>/*` の (本方式で作られた) リポジトリ
 
 ```
 ~/.local/share/repos/{host}/{org-user}/{repo}/

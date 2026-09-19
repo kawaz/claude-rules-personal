@@ -49,7 +49,7 @@ claude-gh-monitor は docs/issue/ 採用済 = 当初の例外論拠は失効)。
 |---|---|---|
 | kawaz (個人 OSS 本体) | guard 対象 | block + `docs/issue/<slug>.md` redirect hint |
 | kawaz 個人面 overlay 系 (= `kawaz/claude-rules-*` 等) | guard 対象 | 同上 (= 全部 owner=kawaz なので 1 列で覆われる) |
-| kawaz123 (= emrd 業務面) | guard 対象外 | 通常通り (= 業務 issue は GH Issues) |
+| 業務用アカウント | guard 対象外 | 通常通り (= 業務 issue は GH Issues) |
 | その他第三者 (= 外部 OSS、非 kawaz owner) | guard 対象外 | 通常通り |
 
 「kawaz が自己所有 (= kawaz owner)」ならローカル起票、それ以外なら通常通り、というだけ。
@@ -63,15 +63,15 @@ docs/issue/ ディレクトリの実体有無は判定に使わない (= 「未�
 - `kawaz` (= 個人 OSS 本体 + 個人面 overlay リポ群すべて)
 
 list を将来増やすか確認: kawaz 個人面で持つ overlay 系リポ (`kawaz/claude-rules-personal`,
-`kawaz/claude-rules-syun`, `kawaz/claude-rules-zunsystem` 等) はすべて owner = `kawaz` なので、
+`kawaz/claude-rules-*` 等) はすべて owner = `kawaz` なので、
 owner 1 種類で全部カバーできる (= 余計な list 保守不要)。
 
 将来別の overlay account (= 仮に `kawaz-owner-X`) を持ったら、その owner も判定 list に追加する。
 
-### 業務面 (kawaz123/*) の扱い
+### 業務用アカウントの扱い
 
-- owner = `kawaz123` は **guard 対象外** = `gh issue create` 通常通り
-- 業務リポ (emrd) の運用は GH Issues 主体、kawaz123 個人作業も慣習的に GH Issues 利用
+- 業務用 owner は **guard 対象外** = `gh issue create` 通常通り
+- 業務リポの運用は GH Issues 主体、業務用アカウントでの個人作業も慣習的に GH Issues 利用
 - 同 hook で `owner != kawaz` なら早期 exit、別 hook を作らない (= シンプル)
 
 ## 採用ポリシー: 候補 A + C (= 確定)
@@ -308,7 +308,7 @@ name=${repo##*/}
 # kawaz 自己所有 owner 一覧 (= 個人 OSS 本体 + 個人面 overlay。全部 owner=kawaz)
 case "$owner" in
   kawaz) ;;  # guard 対象、続行
-  *) exit 0 ;;  # 第三者 / kawaz123 → 通す
+  *) exit 0 ;;  # 第三者 / 業務用 owner → 通す
 esac
 
 HINT_FILE="$(cd "$(dirname "$0")" && pwd)/gh-issue-redirect-hint.md"
@@ -397,8 +397,8 @@ push-guard と同じ pattern で `~/.claude-personal/settings.json` に追加:
 - `docs-knowledge-flow.md`: `docs/issue/<file>.md` の **解決時フロー**を規定。本 hook は **入口を強制**
 - `push-workflow.md`: push 時の品質 gate と同じ「違反は仕組みで止める」思想
 - `release-flow-awareness.md`: tag/release を Claude が打たない、と同じ「自動化が打つ」思想
-- `account-isolation.md` (overlay 経由、emrd): owner 判定で `kawaz` 自己所有のみ block、`kawaz123` (業務) は通す
-- `git-repo-management.md`: `kawaz` (public OSS) と `kawaz123` (業務 private) の所有者区別と整合
+- `account-isolation.md` (overlay 経由、emrd): owner 判定で `kawaz` 自己所有のみ block、業務用 owner は通す
+- `git-repo-management.md`: `kawaz` (public OSS) と業務用 owner (private) の所有者区別と整合
 - **`claude-push-guard` (= 兄弟 plugin)**: 本 guard の構成テンプレ、同じ marketplace pattern
 
 ## Decision points (= 確定/未確定)
@@ -407,7 +407,7 @@ push-guard と同じ pattern で `~/.claude-personal/settings.json` に追加:
 
 1. **guard 強度**: 候補 **A + C** (= hard block + env flag 突破) で進める
 2. **guard 対象 owner**: `kawaz` のみで足りる (= overlay 系も全部 owner=kawaz)
-3. **kawaz123 の扱い**: guard 対象外 (= 業務面 GH Issues 利用は慣習通り)
+3. **業務用アカウントの扱い**: guard 対象外 (= 業務面 GH Issues 利用は慣習通り)
 4. **過渡期リポ (= claude-gh-monitor 等)**: 個別特例は設けず、env flag で都度突破
 5. **hook 設置場所**: **push-guard と同じ独立 plugin リポ方式** (= 新規 `kawaz/claude-gh-issue-guard` を作成、`claude-rules-personal/` 直配置は不採用)
    - 理由: 既存 hook 系 plugin (push-guard / force-bun / force-uv / bash-safety / claude-rules-source-guard) 全部 plugin リポ化、一貫性

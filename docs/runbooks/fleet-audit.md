@@ -4,7 +4,7 @@
 
 ## 適用ケース
 
-kawaz の全ローカルリポ (`~/.local/share/repos/github.com/kawaz/*` + `kawaz123/*`) を
+kawaz の全ローカルリポを
 横断して、単リポ作業では見えない **移行漏れ / 参照不整合 / 残置** をまとめて検出する。
 
 **頻度目安: 週次〜隔週**。監査自体の自動化 (定期実行の仕組み化) は別 issue で検討中
@@ -12,7 +12,7 @@ kawaz の全ローカルリポ (`~/.local/share/repos/github.com/kawaz/*` + `kaw
 
 ## 前提
 
-- `gh` CLI が kawaz / kawaz123 両 owner で認証済み (`GH_CONFIG_DIR` の面切替に注意)
+- `gh` CLI が個人用 / 業務用の両 owner で認証済み (`GH_CONFIG_DIR` の面切替に注意)
 - `rg` / `jj` / `just` / `bump-semver` が PATH 上にある
 
 ## チェックリスト
@@ -93,7 +93,7 @@ kawaz の全ローカルリポ (`~/.local/share/repos/github.com/kawaz/*` + `kaw
 
 | 症状 | 原因 | 対処 |
 |---|---|---|
-| `gh repo view` が全リポで空 | 面 (GH_CONFIG_DIR) がズレて認証先が違う | kawaz / kawaz123 の面を確認して再実行 |
+| `gh repo view` が全リポで空 | 面 (GH_CONFIG_DIR) がズレて認証先が違う | 個人用 / 業務用の面を確認して再実行 |
 | lint-rules が fatal | rule 構造規約違反 | `docs/runbooks` ではなく該当 rule を修正 |
 | workflow grep が誤検出 | `on: push` に paths filter が付いた正常型 | release.yml を目視して tag 待ちか VERSION 起動か判別 |
 

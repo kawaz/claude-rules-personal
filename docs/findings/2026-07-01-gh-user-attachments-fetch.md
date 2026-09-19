@@ -122,7 +122,7 @@ file out.png  # PNG image data であることを確認
 ## 未検証事項 (= 将来ここを詰めるべき)
 
 - **private repo** で経路 A (`user-attachments/assets/<UUID>` 直叩き) が本当に「ログイン画面
-  HTML」を返すか。実測環境が用意できていない (= kawaz は kawaz123 業務環境で確認可能)
+  HTML」を返すか。実測環境が用意できていない (= kawaz は業務環境で確認可能)
 - **discussion**: `graphql` 経由でしか取れないが、`body_html` 相当のフィールドが取れるか
 - **私設 GH Enterprise Server**: 挙動は同一か
 - **画像以外 (動画 .mp4, PDF)**: 同じ `user-attachments` の別形式で、経路 B は img 以外を

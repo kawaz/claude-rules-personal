@@ -17,5 +17,5 @@
 
 ## 連鎖
 
-1. **段 2 (面)**: 現在の面の overlay ルールリポに `reference/role-main/_index.md` があれば、それも同じ規律で読む。overlay のパスは `CLAUDE_CONFIG_DIR` に対応する overlay の rule が案内する (emrd 面なら `account-isolation` rule に `kawaz123/claude-rules-emrd/main` のパスがある)
+1. **段 2 (面)**: 現在の面の overlay ルールリポに `reference/role-main/_index.md` があれば、それも同じ規律で読む。overlay のパスは `CLAUDE_CONFIG_DIR` に対応する overlay の rule が案内する
 2. **段 3 (プロジェクト)**: cwd のプロジェクトに CLAUDE.md の起動時手順があれば、それに従う

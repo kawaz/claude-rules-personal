@@ -10,9 +10,9 @@ kawaz の Claude Code 用ルール / スキルの **central リポジトリ**。
 | リポ | 役割 | 専用環境 (CLAUDE_CONFIG_DIR) |
 |------|------|------|
 | **kawaz/claude-rules-personal** (これ) | central。全 overlay を束ね、配備 recipe (`justfile` + `scripts/`) / `repos_mapping.json` を持つ | `~/.claude-personal` |
-| kawaz123/claude-rules-emrd | emrd 業務面の overlay (private) | `~/.claude-emrd` |
+| 業務用 overlay (private) | 業務面のルール差分 | 専用環境 |
 | kawaz/claude-rules-zunsystem | zunsystem 識別子 overlay (private) | (専用環境なし) |
-| kawaz/claude-rules-syun | syun 識別子 overlay (private) | (専用環境なし) |
+| 業務識別子 overlay (private) | 特定業務面の識別子差分 | (専用環境なし) |
 
 - 配備 recipe と `repos_mapping.json` は **この personal リポにのみ置く** (2 重管理しない)
 - どの overlay のルール/スキルを変更しても、反映は **personal で `just setup` を実行**する
