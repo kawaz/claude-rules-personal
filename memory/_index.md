@@ -14,5 +14,5 @@
   発火語: r303, room 番号, メッセージ番号, 出典, 裁定の記録, DR の Context
 - [grep-wrapper-skips-binary-looking-files](grep-wrapper-skips-binary-looking-files.md) — Bash の `grep` は ugrep ラッパで、NUL を含むファイルや ignore 済みファイルを無言で飛ばす。「該当なし」の前に `file` と `command grep` で裏を取る。
   発火語: grep で見つからない, 該当なし, Binary file, ugrep, --ignore-files, NUL, file が data と言う
-- [webui-modern-platform-first](webui-modern-platform-first.md) — kawaz の webui はモダン CSS / JS を積極採用し、古いハックで代替しない。採否は Baseline を根拠に DR / DESIGN に書く。
+- [webui-modern-platform-first](webui-modern-platform-first.md) — kawaz の webui はモダン CSS / JS を積極採用し、古いハックで代替しない。ブラウザが持つ振る舞い (追従 / 貼り付き / 伸縮) を JS で自前制御しない。採否は Baseline を根拠に DR / DESIGN に書く。
   発火語: webui, CSS, モダン CSS, Baseline, Safari 27, ハック, 相対色構文, color-mix, @container, :has
