@@ -9,12 +9,12 @@ kawaz の Claude Code 用ルール / スキルの **central リポジトリ**。
 
 | リポ | 役割 | 専用環境 (CLAUDE_CONFIG_DIR) |
 |------|------|------|
-| **kawaz/claude-rules-personal** (これ) | central。全 overlay を束ね、配備 recipe (`justfile` + `scripts/`) / `repos_mapping.local.json` を持つ | `~/.claude-personal` |
+| **kawaz/claude-rules-personal** (これ) | central。全 overlay を束ね、配備 recipe (`justfile` + `scripts/`) を持つ。環境一覧 `repos_mapping.local.json` は gitignore 対象で各マシンに置く (雛形は `repos_mapping.example.json`) | `~/.claude-personal` |
 | 業務用 overlay (private) | 業務面のルール差分 | 専用環境 |
 | kawaz/claude-rules-zunsystem | zunsystem 識別子 overlay (private) | (専用環境なし) |
 | 業務識別子 overlay (private) | 特定業務面の識別子差分 | (専用環境なし) |
 
-- 配備 recipe と `repos_mapping.local.json` は **この personal リポにのみ置く** (2 重管理しない)
+- 配備 recipe は **この personal リポにのみ置く** (2 重管理しない)。`repos_mapping.local.json` は追跡しない
 - どの overlay のルール/スキルを変更しても、反映は **personal で `just setup` を実行**する
 - 整理方法・設計判断などの詳細ドキュメントは **personal の `docs/` に集約**する
 
