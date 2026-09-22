@@ -46,6 +46,7 @@ agent 定義は `agents/` 配下。`reviewer-nitpick` は fable-high に独自�
 | 穴探しを安く数で当てる (多系統レビューの 1 系統) | reviewer-luna-xhigh |
 | 粗探し特化のレビュー | reviewer-nitpick |
 | 指揮・タスク分解・統合 (メイン) | fable (通常 medium / 大型タスクは high) |
+| Opus 5.5 (2026-09-22 公開) を試す。kawaz 情報では Opus 5 より安く fable より良く速い。特性評価中で、評価が固まるまでは opus 行の代替として同じ課題に使う | worker-opus55-medium / worker-opus55-high (`claude-opus-5-5[1m]` 明示。`opus[1m]` alias はまだ Opus 5 を指す、2026-09-23 実測) |
 
 ## 判定の分岐
 
