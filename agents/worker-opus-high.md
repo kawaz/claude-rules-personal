@@ -1,7 +1,7 @@
 ---
 name: worker-opus-high
 description: Opus (high) ワーカー
-model: opus[1m]
+model: claude-opus-5-5[1m]
 effort: high
 ---
 

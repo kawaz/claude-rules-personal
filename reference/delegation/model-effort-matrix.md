@@ -46,7 +46,6 @@ agent 定義は `agents/` 配下。`reviewer-nitpick` は fable-high に独自�
 | 穴探しを安く数で当てる (多系統レビューの 1 系統) | reviewer-luna-xhigh |
 | 粗探し特化のレビュー | reviewer-nitpick |
 | 指揮・タスク分解・統合 (メイン) | fable (通常 medium / 大型タスクは high) |
-| Opus 5.5 (2026-09-22 公開) を試す。kawaz 情報では Opus 5 より安く fable より良く速い。特性評価中で、評価が固まるまでは opus 行の代替として同じ課題に使う | worker-opus55-medium / worker-opus55-high (`claude-opus-5-5[1m]` 明示。`opus[1m]` alias はまだ Opus 5 を指す、2026-09-23 実測) |
 
 ## 判定の分岐
 
@@ -59,7 +58,7 @@ agent 定義は `agents/` 配下。`reviewer-nitpick` は fable-high に独自�
 ## モデル特性差
 
 - sonnet: effort を上げれば opus 級の問題も解けるが、解法が素朴で大量トークン消費によりコストが逆転しうる。複雑な課題が複数直列に絡むとルール・指示を無視して手抜きでゴールに向かう。指示の質に品質がそのまま比例する
-- opus: 高精度推論・複雑な設計判断・エラーコストが高い判断向き。曖昧・矛盾した指示を自力で妥当に解消できる
+- opus: 高精度推論・複雑な設計判断・エラーコストが高い判断向き。曖昧・矛盾した指示を自力で妥当に解消できる。worker-opus-* は 2026-09-23 から Opus 5.5 (`claude-opus-5-5[1m]` を明示。`opus[1m]` alias はまだ Opus 5 を指す) で、kawaz 情報では Opus 5 より安く fable より良く速い。特性は評価中
 - fable: opus より広く複雑な判断と視野を持ち、指揮は fable-medium が opus-high/xhigh より遥かに良い。遅い。コードを直接書かせるより、要件壁打ち・プラン・codex への指示書き・成果のブレ検査に回す方が強い
 - codex (sol): 不具合調査・長時間自走・terminal/GUI 操作・Web リサーチ・コスト効率。claude 系は複雑な PR 作成・実務文書・長文脈整合・検証の厚さ (指示なしでも独立実装クロスチェックを自発的に行う)
 - 「claude 系が指示書 → codex が実装 → claude 系がブレ検査」の 3 段編成は難所を含む大型作業の現実解であって常用テンプレではない。1 worker 直行で足りるなら分けない
