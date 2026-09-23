@@ -3,7 +3,7 @@ title: for-all/rules/_index.md の要旨に発火条件 (該当する時 / し�
 status: idea
 category: design
 created: 2026-09-19T08:12:03+09:00
-last_read:
+last_read: 2026-09-23T22:45:59+09:00
 open_entered:
 wip_entered:
 blocked_entered:
