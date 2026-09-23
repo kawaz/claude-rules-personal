@@ -64,7 +64,6 @@
 - [[tooling-tips]] — direnv・ベンチマーク等の実行環境まわり
 - [[secret-hygiene]] — credential の受け渡し経路を決めるとき
 - [[notification-tips]] — 音声通知・不在時のふるまい
-- [[llm-gateway-cache-keepalive]] — `[llm-gateway keepalive ping]` 通知が届いたとき (nonce を 1 行で返す)
 
 ## メタ (ルール・docs 運用そのもの)
 
