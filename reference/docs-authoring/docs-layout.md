@@ -8,10 +8,9 @@ kawaz/* の各リポジトリで `docs/` 構成を揃えるためのルール。
 - **`docs/` 直下のドキュメントは大文字 + `.md`**: `DESIGN.md` `STRUCTURE.md` `ROADMAP.md` `MANUAL.md`
   - 大文字でサブディレクトリ（小文字）と視覚区別できる
 - **`docs/` 配下のサブディレクトリは小文字**: `decisions/` `findings/` `journal/` `research/` `knowledge/` `runbooks/` `issue/` `design/`
-- **サブディレクトリ内のファイル名は原則 `YYYY-MM-DD-<slug>.md`**:
-  - 全カテゴリで日付プレフィックス必須
+- **時系列記録のサブディレクトリ (`findings/` `journal/` `research/` `knowledge/` `issue/`) のファイル名は `YYYY-MM-DD-<slug>.md`**:
   - 理由: 数が増えた時に気付きやすい、タイムスタンプは jj/git rebase であてにならない、slug に内容情報があるので日付追加で情報が減ることはない
-  - 例外: `decisions/DR-NNNN-title.md`（4 桁ゼロパディング）、`design/<topic>-<sub>.md`（付随詳細はハイフン付き複合名で日付なし）
+  - 現在専用に保守する文書は日付なし: `decisions/DR-NNNN-title.md`（4 桁ゼロパディング）、`design/<topic>-<sub>.md`（付随詳細はハイフン付き複合名）、`runbooks/<topic>.md`（手順は書いた日ではなく現在の正しさで読む。日付が付くと「その日の手順」に見えて鮮度を誤読させる）
 - **索引の名前は `docs/` 配下では `INDEX.md`** (docs 直下の大文字文書の延長で「読むべき文書」を示す)。reference / memory の索引は `_index.md` (`_` で「本文でなく索引」を示し `ls` の先頭に来る)。木ごとに由来が違うので混ぜず、揃えもしない (docs 側の既存リポと local-issue plugin が `INDEX.md` で通っているため)
 
 ## ディレクトリ構造
@@ -31,7 +30,7 @@ docs/
   findings/<f>          単発調査の確定事実
   journal/<f>           日々の生記録（ハマり所→解決策のペア、コマンド・設定値）。non-stop 作業が多いプロジェクトで特に有用
   knowledge/<f>         時系列依存しない長期ナレッジ（OS 挙動などストックしたい知見）
-  runbooks/<f>          運用・復旧手順（運用フェーズに入ったら）
+  runbooks/<topic>.md   運用・復旧手順（運用フェーズに入ったら。現在専用に保守するので日付なし）
   issue/<f>             自リポ TODO + 他プロジェクトから受けた依頼/要望（依頼受付窓口）
   design/<topic>.md     設計の付随詳細（ハイフン付き複合名、日付なし、単一 DESIGN.md で収まらないとき）
 
@@ -62,7 +61,7 @@ docs/
 | issue | `issue/YYYY-MM-DD-template.md` |
 | journal | `journal/YYYY-MM-DD-template.md` |
 | findings | `findings/YYYY-MM-DD-template.md` |
-| runbooks (汎用) | `runbooks/YYYY-MM-DD-template.md` |
+| runbooks (汎用) | `runbooks/topic-template.md` |
 | runbooks (worktree 合流・push) | `runbooks/worktree-workflow.template.md` |
 | research | `research/YYYY-MM-DD-template.md` |
 | knowledge | `knowledge/YYYY-MM-DD-template.md` |
