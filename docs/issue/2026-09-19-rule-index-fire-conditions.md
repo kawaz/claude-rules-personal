@@ -1,17 +1,17 @@
 ---
 title: for-all/rules/_index.md の要旨に発火条件 (該当する時 / しない時) を書くと機械判定に使える
-status: idea
+status: pending-sublimation
 category: design
 created: 2026-09-19T08:12:03+09:00
 last_read: 2026-09-23T22:45:59+09:00
 open_entered:
 wip_entered:
 blocked_entered:
-pending_entered:
+pending_entered: 2026-09-23T22:47:17+09:00
 discarded_entered:
 resolved_entered:
 discard_reason:
-pending_reason:
+pending_reason: ["kawaz 指示 (2026-09-23): 一旦 pending。sandbox-jev の docs-lint を発展させて rules リポを再整理する方向性の検討結果に従属させる"]
 close_reason:
 blocked_by:
 origin: sandbox-jev

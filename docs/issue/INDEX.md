@@ -4,7 +4,7 @@ active な issue の一覧。close 済みは archive/ にあり、ここには�
 
 | date | category | status | slug | 概要 |
 |---|---|---|---|---|
-| 2026-09-19 | design | idea | [rule-index-fire-conditions](./2026-09-19-rule-index-fire-conditions.md) | for-all/rules/_index.md の要旨に発火条件 (該当する時 / しない時) を書くと機械判定に使える |
+| 2026-09-19 | design | pending-sublimation | [rule-index-fire-conditions](./2026-09-19-rule-index-fire-conditions.md) | for-all/rules/_index.md の要旨に発火条件 (該当する時 / しない時) を書くと機械判定に使える |
 | 2026-09-14 | task | open | [remove-llm-gateway-cache-keepalive-rule](./2026-09-14-remove-llm-gateway-cache-keepalive-rule.md) | llm-gateway cache keepalive 応答 rule の削除 (v0.48.0 で合図方式が撤去) |
 | 2026-09-10 | task | open | [ecosystem-review-2026-09](./2026-09-10-ecosystem-review-2026-09.md) | エコシステム外部レビュー (2026-09) の指摘 (R-*, P-*) への対応検討 |
 | 2026-08-21 | task | open | [colocate](./2026-08-21-colocate.md) | colocate 新構成への移行台帳 (bare+jj 方式 56 リポの進捗管理) |
