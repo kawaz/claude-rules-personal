@@ -1,7 +1,7 @@
 ---
 name: reviewer-sol-high
 description: codex sol (high) レビュアー。読み取り専用
-model: sol
+model: gpt-6-sol
 effort: high
 ---
 
