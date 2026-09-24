@@ -1,6 +1,6 @@
 # jj colocate + 親ガード方式のセットアップと運用 (新標準)
 
-適用: **`{repo}/main/.git` と `{repo}/main/.jj` が両方ディレクトリ** (= colocate) のリポ。`{repo}/main/` を起点にする親ガード方式のレイアウトは `~/.local/share/repos/` 配下のリポだけの規約で、それ以外の場所 (とりあえずバージョン管理したい適当なディレクトリ等) は main/ も親ガードも要らず、その場で `git init && git commit -m "Initial empty commit" --allow-empty && jj git init --colocate` を行う。**`git init` 直後に commit を挟まず `jj git init` すると `main` bookmark が作られない** (後から立て直す手間が大きい) ので、順番だけは守る。workspace 名はどの順でも `default` になるので、repos 配下では `jj workspace rename main` でディレクトリ名と揃える。リポ直下に `.jj` があり `main/.git` が無い場合は旧方式なので reference の `vcs/jj-bare-workspace-setup` に従う (既存リポを本方式へ移す手順は下記「移行」)。
+適用: **`{repo}/main/.git` と `{repo}/main/.jj` が両方ディレクトリ** (= colocate) のリポ。colocate 化するのは自分のリポ (path 上の owner と origin の owner が自分で、remote が origin だけ) に限り、他者リポの fork や clone は upstream の作法のまま git で運用する (hook の案内もこの条件で出し分ける)。`{repo}/main/` を起点にする親ガード方式のレイアウトは `~/.local/share/repos/` 配下のリポだけの規約で、それ以外の場所 (とりあえずバージョン管理したい適当なディレクトリ等) は main/ も親ガードも要らず、その場で `git init && git commit -m "Initial empty commit" --allow-empty && jj git init --colocate` を行う。**`git init` 直後に commit を挟まず `jj git init` すると `main` bookmark が作られない** (後から立て直す手間が大きい) ので、順番だけは守る。workspace 名はどの順でも `default` になるので、repos 配下では `jj workspace rename main` でディレクトリ名と揃える。リポ直下に `.jj` があり `main/.git` が無い場合は旧方式なので reference の `vcs/jj-bare-workspace-setup` に従う (既存リポを本方式へ移す手順は下記「移行」)。
 
 ## レイアウト
 

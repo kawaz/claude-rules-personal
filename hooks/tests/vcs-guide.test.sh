@@ -26,6 +26,18 @@ mkdir -p "$OTHER/gitonly" && git init -q "$OTHER/gitonly"
 ADHOC="$TMP/scratch"; mkdir -p "$ADHOC/g" && git init -q "$ADHOC/g"
 mkdir -p "$GITONLY_ORG/x/.jj" && git init -q "$GITONLY_ORG/x"
 mkdir -p "$GITONLY_ORG/g" && git init -q "$GITONLY_ORG/g"
+# colocate 化案内の包含条件 (自分のリポ) 用: path owner / remote 構成の組合せ
+mkgit() { mkdir -p "$1" && git init -q "$1"; }
+mkgit "$OWN/own-origin"      && git -C "$OWN/own-origin" remote add origin git@github.com:kawaz/own-origin.git
+mkgit "$OWN/own-origin-https" && git -C "$OWN/own-origin-https" remote add origin https://github.com/kawaz/own-origin-https.git
+mkgit "$OWN/fork"            && git -C "$OWN/fork" remote add origin https://github.com/upstream-org/fork.git && git -C "$OWN/fork" remote add fork git@github.com:kawaz/fork.git
+mkgit "$OWN/foreign-origin"  && git -C "$OWN/foreign-origin" remote add origin git@github.com:upstream-org/foreign-origin.git
+mkgit "$OWN/two-remotes"     && git -C "$OWN/two-remotes" remote add origin git@github.com:kawaz/two-remotes.git && git -C "$OWN/two-remotes" remote add backup git@github.com:kawaz/two-remotes-backup.git
+CLONE="$TMP/share/repos/github.com/someone"
+mkgit "$CLONE/theirs"        && git -C "$CLONE/theirs" remote add origin git@github.com:someone/theirs.git
+EXTRA="$TMP/share/repos/github.com/work-account"
+mkgit "$EXTRA/own-origin"    && git -C "$EXTRA/own-origin" remote add origin git@github.com:work-account/own-origin.git
+git -C "$OWN/gitonly" remote add origin git@github.com:kawaz/gitonly.git
 
 run() { # run <cwd> <command> [session_id]
   jq -n --arg c "$2" --arg d "$1" --arg s "${3:-sess-default}" \
@@ -103,12 +115,31 @@ assert_contains "git 専用リポの git status は移行節を案内" \
   "jj-colocate-setup.md"
 assert_empty "jj 管理下 (colocate) の git status は無案内" \
   "$(run "$OWN/colocate" "git status" s12)"
-assert_contains "除外リスト外の git 専用リポの git status は colocate 化を案内" \
-  "$(run "$OTHER/gitonly" "git status" s12b)" \
+# colocate 化案内は「自分のリポ」(path owner が自分 / remote は origin のみ / origin の owner も自分) だけ
+assert_contains "自分のリポ (ssh URL) の git status は colocate 化を案内" \
+  "$(run "$OWN/own-origin" "git status" s12b)" \
   "jj 管理されていません"
-assert_contains "repos 外の適当なディレクトリでも同じ案内 (適用範囲は reference 側)" \
-  "$(run "$ADHOC/g" "git status" s12d)" \
-  "jj-colocate-setup.md"
+assert_contains "自分のリポ (https URL) も同様" \
+  "$(run "$OWN/own-origin-https" "git status" s12c)" \
+  "jj 管理されていません"
+assert_empty "fork (origin が他者、fork remote が自分) は無案内" \
+  "$(run "$OWN/fork" "git status" s12d)"
+assert_empty "origin が他者 owner なら無案内" \
+  "$(run "$OWN/foreign-origin" "git status" s12e)"
+assert_empty "remote が origin 以外にもあれば無案内" \
+  "$(run "$OWN/two-remotes" "git status" s12f)"
+assert_empty "他者リポの clone (path owner も origin も他者) は無案内" \
+  "$(run "$CLONE/theirs" "git status" s12g)"
+assert_empty "remote が無い git 専用リポは無案内" \
+  "$(run "$OTHER/gitonly" "git status" s12h)"
+assert_empty "repos 外の適当なディレクトリは無案内 (path owner が取れない)" \
+  "$(run "$ADHOC/g" "git status" s12i)"
+assert_empty "自分の owner 名の追加設定が無ければ別アカウントのリポは無案内" \
+  "$(run "$EXTRA/own-origin" "git status" s12j)"
+printf 'work-account\n' > "$XDG_CONFIG_HOME/claude-rules-personal/vcs-guide-own-owners"
+assert_contains "vcs-guide-own-owners に足した owner は自分のリポ扱い" \
+  "$(run "$EXTRA/own-origin" "git status" s12k)" \
+  "jj 管理されていません"
 
 # --- 読み取り系は無案内 -----------------------------------------------------
 assert_empty "jj log は無案内" "$(run "$OWN/colocate" "jj log -r @" s13)"

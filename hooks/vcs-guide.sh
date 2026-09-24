@@ -68,6 +68,29 @@ git_init='(^|&&|;|\|\|?)[[:space:]]*git([[:space:]]+[^[:space:]]+)*[[:space:]]+i
 git_status='(^|&&|;|\|\|?)[[:space:]]*git([[:space:]]+[^[:space:]]+)*[[:space:]]+status\b'
 jj_run='(^|&&|;|\|\|?)[[:space:]]*jj[[:space:]]'
 
+# colocate 化を勧めてよいのは自分のリポだけ (fork や他者リポの clone は upstream の
+# 作法で運用するので勧めない)。自分のリポの条件は「repos/<host>/<owner>/ の owner が
+# 自分 かつ remote が origin だけ かつ origin の owner も自分」。
+# 自分の owner 名は kawaz に加えて、ローカル設定
+# ${XDG_CONFIG_HOME:-~/.config}/claude-rules-personal/vcs-guide-own-owners
+# (1 行 1 owner) のものを含める (業務用アカウント名はリポに含めない)。
+is_own_owner() {
+  [ "$1" = kawaz ] && return 0
+  local f="${XDG_CONFIG_HOME:-$HOME/.config}/claude-rules-personal/vcs-guide-own-owners"
+  [ -f "$f" ] || return 1
+  grep -qxF -- "$1" "$f"
+}
+is_own_repo() {
+  local remotes origin_url origin_owner path_owner
+  remotes=$(cd "$repo_root" 2>/dev/null && git remote 2>/dev/null)
+  [ "$remotes" = origin ] || return 1
+  path_owner=$(printf '%s' "$repo_root" | sed -nE 's#.*/repos/[^/]+/([^/]+)/.*#\1#p')
+  [ -n "$path_owner" ] && is_own_owner "$path_owner" || return 1
+  origin_url=$(cd "$repo_root" 2>/dev/null && git remote get-url origin 2>/dev/null)
+  origin_owner=$(printf '%s' "$origin_url" | sed -E 's#^(git@|https?://|ssh://git@)[^:/]+[:/]##; s#/.*##')
+  [ -n "$origin_owner" ] && is_own_owner "$origin_owner"
+}
+
 if has "$git_init"; then
   kind=git-init
 elif has "$changing"; then
@@ -77,6 +100,7 @@ elif has "$changing"; then
     kind=normal
   fi
 elif has "$git_status" && [ "$layout" = git-only ]; then
+  is_own_repo || exit 0
   kind=git-status
 else
   exit 0
