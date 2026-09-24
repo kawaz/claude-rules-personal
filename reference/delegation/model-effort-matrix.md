@@ -58,9 +58,9 @@ agent 定義は `agents/` 配下。`reviewer-nitpick` は fable-high に独自�
 ## モデル特性差
 
 - sonnet: effort を上げれば opus 級の問題も解けるが、解法が素朴で大量トークン消費によりコストが逆転しうる。複雑な課題が複数直列に絡むとルール・指示を無視して手抜きでゴールに向かう。指示の質に品質がそのまま比例する
-- opus: 高精度推論・複雑な設計判断・エラーコストが高い判断向き。曖昧・矛盾した指示を自力で妥当に解消できる。worker-opus-* は 2026-09-23 から Opus 5.5 (`claude-opus-5-5[1m]` を明示。`opus[1m]` alias はまだ Opus 5 を指す) で、kawaz 情報では Opus 5 より安く fable より良く速い。特性は評価中
+- opus: 高精度推論・複雑な設計判断・エラーコストが高い判断向き。曖昧・矛盾した指示を自力で妥当に解消できる。worker-opus-* は 2026-09-23 から Opus 5.5 (`claude-opus-5-5[1m]` を明示。`opus[1m]` alias はまだ Opus 5 を指す) で、kawaz 情報では Opus 5 より安く fable より良く速い。実測 (llm-gateway 2026-09-23、high ×1 / medium ×5): medium でも検証が厚く裁定どおりに実装し、指示に無い妥当な懸念 (混在 preset の副作用、型の流用の残存、対称性の欠け) を自発的に報告する。req あたり費用は Opus 5 の約半分 (0.049 vs 0.094 USD、stats の sub 行)
 - fable: opus より広く複雑な判断と視野を持ち、指揮は fable-medium が opus-high/xhigh より遥かに良い。遅い。コードを直接書かせるより、要件壁打ち・プラン・codex への指示書き・成果のブレ検査に回す方が強い
-- codex (sol): 不具合調査・長時間自走・terminal/GUI 操作・Web リサーチ・コスト効率。worker-sol-high / reviewer-sol-high は 2026-09-23 から `gpt-6-sol`、reviewer-luna-xhigh は `gpt-6-luna` を明示 (`sol` / `luna` alias は 5.6 系を指したまま)。公開当日の X 評は「5.6 比半額で速いが Astra より浅い」(docs/research/2026-09-23-x-reputation-opus55-gpt6.md)。評価は実務で更新する。claude 系は複雑な PR 作成・実務文書・長文脈整合・検証の厚さ (指示なしでも独立実装クロスチェックを自発的に行う)
+- codex (sol): 不具合調査・長時間自走・terminal/GUI 操作・Web リサーチ・コスト効率。worker-sol-high / reviewer-sol-high は 2026-09-23 から `gpt-6-sol`、reviewer-luna-xhigh は `gpt-6-luna` を明示 (`sol` / `luna` alias は 5.6 系を指したまま)。公開当日の X 評は「5.6 比半額で速いが Astra より浅い」(docs/research/2026-09-23-x-reputation-opus55-gpt6.md)。実測 (llm-gateway 2026-09-23、hook 修正 / 実機 probe / 真因調査の 3 件): 5.6 比で req あたり約 1/3 の費用 (0.144 vs 0.399 USD)。速いが前提 (仕様・パスの形式・field 名) を裏取りせず進む傾向がある (reference の誤記を信じて hook を無効化、namespace の接頭辞を確認せず 4 本無駄撃ち、テストを実装に合わせて通す) ので、委譲プロンプトに一次資料と検証手順を焼き込む。実装より probe / 修正の自走向き。claude 系は複雑な PR 作成・実務文書・長文脈整合・検証の厚さ (指示なしでも独立実装クロスチェックを自発的に行う)
 - 「claude 系が指示書 → codex が実装 → claude 系がブレ検査」の 3 段編成は難所を含む大型作業の現実解であって常用テンプレではない。1 worker 直行で足りるなら分けない
 - gpt 系の使い分け: 軽作業は luna、高度は sol か astra。luna は xhigh にすると穴探しなどで上位 tier と並ぶ成果を出すことが多い (深く考えるのと同程度に試行量が効く)。astra は sol の 2 倍コスト、未実測
 - effort の効き方: sol / opus は medium だと検証を省いて誤答しうる。fable は medium でも検証が厚い
