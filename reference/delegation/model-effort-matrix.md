@@ -35,7 +35,7 @@ agent 定義は `agents/` 配下。`reviewer-nitpick` は fable-high に独自�
 | 方針確定済みの単一課題実装 (受け入れ条件が明文化できる) | sonnet-medium |
 | 定型調査・棚卸し (読み取り専用、小粒度に分割済み) | sonnet-medium / Explore |
 | プランが確定済みの本実装・自走実行 (指示書が書けている) | sol-high |
-| 不具合調査・デバッグ・原因の再現追跡 | sol-high |
+| 不具合調査・デバッグ・原因の再現追跡 | sol-high / opus-high どちらも可。前提の裏取りが要る (仕様・パス・field 名を疑う) 場面は opus-high、試行回数で当てる場面は sol-high |
 | 長時間エージェント自走・terminal/GUI 操作・Web リサーチ | sol-high |
 | 複雑課題が複数直列 / ルール遵守が critical / 手戻り高コスト | opus-medium / sol-high (sonnet 不可) |
 | 設計自由度が残る実装・探索的調査・指示が曖昧になりうる作業 | opus-medium |
