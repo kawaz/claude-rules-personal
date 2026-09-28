@@ -135,6 +135,7 @@ direnv exec "$PWD" hyoui run --detached -- claude \
 - **A と C の違いはプロセスを捨てるか**: A は同じプロセスの中で context を空にして続ける (kawaz「そのプロセスのまま clear」)。C は新しいプロセスを起動して、このプロセスは kawaz が止める (ccmsg stop)。「新規セッションで」と言われたら C で、A の `/clear` を打たない
 - **A で引数を省かない**。素の `/clear` だと後継は SessionStart hook の指示 (role skill のロード等) を済ませただけで指示待ちに入り、状態ファイルを読まない (実機確認済み)。**引数には latest.md の絶対パスを必ず入れる** (`<slug>` を実際の値に展開する) — これが後継の唯一の起動トリガ。上の 1 文は継続作業指示の有無を両方カバーするので、有無で打ち分けない
 - **B で `/clear` を打たない**。作業する気がないのに新規セッションが起き、role skill のロードで無駄に context を食う
+- **B で `/exit` を打たない** (`hyoui input` で自分に送るのも不可)。Monitor や background task が生きていると「止めるか?」の yes / no が TUI に出て、そこで止まる。止める手段は `ccmsg stop` だけ (中身は ctrl+c を 2 回送るのと同じ)
 - 引数に空白を含むので `text:...` 全体を quote する (C の prompt も同様)。C の `--model` / `--effort` は自分の system prompt の model id と effort をそのまま渡す。`--resume` / fork 系の option は引き継ぎでは使わない
 - **A / B の判断がつかないときは注入しない**。保存先を提示して「続けるなら A、終わるなら B」と両方示して委ねる (誤って B を打つと作業続行の意思を潰す)
 - **順序が本質**: 状態本文の書き込み → `latest.md` 更新 → 完了報告の本文 → 最後に `hyoui input`。注入された `/clear` はプロンプト行に乗り**現ターン終了直後に実行**されるため、これより後にやるつもりの作業は消える
