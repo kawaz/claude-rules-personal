@@ -122,11 +122,20 @@ hyoui input "$HYOUI_SESSION_ID" \
 
 # B. 今日はここで終わり (「作業終了」「もう寝る」等) → ccmsg stop で自己停止
 ccmsg stop "$CLAUDE_SESSION_ID"  # sid 不明なら ccmsg peers で自 sid を確認して渡す
+
+# C. 「新規セッションに引き継いで」と言われた (context が逼迫し、同じプロセスを捨てて
+#    別プロセスで続ける) → hyoui run --detached で新しい claude を起動する。/clear は打たない
+direnv exec "$PWD" hyoui run --detached -- claude \
+  --allow-dangerously-skip-permissions \
+  --model "<自分と同じ model id>" --effort "<自分と同じ effort>" \
+  --name "<統括の名前 (任意)>" \
+  '~/.cache/claude-session-state/<slug>/latest.md があれば reference の session-state/load の手順でロードし、継続指示があれば実行、無ければ次の優先作業候補を提案'
 ```
 
+- **A と C の違いはプロセスを捨てるか**: A は同じプロセスの中で context を空にして続ける (kawaz「そのプロセスのまま clear」)。C は新しいプロセスを起動して、このプロセスは kawaz が止める (ccmsg stop)。「新規セッションで」と言われたら C で、A の `/clear` を打たない
 - **A で引数を省かない**。素の `/clear` だと後継は SessionStart hook の指示 (role skill のロード等) を済ませただけで指示待ちに入り、状態ファイルを読まない (実機確認済み)。**引数には latest.md の絶対パスを必ず入れる** (`<slug>` を実際の値に展開する) — これが後継の唯一の起動トリガ。上の 1 文は継続作業指示の有無を両方カバーするので、有無で打ち分けない
 - **B で `/clear` を打たない**。作業する気がないのに新規セッションが起き、role skill のロードで無駄に context を食う
-- 引数に空白を含むので `text:...` 全体を quote する
+- 引数に空白を含むので `text:...` 全体を quote する (C の prompt も同様)。C の `--model` / `--effort` は自分の system prompt の model id と effort をそのまま渡す。`--resume` / fork 系の option は引き継ぎでは使わない
 - **A / B の判断がつかないときは注入しない**。保存先を提示して「続けるなら A、終わるなら B」と両方示して委ねる (誤って B を打つと作業続行の意思を潰す)
 - **順序が本質**: 状態本文の書き込み → `latest.md` 更新 → 完了報告の本文 → 最後に `hyoui input`。注入された `/clear` はプロンプト行に乗り**現ターン終了直後に実行**されるため、これより後にやるつもりの作業は消える
 - §0 の前提チェックが汚れたまま clear を見送った場合、kawaz が「保存だけ」と言った場合、`$HYOUI_SESSION_ID` が無い場合は注入しない (保存パスを提示して終える)
