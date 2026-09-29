@@ -41,7 +41,7 @@ backlog file path 規約: `/tmp/itumono-backlog-{repo_basename}.md`
 - **ペルソナの model 指定 (必須)**: Task tool 起動時に `model` を必ず明示する (未指定はメインのモデルを継承し、メインが Fable だと全ペルソナが最高コストで走る)。使い分け:
   - 初期ラウンド / 数を撒くスクリーニング → `opus`
   - 最終ラウンド / リリース判定 / 本質指摘が欲しいラウンド → `fable` (メインが Fable の場合)。本気の品質判定を劣る tier に委譲しない。fable ペルソナは観点分割で並列するより 1 本に全方位を見せるほうが効く (詳細: top-tier-model-delegation ルール)
-- **外部AIツール**: `/itumono-review-codex`、`/itumono-review-gemini` と同等の手順で並列実行。codex には「瑣末な点へのクソリプはしないで。致命的な点だけ指摘して」の指示を必ず含める (= ただし `codex review --base SHA` 経由ではプロンプト併用不可なので default prompt + post-process で VERDICT 付与する経路を選ぶ)。モデルは `-c 'model="gpt-5.3-codex"'` を指定する (`codex review` の Code Review 機能は gpt-5.3-codex 専用。`-m` は不可)。外部ツールは 10〜15 分かかることもあるのでタイムアウトは長めに設定する。他のレビュアーと大きな時間差がある場合はバックグラウンドで待ちつつ、揃った分で先に進めてよい。遅れた結果は返ってきた時点で追加反映する。
+- **外部AIツール**: codex / gemini CLI を下記「外部 AI の典型コマンド」で並列実行。codex には「瑣末な点へのクソリプはしないで。致命的な点だけ指摘して」の指示を必ず含める (= ただし `codex review --base SHA` 経由ではプロンプト併用不可なので default prompt + post-process で VERDICT 付与する経路を選ぶ)。モデルは `-c 'model="gpt-5.3-codex"'` を指定する (`codex review` の Code Review 機能は gpt-5.3-codex 専用。`-m` は不可)。外部ツールは 10〜15 分かかることもあるのでタイムアウトは長めに設定する。他のレビュアーと大きな時間差がある場合はバックグラウンドで待ちつつ、揃った分で先に進めてよい。遅れた結果は返ってきた時点で追加反映する。
 - **gemini rate limit 対策**: `gemini-2.5-pro` が rate-limit (= "RATE_LIMIT_EXCEEDED") で死んだら、即座に `gemini -m gemini-2.5-flash -p ...` に fallback。flash は別 quota で通ることが多い。
 
 ### 外部 AI の典型コマンド
