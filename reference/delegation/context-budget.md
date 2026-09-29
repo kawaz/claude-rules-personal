@@ -10,7 +10,6 @@ model×effort と同時に「タスクが運ぶ入力量 vs 経路の余地」�
 | fable (メイン/subagent) | 1M | メインはルール類で大 | 大 |
 | codex (preset / 対話) | 1M (272K 超は割増) | preset ~67-77k | 割増境界まで ~200k |
 | codex 大入力経路 (`CLAUDE_CONFIG_DIR=~/.claude-bare claude -p`) | 同上 | ~17k | 割増境界まで ~250k |
-| Explore (built-in、読み取り調査) | 継承 | ~37k | 広い |
 
 subagent 側の注入 (~67k) の正体はツールスキーマ + ハーネス機構で、CLAUDE.md ではない。frontmatter で削る手段は無い (`omitClaudeMd` はユーザ agent では無効)。
 

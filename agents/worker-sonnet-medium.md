@@ -1,7 +1,7 @@
 ---
 name: worker-sonnet-medium
 description: Sonnet (medium) ワーカー
-model: sonnet[1m]
+model: claude-sonnet-5-5[1m]
 effort: medium
 ---
 

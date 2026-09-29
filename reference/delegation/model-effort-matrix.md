@@ -33,7 +33,7 @@ agent 定義は `agents/` 配下。`reviewer-nitpick` は fable-high に独自�
 |---|---|
 | 機械的・定型 (整形・一括リネーム・転写・記録・journal) | sonnet-low |
 | 方針確定済みの単一課題実装 (受け入れ条件が明文化できる) | sonnet-medium |
-| 定型調査・棚卸し (読み取り専用、小粒度に分割済み) | sonnet-medium / Explore |
+| 定型調査・棚卸し (読み取り専用、小粒度に分割済み) | sonnet-medium |
 | プランが確定済みの本実装・自走実行 (指示書が書けている) | sol-high |
 | 不具合調査・デバッグ・原因の再現追跡 | sol-high / opus-high どちらも可。前提の裏取りが要る (仕様・パス・field 名を疑う) 場面は opus-high、試行回数で当てる場面は sol-high |
 | 長時間エージェント自走・terminal/GUI 操作・Web リサーチ | sol-high |
@@ -57,7 +57,7 @@ agent 定義は `agents/` 配下。`reviewer-nitpick` は fable-high に独自�
 
 ## モデル特性差
 
-- sonnet: effort を上げれば opus 級の問題も解けるが、解法が素朴で大量トークン消費によりコストが逆転しうる。複雑な課題が複数直列に絡むとルール・指示を無視して手抜きでゴールに向かう。指示の質に品質がそのまま比例する
+- sonnet: effort を上げれば opus 級の問題も解けるが、解法が素朴で大量トークン消費によりコストが逆転しうる。複雑な課題が複数直列に絡むとルール・指示を無視して手抜きでゴールに向かう。指示の質に品質がそのまま比例する。worker-sonnet-* は 2026-09-29 から Sonnet 5.5 (`claude-sonnet-5-5[1m]` を明示)。公式 blog (claude.dev/blog/building-with-claude-sonnet-5-5) の要点: 単価は Sonnet 5 と同じ (in $2 / out $10 per Mtok、Opus 5.5 の半額) でトークン消費が減り 30% 速い。「仕様が明確で結果の検証手段があるタスク」向きで、長期 agentic な難問は Opus 推奨。effort は再調整されており、agentic な作業は medium 始まり、low は検証 (test / build) を省いて完了宣言しがちなので low に出す時は検証手順を明示する。xhigh / max は速度・費用の利点が消えるので Opus を選ぶ
 - opus: 高精度推論・複雑な設計判断・エラーコストが高い判断向き。曖昧・矛盾した指示を自力で妥当に解消できる。worker-opus-* は 2026-09-23 から Opus 5.5 (`claude-opus-5-5[1m]` を明示。`opus[1m]` alias はまだ Opus 5 を指す) で、kawaz 情報では Opus 5 より安く fable より良く速い。実測 (llm-gateway 2026-09-23、high ×1 / medium ×5): medium でも検証が厚く裁定どおりに実装し、指示に無い妥当な懸念 (混在 preset の副作用、型の流用の残存、対称性の欠け) を自発的に報告する。req あたり費用は Opus 5 の約半分 (0.049 vs 0.094 USD、stats の sub 行)
 - fable: opus より広く複雑な判断と視野を持ち、指揮は fable-medium が opus-high/xhigh より遥かに良い。遅い。コードを直接書かせるより、要件壁打ち・プラン・codex への指示書き・成果のブレ検査に回す方が強い
 - codex (sol): 不具合調査・長時間自走・terminal/GUI 操作・Web リサーチ・コスト効率。worker-sol-high / reviewer-sol-high は 2026-09-23 から `gpt-6-sol`、reviewer-luna-xhigh は `gpt-6-luna` を明示 (`sol` / `luna` alias は 5.6 系を指したまま)。公開当日の X 評は「5.6 比半額で速いが Astra より浅い」(docs/research/2026-09-23-x-reputation-opus55-gpt6.md)。実測 (llm-gateway 2026-09-23、hook 修正 / 実機 probe / 真因調査の 3 件): 5.6 比で req あたり約 1/3 の費用 (0.144 vs 0.399 USD)。速いが前提 (仕様・パスの形式・field 名) を裏取りせず進む傾向がある (reference の誤記を信じて hook を無効化、namespace の接頭辞を確認せず 4 本無駄撃ち、テストを実装に合わせて通す) ので、委譲プロンプトに一次資料と検証手順を焼き込む。実装より probe / 修正の自走向き。claude 系は複雑な PR 作成・実務文書・長文脈整合・検証の厚さ (指示なしでも独立実装クロスチェックを自発的に行う)
@@ -68,7 +68,7 @@ agent 定義は `agents/` 配下。`reviewer-nitpick` は fable-high に独自�
 
 ## agent 定義の固定方針
 
-- claude 系はモデル ID の後ろに必ず `[1m]` を付ける (例 `opus[1m]`)。haiku は非対応なので付けない。理由: 200k 超過に課金ペナルティは無く、途中で「Prompt is too long」死する損失の方が大きい
+- claude 系はモデル ID の後ろに必ず `[1m]` を付ける (例 `claude-opus-5-5[1m]`)。理由: 200k 超過に課金ペナルティは無く、途中で「Prompt is too long」死する損失の方が大きい
 - effort は全 agent 定義で明示する。未指定はメインの effort を継承して不定になる
 
 ## 委譲プロンプトに必ず入れる規約
