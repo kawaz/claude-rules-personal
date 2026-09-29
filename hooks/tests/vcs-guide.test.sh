@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # hooks/vcs-guide.sh の振る舞いテスト。
-# 一時ディレクトリに colocate / bare / git 専用 / 許可リスト外のリポを作り、
+# 一時ディレクトリに colocate / bare / git 専用 / 他者 owner のリポを作り、
 # 擬似 hook 入力 JSON を流して additionalContext の有無と案内先を assert する。
 set -uo pipefail
 
@@ -12,7 +12,7 @@ export XDG_STATE_HOME="$TMP/state"
 pass=0
 fail=0
 
-# 許可リスト (/github.com/kawaz/) を通るパスに置く
+# colocate 化案内の対象は path owner と origin owner が自分、remote は origin のみ
 OWN="$TMP/share/repos/github.com/kawaz"
 OTHER="$TMP/github.com/other-org"
 GITONLY_ORG="$TMP/github.com/git-only-org"
@@ -100,6 +100,11 @@ assert_contains "~ 始まりの cd は展開して判定" \
 assert_contains "最後の cd 先で構成を判定する" \
   "$(run "$OWN/gitonly" "cd $OWN/gitonly && cd $OWN/colocate && jj commit -m x f" s8)" \
   "jj-colocate-setup.md (colocate 新標準の手順)"
+
+# --- git -C ---------------------------------------------------------------
+assert_contains "git -C は cwd と direnv の切替を案内" \
+  "$(run "$OWN/colocate" "git -C $OWN/gitonly status" s8c)" \
+  "(cd <dir> && direnv exec . <command>)"
 
 # --- git init ---------------------------------------------------------------
 assert_contains "git init は colocate 新規作成へ誘導" \
