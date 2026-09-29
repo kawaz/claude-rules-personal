@@ -117,6 +117,25 @@ lint-rules:
     if [ "$total" -gt "$budget" ]; then
         echo "WARN 常時ロード rules 合計 ${total} bytes が予算 ${budget} を超過 (skill への降格を検討)"
     fi
+    # (i) 統括起動時の必読ファイル合計 (warning のみ、120KB)
+    role_total=0
+    while IFS= read -r rel; do
+        file="reference/role-main/$rel"
+        if [ ! -f "$file" ]; then
+            echo "FATAL 統括必読ファイルの欠落: $file"
+            fatal=1
+            continue
+        fi
+        role_total=$((role_total + $(wc -c < "$file")))
+    done < <(sed -n '/^## 必読$/,/^## 必要時に読む$/p' reference/role-main/_index.md | rg -o '\]\(([^)]+\.md)\)' -r '$1')
+    for file in reference/_index.md memory/_index.md; do
+        role_total=$((role_total + $(wc -c < "$file")))
+    done
+    role_budget=122880
+    echo "統括起動時の必読ファイル合計 ${role_total} bytes (予算 ${role_budget} bytes)"
+    if [ "$role_total" -gt "$role_budget" ]; then
+        echo "WARN 統括起動時の必読ファイル合計 ${role_total} bytes が予算 ${role_budget} を超過"
+    fi
     # (g) 参照知識の索引整合: 各ディレクトリ (reference/ memory/ とその下の topic dir) で、
     #     <dir>/*.md ↔ <dir>/_index.md のリンクが 1:1、サブディレクトリは <sub>/_index.md として
     #     親の索引に載る。片方だけ足すと「本文はあるが誰も辿れない」「リンク先が無い」になる。
