@@ -34,7 +34,7 @@ plugin は `engine.create` で独自の noun を足せる (built-in の `telemet
 - `fs.read` / `fs.write` は 4 MiB を超えると reject。追記 API は無いので、log を `read` + `write` で伸ばす作りは 4 MiB で止まる (ファイルを分ける)。network 越しのパス表記は触らずに reject
 - `store` は全体で JSON 4 MiB まで。関数・循環参照は reject、`Date` は ISO 文字列、`Map` / `Set` は `{}` になる
 - `env.get` / `env.set` の変数名、`state.get` / `state.set` の `plugin` / `key` は文字列リテラル必須 (validate が列挙し、列挙外は拒否)
-- `http.fetch` は http / https だけ (WebSocket・生 socket は無い)。応答は body を全部読んでから `{ status, ok, headers, text }` で返り、stream しない。body は文字列。`socketPath` で Unix socket 越しの HTTP を話せる (絶対パス、約 100 byte まで)。timeout の記述は型定義に無い
+- `http.fetch` は http / https だけ (WebSocket・SSE・生 socket は無い)。応答は body を全部読んでから `{ status, ok, headers, text }` で返り、stream しない。長期接続を持つ・再接続する手段は `$` に無く、SSE の endpoint を叩けば「サーバが閉じるまで resolve しない fetch」になるだけ。長期接続が要るものは全部 `process.spawn` の子 (stdout を stream で読める) に置き、再接続も子の終了を見て spawn し直す module 側のループで行う。body は文字列。`socketPath` で Unix socket 越しの HTTP を話せる (絶対パス、約 100 byte まで)。timeout の記述は型定義に無い
 - `process.run(argv, { cwd, env, stdin, timeoutMs })` は終了後に出力をまとめて返す。timeout は既定 30 秒、最大 10 分。背景に残って書き続ける子がいると timeout まで返らない。git は repo hooks 無効で走る。signal で終わった子は `exitCode: 1`
 - `process.spawn({ argv, cwd, env, input })` は出力を `{ stream, text }` の断片で stream し、最後に `{ code, signal }`。ループを抜ける・`next.signal` の abort・module の unload で子が kill される。`input` は 1 回書いて閉じるだけで、書き続ける stdin は無い
 - 予算: hook 自身のコードの時間が 1 回 10 秒まで。`$` 呼び出しと `next(e)` の待ちは数えない (`$.clock.sleep` は数える)。実測では `$.process.run` で 20 秒待っても、during 配置で `next(e)` を 20 秒保留しても超過しなかった。module 内の素の Promise (自前 Button の押下待ち等) を待つ時間は数えられると読める (定義文からの推測、未検証)
