@@ -20,6 +20,13 @@ command=$(printf '%s' "$input" | jq -r '.tool_input.command // empty' 2>/dev/nul
 printf '%s' "$command" |
   grep -qE '(^|&&|;|\|\|?)[[:space:]]*(jj|git)[[:space:]]' || exit 0
 
+git_c='(^|&&|;|\|\|?)[[:space:]]*git[[:space:]]+-C[[:space:]]+[^[:space:]]+'
+if printf '%s' "$command" | grep -qE "$git_c"; then
+  message='git -C <dir> は cwd と direnv の環境がずれるため避け、(cd <dir> && direnv exec . <command>) の形で実行してください。tooling-tips rule を参照してください。'
+  jq -n --arg message "$message" '{hookSpecificOutput: {hookEventName: "PreToolUse", additionalContext: $message}}' 2>/dev/null || exit 0
+  exit 0
+fi
+
 session_id=$(printf '%s' "$input" | jq -r '.session_id // empty' 2>/dev/null)
 cwd=$(printf '%s' "$input" | jq -r '.cwd // empty' 2>/dev/null)
 [ -n "$cwd" ] || cwd=$PWD
