@@ -1,0 +1,4 @@
+{
+  "description": "observe-mod: log every event",
+  "modules": ["./register.ts"]
+}

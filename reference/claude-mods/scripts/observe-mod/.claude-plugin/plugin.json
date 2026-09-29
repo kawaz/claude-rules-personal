@@ -1,0 +1,5 @@
+{
+  "name": "observe-mod",
+  "version": "0.1.0",
+  "description": "Logs every function-hook event (on '*') to JSONL for inspection."
+}
