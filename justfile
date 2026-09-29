@@ -99,6 +99,37 @@ lint-rules:
         echo "  → 改名なら参照を直す / 外部 overlay の rule なら .lint-external-slugs に追加"
         fatal=1
     done <<< "$dead"
+    # (j) 文中改行 (warning のみ。Markdown の構造・コード・frontmatter は対象外)
+    python3 - <<'PY'
+    from pathlib import Path
+    import re
+
+    paths = sorted([*Path('for-all/rules').glob('*.md'), *Path('for-me/rules').glob('*.md'), *Path('reference').rglob('*.md'), *Path('memory').glob('*.md')])
+    ending = re.compile(r'[。．.!?！？、，,:：;；)）\]】」』`>]$')
+    structure = re.compile(r'^\s*(?:#|>|\||```|~~~|[-*+]\s|\d+[.)]\s|<[^>]+>)')
+    warnings = 0
+    for path in paths:
+        lines = path.read_text().splitlines()
+        frontmatter = bool(lines and lines[0] == '---')
+        fenced = False
+        for number, (line, following) in enumerate(zip(lines, lines[1:]), 1):
+            if frontmatter:
+                if number > 1 and line == '---':
+                    frontmatter = False
+                continue
+            if re.match(r'^\s*(```|~~~)', line):
+                fenced = not fenced
+                continue
+            if fenced or not line.strip() or not following.strip():
+                continue
+            if structure.match(line) and not re.match(r'^\s*(?:[-*+]\s|\d+[.)]\s)', line):
+                continue
+            if structure.match(following) or ending.search(line.rstrip()):
+                continue
+            print(f'WARN 文中改行: {path}:{number}: {line.strip()} / {following.strip()}')
+            warnings += 1
+    print(f'文中改行 warning {warnings} 件')
+    PY
     # (d) 5KB 超 rule (warning のみ、常時ロード肥大の検討材料)
     big=$(find for-all/rules for-me/rules -name '*.md' -size +5k | sort)
     if [ -n "$big" ]; then
