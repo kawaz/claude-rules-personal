@@ -25,6 +25,7 @@ WebAuthn の RP ID は origin ではなく **domain** で、credential は「今
 - `clientDataJSON.origin` の期待値は入口の origin ではなく **webui の origin 集合**。ページを配っている場所が origin を決める
 - `crossOrigin` は **`true` のときだけ拒否**する。Chrome 系は最上位フレームでも常に `false` を送るので、「present であること」を要求してはならない
 - `topOrigin` は present なら拒否する (iframe 内からの登録・認証を許さない)
+- 2 つは独立した条件ではなく含意関係にある。WebAuthn L3 §5.8.1 は `crossOrigin` を「祖先と same-origin かどうか (`sameOriginWithAncestors`) の否定」、`topOrigin` を「その呼び出しが祖先と same-origin でない文脈から来た時、つまり `crossOrigin` が `true` の時にだけ設定される最上位 origin」と定義する。よって `topOrigin` が present なら `crossOrigin` も `true` のはずで、どちらか一方で拒否すれば足りるように見えるが、**両方を独立に検査する**。`topOrigin` は L3 で足された field で、L2 相当の client は `crossOrigin: true` だけを送って `topOrigin` を付けない。逆に `topOrigin` だけ付いて `crossOrigin` が欠ける値は client の不整合で、片方の検査に頼るとこれを通してしまう。検証手順 (§7.1) も `crossOrigin` と `topOrigin` を別の step で扱い、`topOrigin` が present なら「cross-origin iframe 内での作成を RP が想定しているか」を要求する — 想定しない設計なので、present の時点で拒否になる
 - 同じ RP ID の入口が複数あっても (`https://h.example/` と `https://h.example/personal`) credential は 1 つで足りる
 
 ## 検証手順
@@ -37,8 +38,11 @@ WebAuthn の RP ID は origin ではなく **domain** で、credential は「今
 4. `crossOrigin` が `true` でない、`topOrigin` が無い
 5. `authData.rpIdHash` が `sha256(rp_id)`
 6. UP と UV の flag が立っている (UV は必須にする)
-7. `fmt` が `none` で `attStmt` が空
-8. credential id が既存 record と重複しない
+7. BE が 0 なのに BS が 1 なら拒否する。BS は「バックアップ可能な credential が今バックアップされている」ことを示すので、BE=0 と BS=1 の組は authenticator data として成立しない (L3 §7.1 はこの検査を無条件の step として置く)。通った BE / BS はそのまま credential record に保存する
+8. `fmt` が `none` で `attStmt` が空
+9. credential id が既存 record と重複しない
+
+**extensions は要求せず、出力も判定に使わない。** `create()` に `extensions` を渡さないので、authData の extensions と `getClientExtensionResults()` に何か載っていても、それは client が自発的に足したものである。L3 §7.1 は要求していない extension の出力について「無視するか attestation を拒否するか」を RP の方針に委ね、要求した extension についても出力が全部は返らない前提で扱えと書く。この設計が必要とする判定 (誰が作ってよいか = jwt、誰が操作したか = UV) は extension に依存していないので、**無視する側**に倒す。拒否に倒すと、ブラウザや authenticator が将来足す extension で登録が壊れる。`credProps` (resident key になったかの報告) のような保守 UI の手がかりになる extension を後から要求する場合も、その出力は BE / BS と同じく記録に留め、可否判定には使わない。
 
 認証 (§7.2):
 
@@ -48,6 +52,7 @@ WebAuthn の RP ID は origin ではなく **domain** で、credential は「今
 4. 署名 (`authData || sha256(clientDataJSON)`) を ES256 (加えて RS256 / Ed25519) で検証する
 5. signCount は **record の値が非 0 なら「提示値 > record」を要求**する (提示 0 も退行として拒否)。record が 0 なら提示値をそのまま保存する。同期される passkey は常に 0 を返すので、0 のまま据え置く経路が要る
 6. `authenticatorData` の flags のうち **BE (backup eligible) / BS (backup state) を登録時・認証時ともに record へ記録**する。同期 passkey (BE=1) かデバイス束縛 (BE=0) かが保守 UI の手がかりになる。signCount が常に 0 なのが同期 passkey の常態であることは、BE=1 と対で読むと説明が付く。BE / BS は認証の可否判定には使わない (手がかりに留める)
+7. BE は credential の作成時に決まり変わらない性質で (L3 §6.1.3 の MUST NOT change)、BS は時間とともに変わりうる。L3 §7.2 の「record の BE と提示の BE の一致を検証する」step は「backup state を RP の業務判断や方針に使う場合」に限った条件付きの step なので、可否判定に使わないこの設計では拒否条件にしない。record と食い違う BE を見たら、BS の変化と同じく保守 UI に出す異常として記録する (BS が 1 → 0 に落ちた credential は単一端末の紛失で失われうるので、追加登録を促す手がかりになる)
 
 `user_id` (WebAuthn の user handle) は **server が sub ごとに 1 度だけ決めた 16 byte の乱数**を使い回す。authenticator は handle を server の手の届かない場所に保存するので、同じ人に 2 つの値を配ると端末上で 2 つのアカウントに見える。同じ sub への追加登録では既存の handle を再利用する。
 
@@ -59,6 +64,7 @@ access / refresh token は署名せず、乱数 (base64url) を **token family**
 
 - family = `{ id, sub, iss (mint した instance), access: { value, exp }, refresh: { value, exp }, 退役世代の記録 }`
 - **access はブラウザのメモリにだけ置き**、WebSocket の handshake に subprotocol (`<名前空間>.token.<値>`) で載せる。server は選んだ subprotocol を echo する。proxy が `Sec-WebSocket-Protocol` を透過することが要件になる
+- subprotocol を運び手にするのは、ブラウザの `WebSocket` が handshake で JS から触れる値を **URL と subprotocol の 2 つしか持たない**ため (WHATWG WebSockets の `new WebSocket(url, protocols)`。`Authorization` 等の任意 header は付けられない)。RFC 6455 §10.5 は handshake 時の client 認証の方式を規定せず、HTTP で使える任意の仕組みに委ねているので、その範囲での選択になる。URL (query) に載せると access log・proxy log・履歴に残る。cookie に載せると JS から読めない値で認証することになり、ブラウザが自動で付けるので cross-site の WebSocket (origin 検査を忘れた時の CSWSH) にそのまま使われる。subprotocol なら JS がメモリから明示的に載せたときだけ送られ、access は短命なので handshake の header に一度載ることの露出は exp で閉じる。制約は 2 つ: server は受け取った候補のうち 1 つを echo しなければならない。候補外を返すと RFC 6455 §4.1 で client が接続を失敗させ、echo 自体を省くと RFC 上は「subprotocol なし」で成立するが、ブラウザは WHATWG WebSockets の規定で `protocols` を渡した接続の応答に `Sec-WebSocket-Protocol` が無ければ失敗させる。もう 1 つは値の文字集合で、subprotocol は RFC 2616 の `token` (§4.1 / §4.3) なので base64url を padding (`=`) 無しで使う
 - **refresh は httpOnly cookie**。名前は `__Secure-` prefix + 「発行者 id と sub のハッシュ」(同じブラウザが複数の instance / 利用者を持てるように)、`HttpOnly; Secure; SameSite=Strict`、`Path` は認証経路の prefix。**`Path` は認可境界ではない** (同一 origin の JS は任意のパスに fetch できる)。絞るのは帯域と露出面のため
 - **`__Host-` prefix ではなく `__Secure-` + `Path` を選ぶ**。同一ホストの別パス prefix (`https://h.example/` と `https://h.example/personal/`) を別の入口 (= 別登録) として扱うには cookie を `Path` で分ける必要があるが、`__Host-` は `Path=/` を強制するのでそれができない。`Path` が認可境界にならない以上この分離は帯域・露出面の絞り込みに留まり、cookie tossing (他ホストが同名 cookie を broader な `Path` で上書きする攻撃) は eTLD+1 の分離 (信頼するアプリと sandbox で登録ドメイン自体を分ける) で構造的に封じるのが前提になる
 - localStorage には置かない。XSS 1 つで長期 token が抜ける

@@ -46,6 +46,20 @@ OPTIONS (共通)
   --help        そのレベルの help
 ```
 
+## `daemon start` / `stop` と `service start` / `stop` の違い
+
+どちらも「起動 / 停止」だが、動かす対象と書き換える状態が違う。
+
+- **`daemon start` / `stop`** は起動中の監督者への要求で、unit の desired state (`enabled`) を書き換える。プロセスを直接 spawn / kill するのは監督者で、CLI はそれを頼むだけ。`stop` した unit は監督者が再起動しない (落ちたのではなく止めてあるので)。書き換えは登録簿に残るので、監督者や OS が再起動しても `stop` した unit は止まったままになる。OS への常駐登録には一切触れない
+- **`service start` / `stop`** は OS (launchd / systemd) に監督者 1 プロセスの起動 / 停止を頼む。unit の `enabled` は書き換えないので、`service stop` → `service start` で監督者が戻ると、`enabled` な unit はすべて監督者が上げ直す。`service register` / `unregister` はさらにその外側で、OS に監督者を常駐させる登録そのものを作る / 消す
+- **`daemon run` / `supervise`** は foreground で自分自身がそのプロセスになる。OS 登録も監督者も介さない、開発時・障害切り分け用の口
+
+| 操作 | 動かすもの | 書き換える状態 | OS 登録 |
+|---|---|---|---|
+| `daemon start` / `stop` | 監督者の子 (unit) | 登録簿の `enabled` | 触れない |
+| `service start` / `stop` | 監督者 | なし (OS 側の起動状態のみ) | 使う (登録済みが前提) |
+| `service register` / `unregister` | なし | OS 側の unit ファイル | 作る / 消す |
+
 ## `daemon supervise` を置く目的
 
 **OS 登録の契約を binary 更新から切り離す。** 監督者は OS に「`<tool> daemon supervise` を常駐させる」という 1 点だけを約束する。unit の実体や数がどう変わっても、tool の binary を入れ替えても、この契約は変わらないので `service register` をやり直さない。OS 登録レベルの更新 (plist / unit ファイルの書き換え、署名や FDA 等の権限付与のやり直し) をバージョンアップ毎に発生させない。
