@@ -140,3 +140,16 @@ origin: kawaz 依頼 (2026-09-10)
 - R-16: itumono-review-{claude,codex,gemini} を直接起動した実績はあるか、無ければ reference に降ろしてよいか。
 - P-16: commit message の型を「`feat:` 等の prefix + 日本語の意図文」に標準化するか。
 - P-32: セッション間通信の規約のうち「リレー報告不要」「社交辞令禁止」の 2 行を常時ロード rule (work-principles) に入れるか、reference に留めるか。
+
+### 裁定結果 (2026-09-29)
+
+- R-16: itumono-review-{claude,codex,gemini} の 3 skill を削除する。最終利用は 2026-07-14、以降ゼロを session log で確認済み。
+- R-14 / P-8 (ER-Q3a): `根拠:` 行は必須化しない。
+- P-16 (ER-Q6a): commit message の型は標準化しない。
+- P-32 (ER-Q7a): reference に留める。P-33 と同じファイルに書く。
+- 継続待ち: R-4 (ER-Q1) / R-13 (ER-Q2) / R-15 (ER-Q4)。
+
+### 関連の追加対応 (2026-09-29)
+
+- kawaz 指摘により model-effort-matrix から Explore と haiku の言及を除去した。
+- worker-sonnet-* を `claude-sonnet-5-5[1m]` に固定した。
