@@ -194,6 +194,35 @@ lint-rules:
     fi
     echo "lint-rules: OK (fatal 違反なし)"
 
+# hook が案内する reference の実在を、hook 側の列挙から検査する
+lint-hooks:
+    #!/usr/bin/env bash
+    set -uo pipefail
+    fatal=0
+    count=0
+    while IFS= read -r name; do
+        [ -n "$name" ] || continue
+        count=$((count + 1))
+        if [ ! -f "reference/vcs/$name" ]; then
+            echo "FATAL hook の参照先が無い: reference/vcs/$name"
+            fatal=1
+        fi
+    done < <(rg -o '\$ref_dir/[[:alnum:]_-]+\.md' hooks/vcs-guide.sh | cut -d/ -f2 | sort -u)
+    if [ "$count" -eq 0 ]; then
+        echo 'FATAL hook の参照先が検出できない'
+        fatal=1
+    fi
+    if [ "$fatal" -ne 0 ]; then exit 1; fi
+    echo "lint-hooks: OK (${count} 件)"
+
+# push 前に全 hook テストを走らせる
+test-hooks:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    tests=(hooks/tests/*.test.sh)
+    [ -f "${tests[0]}" ] || { printf '%s\n' 'FATAL hook テストが見つからない' >&2; exit 1; }
+    for test in "${tests[@]}"; do bash "$test"; done
+
 # (重複は片方が黙って破棄される Claude Code 仕様のため fatal)
 # agent 定義 lint: name/description 必須 + name 重複 + ゼロ件を検出
 lint-agents:
@@ -337,9 +366,9 @@ _check-version-bumped *trigger_paths:
     echo 'ERROR: plugin 配布物 (hooks/ skills/ agents/) が変わっているが version 未 bump。"just bump-version" を実行してください' >&2
     exit 1
 
-# gates: check-on-default-branch + ensure-clean + lint-rules + lint-agents
-#        + validate + check-versions + check-version-bumped
+# gates: check-on-default-branch + ensure-clean + lint-rules + lint-hooks + test-hooks
+#        + lint-agents + validate + check-versions + check-version-bumped
 # push して local plugin cache まで反映する (release artifact 無しなので push = リリース完了)
-push: check-on-default-branch ensure-clean lint-rules lint-agents validate check-versions check-version-bumped
+push: check-on-default-branch ensure-clean lint-rules lint-hooks test-hooks lint-agents validate check-versions check-version-bumped
     bump-semver vcs push --branch main --jj-bookmark-auto-advance
     @just on-success-release
