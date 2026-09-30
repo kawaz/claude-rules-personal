@@ -129,6 +129,17 @@ OPTIONS (共通)
 
 `registered` と `service.loaded` は別物 (ファイルが有るのに OS に載っていない状態がある)、`service.running` と top-level の `running` も別物 (OS から見て生きているのに頼み口が開いていない状態がある)。同じ語を階層で分けているのは、この食い違い自体を見せるため。
 
+## `service register` は場所を決める env を unit に固定し、変わったら止まる
+
+daemon が socket / state / config の場所を env (`XDG_RUNTIME_DIR` / `XDG_STATE_HOME` / `XDG_CONFIG_HOME` / `HOME` / ツール固有の `<TOOL>_STATE_DIR` 等) から導く場合、**launchd / systemd --user から起きた daemon と、shell から起きた client (CLI、hook、sidecar) で env が食い違う**罠がある。`XDG_RUNTIME_DIR` 等は `.zshrc` のような shell rc で export されるのが普通で、launchd はそれを継承しない (macOS には元々 `XDG_RUNTIME_DIR` が無い、reference の `app-file-placement`)。食い違うと両者は別の dir を見て、client は「daemon が居ない」と読み、daemon は「client が居ない」と読み、どちらのログにも理由が出ない。
+
+- **`service register` は、場所の導出に効く env を register 時の値で unit (plist の `EnvironmentVariables` / systemd の `Environment=`) に固定する。** 値が無い変数は書かない (= 「無い」ことも固定される。launchd は継承しないので書かなければ無い)。daemon の起動ごとに揺れる要素が消え、shell 側と同じ値で導出される
+- **re-register 時に、既存 unit の値と今の env が違えば差分を示して止まる。** `--force` で上書き。固定しただけでは「register した shell の env が前回と違う」を検知できず、結局ずれる。止まる側に倒すのは、この食い違いが起きた時に気づく手段が他に無いから
+- **client 側にも検知を持つ。** daemon が名乗る場所 (status 応答等) と client の導出結果を比べ、違えば警告する。片側だけの検知だと「永久に届かない、理由不明」が残る
+- `PATH` も同じ枡で固定されるが、register を繰り返すと重複が積もりやすい (実測: ccmsg の plist で plugin cache の bin が数十回重複)。register 時に正規化する
+
+固定する変数の一覧は、そのツールの path 導出コード (paths 相当) が読む変数を正とし、unit 生成側に別のリストを持たない。
+
 ドメイン要件によっては launchd に登録する署名済み launcher を別途用意してそれを登録し、launcher は `<tool> daemon supervise` の起動と死活監視に徹する形も検討する。FDA 要求などがバージョンアップ毎に発生するのを回避するための構成。
 
 関連: [cli-design-preferences](cli-design-preferences.md)

@@ -43,6 +43,8 @@ export function resolveStateDir(env = process.env): string {
 
 ## macOS の runtime: `XDG_RUNTIME_DIR` は無い
 
+これらの env から場所を導く daemon を launchd / systemd に登録する時は、shell と daemon で env が食い違う罠がある。対処は reference の `cli-daemon-subcommands` の「`service register` は場所を決める env を unit に固定し、変わったら止まる」。
+
 実測 (macOS 15, 2026-08-31): `XDG_RUNTIME_DIR` は**未設定**。systemd の pam モジュールが設定するものなので、Linux 以外では期待できない。spec も「未設定なら同等の代替ディレクトリを使い warning を出せ」としか言っていないので、代替は自前で決める。
 
 **代替: `${XDG_RUNTIME_DIR:-${TMPDIR:-/tmp}}/{appname}-{uid}`**
