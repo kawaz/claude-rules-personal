@@ -42,7 +42,7 @@ personal 面の例。業務面は org / remote を差し替えて別の config d
   ],
   "allow": [
     "$defaults",
-    "Reading and editing files under $XDG_CONFIG_HOME, $XDG_DATA_HOME, $XDG_STATE_HOME, $XDG_CACHE_HOME, $XDG_RUNTIME_DIR (and their ~/.config, ~/.local/share, ~/.local/state, ~/.cache defaults) for the user's own tools, including config, key rings and credential files, is routine operation of those tools",
+    "Managing the user's own tools (those developed under ~/.local/share/repos/github.com/kawaz/) through their own CLIs and by editing their files under ~/.config/<tool>/, ~/.local/share/<tool>/, ~/.local/state/<tool>/ and ~/.cache/<tool>/ is routine, including config files, key rings and credential files those tools own. This does not cover shell rc files, ~/.ssh, ~/.config/gh, launchd or systemd units, and does not clear printing secret values into the transcript",
     "Committing and pushing with `jj`, `just push` and `cd <dir> && direnv exec . <cmd>` to the trusted repos is routine",
     "Editing and deleting files and directories under /tmp or /private/tmp that this session or its workers created is routine"
   ],
@@ -53,7 +53,7 @@ personal 面の例。業務面は org / remote を差し替えて別の config d
 }
 ```
 
-既定 allow に Multi-Agent Coordination と Session-Created Job Cleanup があるので、SendMessage と `/tmp` の行は `critique` が冗長と言えば削る。`/auto-mode-setup` を後から回す時は「add」を選ぶ (replace は手書き分を消す)。
+allow は当たれば必ず通すので、広い allow は deny より危険 (`claude auto-mode critique` は「`~/.config` 配下なら何でも」の文を、鍵の中身を transcript に出す / shell rc や unit の編集まで通すとして退ける)。対象をツール所有のディレクトリに限り、永続化・認証系のパスと「値を transcript に出す」ことを除外文で残す。既定 allow に Multi-Agent Coordination と Session-Created Job Cleanup があるので、SendMessage と `/tmp` の行は `critique` が冗長と言えば削る。`/auto-mode-setup` を後から回す時は「add」を選ぶ (replace は手書き分を消す)。
 
 ## プロジェクト固有の環境説明 (`classifier.local.md`)
 
