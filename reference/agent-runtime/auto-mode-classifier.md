@@ -66,6 +66,8 @@ ln -sfn <privacy リポへの相対パス>/classifier/classifier-<repo>.md .clau
 printf '\n# auto mode classifier 向けの個人設定 (正本は privacy リポ、symlink)\n.claude/rules/*.local.md\n' >> .gitignore
 ```
 
+symlink の実体が cwd の外にあるので、そのプロジェクトの初回起動で「Allow external CLAUDE.md file imports?」が出る。リンク先は自分の privacy リポなので **Yes, allow external imports** を選ぶ (プロジェクトごとに 1 回)。
+
 本文の型 (箇条書きのみ、各項目は settings の entries にそのまま移せる 1 文):
 
 ```markdown
