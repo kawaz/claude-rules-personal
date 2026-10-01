@@ -18,8 +18,8 @@
   発火語: justfile, just push, recipe, check-version-bumped, release.yml, リリースが出ない, tag が作られない, just watch
 - [gh-ops](gh-ops/_index.md) — GitHub 上の画像の取得・投稿 (`gh --attach`) と、homebrew tap への自動 push 用 deploy key。
   発火語: GitHub の画像を取得, 画像を貼る, --attach, user-attachments, camo, raw.githubusercontent, HOMEBREW_TAP_DEPLOY_KEY, Permission to homebrew-tap denied
-- [agent-runtime](agent-runtime/_index.md) — sleep / polling の代替 primitive と、ブラウザ自動化のプロファイル運用。
-  発火語: sleep で待つ, polling, event-driven, Monitor tool, playwright-cli, PLAYWRIGHT_MCP_EXTENSION_TOKEN, Chrome プロファイル
+- [agent-runtime](agent-runtime/_index.md) — sleep / polling の代替 primitive、ブラウザ自動化のプロファイル運用、auto mode classifier の設定と誤拒否の直し方。
+  発火語: sleep で待つ, polling, event-driven, Monitor tool, playwright-cli, PLAYWRIGHT_MCP_EXTENSION_TOKEN, Chrome プロファイル, auto mode, classifier, autoMode, 誤拒否, classifier.local.md
 - [macos-signing](macos-signing/_index.md) — macOS 配布物の codesign + notarize (証明書・Secrets・CI・TCC・トラブルシュート)。
   発火語: codesign, notarize, Developer ID, App-Specific Password, stapler, Gatekeeper, TCC, System Extension
 - [auth-patterns](auth-patterns/_index.md) — 他プロダクトにも効く認証設計パターン (passkey の登録、peer 間相互認証、自分の endpoint の確定)。
