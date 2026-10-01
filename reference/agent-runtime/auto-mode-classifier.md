@@ -42,8 +42,8 @@ personal 面の例。業務面は org / remote を差し替えて別の config d
   ],
   "allow": [
     "$defaults",
-    "Managing the user's own tools (those developed under ~/.local/share/repos/github.com/kawaz/) through their own CLIs and by editing their files under ~/.config/<tool>/, ~/.local/share/<tool>/, ~/.local/state/<tool>/ and ~/.cache/<tool>/ is routine, including config files, key rings and credential files those tools own. This does not cover shell rc files, ~/.ssh, ~/.config/gh, launchd or systemd units, and does not clear printing secret values into the transcript",
-    "Committing and pushing with `jj`, `just push` and `cd <dir> && direnv exec . <cmd>` to the trusted repos is routine",
+    "Local config and state operations for these user-authored tools are routine: llm-gateway, ccmsg, hyoui, cache-warden, bump-semver, kuu (directories ~/.config/<tool>/, ~/.local/share/<tool>/, ~/.local/state/<tool>/, ~/.cache/<tool>/). This covers reading and editing their config files and appending to or rewriting their key-ring files by rename. It does not cover deleting credential or key files (the user must name the file), copying those files out of their directories or into any repo, printing secret values into the transcript, shell rc files, ~/.ssh, ~/.config/gh, launchd or systemd units, or any effect those CLIs have beyond this machine (pushes, uploads, deploys, messages), which is judged on its own terms",
+    "In the trusted repos, `jj commit`, `jj git push`, the `just push` recipe and the `cd <dir> && direnv exec . <cmd>` wrapper are the ordinary commit/push path; treat them like plain `git commit` / `git push` to the repo's own remote. This clears the destination only: rewriting history others authored (`jj abandon`, `squash`, `rebase`, moving a bookmark backwards) is still Git Destructive, and what is pushed is still subject to Credential Leakage, Sensitive-Source Provenance and Out-of-Place Publication",
     "Editing and deleting files and directories under /tmp or /private/tmp that this session or its workers created is routine"
   ],
   "soft_deny": [
@@ -53,7 +53,7 @@ personal 面の例。業務面は org / remote を差し替えて別の config d
 }
 ```
 
-allow は当たれば必ず通すので、広い allow は deny より危険 (`claude auto-mode critique` は「`~/.config` 配下なら何でも」の文を、鍵の中身を transcript に出す / shell rc や unit の編集まで通すとして退ける)。対象をツール所有のディレクトリに限り、永続化・認証系のパスと「値を transcript に出す」ことを除外文で残す。既定 allow に Multi-Agent Coordination と Session-Created Job Cleanup があるので、SendMessage と `/tmp` の行は `critique` が冗長と言えば削る。`/auto-mode-setup` を後から回す時は「add」を選ぶ (replace は手書き分を消す)。
+allow は当たれば必ず通すので、広い allow は deny より危険 (`claude auto-mode critique` は「`~/.config` 配下なら何でも」の文を、鍵の中身を transcript に出す / shell rc や unit の編集まで通すとして退ける)。ツールは名前で列挙し (ownership は transcript から検証できない)、閉じていない方向 (削除、コピー、CLI の外向き効果) を除外文で全部塞ぐ。既定 allow に Multi-Agent Coordination と Session-Created Job Cleanup があるので、SendMessage と `/tmp` の行は `critique` が冗長と言えば削る。`/auto-mode-setup` を後から回す時は「add」を選ぶ (replace は手書き分を消す)。
 
 ## プロジェクト固有の環境説明 (`classifier.local.md`)
 
