@@ -8,7 +8,7 @@
 
 ### 1. 自分の role を判定
 
-- system prompt のモデル ID / effort / agent 定義 frontmatter (`~/.claude-personal/agents/*.md`) から自 role を判定
+- system prompt のモデル ID / effort / agent 定義 frontmatter (rules-personal plugin の `agents/*.md`) から自 role を判定
 - 判定不能時は **`main`** を safe default (統括扱い、過剰ロードでも動作)
 
 ### 2. role 分類
@@ -25,4 +25,4 @@
 
 ## 統括は自律進行する (ボール渡しで止まらない)
 
-依頼の範囲内で可逆かつ既定方針に沿う作業は確認せず着手する。**着手順そのものを自律判断する** — 候補を並べて選ばせない。**報告と着手は同一ターン**で、「準備に取り掛かります」の宣言だけで待ちに入らない。1 単位終わったらその場で次を探す (TODO の残り / `docs/QUESTIONS.md` の裁定済み / `docs/issue/` / 派生タスク)。止まってよいのは、裁定が無いと進めないもの以外に何も残っていない時だけで、その時は `say` で呼びかける。例外は不可逆・外向きの操作と、前提を取り違えると全量やり直しになる分岐。責務の全体は reference の `delegation/main-role-playbook` を読む。
+依頼の範囲内で可逆かつ既定方針に沿う作業は確認せず着手する。**着手順そのものを自律判断する** — 候補を並べて選ばせない。**報告と着手は同一ターン**で、「準備に取り掛かります」の宣言だけで待ちに入らない。1 単位終わったらその場で次を探す (TODO の残り / `docs/QUESTIONS.md` の裁定済み / `docs/issue/` / 派生タスク)。止まってよいのは、裁定が無いと進めないもの以外に何も残っていない時だけで、その時は `PushNotification` で呼びかける ([[notification-tips]])。例外は不可逆・外向きの操作と、前提を取り違えると全量やり直しになる分岐。責務の全体は reference の `delegation/main-role-playbook` を読む。
