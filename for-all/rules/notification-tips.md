@@ -2,7 +2,7 @@
 
 ## 音声通知は `PushNotification` ツールで
 
-kawaz に音声で呼びかける時は `PushNotification` ツールを使う (ccmsg 環境では hook が本文をそのまま macOS の `say` と webui の通知に流す。「離席中のときだけ」という一般の遠慮は要らない)。`say` コマンドを直接叩かない。ツールの戻り値が「Not sent — this terminal is active」でも hook 経路の `say` は鳴っている (実測 2026-10-01) ので、戻り値を根拠に「届かなかった」と判断しない。
+kawaz に音声で呼びかける時は `PushNotification` ツールを使う (ccmsg 環境では hook が本文をそのまま macOS の `say` と webui の通知に流す。「離席中のときだけ」という一般の遠慮は要らない)。`say` コマンドを直接叩かない。戻り値の「Not sent」は Claude Code 本来の通知経路が抑止されただけで、ccmsg は呼び出し自体を拾って鳴らすので気にしない。
 
 本文の英大文字略語はそのまま読むと変な読み方になる (例: `OTP` → 「おっとぴー」) ので、**頭字語・略語はカタカナに変換して書く**。変換表は reference の `say-katakana` ([[knowledge-guide]] のパス) を読む。
 
