@@ -66,7 +66,19 @@ ln -sfn <privacy リポへの相対パス>/classifier/classifier-<repo>.md .clau
 printf '\n# auto mode classifier 向けの個人設定 (正本は privacy リポ、symlink)\n.claude/rules/*.local.md\n' >> .gitignore
 ```
 
-symlink の実体が cwd の外にあるので、そのプロジェクトの初回起動で「Allow external CLAUDE.md file imports?」が出る。リンク先は自分の privacy リポなので **Yes, allow external imports** を選ぶ (プロジェクトごとに 1 回)。
+symlink の実体が cwd の外にあるので、そのプロジェクトの初回起動で「Allow external CLAUDE.md file imports?」が出る (user scope の rules は無条件に信頼されるが、project scope の cwd 外 import は初回確認。パス粒度の事前許可は公式設定に無い)。ダイアログを出さずに済ませるには、symlink を置く時に `$CLAUDE_CONFIG_DIR/.claude.json` の該当 project に承認済みの印を先に書く (非公開キー、trust dialog の `hasTrustDialogAccepted` と同じ場所):
+
+```bash
+python3 - "$CLAUDE_CONFIG_DIR/.claude.json" "$PWD" <<'PY'
+import json,sys
+p,cwd=sys.argv[1],sys.argv[2]; d=json.load(open(p))
+pr=d.setdefault('projects',{}).setdefault(cwd,{})
+pr['hasClaudeMdExternalIncludesApproved']=True; pr['hasClaudeMdExternalIncludesWarningShown']=True
+json.dump(d,open(p,'w'),indent=2,ensure_ascii=False)
+PY
+```
+
+出てしまった時は **Yes, allow external imports** (リンク先は自分の privacy リポ)。
 
 本文の型 (箇条書きのみ、各項目は settings の entries にそのまま移せる 1 文):
 
