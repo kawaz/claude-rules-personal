@@ -61,7 +61,7 @@
 ## 運用・インフラ
 
 - [[claude-config-dir-isolation]] — `~/.claude` 汚染対策・別環境のリポを触るとき
-- [[classifier-notes]] — auto mode classifier への環境説明をどこに書くか (`autoMode` と `classifier.local.md` の 2 か所に固定)
+- [[classifier-notes]] — auto mode classifier への環境説明をどこに書くか (`autoMode` と `classifier.local.md` の 2 か所に固定)、拒否されたら迂回せず止まって伝える
 - [[tooling-tips]] — direnv・ベンチマーク等の実行環境まわり
 - [[secret-hygiene]] — credential の受け渡し経路を決めるとき
 - [[notification-tips]] — 音声通知・不在時のふるまい

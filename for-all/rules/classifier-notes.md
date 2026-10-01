@@ -12,3 +12,10 @@ auto mode の classifier は Claude と同じ CLAUDE.md / `.claude/rules/` と�
 - 個別列挙より状況の包括記述を優先する。個別に書くのは名前で同一性を判定するもの (host / remote / path の例外) と deny だけ。entries は毎 check で context に載るので rule と同じ省コンテキストの規律
 
 書式・設置手順・`autoMode` の 4 区分の意味は reference の `agent-runtime/auto-mode-classifier` を読む。
+
+## 拒否されたら迂回しない (全 role)
+
+classifier に操作を拒否されたら、別の手段 (別コマンド・別ツール・手動取得) で同じ結果を得ない。その場で止まり、何をしようとしたかを 1〜2 行で伝える。
+
+- 統括: `PushNotification` で kawaz に許可を求めて待つ。kawaz が許可すれば同じ操作の再実行が通る (classifier は会話の文脈を見る)
+- worker / reviewer: 作業を止めて委譲元に報告する。統括が kawaz に回す
