@@ -130,6 +130,45 @@ lint-rules:
             warnings += 1
     print(f'文中改行 warning {warnings} 件')
     PY
+    # (k) Markdown の HTML コメント (fatal、no-md-html-comments rule)。
+    #     プレビューで見えない / 先頭に置くと frontmatter を壊す / AI だけが読む隠れた指示の置き場になる。
+    #     コードフェンスの中とインラインコードの中は規約の説明で例示するので対象外。
+    #     対象はリポ内の .md 全部 (rg --files なので .gitignore と隠しディレクトリは除外される)。
+    #     LINT_MD_ROOT で走査の起点を差し替えられる (検査自体の動作確認用)。
+    if ! python3 - "${LINT_MD_ROOT:-.}" <<'PY'
+    import re
+    import subprocess
+    import sys
+
+    root = sys.argv[1]
+    files = subprocess.run(['rg', '--files', '-g', '*.md', root], capture_output=True, text=True).stdout.split()
+    fence_open = re.compile(r'^\s*(`{3,}|~{3,})')
+    inline_code = re.compile(r'(`+).+?\1')
+    found = 0
+    for path in sorted(files):
+        fence = None
+        with open(path, encoding='utf-8') as f:
+            for number, line in enumerate(f, 1):
+                m = fence_open.match(line)
+                if m:
+                    marker = m.group(1)
+                    if fence is None:
+                        fence = marker
+                    elif marker[0] == fence[0] and len(marker) >= len(fence) and not line.strip()[len(marker):].strip():
+                        fence = None
+                    continue
+                if fence is not None:
+                    continue
+                if '<!--' in inline_code.sub('', line):
+                    print(f'FATAL HTML コメント: {path}:{number}: {line.strip()}')
+                    found += 1
+    if found:
+        print(f'  → 見せたい補足は本文の文・<details>・注記の節で書く (no-md-html-comments rule)')
+        sys.exit(1)
+    PY
+    then
+        fatal=1
+    fi
     # (d) 5KB 超 rule (warning のみ、常時ロード肥大の検討材料)
     big=$(find for-all/rules for-me/rules -name '*.md' -size +5k | sort)
     if [ -n "$big" ]; then

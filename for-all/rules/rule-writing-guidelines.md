@@ -9,6 +9,7 @@ rule / skill / 参照知識 (reference / memory / privacy) を**編集・新設�
 - **自己参照しない** (「関連」節で自ファイルを指さない)
 - **本文と索引は同じ変更で更新する** (参照知識の `_index.md` も、rules のフェーズ別 index も)
 - **行長を揃える改行をしない** ([[no-hard-wrap]])
+- **HTML コメント `<!-- -->` を書かない** ([[no-md-html-comments]])
 
 これらと「5KB 超 rule」「常時ロード合計の予算」は `just lint-rules` が機械検査する (claude-rules-personal リポと各 overlay リポの push の deps で自動実行)。
 

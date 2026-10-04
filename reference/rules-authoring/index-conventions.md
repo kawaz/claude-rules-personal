@@ -37,6 +37,7 @@ claude-rules-personal リポと各 overlay リポの `lint-rules` recipe が機�
 | `.draft-` が rules 配下に存在 | FATAL |
 | wikilink が rule ファイル名 / skill ディレクトリ名 / `.lint-external-slugs` のどれにも解決できない | FATAL |
 | 参照知識のディレクトリに `_index.md` が無い / 本文が索引に無い / 索引のリンク先が実在しない | FATAL |
+| リポ内の `.md` に HTML コメント `<!--` がある (コードフェンス・インラインコードの中は除く。`no-md-html-comments` rule) | FATAL |
 | 5KB 超の rule | WARN (省コンテキストの検討材料) |
 | 常時ロード rules の合計が予算超過 | WARN (central のみ) |
 

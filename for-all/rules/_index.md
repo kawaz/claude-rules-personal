@@ -37,6 +37,7 @@
 
 - [[sanitize-work-identifiers]] — 業務固有名詞が成果物に混ざっていないか
 - [[sanitize-local-paths]] — `/Users/kawaz` 等の絶対パスが残っていないか
+- [[no-md-html-comments]] — md に HTML コメントが残っていないか
 - [[secret-hygiene]] — 機微情報が diff・log に乗っていないか
 - [[no-historical-noise]] — 跡地コメント・過去仕様言及が残っていないか
 - [[public-repo-contribution]] — 公共リポへ PR / publish するとき
@@ -53,6 +54,7 @@
 - [[discussion-style]] — 議論レーンでの応答 (畳まない / 走らない)
 - [[report-and-decomposition-form]] — 状況・原因・複数案を報告する形
 - [[no-hard-wrap]] — md を書く・話すとき (文中改行しない)
+- [[no-md-html-comments]] — md に見えない記述 (HTML コメント) が紛れていないか
 - [[no-excessive-apology]] — 指摘・「なんで?」を受けたとき
 - [[design-impl-bidirectional-check]] — 「設計済み = 実装済み」と推定しないため
 - [[test-integrity]] — テストの green / ignore の扱いを検分するため
@@ -71,6 +73,7 @@
 - [[work-principles]] — 全フェーズ横断の作業原則 (指示遵守 / TODO / 委譲)
 - [[rule-writing-guidelines]] — rule / skill / 参照知識を書く・移す・改廃するとき (禁則と、reference の `rules-authoring` への入口)
 - [[no-hard-wrap]] — rule / skill / docs の md で行長を揃える改行をしない
+- [[no-md-html-comments]] — md に HTML コメントを書かない (補足は見える本文で書く)
 - [[knowledge-guide]] — 覚えておくべき事実に気づいたとき (reference / memory / privacy の 3 層のパス)
 - [[research-documentation]] — 調査・検証結果を記録するとき
 - [[no-historical-noise]] — docs に history narrative を書きたくなったとき
