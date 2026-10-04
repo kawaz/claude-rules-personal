@@ -129,6 +129,15 @@ OPTIONS (共通)
 
 `registered` と `service.loaded` は別物 (ファイルが有るのに OS に載っていない状態がある)、`service.running` と top-level の `running` も別物 (OS から見て生きているのに頼み口が開いていない状態がある)。同じ語を階層で分けているのは、この食い違い自体を見せるため。
 
+## OS 登録の名前 (launchd label / systemd unit)
+
+逆引き DNS の名前は「その名前空間を自分が管理している」ことが前提。**所有を確かめた名前空間だけを使う**。既定は `com.github.kawaz.<repo>[.<sub>...]` (例: `com.github.kawaz.hyoui.web.supervise`)。
+
+- GitHub アカウント `kawaz` の所有と常に一致するので、所有の確認自体が要らない。自前ドメインは更新切れや手放しで正当性を失いうるうえ、所有していないドメイン (例: `kawaz.com`) を名乗る誤りを生む
+- 先頭をリポ名にする (`<repo>-<sub>` のような別名を作らない)。label からリポへ辿れ、XDG の置き場 (`$XDG_*_HOME/<repo>/`) と同じ軸になる
+- systemd の user unit も同じ文字列に `.service` を付ける (OS ごとに名前を分けない)
+- 署名・notarization する成果物 (署名済み launcher の `.app` 等) の bundle id は別物。署名する証明書の持ち主の規約に従う
+
 ## `service register` は場所を決める env を unit に固定し、変わったら止まる
 
 daemon が socket / state / config の場所を env (`XDG_RUNTIME_DIR` / `XDG_STATE_HOME` / `XDG_CONFIG_HOME` / `HOME` / ツール固有の `<TOOL>_STATE_DIR` 等) から導く場合、**launchd / systemd --user から起きた daemon と、shell から起きた client (CLI、hook、sidecar) で env が食い違う**罠がある。`XDG_RUNTIME_DIR` 等は `.zshrc` のような shell rc で export されるのが普通で、launchd はそれを継承しない (macOS には元々 `XDG_RUNTIME_DIR` が無い、reference の `app-file-placement`)。食い違うと両者は別の dir を見て、client は「daemon が居ない」と読み、daemon は「client が居ない」と読み、どちらのログにも理由が出ない。
