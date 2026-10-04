@@ -74,4 +74,3 @@ artifact は無し。`.github/workflows/release.yml` を作らない」と明記
 
 ## TODO
 
-<!-- wip 時のみ -->

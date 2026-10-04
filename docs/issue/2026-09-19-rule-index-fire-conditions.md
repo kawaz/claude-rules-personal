@@ -60,4 +60,3 @@ sandbox-jev の実験06 (33 rule を noul で fan-out、criteria は `_index.md`
 
 ## TODO
 
-<!-- wip 時のみ -->
