@@ -10,6 +10,12 @@ kawaz リポでは **tag 打ちと GH Release 作成は CI/CD の仕事**:
 - workflow / push task の挙動が読み取れない場合は本文の箇条書きで kawaz に確認、黙って push しない
 - リリース不要なプロジェクトでは `release.yml` 不在を bug と判定しない / 「リリースが完成しない」報告をしない / push 後の watch で release workflow を期待しない
 
+## 版番号: publish しても 1.0 にしない
+
+- 初版は `0.x.y` で出す。初回の publish は registry の名前の確保が主で、公開したことは安定を意味しない
+- `0.x` の間は互換性を考えない。方針を変えたら API もファイルもざくざく消し、消したことの記録をコードコメント等に残さない (`no-historical-noise` rule)
+- 1.0 にするのは、互換性を守る段階に入ると kawaz が決めた時だけ
+
 ## 自動化の標準ループ
 
 1. `git/jj push` を hook ガードが捕まえてリポの push task に誘導する
