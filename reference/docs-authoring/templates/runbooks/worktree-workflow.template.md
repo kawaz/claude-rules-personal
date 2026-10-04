@@ -4,8 +4,7 @@
 
 ## 適用ケース
 
-worktree (git linked worktree / jj secondary workspace) 内で編集した change を
-default branch に合流させて push したい時。特に:
+worktree (git linked worktree / jj secondary workspace) 内で編集した change をdefault branch に合流させて push したい時。特に:
 
 - Claude Code の background job / `isolation: "worktree"` で `EnterWorktree` が使われた
 - `just push` が `check-on-default-branch` で止まり、cascade の hint が出た
@@ -13,10 +12,8 @@ default branch に合流させて push したい時。特に:
 
 ## 前提
 
-- `bump-semver` v0.40.0 以上 (`vcs is on-default-branch` / `vcs get default-branch` /
-  `vcs get worktree-name` / `vcs promote` / `vcs sync` を使う)
-- リポの justfile に `sync` / `promote` / `check-on-default-branch` recipe が入っている
-  (未導入なら「## adopt 手順」を先に実施)
+- `bump-semver` v0.40.0 以上 (`vcs is on-default-branch` / `vcs get default-branch` / `vcs get worktree-name` / `vcs promote` / `vcs sync` を使う)
+- リポの justfile に `sync` / `promote` / `check-on-default-branch` recipe が入っている(未導入なら「## adopt 手順」を先に実施)
 
 ## 手順
 
@@ -35,8 +32,7 @@ default branch に合流させて push したい時。特に:
    just push
    ```
 
-   期待結果: default branch 上にいなければ `check-on-default-branch` が
-   cascade の hint を出して exit 1。default branch 上なら通常の push gate に進む。
+   期待結果: default branch 上にいなければ `check-on-default-branch` がcascade の hint を出して exit 1。default branch 上なら通常の push gate に進む。
 
 3. **ベースを default branch に揃える**
 
@@ -75,17 +71,13 @@ DR-0038 (bump-semver) の設計で、1 verb = 1 副作用に分解されてい�
 | `promote` | default branch/bookmark を current に forward (ref 移動のみ) |
 | `push` | remote へ反映 |
 
-`promote` が push しないので、promote 結果を確認してから push する / promote 後に
-commit を足してから push する、といった分解が素直に書ける。
+`promote` が push しないので、promote 結果を確認してから push する / promote 後にcommit を足してから push する、といった分解が素直に書ける。
 
 ## gate の predicate は `is worktree` ではなく `is on-default-branch`
 
-`vcs is worktree` を push gate に使ってはいけない。git bare + jj workspace 方式では
-`main/` 自体が secondary workspace なので、`vcs is worktree` は `main` でも true を
-返し、**正常な push を誤ってブロックする** (DR-0038 Adoption pattern 節)。
+`vcs is worktree` を push gate に使ってはいけない。git bare + jj workspace 方式では`main/` 自体が secondary workspace なので、`vcs is worktree` は `main` でも true を返し、**正常な push を誤ってブロックする** (DR-0038 Adoption pattern 節)。
 
-実際に問うべきは「現 bookmark/branch が push 対象の default か」なので
-`vcs is on-default-branch` の反転が正しい。両 predicate の責務は分離されている:
+実際に問うべきは「現 bookmark/branch が push 対象の default か」なので`vcs is on-default-branch` の反転が正しい。両 predicate の責務は分離されている:
 
 - `is worktree` — **場所** (linked worktree / secondary workspace か)
 - `is on-default-branch` — **bookmark/branch** (default か)
@@ -131,9 +123,7 @@ push: check-on-default-branch <既存の gate...>
     bump-semver vcs push --branch "$(bump-semver vcs get default-branch)" --jj-bookmark-auto-advance
 ```
 
-hint の printf は `vcs is` が predicate-false 時に silent (`compare` と同じ semantics) な
-ため justfile 側で持つ。`sync` / `promote` は AI・人間の双方が直接叩くので `[private]` に
-しない。
+hint の printf は `vcs is` が predicate-false 時に silent (`compare` と同じ semantics) なため justfile 側で持つ。`sync` / `promote` は AI・人間の双方が直接叩くので `[private]` にしない。
 
 導入確認:
 
@@ -144,7 +134,6 @@ bump-semver vcs is on-default-branch && echo on-default || echo not-on-default
 
 ## 関連
 
-- bump-semver `docs/decisions/DR-0038-vcs-worktree-promote-sync.md` — 3 verb の設計と
-  Adoption pattern (gate predicate の選択)
+- bump-semver `docs/decisions/DR-0038-vcs-worktree-promote-sync.md` — 3 verb の設計とAdoption pattern (gate predicate の選択)
 - `bump-semver vcs {is,get,sync,promote} --help` — 引数・exit code の正本
 - {自リポの journal / findings}

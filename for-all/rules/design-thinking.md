@@ -28,8 +28,7 @@
 
 ## 思考設定
 
-正本: 本ファイル。claude.ai 側 userPreferences の「思考設定」は本節の手動
-複製 (drift したら本ファイルに合わせて userPreferences を直す)。
+正本: 本ファイル。claude.ai 側 userPreferences の「思考設定」は本節の手動複製 (drift したら本ファイルに合わせて userPreferences を直す)。
 
 - システム設計: ドメインモデリングからアーキテクチャを考える
 - 計画立案: ゴールから逆算して計画する

@@ -1,23 +1,18 @@
 # デフォルト収束の警戒
 
 LLM は要件に関係なく「よく見る無難な実装」へ吸い寄せられる。
-正しい設計を選ぶ (design-priority) の対極として、安易に流れ着く
-具体パターンを名指しで自覚し、選んだのか流れたのかを区別する。
+正しい設計を選ぶ (design-priority) の対極として、安易に流れ着く具体パターンを名指しで自覚し、選んだのか流れたのかを区別する。
 
 **前提**: conventional・標準 idiom・チーム規約に沿うことは第一候補。
-本ルールが避けたいのは「無自覚に」デフォルトへ流れること。下記パターンも
-正当な使用文脈があり、各 bullet の「危険な使い方」だけが対象。
+本ルールが避けたいのは「無自覚に」デフォルトへ流れること。下記パターンも正当な使用文脈があり、各 bullet の「危険な使い方」だけが対象。
 
 ## 吸い寄せられやすい実名パターン
 
 ### 言語共通
 
-- ドメイン語を持たない `utils` / `helpers` / `common` / `Manager` /
-  `Helper` / `Service` に関数を寄せ集める (DDD 等で domain 語と
-  組み合わさる `OrderService` 等は対象外)
+- ドメイン語を持たない `utils` / `helpers` / `common` / `Manager` / `Helper` / `Service` に関数を寄せ集める (DDD 等で domain 語と組み合わさる `OrderService` 等は対象外)
 - 既存の素直な関数で足りるのに抽象基底・trait・interface を先に立てる
-- 意味不明な literal や環境差分を持つ設定値をその場にハードコード
-  (仕様由来で局所的な小定数は対象外)
+- 意味不明な literal や環境差分を持つ設定値をその場にハードコード(仕様由来で局所的な小定数は対象外)
 - 「将来必要かも」で使われないオプション引数・フラグを足す
 
 ### Rust
@@ -33,9 +28,7 @@ LLM は要件に関係なく「よく見る無難な実装」へ吸い寄せら�
 
 ### Go
 
-- **呼び出し側が操作対象や文脈を失う境界**で `return err` を素通し
-  (sentinel error / 既に十分な文脈を持つ下位エラー / 抽象境界で実装詳細を
-  漏らしたくない場合は対象外)
+- **呼び出し側が操作対象や文脈を失う境界**で `return err` を素通し(sentinel error / 既に十分な文脈を持つ下位エラー / 抽象境界で実装詳細を漏らしたくない場合は対象外)
 - `interface{}` / `any` で型を曖昧化、または広すぎる interface を切る
 - 復帰不能でないのに `panic`、または `recover` で握りつぶす
 - 意味の薄い `data` / `info` / `obj` 命名
@@ -47,21 +40,16 @@ LLM は要件に関係なく「よく見る無難な実装」へ吸い寄せら�
 
 - `try/catch` で握りつぶし `console.error` だけ (原因も復帰も示さない)、
   Promise rejection の握りつぶし
-- `any` / 検証なしの `as Foo` / `Record<string, any>` で型エラーを黙らせる
-  (`as const` / DOM 境界 / 検証済み narrowing 後の assertion は対象外)
-- **本来 invariant な値**への non-null assertion `!` / 設計不備を隠す
-  `?.` の乱用 (optional なドメイン値への `?.` は対象外)
+- `any` / 検証なしの `as Foo` / `Record<string, any>` で型エラーを黙らせる(`as const` / DOM 境界 / 検証済み narrowing 後の assertion は対象外)
+- **本来 invariant な値**への non-null assertion `!` / 設計不備を隠す`?.` の乱用 (optional なドメイン値への `?.` は対象外)
 - 外部 JSON / API レスポンスをランタイム検証なしで cast
 - 副作用を何でも `useEffect` に詰める、`useMemo` / `useCallback` の儀式化
-- boolean prop が増殖して状態の組合せが爆発 (= discriminated union に
-  すべき場面)
+- boolean prop が増殖して状態の組合せが爆発 (= discriminated union にすべき場面)
 
 ## How to apply
 
 - 上記に該当する実装を書く瞬間に「要件がこれを要求したか」を自問
-- 要件由来でなく手癖ならやめる。**ベストプラクティスから外れる方を
-  選ぶ場合のみ** design-rationale を残す (conventional な idiom 採用は
-  rationale 不要)
+- 要件由来でなく手癖ならやめる。**ベストプラクティスから外れる方を選ぶ場合のみ** design-rationale を残す (conventional な idiom 採用はrationale 不要)
 - 「要件が違っても同じ形になる実装」は要件を反映できていない兆候
 - conventional は第一候補。避けるのは*無自覚な*デフォルト依存
 

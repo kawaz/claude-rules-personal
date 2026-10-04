@@ -1,7 +1,6 @@
 # 業務文脈の固有名詞を public な成果物に書かない
 
-**判定軸は「その成果物が public に出るか」の一点**。public に出るものには業務固有の
-固有名詞・話題カテゴリを含めない。具体的な対象語は `identifiers-*.md`
+**判定軸は「その成果物が public に出るか」の一点**。public に出るものには業務固有の固有名詞・話題カテゴリを含めない。具体的な対象語は `identifiers-*.md`
 (各 overlay リポ) で定義する。
 
 ## 要サニタイズ (= public に出るもの)
@@ -14,14 +13,12 @@ public リポ (kawaz/* の public) に入る一切:
 
 ## サニタイズ対象外
 
-- **private リポの内容**。業務リポ・overlay リポ (`claude-rules-*` の private) ・
-  private な個人リポは、中に業務固有名詞があっても問題ない
+- **private リポの内容**。業務リポ・overlay リポ (`claude-rules-*` の private) ・private な個人リポは、中に業務固有名詞があっても問題ない
 - ローカルに配られるだけのもの (`~/.claude*/` 配下の rules / skills / 設定)
 - セッション内の会話・思考
 - ユーザが明示的に「固有名詞含めてよい」と指示した場合
 
-private を public 化するときは、その時点で中身をチェックする (= public 化が
-サニタイズの発動点であって、private のうちは気にしない)。
+private を public 化するときは、その時点で中身をチェックする (= public 化がサニタイズの発動点であって、private のうちは気にしない)。
 
 ## 一般化の例
 
