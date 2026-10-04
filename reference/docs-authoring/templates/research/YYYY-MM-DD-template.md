@@ -1,7 +1,7 @@
 # {テーマ}
 
 - Date: YYYY-MM-DD
-- Status: In Progress <!-- In Progress / Concluded / Archived -->
+- Status: {In Progress / Concluded / Archived}
 
 ## 動機
 

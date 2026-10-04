@@ -1,6 +1,6 @@
 # DR-NNNN: {タイトル}
 
-- Status: Active <!-- Active / Archived / Superseded by DR-XXXX / Moved to research/ -->
+- Status: {Proposed / Active / Archived / Superseded by DR-XXXX / Moved to research/}
 - Date: YYYY-MM-DD
 
 ## Context

@@ -17,8 +17,6 @@ blocked_by:
 origin: "{自リポ TODO / 他プロジェクト依頼 (= 依頼元プロジェクト)}"
 ---
 
-<!-- issue は claude-local-issue plugin の `write` sub-command で起票する (= 手書きしない)。本ファイルは plugin が生成する形の参考。frontmatter / status 遷移 / archive の機械的詳細は plugin の `SKILL.md` / `docs/DESIGN.md` を参照。 -->
-
 # {タイトル}
 
 ## 概要
@@ -36,7 +34,7 @@ origin: "{自リポ TODO / 他プロジェクト依頼 (= 依頼元プロジェ�
 
 ## TODO
 
-<!-- wip 状態のとき進捗 checkbox で内包。idea/open 時は section ごと削除可。 -->
+{wip の間は進捗を checkbox で書く。idea / open の間はこの節ごと削除してよい}
 
 - [ ] {次に手を付けるサブタスク}
 - [ ] ...

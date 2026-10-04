@@ -58,7 +58,7 @@ docs/
 | DR 本体 | `decisions/DR-NNNN-template.md` |
 | DR INDEX | `decisions/INDEX.template.md` |
 | DR archive INDEX | `decisions/archive/INDEX.template.md` |
-| issue | `issue/YYYY-MM-DD-template.md` |
+| issue | `issue/YYYY-MM-DD-template.md` (claude-local-issue plugin の `write` が生成する形の参考。起票は `write` で行い、このテンプレから手書きしない) |
 | journal | `journal/YYYY-MM-DD-template.md` |
 | findings | `findings/YYYY-MM-DD-template.md` |
 | runbooks (汎用) | `runbooks/topic-template.md` |
