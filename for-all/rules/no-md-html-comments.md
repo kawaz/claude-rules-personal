@@ -1,6 +1,6 @@
 # Markdown に HTML コメントを書かない
 
-markdown のファイル (rule / skill / reference / docs / テンプレ) に HTML コメント `<!-- ... -->` を書かない。`just lint-rules` が FATAL で検出する (コードフェンスとインラインコードの中は対象外)。
+markdown のファイル (rule / skill / reference / docs / テンプレ) に HTML コメント `<!-- ... -->` を書かない。rules リポでは `just lint-rules` が FATAL で検出する (コードフェンスとインラインコードの中は対象外)。
 
 - 人間がプレビューで読むときに見えない。書き手と読み手で見えている内容がずれる
 - ファイルの先頭に置くと frontmatter を壊す (frontmatter はファイルの 1 行目から始まる必要がある)
