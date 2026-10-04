@@ -1,8 +1,3 @@
-<!--
-issue は claude-local-issue plugin の `write` sub-command で起票する (= 手書きしない)。
-本ファイルは plugin が生成する形の参考。frontmatter / status 遷移 / archive の機械的詳細
-は plugin の `SKILL.md` / `docs/DESIGN.md` を参照。
--->
 ---
 title: "{タイトル}"
 status: open
@@ -21,6 +16,8 @@ close_reason:
 blocked_by:
 origin: "{自リポ TODO / 他プロジェクト依頼 (= 依頼元プロジェクト)}"
 ---
+
+<!-- issue は claude-local-issue plugin の `write` sub-command で起票する (= 手書きしない)。本ファイルは plugin が生成する形の参考。frontmatter / status 遷移 / archive の機械的詳細は plugin の `SKILL.md` / `docs/DESIGN.md` を参照。 -->
 
 # {タイトル}
 
