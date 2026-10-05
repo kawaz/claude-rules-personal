@@ -19,7 +19,7 @@ COMMANDS
   ...         ツール固有のコマンド
 
 <tool> daemon
-  run [unit]                この unit の instance を foreground で起動する (未指定の場合はデフォルト)
+  run [unit]                この unit の instance を foreground で起動する (unit の名前に既定値を持たせるかは案件が決める)
   supervise                 foreground の監督者: 登録された instance を子として run で起動し、落ちたら上げる
   add <unit>                登録する
   remove <unit>             登録を外す
@@ -32,6 +32,7 @@ COMMANDS
 
   start / stop / restart / status は起動中の supervise に対する操作。supervise が未起動ならエラー終了。
   unit = 登録の単位で、案件ドメインが決める (dir / config ファイル / id など)。
+  unit に `default` という名前を付けない (既定値を管理しているように見える)。既定値を持たせない案件では、unit を省いた run は help。
   reload (設定再読み込み、再起動なし) や graceful_upgrade など、要件に応じたサブコマンドの追加・削除はしてよい。
 
 <tool> service
