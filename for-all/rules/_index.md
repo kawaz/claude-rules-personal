@@ -30,7 +30,8 @@
 - [[spec-careful-reading]] — POSIX / RFC / API doc を判断根拠にするとき
 - [[document-design-rationale]] — ベストプラクティスから外れる実装を書くとき
 - [[no-historical-noise]] — 変更経緯をコード・docs に書きたくなったとき
-- [[tooling-tips]] — 別ディレクトリでコマンドを実行するとき・一時ファイルを作るとき
+- [[tooling-tips]] — 別ディレクトリでコマンドを実行するとき
+- [[temp-files]] — 一時ファイルを作るとき (テスト・実験環境含む)
 - [[secret-hygiene]] — TOKEN / KEY / .env 等を扱うとき
 
 ## コミット・プッシュ
@@ -64,7 +65,8 @@
 
 - [[claude-config-dir-isolation]] — `~/.claude` 汚染対策・別環境のリポを触るとき
 - [[classifier-notes]] — auto mode classifier への環境説明をどこに書くか (`autoMode` と `classifier.local.md` の 2 か所に固定)、拒否されたら迂回せず止まって伝える
-- [[tooling-tips]] — direnv・一時ファイルの置き場など実行環境まわり
+- [[tooling-tips]] — direnv まわり
+- [[temp-files]] — worker・起動プロセスの置き場を決めるとき
 - [[secret-hygiene]] — credential の受け渡し経路を決めるとき
 - [[notification-tips]] — 音声通知・不在時のふるまい
 
