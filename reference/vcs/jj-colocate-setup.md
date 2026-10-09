@@ -9,6 +9,7 @@
   .git                 # ガード (通常ファイル。内容は「ガードである」旨の説明文)
   .jj/                 # ガード (ディレクトリ。README.md で説明)
   main/                # 実体 (git + jj colocate)。main/.git も main/.jj もディレクトリ
+  artifacts/           # 生成物の置き場 (最初の commit から生やした別枝、.gitignore は '*'。下記「artifacts workspace」)
   <name>/              # 恒久 workspace (jj workspace add で作る。命名は従来規約のまま)
   agent-<id>/          # isolation:"worktree" が hook 経由で作る使い捨て git worktree
 ```
@@ -24,6 +25,14 @@ mkdir -p "$REPO_PARENT/main" && cd "$REPO_PARENT/main"
 git init && git commit -m "Initial empty commit" --allow-empty && jj git init && jj workspace rename main
 cd .. && echo "guard: 上位への .git 探索を止める (実体は main/)" > .git && mkdir .jj
 echo "guard: 上位への .jj 探索を止める (実体は main/)" > .jj/README.md
+```
+
+続けて artifacts workspace を生やす (下記「artifacts workspace」)。
+
+```bash
+cd "$REPO_PARENT/main"
+jj workspace add -r 'root()+' ../artifacts
+cd ../artifacts && printf '*\n' > .gitignore && jj file track --include-ignored .gitignore && jj commit -m "artifacts: 既定で追跡しない枝 (残す物だけ jj file track --include-ignored)" .gitignore
 ```
 
 続けて VS Code の workspace ファイルを作る。名前は `{repo}.local.code-workspace` (グローバル gitignore の `*.local.*` に載るので commit されない。リポに追跡させる workspace ファイルは作らない):
@@ -47,6 +56,15 @@ echo "guard: 上位への .jj 探索を止める (実体は main/)" > .jj/README
 ```
 
 自分のリポも `.` でなく `../../../{owner}/{repo}/{ws}` (main/ から見て repo → owner → github.com の 3 段上) で書く (workspace ファイルごと別リポにコピーした時に name と path の対応が崩れないため)。関連リポや設定ディレクトリを一緒に開きたい時は `folders` に同じ形で足す (`$HOME` 配下の設定は絶対パスでよい。追跡されないファイルなので sanitize の対象外)。
+
+## artifacts workspace (ブラウザで見る生成物の置き場)
+
+`{repo}/artifacts/` は Claude セッションが作る HTML / JS 等の生成物をブラウザで閲覧するための workspace。canddy-app-proxy が `artifacts-{owner}-{repo}.<host>.tmpspace.net/<path>` をこのディレクトリに写像して配信する (非信頼コンテンツなので sandbox 側の site)。
+
+- 枝はリポの**最初の commit** (`root()+`) から生やし、main 本編の履歴に生成物を混ぜない。bookmark は作らず push もしない (ローカル枝)
+- `.gitignore` は `*` 1 行。既定では何も追跡せず (jj の snapshot にも乗らない)、版管理したい物だけ `jj file track --include-ignored <paths>` してから `jj commit -m "..." <paths>` する。`--include-ignored` を落とすと exit 0 のまま何も起きないので注意
+- 既存リポに後から生やす時も上の 3 行をそのまま使う (`root()+` がリポの最初の commit)
+- `.jj/` と `.gitignore` は配信側で `/.*` を 404 にして隠す
 
 ## 既存リポジトリの clone
 

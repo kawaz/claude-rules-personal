@@ -21,7 +21,7 @@
 - [jj-antipatterns](jj-antipatterns.md) — 読み取りスキャンでの snapshot 事故、複数エージェントの同一 workspace、git コマンド混用、worktree ツールの扱い。
   発火語: --ignore-working-copy, 複数リポを一括スキャン, jj restore, 並列エージェント, jj-guard, jj-worktree, isolation worktree
 - [jj-colocate-setup](jj-colocate-setup.md) — colocate + 親ガード方式のレイアウト・新規作成・clone・旧方式からの移行・作業場所の使い分け。
-  発火語: colocate, 親ガード, jj git init, リポを作る, リポを clone, agent-worktree, main への統合
+  発火語: colocate, 親ガード, jj git init, リポを作る, リポを clone, agent-worktree, main への統合, artifacts workspace, 生成物をブラウザで見る, file track --include-ignored
 - [jj-bare-workspace-setup](jj-bare-workspace-setup.md) — 旧方式のセットアップ・workspace・PR 手順・署名・トラブルシュート。
   発火語: git bare, jj workspace add, PR を作る, wip を PR に昇格, sign-on-push, stale info, tag が jj に見えない, tagOpt
 - [git-worktree-setup](git-worktree-setup.md) — git 専用リポの worktree 構成・命名・PR 手順。
