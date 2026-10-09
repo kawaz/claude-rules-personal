@@ -59,12 +59,7 @@ cd ../artifacts && printf '*\n' > .gitignore && jj file track --include-ignored 
 
 ## artifacts workspace (ブラウザで見る生成物の置き場)
 
-`{repo}/artifacts/` は Claude セッションが作る HTML / JS 等の生成物をブラウザで閲覧するための workspace。canddy-app-proxy が `artifacts-{owner}-{repo}.<host>.tmpspace.net/<path>` をこのディレクトリに写像して配信する (非信頼コンテンツなので sandbox 側の site)。
-
-- 枝は main 本編の**最初の commit** (`root()+ & ::main`。旧方式リポでは root 直下に default workspace の空 @ が居るので `root()+` 単独だとマージ親になる) から生やし、main 本編の履歴に生成物を混ぜない。bookmark は作らず push もしない (ローカル枝)
-- `.gitignore` は `*` 1 行。既定では何も追跡せず (jj の snapshot にも乗らない)、版管理したい物だけ `jj file track --include-ignored <paths>` してから `jj commit -m "..." <paths>` する。`--include-ignored` を落とすと exit 0 のまま何も起きないので注意
-- 既存リポに後から生やす時も上の 3 行をそのまま使う (`root()+ & ::main` が main の最初の commit)
-- `.jj/` と `.gitignore` は配信側で `/.*` を 404 にして隠す
+`{repo}/artifacts/` は生成物を `artifacts-{owner}-{repo}.<host>.tmpspace.net` で閲覧するための workspace。運用 (選択的追跡、URL 対応、sandbox の意味) は reference の `artifacts-workspace` が正本で、ここでは作り方だけ: 上の 3 行を既存リポにもそのまま使う (`root()+ & ::main` が main の最初の commit。旧方式リポでは root 直下に default workspace の空 @ が居るので `root()+` 単独だとマージ親になる)。
 
 ## 既存リポジトリの clone
 

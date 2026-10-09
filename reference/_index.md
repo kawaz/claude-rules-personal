@@ -47,6 +47,8 @@
   発火語: say, PushNotification, 音声通知, 読み上げ, 頭字語のカタカナ化
 - [cli-design-preferences](cli-design-preferences.md) — kawaz の CLI 設計の好み (サブコマンド構成 / `--help` の節構成 / bool フラグ / 引数位置 / completion)。
   発火語: CLI 設計, サブコマンド, --help, オプション, bool フラグ, completion, 引数パーサ
+- [artifacts-workspace](artifacts-workspace.md) — 生成物 (HTML / JS / 画像) を各リポの `artifacts/` workspace に置き、`artifacts-{owner}-{repo}.<host>.tmpspace.net` でブラウザから見る仕組み (作り方、`--include-ignored` での選択的追跡、URL 対応、sandbox site の意味)。
+  発火語: artifacts, 生成物をブラウザで見る, HTML を見せたい, tmpspace.net, file track --include-ignored, 可視化を共有
 - [findings-recording](findings-recording.md) — findings ファイルの構成テンプレと、記録をサブエージェントに委譲するプロンプトの型。
   発火語: findings, 調査結果を記録, 検証記録, docs/findings, 記録委譲
 
