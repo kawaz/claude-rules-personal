@@ -33,6 +33,7 @@
 - [[tooling-tips]] — 別ディレクトリでコマンドを実行するとき
 - [[temp-files]] — 一時ファイルを作るとき (テスト・実験環境含む)
 - [[secret-hygiene]] — TOKEN / KEY / .env 等を扱うとき
+- [[typescript-typing]] — TypeScript を書くとき (スキーマから型、境界で parse、`as` / `any` / `!` 禁止)
 
 ## コミット・プッシュ
 
@@ -59,6 +60,7 @@
 - [[no-excessive-apology]] — 指摘・「なんで?」を受けたとき
 - [[design-impl-bidirectional-check]] — 「設計済み = 実装済み」と推定しないため
 - [[test-integrity]] — テストの green / ignore の扱いを検分するため
+- [[typescript-typing]] — TypeScript の diff に `as` / `unknown` 引数 / 手書きの型ガードが無いか
 - [[self-written-rule-blind-spots]] — check list の片面性を疑うため
 
 ## 運用・インフラ

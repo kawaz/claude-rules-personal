@@ -38,11 +38,9 @@ LLM は要件に関係なく「よく見る無難な実装」へ吸い寄せら�
 
 ### TypeScript
 
-- `try/catch` で握りつぶし `console.error` だけ (原因も復帰も示さない)、
-  Promise rejection の握りつぶし
-- `any` / 検証なしの `as Foo` / `Record<string, any>` で型エラーを黙らせる(`as const` / DOM 境界 / 検証済み narrowing 後の assertion は対象外)
-- **本来 invariant な値**への non-null assertion `!` / 設計不備を隠す`?.` の乱用 (optional なドメイン値への `?.` は対象外)
-- 外部 JSON / API レスポンスをランタイム検証なしで cast
+- `try/catch` で握りつぶし `console.error` だけ (原因も復帰も示さない)、Promise rejection の握りつぶし
+- `any` / `as` / 非 null の主張 `!` / `unknown` の持ち回り / 外部データの検証なし利用: 対象外の文脈は無く、水準は [[typescript-typing]] が正本
+- 設計不備を隠す `?.` の乱用 (optional なドメイン値への `?.` は対象外)
 - 副作用を何でも `useEffect` に詰める、`useMemo` / `useCallback` の儀式化
 - boolean prop が増殖して状態の組合せが爆発 (= discriminated union にすべき場面)
 

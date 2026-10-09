@@ -8,6 +8,8 @@
   発火語: worker 選定, サブエージェント委譲, model と effort, context が足りない, Prompt is too long, Phase 0, 完了条件, 統括の立て直し, codex に大入力
 - [testing](testing/_index.md) — テスト設計の網羅観点、テストを仕様書にするコメント様式、失敗時の説明責任。
   発火語: テスト設計, 境界値, 同値分割, デシジョンテーブル, テストコメント, flaky, たまに失敗する, timeout を伸ばす, ignore 化
+- [typescript](typescript/_index.md) — スキーマから型を導いて境界で parse する書き方と、`as` / `any` / 非 null の主張を禁じる lint 設定。
+  発火語: valibot, zod, スキーマ定義, JSON.parse as, unknown を受ける関数, isRecord, oxlint, typescript-eslint, consistent-type-assertions
 - [design-spec](design-spec/_index.md) — 設計文書 (DR / プロトコル / 仕様) の着手前チェック・仕上げチェック・状態フィールドの決め方。
   発火語: DR を書く, 仕様書, プロトコル設計, スコープの粒度, 不採用表, 節番号の参照, 設計文書のレビュー, 状態の enum, 判定表
 - [docs-authoring](docs-authoring/_index.md) — `docs/` の構造標準・テンプレ・翻訳ペア・何をいつ書き残すか・裁定待ちの管理。
