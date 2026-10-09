@@ -42,6 +42,7 @@ cd ../artifacts && printf '*\n' > .gitignore && jj file track --include-ignored 
 {
   "folders": [
     { "name": "{repo}@{ws}", "path": "../../../{owner}/{repo}/{ws}" },
+    { "name": "{repo}@artifacts", "path": "../../../{owner}/{repo}/artifacts" },
     // アプリのリポなら、そのアプリの XDG 置き場を大文字の名前で常に並べる (無いものはツリーに何も出ないだけなので存在確認は要らない)。
     // workspace ファイルでは変数展開されないので、作成時に ${XDG_*_HOME} と ${APP} を実値に展開して書く
     { "name": "CONFIG", "path": "${XDG_CONFIG_HOME:-$HOME/.config}/${APP}" },

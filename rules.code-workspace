@@ -5,6 +5,10 @@
 			"path": "."
 		},
 		{
+			"name": "claude-rules-personal@artifacts",
+			"path": "../../../kawaz/claude-rules-personal/artifacts"
+		},
+		{
 			"name": "rules-emrd",
 			"path": "../../../kawaz123/claude-rules-emrd/main"
 		},
