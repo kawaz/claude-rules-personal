@@ -31,7 +31,7 @@ echo "guard: 上位への .jj 探索を止める (実体は main/)" > .jj/README
 
 ```bash
 cd "$REPO_PARENT/main"
-jj workspace add -r 'root()+' ../artifacts
+jj workspace add -r 'root()+ & ::main' ../artifacts
 cd ../artifacts && printf '*\n' > .gitignore && jj file track --include-ignored .gitignore && jj commit -m "artifacts: 既定で追跡しない枝 (残す物だけ jj file track --include-ignored)" .gitignore
 ```
 
@@ -61,9 +61,9 @@ cd ../artifacts && printf '*\n' > .gitignore && jj file track --include-ignored 
 
 `{repo}/artifacts/` は Claude セッションが作る HTML / JS 等の生成物をブラウザで閲覧するための workspace。canddy-app-proxy が `artifacts-{owner}-{repo}.<host>.tmpspace.net/<path>` をこのディレクトリに写像して配信する (非信頼コンテンツなので sandbox 側の site)。
 
-- 枝はリポの**最初の commit** (`root()+`) から生やし、main 本編の履歴に生成物を混ぜない。bookmark は作らず push もしない (ローカル枝)
+- 枝は main 本編の**最初の commit** (`root()+ & ::main`。旧方式リポでは root 直下に default workspace の空 @ が居るので `root()+` 単独だとマージ親になる) から生やし、main 本編の履歴に生成物を混ぜない。bookmark は作らず push もしない (ローカル枝)
 - `.gitignore` は `*` 1 行。既定では何も追跡せず (jj の snapshot にも乗らない)、版管理したい物だけ `jj file track --include-ignored <paths>` してから `jj commit -m "..." <paths>` する。`--include-ignored` を落とすと exit 0 のまま何も起きないので注意
-- 既存リポに後から生やす時も上の 3 行をそのまま使う (`root()+` がリポの最初の commit)
+- 既存リポに後から生やす時も上の 3 行をそのまま使う (`root()+ & ::main` が main の最初の commit)
 - `.jj/` と `.gitignore` は配信側で `/.*` を 404 にして隠す
 
 ## 既存リポジトリの clone
