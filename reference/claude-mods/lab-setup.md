@@ -7,7 +7,8 @@
 - **別の `CLAUDE_CONFIG_DIR`** を作る (`/tmp/mods-lab/config-a` 等)。インストール済み plugin・settings の hook・session 一覧が普段の環境から切り離される。同じ config home の session 同士は SendMessage で届き合うので、送受信を試す時は 2 本目も同じ config home、届かないことを試す時は別の config home にする
 - **既定の config home の場所をいじらない**。`~/.claude` を意図的に置き換えている環境 (regular file にしてある等) では、実験のためにディレクトリを作らない
 - **`env -i` で最小の環境から起動する**。Claude Code の中から起動すると `CLAUDE_CODE_MESSAGING_SOCKET` / `CLAUDE_CODE_MESSAGING_TOKEN` / `CLAUDE_CODE_SESSION_ID` / `CLAUDECODE` が継承され、子の Claude Code が親の session を自分と取り違えうる
-- **API の認証を環境変数で渡している環境**では、その変数を実験用 config home の `settings.json` の `env` に写す (パーミッション 0600、値は起動元の環境から写し、リポやログに残さない)
+- **認証は起動コマンドの `--settings` に `apiKeyHelper` と `env.ANTHROPIC_BASE_URL` をセットで渡す**。ヘルパが返す鍵は gateway 用なので、BASE_URL も同じ gateway を指す必要がある。隔離 config の `settings.json` には認証の値を書かない
+- **messaging socket の場所を隔離する**。harness が作る socket は既定で `/tmp/cc-socks/<pid>.sock` (実セッションと同じディレクトリ)。起動時に `XDG_RUNTIME_DIR` / `CLAUDE_CODE_TMPDIR` / `TMPDIR` を作業ディレクトリの中に向けると `<そのディレクトリ>/cc-socks/<pid>.sock` に作られ、state file の `messagingSocketPath` もそこを指す (2.1.295 で実測。3 つのうちどれが効いているかは切り分けていない)。hyoui を使うなら `HYOUI_STATE_DIR` も同じ場所に向ける
 - **`--plugin-dir <mod>`** で mod を session 限りで読む。`CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1` が無いと module は読まれない
 - **`--debug`** で `$CLAUDE_CONFIG_DIR/debug/<sessionId>.txt` に module の読み込み・reload・hook の所要時間が出る
 - 安いモデル (`--model haiku`) で十分。ただし haiku は auto mode 非対応 (`auto mode disabled: model ... does not support auto mode`)
@@ -19,8 +20,7 @@ LAB=/tmp/mods-lab
 mkdir -p "$LAB/config-a" "$LAB/ws" && (cd "$LAB/ws" && git init -q)
 cat > "$LAB/config-a/settings.json" <<'EOF'
 {
-  "crossSessionInbound": "accept",
-  "env": {}
+  "crossSessionInbound": "accept"
 }
 EOF
 chmod 600 "$LAB/config-a/settings.json"
@@ -28,7 +28,7 @@ cp -R <rules リポ>/reference/claude-mods/scripts/observe-mod "$LAB/mod"
 claude plugin validate "$LAB/mod"
 ```
 
-`crossSessionInbound: "accept"` は別 session からの配送を確認なしで受ける設定 (受信を試す時だけ要る)。`env` には上記の認証用変数を入れる。
+`crossSessionInbound: "accept"` は別 session からの配送を確認なしで受ける設定 (受信を試す時だけ要る)。認証は上記のとおり起動コマンドの `--settings` で渡す。
 
 ## 起動
 
@@ -44,7 +44,7 @@ tmux capture-pane -p -t mods-lab          # 画面を見る
 tmux send-keys -t mods-lab Down Enter     # キーを送る
 ```
 
-新しい config home の初回は、テーマ選択 (Enter)、Security notes (Enter)、workspace trust (既定選択は `No, exit` なので Down → Enter) の順にダイアログが出る。
+新しい config home の初回は、テーマ選択 (Enter)、Security notes (Enter)、workspace trust (既定選択は `No, exit` なので Down → Enter) の順にダイアログが出る。`hyoui input` で答える時、選択キーと Enter を同じ呼び出しで送ると確認画面で「No」が選ばれて終了することがある。選択を `hyoui screen dump` で確かめてから Enter を送る。
 
 headless は同じ環境で `claude -p "<prompt>" --plugin-dir ... --debug --model haiku` を cwd で直接走らせる。
 
@@ -85,10 +85,11 @@ jq -r '.ev' /tmp/mods-lab/log/events-*.jsonl | sort | uniq -c | sort -rn
 ## session の発見と peer socket への直接送信
 
 - 同じ config home の live session 一覧: `env -i HOME="$HOME" PATH="$PATH" CLAUDE_CONFIG_DIR=/tmp/mods-lab/config-a claude agents --json`
-- state file `sessions/<pid>.json` (`sessionId` / `messagingSocketPath` / `name` / `status` 等) は **trust 承諾後に**書かれる。承諾前は `claude agents --json` に出ない。一方 peer token の key file `sessions/<pid>.<digest>.key` と UDS の listen (実測 `/tmp/cc-socks/<pid>.sock`) は承諾前からある
+- 起動の cwd に symlink (`/tmp` → `/private/tmp`、作業ディレクトリの symlink) や末尾 `/` があっても、state file と `claude agents --json` の cwd は realpath (末尾 `/` なし) に揃う
+- state file `sessions/<pid>.json` (`sessionId` / `messagingSocketPath` / `name` / `status` 等) は **trust 承諾後に**書かれる。承諾前は `claude agents --json` に出ない。一方 peer token の key file `sessions/<pid>.<digest>.key` と UDS の listen (既定は `/tmp/cc-socks/<pid>.sock`、隔離の要点の環境変数で移せる) は承諾前からある
 - 本トピックの `scripts/uds-send.py <config_dir> <pid> <text> [--from-name NAME]` は、state file と key file から socket と token を引き、auth frame と `type: "user"` frame を 1 行ずつ書く。受け側では `session.receive` (`origin: { kind: 'peer' }`) を通り、`UserMessage` の `props.from.name` に `--from-name` が入る。socket は何も返さない (2 秒待って 0 byte)
 
 ## 後始末
 
 - 起動した session を落とす (`tmux kill-session -t mods-lab` 等)。`ps` で `CLAUDE_CONFIG_DIR` の実験パスを含むプロセスが残っていないことを見る
-- 実験用 config home の `settings.json` に写した認証情報は、実験が終わったら消す
+- 作業ディレクトリに向けた `cc-socks/` の socket は、セッション終了後に消えている。残っていれば該当プロセスが生きている
