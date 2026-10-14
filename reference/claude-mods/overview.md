@@ -1,6 +1,6 @@
 # Claude Mods の立て付け
 
-Claude Mods は Claude Code の plugin が持てる 5 種目の hook (function hook)。plugin という配布・発見の単位はそのままで、`hooks/hooks.json` に command / prompt / agent / http と並んで TypeScript / JavaScript のモジュールを名指しする。記述の根拠は Claude Code 2.1.299 が書き出した型定義 (`.claude-plugin/types/claude-code/index.d.ts`)、公式リポ anthropics/claude-code の `mods/` (README と built-in mod のソース)、実機観測。型定義の冒頭は EARLY ACCESS (予告なく変わりうる) と書く。開発ループは reference の `claude-mods/develop`。
+Claude Mods は Claude Code の plugin が持てる 5 種目の hook (function hook)。plugin という配布・発見の単位はそのままで、`hooks/hooks.json` に command / prompt / agent / http と並んで TypeScript / JavaScript のモジュールを名指しする。記述の根拠は Claude Code 2.1.299 が書き出した型定義 (`.claude-plugin/types/claude-code/index.d.ts`)、公式リポ anthropics/claude-code の `mods/` (README と built-in mod のソース)、実機観測。Mods は 2.1.287 から標準で有効で、有効化の設定は無く無効化もできない。型定義の冒頭と公式 README には API が予告なく変わりうるという注記が残っている (README の「function hooks が有効な所でだけ読まれる」は現状と合わない)。開発ループは reference の `claude-mods/develop`。
 
 ## plugin の形 (3 ファイル)
 
