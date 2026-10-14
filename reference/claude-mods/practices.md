@@ -41,10 +41,11 @@ mod を設計する時の判断軸。事実 (event の欄、`$` の制限) は r
 - `description` は「何をするか」の 1 文。使い所は skill 側に書く
 - `isDeferred: true` で schema は呼ばれた時だけ context に載る
 
-## 外から来るデータの parse
+## npm パッケージと bundle
 
-- module は相対 import と `"claude-code"` しか読めない。npm パッケージは plugin 内に同梱するしかない
-- parse する形が少ないなら、境界 (設定ファイル、`$.store` の読み戻し) に手書きの parse を 1 か所ずつ置き、`Design rationale:` で同梱しない理由を書く
+- module は相対 import と `"claude-code"` しか読めない (bare specifier は validate が拒む)。npm パッケージは plugin 内に置いて相対 import する (dist を直接置いて動くことは実測済み)
+- 依存が多いなら bundler で 1 ファイルに畳む。validate は `on(...)` の pattern、`$.noun.method`、`$.env` の変数名、`$.state` の参照を静的に走査し、実行時はその列挙にあるものしか通さないので、minify で呼び出しの形やリテラルが崩れると実行時に拒まれる。識別子の短縮・空白の削除は影響しない。文字列の変数への括り出し、`$.store` 等の別名化、event 名の定数化は不可 (未確認: bundle + minify の実機確認はしていない。bundle 後に `claude plugin validate` を回し、`calls` / `env` / `state` の列挙が bundle 前と一致することを見る)
+- parse する形が少ないなら同梱せず、境界 (設定ファイル、`$.store` の読み戻し) に手書きの parse を 1 か所ずつ置き、`Design rationale:` で同梱しない理由を書く
 
 ## 実機で確かめる
 
