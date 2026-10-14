@@ -8,6 +8,8 @@ Claude Code の plugin が持てる TypeScript / JavaScript の hook module。en
   発火語: --plugin-dir, CLAUDE_CODE_PLUGIN_DIRS, claude plugin validate, claude plugin test, hot-reload, reload されない, dev-mods, /plugin-types
 - [events](events.md) — hook できる event の全一覧 (engine / `$` の操作 / `classic.*`)、1 turn の実測時系列、対話と `-p` の差、`session.start` が `/clear` で起きない等の意味論。
   発火語: on('*'), event 一覧, 発火順, tool.call, tool.check, prompt.submit, session.receive, session.start, classic.PreToolUse, origin.kind, composer, -p で動かない, isInteractive
+- [capabilities](capabilities.md) — event ごとの能力表 (`e` の主要欄、`next(e)` の結果、書き換えられる欄と配置、model に届く文脈を足す欄、pinned な欄) と、model に文脈を渡す時の event の選び方。
+  発火語: model に文脈を渡す, context を足す, additionalContext, reminder を足す, tool.call の context, skill.prompt, prompt.attachment, command.run の context が消える, after next() dropped, wrong shape, stop_hook_active, pinned, agentId で subagent, 書き換えられる欄
 - [dollar-api](dollar-api.md) — `$` の noun ごとのメソッドと制限 (4 MiB、HTTP のみ、stdin は 1 回、予算は `$` 待ちを数えない)、外部プロセスとつなぐ形、`$.session.send` の届く範囲。
   発火語: $.fs, $.http.fetch, socketPath, $.process.run, $.process.spawn, $.store, $.state, $.clock.every, $.env.get, $.session.send, $.ui.status, HookBudget, 4 MiB
 - [dialogs](dialogs.md) — permission / AskUserQuestion / Elicitation / engine 自身のダイアログで読めるもの・割り込める点・返せるもの、表示中のダイアログを閉じる during 配置、待つ形。
