@@ -1,11 +1,11 @@
 # Claude Mods (function hooks)
 
-Claude Code の plugin が持てる TypeScript / JavaScript の hook module。engine の event と描画を `($, e, next)` の middleware で書き換え、外界へは `$` を通して届く。early access (インストール物は `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1` か rollout で有効)。
+Claude Code の plugin が持てる TypeScript / JavaScript の hook module。engine の event と描画を `($, e, next)` の middleware で書き換え、外界へは `$` を通して届く。
 
 - [overview](overview.md) — plugin の 3 ファイル構成、`register(on, options)` と入れ子の順序、実行環境と時間予算、security モデル、command hook・MCP・skill との差分表。
   発火語: Claude Mods, function hooks, hooks module, register(on), ($, e, next), Koa, middleware, worker, sandbox, command hook との違い, MCP との違い, plugin との違い, sec-default
-- [develop](develop.md) — mod が読まれる条件 (flag / rollout / built-in)、`--plugin-dir` 等の一時読み込み、validate / test / hot-reload / 型定義の書き出し。
-  発火語: CLAUDE_CODE_ENABLE_FUNCTION_HOOKS, hooks modules are not turned on, --plugin-dir, CLAUDE_CODE_PLUGIN_DIRS, claude plugin validate, claude plugin test, hot-reload, reload されない, dev-mods, /plugin-types
+- [develop](develop.md) — `--plugin-dir` 等の一時読み込み、validate / test / hot-reload / 型定義の書き出し。
+  発火語: --plugin-dir, CLAUDE_CODE_PLUGIN_DIRS, claude plugin validate, claude plugin test, hot-reload, reload されない, dev-mods, /plugin-types
 - [events](events.md) — hook できる event の全一覧 (engine / `$` の操作 / `classic.*`)、1 turn の実測時系列、対話と `-p` の差、`session.start` が `/clear` で起きない等の意味論。
   発火語: on('*'), event 一覧, 発火順, tool.call, tool.check, prompt.submit, session.receive, session.start, classic.PreToolUse, origin.kind, composer, -p で動かない, isInteractive
 - [dollar-api](dollar-api.md) — `$` の noun ごとのメソッドと制限 (4 MiB、HTTP のみ、stdin は 1 回、予算は `$` 待ちを数えない)、外部プロセスとつなぐ形、`$.session.send` の届く範囲。

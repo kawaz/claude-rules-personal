@@ -9,7 +9,7 @@
 - **`env -i` で最小の環境から起動する**。Claude Code の中から起動すると `CLAUDE_CODE_MESSAGING_SOCKET` / `CLAUDE_CODE_MESSAGING_TOKEN` / `CLAUDE_CODE_SESSION_ID` / `CLAUDECODE` が継承され、子の Claude Code が親の session を自分と取り違えうる
 - **認証は起動コマンドの `--settings` に `apiKeyHelper` と `env.ANTHROPIC_BASE_URL` をセットで渡す**。ヘルパが返す鍵は gateway 用なので、BASE_URL も同じ gateway を指す必要がある。隔離 config の `settings.json` には認証の値を書かない
 - **messaging socket の場所を隔離する**。harness が作る socket は既定で `/tmp/cc-socks/<pid>.sock` (実セッションと同じディレクトリ)。起動時に `XDG_RUNTIME_DIR` / `CLAUDE_CODE_TMPDIR` / `TMPDIR` を作業ディレクトリの中に向けると `<そのディレクトリ>/cc-socks/<pid>.sock` に作られ、state file の `messagingSocketPath` もそこを指す (2.1.295 で実測。3 つのうちどれが効いているかは切り分けていない)。hyoui を使うなら `HYOUI_STATE_DIR` も同じ場所に向ける
-- **`--plugin-dir <mod>`** で mod を session 限りで読む。`CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1` が無いと module は読まれない
+- **`--plugin-dir <mod>`** で mod を session 限りで読む
 - **`--debug`** で `$CLAUDE_CONFIG_DIR/debug/<sessionId>.txt` に module の読み込み・reload・hook の所要時間が出る
 - 安いモデル (`--model haiku`) で十分。ただし haiku は auto mode 非対応 (`auto mode disabled: model ... does not support auto mode`)
 
@@ -37,7 +37,7 @@ claude plugin validate "$LAB/mod"
 ```bash
 tmux new-session -d -s mods-lab -x 120 -y 40 -c /tmp/mods-lab/ws \
   env -i HOME="$HOME" USER="$USER" PATH="$PATH" TERM=xterm-256color LANG=ja_JP.UTF-8 \
-  CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1 CLAUDE_CONFIG_DIR=/tmp/mods-lab/config-a \
+  CLAUDE_CONFIG_DIR=/tmp/mods-lab/config-a \
   MODS_LAB_DIR=/tmp/mods-lab/log \
   claude --plugin-dir /tmp/mods-lab/mod --debug --model haiku
 tmux capture-pane -p -t mods-lab          # 画面を見る

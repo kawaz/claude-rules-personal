@@ -1,6 +1,6 @@
 # Claude Mods の立て付け
 
-Claude Mods は Claude Code の plugin が持てる 5 種目の hook (function hook)。plugin という配布・発見の単位はそのままで、`hooks/hooks.json` に command / prompt / agent / http と並んで TypeScript / JavaScript のモジュールを名指しする。記述の根拠は Claude Code 2.1.283 同梱の skill `plugin-authoring` と型定義 `claude-code.d.ts`、2.1.284 での実機観測。early access で、版が進むと変わりうる。読ませる条件と開発ループは reference の `claude-mods/develop`。
+Claude Mods は Claude Code の plugin が持てる 5 種目の hook (function hook)。plugin という配布・発見の単位はそのままで、`hooks/hooks.json` に command / prompt / agent / http と並んで TypeScript / JavaScript のモジュールを名指しする。記述の根拠は Claude Code 2.1.283 同梱の skill `plugin-authoring` と型定義 `claude-code.d.ts`、2.1.284 での実機観測。版が進むと変わりうる。開発ループは reference の `claude-mods/develop`。
 
 ## plugin の形 (3 ファイル)
 
@@ -65,17 +65,14 @@ export function register(on) {
 | 状態 | 自前 | `$.state` / `$.store` | 自前 | 無し |
 | 観測範囲 | 定義済み event のみ | engine の全 event と他 plugin の `$` 呼び出し。command hook の event も `classic.<Event>` で | 自分への呼び出し | — |
 | 静的な宣言 | 無し | validate の列挙に実行時も縛られる | — | — |
-| 有効化 | 常時 | built-in は常時、他は flag か rollout | 常時 | 常時 |
 
 command hook の event を Mod から取る時は `classic.<Event>` (`classic.PreToolUse` / `classic.PermissionRequest` / `classic.Stop` / `classic.SessionEnd` ...) を hook する。`e` は command hook が stdin で受け取るものと同じ (`session_id` / `transcript_path` / `cwd` / `permission_mode` / `hook_event_name` ... を含む)。
 
 ## 2026-09-29 時点の未確認
 
 - `modules` を含む hooks.json を Mods 非対応の古い build が丸ごと捨てるか (二次資料の主張)。任意の版に配る plugin に `modules` を足す前に確かめる
-- 1 plugin が command hook と module を併せ持つ時、flag なしの環境で command hook 側が変わらず動くか
 - `$.store` の保存先が `CLAUDE_CONFIG_DIR` に従うか (型定義は「user の Claude Code 設定ディレクトリの下の JSON」、二次資料は `~/.claude/plugins/store/`)
 - `$.process.run` の子プロセスの親 pid (worker か engine 本体か)
-- flag 不要化 (正式出荷) の時期と、その時点の API 差分
 
 ## 一次資料
 
