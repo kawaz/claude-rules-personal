@@ -69,6 +69,7 @@ trust の承諾前は `hooks modules not loaded until workspace trust is accepte
 作りの注意 (観測結果に効く):
 
 - `*` hook は `$` に触らない (`engine.create` の時点で `$` が空)。書き出しは `session.start` で始めた `$.clock.every(1000)` で行う
+- 型定義は「installed plugin の `*` は telemetry の event (`telemetry.log` / `telemetry.mark`) を選ばない」と書く。user tier の `--plugin-dir` の mod も同じ扱いと読める (未確認)。見るなら `telemetry.*` を別に登録する
 - timer callback から呼んだ `$` は自分の `*` hook に現れないので、記録処理自体の `fs.read` / `fs.write` はほぼ log に混ざらない。hook の中から `$` を呼ぶ処理を足すと、その呼び出しは `by: { plugin: 'observe-mod' }` で混ざる
 - `session.start` より前に走る `ui.render` 等も buffer に溜まり、`session.start` 後の最初の flush で書かれる
 - 端末ごと kill すると最後の 1 秒分と `classic.SessionEnd` が書かれずに終わることがある

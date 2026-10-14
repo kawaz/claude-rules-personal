@@ -1,10 +1,10 @@
 # Claude Mods とダイアログ
 
-permission の確認・AskUserQuestion・MCP Elicitation・engine 自身のダイアログについて、mod から何が読めて、どこで割り込めて、何を返せるか。Claude Code 2.1.283 の型定義と 2.1.284 の実機 (default permission mode) による。
+permission の確認・AskUserQuestion・MCP Elicitation・engine 自身のダイアログについて、mod から何が読めて、どこで割り込めて、何を返せるか。Claude Code 2.1.299 の型定義と built-in `sec-default` の README、2.1.284 の実機 (default permission mode) による。
 
 ## 要点
 
-- **出る前に決める**のが基本。permission は `tool.check` か `classic.PermissionRequest` で答えればダイアログは出ない
+- **出る前に決める**のが基本。permission は `tool.check` か `classic.PermissionRequest` で答えればダイアログは出ない。ただし人に答えさせる tool (AskUserQuestion、plan の承認) は `tool.check` の allow ではダイアログが消えない (締める方向だけ)
 - **表示中のダイアログを閉じる**ことは `tool.call` の during 配置でできる。AskUserQuestion は答え (`{ result }`) を返せる。permission は `{ deny }` だけ (許可側は tool の実行結果を作れないので、出る前に決める)
 - **engine が描いたダイアログのボタンを押す API は無い**。`ui.press` / `ui.input` / `ui.select` の対象は plugin 自身が描いた要素だけ
 - **描き換えられるダイアログは AskUserQuestion だけ**。permission のダイアログは engine だけが描く (mod は `$.ui.notice(tool_use_id, text)` で下に 1 行足せる)
@@ -14,13 +14,20 @@ permission の確認・AskUserQuestion・MCP Elicitation・engine 自身のダ�
 
 1. `tool.call` — ダイアログは `next(e)` の内側にある。`{ deny }` / `{ result }` を返せば出ない。引数は書き換え可 (`tool` / `tool_use_id` / `agentId` は不可)。managed settings の hook が先に走る
 2. `classic.PreToolUse` — `tool.call` の core の中。`allow` / `ask: string` / `deny: string` / `updatedInput` / `additionalContext`
-3. `tool.check` — mode が ask を決着させる前。`next(e)` が engine の判定 (rules / mode / tool 自身の check / PreToolUse) を返し、hook はどちら向きにも覆せる。返すのは `{ decision: 'allow' | 'ask' | 'deny', reason?, rule? }`
+3. `tool.check` — mode が ask を決着させる前。`next(e)` が engine の判定 (rules / mode / tool 自身の check / PreToolUse) を返し、hook はどちら向きにも覆せる。返すのは `{ decision: 'allow' | 'ask' | 'deny', reason?, rule? }` (engine の判定は `hook` (決めた classic hook event) と `ceiling` (組織が connector の tool に設けた上限) も持つ)。`e` は全欄 pinned で、call の中身を変えるのは 1 の `tool.call`。どれかの plugin が hook している時だけ上がり、settings の PreToolUse hook が allow した call では上がらない。plan mode の非 read 呼び出しも締める方向だけ
 4. ask の決着 — mode の decider (ダイアログ / auto mode の classifier / headless host)。classifier が拒むと `classic.PermissionDenied` (`retry` を返せる)
 5. `classic.PermissionRequest` — ダイアログの直前。`{ decision: { behavior: 'allow', updatedInput?, updatedPermissions? } }` か `{ decision: { behavior: 'deny', message?, interrupt? } }`
 6. ダイアログ — engine だけが描く
 7. 人の応答 — 拒否は `ToolUse` の `isErrored`、許可なら tool が走り `tool.call` の `next(e)` が `{ ref, result, text, isReadOnly? }` で resolve
 
 `$.tool.check({ tool, input })` は同じ判定を問い合わせだけで走らせる (何も実行せず、ダイアログも PreToolUse も classifier も無い)。「この呼び出しはダイアログになるか」を事前に知る手段。
+
+### 組織が管理する機械 (`sec-default` が座る)
+
+- user tier の mod が `tool.check` の判定を緩めた・言い換えた時、`sec-default` は user tier 抜きで chain を再実行し、deny と「settings rule・classic hook・setting 自身の check・組織の ceiling・host (SDK の `can_use_tool` 等) が後ろにある ask」はその判定に戻す。mod の allow で消せるのは mode 自身の ask (何も名指さない ask) だけ
+- 戻した時は transcript と debug log に 1 度 `<plugin> tried to lift a deny rule in your settings from a <tool> call (<rule>); the deny rule holds over the plugins you install (allowModsToOverrideDenyRules)` (言い換えだけなら `tried to reword`)
+- managed settings の `pluginConfigs["cc-plugin-sec-default@builtin"].options.allowModsToOverrideDenyRules: true` (literal の `true` だけ) で解除される
+- 戻った ask は ask のままなので、人の classic `PermissionRequest` hook はそれに答えられる (それを止めるのは `allowManagedHooksOnly`)
 
 ## 実測
 
@@ -68,7 +75,7 @@ permission の確認・AskUserQuestion・MCP Elicitation・engine 自身のダ�
 | mod が人に訊く | `$.ui.ask` (`$` 呼び出しなので予算を消費しない) | 実測済み |
 | 自前の承認 UI | `$.state` に pending を置き Pane / AbovePrompt に描く。押下を module 内 Promise で待つと予算を消費するので、先に deny して押下後に再実行させる設計になる | 推測 |
 
-## 2026-09-29 時点の未確認
+## 2026-10-14 時点の未確認
 
 - auto mode で `classic.PermissionRequest` が起きるか (haiku は auto mode 非対応で試せていない)
 - `classic.Elicitation` に型に無い `action` / `content` を返した時の runtime の扱い

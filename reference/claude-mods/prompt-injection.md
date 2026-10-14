@@ -1,15 +1,22 @@
 # 外部から「人の入力」として prompt を入れる
 
-外部プロセスが決めた文を、engine から見て人が打った prompt (`origin.kind: 'composer'`) として session に入れる手順。人が書きかけていた文は退避して、送信直後に composer へ戻す。Claude Code 2.1.284 の対話 session で一巡を実測済み。
+外部プロセスが決めた文を、engine から見て人が打った prompt (`origin.kind: 'composer'`) として session に入れる手順。人が書きかけていた文は退避して、送信直後に composer へ戻す。部品の仕様は Claude Code 2.1.299 の型定義、一巡は 2.1.284 の対話 session で実測。
 
 ## なぜ `$.prompt.submit` ではないか
 
-`$.prompt.submit({ text })` は `origin` が `{ kind: 'plugin', name }` になり、model にも hook にも plugin 由来として見える。`origin.kind` は閉じた集合で、plugin が `composer` を名乗る口は無い。`composer` を得るには composer に文を置き、Enter を端末のキー入力として送る。
+`$.prompt.submit({ text })` は `origin` が `{ kind: 'plugin', name }` になり、model は "The <name> plugin sent a message: ..." の枠で読む。`$.prompt.submit({ text, asUser: true })` なら model は枠なしで人の言葉として読むが、hook と provenance の判定が見る origin は `{ kind: 'plugin', name, asUser: true }` のままで、transcript も plugin を名指す。plugin の prompt では `@file` の mention と貼り付け画像は展開されない (`asUser` でも)。
+
+| 欲しいもの | 口 |
+|---|---|
+| model が人の言葉として読めばよい | `$.prompt.submit({ text, asUser: true })` (session が idle になってから自前の turn) |
+| hook・transcript からも人の入力に見える (`origin.kind: 'composer'`)、`@file` も展開される | 下の手順 (composer に置いて端末から Enter) |
+
+`origin.kind` は閉じた集合で、plugin が `composer` を名乗る口は無い。`composer` を得るには composer に文を置き、Enter を端末のキー入力として送る。
 
 ## 部品
 
 - `$.prompt.read()` → `{ text, cursor }`。書きかけが無ければ `{ text: '', cursor: 0 }`。never reject
-- `$.prompt.fill({ text, mode })` → `{ isFilled, text, cursor, refusal? }`。`mode` は `replace` (既定) / `append` / `insert` (cursor 位置)。ダイアログ中は `refusal: 'dialog'`、`-p` / SDK は `refusal: 'no_composer'`。他 plugin の `prompt.fill` hook が拒むこともある
+- `$.prompt.fill({ text, mode, decorations? })` → `{ isFilled, text, cursor, refusal? }`。`mode` は `replace` (既定) / `append` / `insert` (cursor 位置)。ダイアログ中は `refusal: 'dialog'`、`-p` / SDK や自前の composer を描く surface は `refusal: 'no_composer'`。他 plugin の `prompt.fill` hook が拒むこともあり、その時は `refusal` が無い (原因不明として扱い、box が無いとは見なさない)。返る `text` / `cursor` は module のどこかで `$.prompt.read` を呼んでいる plugin にだけ入り、それ以外には空の box が返る。端末で何も描かれない code point は除かれて入る。`decorations` (`{ start, end, color?, bold?, italic?, ... }`) で入れた文に色を塗れる (次の編集で消える)
 - `prompt.submit` hook の `await next(e)` は prompt が session に入り turn が始まった時点 (実測 2〜8ms) で resolve する。model の応答は待たない
 - Enter の送出は mod の外。端末にキーを送れる道具 (tmux の `send-keys`、kawaz 環境なら hyoui の `key:Enter` 等) を使う
 
