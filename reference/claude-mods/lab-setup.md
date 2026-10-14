@@ -8,7 +8,7 @@
 - **既定の config home の場所をいじらない**。`~/.claude` を意図的に置き換えている環境 (regular file にしてある等) では、実験のためにディレクトリを作らない
 - **`env -i` で最小の環境から起動する**。Claude Code の中から起動すると `CLAUDE_CODE_MESSAGING_SOCKET` / `CLAUDE_CODE_MESSAGING_TOKEN` / `CLAUDE_CODE_SESSION_ID` / `CLAUDECODE` が継承され、子の Claude Code が親の session を自分と取り違えうる
 - **認証は起動コマンドの `--settings` に `apiKeyHelper` と `env.ANTHROPIC_BASE_URL` をセットで渡す**。ヘルパが返す鍵は gateway 用なので、BASE_URL も同じ gateway を指す必要がある。隔離 config の `settings.json` には認証の値を書かない
-- **messaging socket は隔離できない前提で扱う**。harness が作る socket は `/tmp/cc-socks/<pid>.sock` か `/tmp/cc-socks-<uid>/<pid>.sock` で、実セッションと同じ場所に並ぶ。2.1.299 の `env -i` 起動では `XDG_RUNTIME_DIR` / `CLAUDE_CODE_TMPDIR` / `TMPDIR` を作業ディレクトリに向けても `/tmp/cc-socks-<uid>/` に作られた (2.1.295 ではこれらの環境変数で移せた)。どちらのディレクトリになるかの条件は切り分けていない。pid で区別できるので実害は無いが、後始末で消し忘れを探す時はこの 2 か所を見る。hyoui を使うなら `HYOUI_STATE_DIR` は作業ディレクトリに向ける
+- **messaging socket は隔離できない前提で扱う**。harness が作る socket は `/tmp/cc-socks/<pid>.sock` か `/tmp/cc-socks-<uid>/<pid>.sock` で、実セッションと同じ場所に並ぶ。2.1.299 の `env -i` 起動では `XDG_RUNTIME_DIR` / `CLAUDE_CODE_TMPDIR` / `TMPDIR` を作業ディレクトリに向けても `/tmp/cc-socks-<uid>/` に作られた。どちらのディレクトリになるかの条件は切り分けていない。pid で区別できるので実害は無いが、後始末で消し忘れを探す時はこの 2 か所を見る。hyoui を使うなら `HYOUI_STATE_DIR` は作業ディレクトリに向ける
 - **`--plugin-dir <mod>`** で mod を session 限りで読む
 - **`--debug`** で `$CLAUDE_CONFIG_DIR/debug/<sessionId>.txt` に module の読み込み・reload・hook の所要時間が出る
 - 安いモデル (`--model haiku`) で十分。ただし haiku は auto mode 非対応 (`auto mode disabled: model ... does not support auto mode`)
