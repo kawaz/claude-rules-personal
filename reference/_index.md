@@ -26,7 +26,7 @@
   発火語: codesign, notarize, Developer ID, App-Specific Password, stapler, Gatekeeper, TCC, System Extension
 - [auth-patterns](auth-patterns/_index.md) — 他プロダクトにも効く認証設計パターン (passkey の登録、peer 間相互認証、自分の endpoint の確定)。
   発火語: passkey, WebAuthn, 登録フロー, refresh token, cookie, peer 認証, mesh, TLS, iss/aud, self の確定, endpoint, instance id, 引っ越し
-- [claude-mods](claude-mods/_index.md) — Claude Code の function hooks (Mods) の立て付け (tier・`.catch`・built-in `sec-default`)・開発ループ (validate / test)・event と発火順・event ごとの能力表 (書き換えられる欄、model に文脈を足す欄)・`$` API と制限・ダイアログへの割り込み・外部からの prompt 注入・隔離実験の手順と観測 mod。
+- [claude-mods](claude-mods/_index.md) — Claude Code の function hooks (Mods) の立て付け (tier・`.catch`・built-in `sec-default`)・開発ループ (validate / test)・event と発火順・event ごとの能力表 (書き換えられる欄、model に文脈を足す欄)・設計の選び方 (計測の契機、文脈の足し方、状態の置き場、skill と tool の分担)・`$` API と制限・ダイアログへの割り込み・外部からの prompt 注入・隔離実験の手順と観測 mod。
   発火語: Claude Mods, function hooks, hooks module, register(on), userConfig, .catch, sec-default, $.prompt.fill, $.session.append, tool.check, session.receive, on('*'), --plugin-dir, claude plugin test, ダイアログを外から答える, mod を試す, model に文脈を渡す, additionalContext
 - [session-state](session-state/_index.md) — 引き継ぎ手順 (pre-clear): 状態ファイルの読み方 (load) と書き方 (write)。
   発火語: pre-clear 出力, latest.md, 引き継ぎ, 状態ファイル, pre-compact
