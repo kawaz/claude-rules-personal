@@ -6,7 +6,12 @@ mod を設計する時の判断軸。事実 (event の欄、`$` の制限) は r
 
 - Claude Code の動作は「context を全部送る → response が返る」の繰り返し。この 1 往復が `turn.step` で、全部拾える
 - `tool.call` / `prompt.submit` / `turn.complete` / `classic.*` 等は、その往復の一部や前後を選ぶためのもの。選び方は `capabilities`
-- main loop だけ見るなら `e.agentId === undefined` で絞る (subagent の往復にも同じ event が起きる)
+
+## main と subagent の見分け
+
+- subagent (worker) の往復にも main と同じ event が起きる
+- `e.agentId` が無ければ main、あれば subagent。main だけ見るなら `e.agentId === undefined` で絞る
+- `$.session.append` 等に `agentId` を渡すと、その subagent の会話が対象になる
 
 ## model に文脈を足す
 
