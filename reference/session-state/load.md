@@ -41,4 +41,4 @@ loaded_by:
 
 ## 書く側の禁則
 
-**状態ファイルは kawaz または hook の明示指示でしか書かない** (区切りの良さ・context 残量・保険を理由に自発的に書かない)。書く指示が来たら reference の `session-state/write` を読む。
+**状態ファイルは自主判断で書かない** (区切りの良さ・context 残量・保険を理由に自発的に書かない)。kawaz か hook の指示があれば、kawaz に問い返さずに書く。書く時は reference の `session-state/write` を読む。
