@@ -1,6 +1,6 @@
 # Claude Mods を書く時の選び方
 
-mod を設計する時に迷う点の判断軸。事実 (event の欄、`$` の制限) は reference の `claude-mods/capabilities` / `dollar-api` が正本で、ここは「どれを選ぶか」だけを書く。根拠は型定義 (Claude Code 2.1.299) と、kawaz/claude-context-notify の Mods 化 (2026-10-14) での実測。
+mod を設計する時に迷う点の判断軸。事実 (event の欄、`$` の制限) は reference の `claude-mods/capabilities` / `dollar-api` が正本で、ここは「どれを選ぶか」だけを書く。2026-10-14 に Claude Code 2.1.299 で書いた (根拠は同版の型定義と、kawaz/claude-context-notify の Mods 化での実測)。Mods の API は版が進むと変わるので、この日付と版からの経過が内容の鮮度の目安になる。
 
 ## 計測は response ごと、単位は turn でも tool でもない
 
