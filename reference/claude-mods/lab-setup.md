@@ -8,7 +8,7 @@
 - **既定の config home の場所をいじらない**。`~/.claude` を意図的に置き換えている環境 (regular file にしてある等) では、実験のためにディレクトリを作らない
 - **`env -i` で最小の環境から起動する**。Claude Code の中から起動すると `CLAUDE_CODE_MESSAGING_SOCKET` / `CLAUDE_CODE_MESSAGING_TOKEN` / `CLAUDE_CODE_SESSION_ID` / `CLAUDECODE` が継承され、子の Claude Code が親の session を自分と取り違えうる
 - **認証は起動コマンドの `--settings` に `apiKeyHelper` と `env.ANTHROPIC_BASE_URL` をセットで渡す**。ヘルパが返す鍵は gateway 用なので、BASE_URL も同じ gateway を指す必要がある。隔離 config の `settings.json` には認証の値を書かない
-- **messaging socket の場所を隔離する**。harness が作る socket は既定で `/tmp/cc-socks/<pid>.sock` (実セッションと同じディレクトリ)。起動時に `XDG_RUNTIME_DIR` / `CLAUDE_CODE_TMPDIR` / `TMPDIR` を作業ディレクトリの中に向けると `<そのディレクトリ>/cc-socks/<pid>.sock` に作られ、state file の `messagingSocketPath` もそこを指す (2.1.295 で実測。3 つのうちどれが効いているかは切り分けていない)。hyoui を使うなら `HYOUI_STATE_DIR` も同じ場所に向ける
+- **messaging socket は隔離できない前提で扱う**。harness が作る socket は `/tmp/cc-socks/<pid>.sock` か `/tmp/cc-socks-<uid>/<pid>.sock` で、実セッションと同じ場所に並ぶ。2.1.299 の `env -i` 起動では `XDG_RUNTIME_DIR` / `CLAUDE_CODE_TMPDIR` / `TMPDIR` を作業ディレクトリに向けても `/tmp/cc-socks-<uid>/` に作られた (2.1.295 ではこれらの環境変数で移せた)。どちらのディレクトリになるかの条件は切り分けていない。pid で区別できるので実害は無いが、後始末で消し忘れを探す時はこの 2 か所を見る。hyoui を使うなら `HYOUI_STATE_DIR` は作業ディレクトリに向ける
 - **`--plugin-dir <mod>`** で mod を session 限りで読む
 - **`--debug`** で `$CLAUDE_CONFIG_DIR/debug/<sessionId>.txt` に module の読み込み・reload・hook の所要時間が出る
 - 安いモデル (`--model haiku`) で十分。ただし haiku は auto mode 非対応 (`auto mode disabled: model ... does not support auto mode`)
@@ -86,10 +86,10 @@ jq -r '.ev' /tmp/mods-lab/log/events-*.jsonl | sort | uniq -c | sort -rn
 
 - 同じ config home の live session 一覧: `env -i HOME="$HOME" PATH="$PATH" CLAUDE_CONFIG_DIR=/tmp/mods-lab/config-a claude agents --json`
 - 起動の cwd に symlink (`/tmp` → `/private/tmp`、作業ディレクトリの symlink) や末尾 `/` があっても、state file と `claude agents --json` の cwd は realpath (末尾 `/` なし) に揃う
-- state file `sessions/<pid>.json` (`sessionId` / `messagingSocketPath` / `name` / `status` 等) は **trust 承諾後に**書かれる。承諾前は `claude agents --json` に出ない。一方 peer token の key file `sessions/<pid>.<digest>.key` と UDS の listen (既定は `/tmp/cc-socks/<pid>.sock`、隔離の要点の環境変数で移せる) は承諾前からある
+- state file `sessions/<pid>.json` (`sessionId` / `messagingSocketPath` / `name` / `status` 等) は **trust 承諾後に**書かれる。承諾前は `claude agents --json` に出ない。一方 peer token の key file `sessions/<pid>.<digest>.key` と UDS の listen (置き場は隔離の要点を参照) は承諾前からある
 - 本トピックの `scripts/uds-send.py <config_dir> <pid> <text> [--from-name NAME]` は、state file と key file から socket と token を引き、auth frame と `type: "user"` frame を 1 行ずつ書く。受け側では `session.receive` (`origin: { kind: 'peer' }`) を通り、`UserMessage` の `props.from.name` に `--from-name` が入る。socket は何も返さない (2 秒待って 0 byte)
 
 ## 後始末
 
 - 起動した session を落とす (`tmux kill-session -t mods-lab` 等)。`ps` で `CLAUDE_CONFIG_DIR` の実験パスを含むプロセスが残っていないことを見る
-- 作業ディレクトリに向けた `cc-socks/` の socket は、セッション終了後に消えている。残っていれば該当プロセスが生きている
+- 起動した session の pid の socket (`/tmp/cc-socks*/<pid>.sock`) は、セッション終了後に消えている。残っていれば該当プロセスが生きている
