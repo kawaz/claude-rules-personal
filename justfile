@@ -285,13 +285,15 @@ lint-hooks:
     if [ "$fatal" -ne 0 ]; then exit 1; fi
     echo "lint-hooks: OK (${count} 件)"
 
-# push 前に全 hook テストを走らせる
+# push 前に全 hook テストを走らせる (command hook の .sh と、mod の validate / `*.test.ts`)
 test-hooks:
     #!/usr/bin/env bash
     set -euo pipefail
     tests=(hooks/tests/*.test.sh)
     [ -f "${tests[0]}" ] || { printf '%s\n' 'FATAL hook テストが見つからない' >&2; exit 1; }
     for test in "${tests[@]}"; do bash "$test"; done
+    claude plugin validate . >/dev/null || { claude plugin validate .; exit 1; }
+    claude plugin test .
 
 # (重複は片方が黙って破棄される Claude Code 仕様のため fatal)
 # agent 定義 lint: name/description 必須 + name 重複 + ゼロ件を検出
@@ -412,9 +414,9 @@ _bump-version bump *version_files:
 
 # trigger paths に diff が無い push は自動 skip される (= rules/ や docs/ のみの
 # 変更では bump 不要)。
-# plugin 配布物 (hooks/ skills/ agents/) を変えたのに version 未 bump なら push を止める
+# plugin 配布物 (hooks/ types/ skills/ agents/) を変えたのに version 未 bump なら push を止める
 [private]
-check-version-bumped: (_check-version-bumped "hooks/" "skills/" "agents/")
+check-version-bumped: (_check-version-bumped "hooks/" "types/" "skills/" "agents/")
 
 [private]
 [script]
