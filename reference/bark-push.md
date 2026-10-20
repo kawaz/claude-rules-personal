@@ -12,7 +12,7 @@ curl -sL -X POST https://bark.kawaz-mbp16-20211217.kawaz.jp/bark-admin/push \
 
 - 常に **FQDN 経由** (tailnet 内のみ到達可)。`127.0.0.1:8086` 直結は on-demand 起動が効かない
 - サーバは常駐せず cold start では **302 が返る** (canddy が起動してから同じ URL へ戻す)。`curl -L` か 1 回リトライで吸収する。初回は 1〜2 秒かかる
-- 宛先は `device: {k: v, …}` (タグの完全一致 AND)。省略すると退役していない全台。`device_key` / `device_keys` は受け付けない (400)
+- 宛先は `device: {k: v, …}` (AND)。値は完全一致、`*v*` (両端 `*`) で部分一致、`*` でそのタグの存在。否定は無い。省略すると退役していない全台。`device_key` / `device_keys` は受け付けない (400)
 - 応答: `{"sent":[{"device_id":"…","status":200}],"skipped":0}`。`skipped` は退役済みで外した台数。該当 0 台なら 404
 - URL 形式 (`/<key>/<body>`) や root の `/push` は bark-server への透過面で、キーや本文がアクセスログに残るので自作ツールからは使わない
 
@@ -31,14 +31,14 @@ body は bark V2 と同じ (`device_key(s)` の代わりに `device`)。よく�
 | `badge` | アイコンのバッジ数 (整数) |
 | `icon` / `image` | 画像 URL |
 | `isArchive` | `"0"` で履歴に残さない |
-| `ciphertext` / `iv` | 端末側に設定した鍵で暗号化した本文 (現状は端末ごとの鍵管理をしていないので使わない) |
 
 全項目と型は `GET https://bark.<host>/bark-admin/api/schema` が返す (bark-admin の `src/schema/push-params.ts` が正本)。
 
 ## 端末の管理
 
 - UI: `https://bark.kawaz-mbp16-20211217.kawaz.jp/bark-admin/` (一覧 / タグ編集 / 退役 / 通知テスト / 追加)
-- 端末の追加: UI の「デバイス追加」でタグ (`owner` `name` `family` 等) を入れて QR を出し、端末で読む → 案内ページの「Bark で開く」→ アプリが登録し、タグ付きで一覧に出る。Bark 未導入の端末向けに App Store リンクも同じページにある
+- 端末の追加: UI の「デバイス追加」でタグ (`owner` `family` 等) と暗号化の有無を入れて招待を作り QR を出す。招待は何度でも使え、端末で読むたびに使い切りの登録トークンと端末別の暗号化キーが発行される → 案内ページの「Bark で開く」→ アプリが登録し、招待のタグ + 自動タグ (`name` = Tailscale のホスト名、`os`、`lang`、`ts_user`) 付きで一覧に出る。暗号化キーは同じページからコピーして Bark の暗号化設定 (AES256 / GCM / noPadding) に貼り、詳細画面の「確認」→ 届いた通知をタップで確認済みになる。Bark 未導入の端末向けに App Store リンクも同じページにある
+- 暗号化キーを持つ端末には `/bark-admin/push` が自動で AES-256-GCM で暗号化して送る (送信側は何も意識しない)
 - API: `GET /bark-admin/api/devices?owner=kawaz` (jsonl)、`PATCH` / `DELETE` `/bark-admin/api/devices/:id`
 - device_id (bark の device key) は秘密扱いしない (出来るのは tailnet 内からその端末へ通知を送ることだけ)。タグの語彙は `owner` (人) / `name` (端末) / `family` (世帯) を基本に、必要なら足す
 
