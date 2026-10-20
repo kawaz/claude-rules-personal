@@ -8,8 +8,8 @@ Claude Code の plugin が持てる TypeScript / JavaScript の hook module。en
   発火語: --plugin-dir, claude plugin validate, claude plugin test, reload されない, 型が合わない
 - [events](events.md) — hook できる event の全一覧、pattern での選び方、1 turn の実測時系列、対話と `-p` の差、`/clear` 等の意味論。
   発火語: event 一覧, 発火順, どの event で拾う, /clear を拾う, -p で動かない
-- [capabilities](capabilities.md) — event ごとの能力表 (読める欄、書き換えられる欄、model に届く文脈を足す欄、pinned な欄) と、文脈を渡す時の event の選び方。
-  発火語: model に文脈を渡す, context を足す, additionalContext, 書き換えたのに効かない, 組織管理下で効かない
+- [capabilities](capabilities.md) — event ごとの能力表 (読める欄、書き換えられる欄、model に届く文脈を足す欄、pinned な欄)、文脈を渡す時の event の選び方、thinking がどの event に来るか (読めるが書き換えは戻る、次 turn に reminder を足す経路)。
+  発火語: model に文脈を渡す, context を足す, additionalContext, 書き換えたのに効かない, 組織管理下で効かない, thinking を読む
 - [practices](practices.md) — mod を設計する時の選び方: 計測の単位、main と subagent の見分け、状態の置き場、skill と tool の分担、境界での parse、実機で確かめる (公式文言が実装より古いことがある)。
   発火語: mod の設計, 状態をどこに持つ, skill と tool の分担, bundle, 公式 README が古い
 - [dollar-api](dollar-api.md) — `$` の noun ごとのメソッドと制限、外部プロセスとつなぐ形、`$.store` の保存先、state ライブラリ。

@@ -151,6 +151,20 @@ event ごとに、hook が `e` から何を読めて、`next(e)` が何を返し
 
 `sec-default` が座る機械 (組織が管理する機械) では、user tier の mod の hook のうち `skill.prompt`・`prompt.attachment`・`prompt.section` / `prompt.compose` / `prompt.context`・`classic.*` は飛ばされる。そこでも効くのは `tool.call` / `prompt.submit` / `prompt.mention` の `context` と、`$.session.append` (door `note`) / `$.prompt.submit`。
 
+## thinking (extended thinking の block) はどこに来るか
+
+実測 (隔離環境、Claude Code 2.1.304 / Sonnet 5.5 high):
+
+| event | thinking | 形 |
+|---|---|---|
+| `turn.step` の stream chunk | 生成中に逐次 | `{ kind: "thinking", index: 0, text }` (text 本文は `{ kind: "text", index: 1 }`) |
+| `session.append` (door `response`) | 完了後、text とは別行 | `{ type: "thinking", thinking, signature }` |
+| `ui.render` / `classic.Stop` / `prompt.attachment` | 来ない | — |
+
+- 読めるが書き換えは戻る: `session.append` で `thinking` / `signature` を書き換えて `next` に渡しても結果は原文、transcript も原文 (debug log: `a rewrite of row … is not kept: what it changed is pinned`)
+- thinking の内容に応じて model に何か言いたい時は、次の turn に足す: `session.append` (door `response`) で thinking を読み `$.state.set(ref, …)` → 次の `prompt.submit` で `$.state.get(ref)` を見て `context` に 1 行足し、state を消す (届くことを確認済み)。main だけに効かせるなら `agentId` の無い event に限る
+- 未検証: `classic.Stop` / `classic.UserPromptSubmit` の `additionalContext` 経由、Opus / Fable の chunk の形
+
 ## 2026-10-14 時点の未確認
 
 - `command.run` の after に足した `context` が、plugin の `.md` 以外 (`$.command.register` した command、built-in) で届くか
