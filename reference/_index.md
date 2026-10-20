@@ -26,8 +26,8 @@
   発火語: codesign, notarize, Developer ID, App-Specific Password, stapler, Gatekeeper, TCC, System Extension
 - [auth-patterns](auth-patterns/_index.md) — 他プロダクトにも効く認証設計パターン (passkey の登録、peer 間相互認証、自分の endpoint の確定)。
   発火語: passkey, WebAuthn, 登録フロー, refresh token, cookie, peer 認証, mesh, TLS, iss/aud, self の確定, endpoint, instance id, 引っ越し
-- [claude-mods](claude-mods/_index.md) — Claude Code の plugin / hook / mod (function hooks) を開発・修正する時に読む。立て付け・event・能力・`$` API・設計の選び方・隔離環境での確かめ方。
-  発火語: Claude Mods, hooks module, plugin を作る, hook を書く, mod を試す, model に文脈を渡す, ダイアログを外から答える
+- [claude-mods](claude-mods/_index.md) — Claude Code の plugin / hook / mod (function hooks) を開発・修正する時に読む。
+  発火語: Claude Mods, hooks module, plugin を作る, hook を書く
 - [session-state](session-state/_index.md) — 引き継ぎ手順 (pre-clear): 状態ファイルの読み方 (load) と書き方 (write)。
   発火語: pre-clear 出力, latest.md, 引き継ぎ, 状態ファイル, pre-compact
 - [role-main](role-main/_index.md) — 統括メイン (main role) のロードリスト段 1 (全面共通の必読 / 必要時 + 段 2 = 面の overlay、段 3 = プロジェクト CLAUDE.md への連鎖)。
