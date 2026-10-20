@@ -26,6 +26,28 @@ describe('thinking guard', () => {
     expect(second.context).toEqual(undefined)
   })
 
+  test('ignores the model talking about its own frustration', async ($, on) => {
+    mock.session(on)
+    on('session.start', (_, e) => ({ cwd: e.cwd }))
+    on('prompt.submit', (_, e) => ({ text: e.text, context: e.context, origin: e.origin }))
+    await $.session.start({ cwd: '/work', surface: 'terminal', isInteractive: true })
+    await $.session.append(response("I'm frustrated with the back-and-forth."))
+
+    const submitted = await $.prompt.submit({ text: 'next', wait: false, origin: { kind: 'composer' } })
+    expect(submitted.context).toEqual(undefined)
+  })
+
+  test('matches Japanese stems such as 怒っている', async ($, on) => {
+    mock.session(on)
+    on('session.start', (_, e) => ({ cwd: e.cwd }))
+    on('prompt.submit', (_, e) => ({ text: e.text, context: e.context, origin: e.origin }))
+    await $.session.start({ cwd: '/work', surface: 'terminal', isInteractive: true })
+    await $.session.append(response('ユーザーが怒っているようなので慎重に答える。'))
+
+    const submitted = await $.prompt.submit({ text: 'next', wait: false, origin: { kind: 'composer' } })
+    expect(submitted.context).toEqual([REMINDER])
+  })
+
   test('ignores subagent thinking', async ($, on) => {
     mock.session(on)
     on('session.start', (_, e) => ({ cwd: e.cwd }))

@@ -1,6 +1,9 @@
 import type { On } from 'claude-code'
 
-const ASSUMED_EMOTION = /\b(frustrated|annoyed|irritated|upset|angry|impatient|exasperated)\b|怒って|苛立|不満|詰問|恫喝|萎縮|責め|叱/i
+// 2025-12〜2026-10 の両面 241,077 thinking block の実測 (194 ヒットを 3 lens で分類) から採用。
+// ユーザの感情を話題にしている率が高い語だけを残し、frustrated は一人称 (model 自身) を除外。
+// 詰問 / 萎縮 / 責め は model 自身の rule 適用文に当たるだけなので入れない。
+const ASSUMED_EMOTION = /(?<!\bI(?:'m| am| was|'ve been) )frustrated|怒っ|苛立|叱責|不満|\b(?:upset|angry|annoyed|impatient)\b/iu
 const REMINDER = '(reminder) 直前の thinking でユーザの感情・意図を決めつけていた。no-excessive-apology rule を思い出す'
 const STATE = { plugin: 'rules-personal', key: 'thinkingGuard' } as const
 
