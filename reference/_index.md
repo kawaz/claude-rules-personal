@@ -2,61 +2,59 @@
 
 ## トピック (`<topic>/_index.md` を読んでから本文 1 ファイルへ)
 
-- [vcs](vcs/_index.md) — jj / git の構成の見分け方と、コミット操作・組み替え・復旧・各方式のセットアップ・越境 push。
-  発火語: jj commit, jj split, jj rebase, jj workspace, bookmark, colocate, worktree, PR 作成, push が拒否される, op restore, stale info, 越境 push
-- [delegation](delegation/_index.md) — サブエージェント委譲の選定・context 見積り・Phase による順序制御・統括の立て直し。
-  発火語: worker 選定, サブエージェント委譲, model と effort, context が足りない, Prompt is too long, Phase 0, 完了条件, 統括の立て直し, codex に大入力
-- [testing](testing/_index.md) — テスト設計の網羅観点、テストを仕様書にするコメント様式、失敗時の説明責任。
-  発火語: テスト設計, 境界値, 同値分割, デシジョンテーブル, テストコメント, flaky, たまに失敗する, timeout を伸ばす, ignore 化
-- [typescript](typescript/_index.md) — スキーマから型を導いて境界で parse する書き方と、`as` / `any` / 非 null の主張を禁じる lint 設定。
-  発火語: valibot, zod, スキーマ定義, JSON.parse as, unknown を受ける関数, isRecord, oxlint, typescript-eslint, consistent-type-assertions
-- [design-spec](design-spec/_index.md) — 設計文書 (DR / プロトコル / 仕様) の着手前チェック・仕上げチェック・状態フィールドの決め方。
-  発火語: DR を書く, 仕様書, プロトコル設計, スコープの粒度, 不採用表, 節番号の参照, 設計文書のレビュー, 状態の enum, 判定表
-- [docs-authoring](docs-authoring/_index.md) — `docs/` の構造標準・テンプレ・翻訳ペア・何をいつ書き残すか・裁定待ちの管理。
-  発火語: docs 構造, DR を立てる, findings, journal, runbook, 翻訳ペア, README-ja, QUESTIONS.md, 裁定待ち
-- [rules-authoring](rules-authoring/_index.md) — rule / skill / 参照知識の分類と書式、reference の構成と分割、ロードリストの規律、reference への移設手順。
-  発火語: rule を書く, skill を作る, reference に移す, 索引, _index, 常時ロードが重い, skill か reference か, ロードリスト, 必読
-- [justfile](justfile/_index.md) — task runner の recipe 設計、リリースの標準ループ、push 後の watch 運用。
-  発火語: justfile, just push, recipe, check-version-bumped, release.yml, リリースが出ない, tag が作られない, just watch
-- [gh-ops](gh-ops/_index.md) — GitHub 上の画像の取得・投稿 (`gh --attach`) と、homebrew tap への自動 push 用 deploy key。
-  発火語: GitHub の画像を取得, 画像を貼る, --attach, user-attachments, camo, raw.githubusercontent, HOMEBREW_TAP_DEPLOY_KEY, Permission to homebrew-tap denied
-- [agent-runtime](agent-runtime/_index.md) — sleep / polling の代替 primitive、ブラウザ自動化のプロファイル運用、auto mode classifier の設定と誤拒否の直し方。
-  発火語: sleep で待つ, polling, event-driven, Monitor tool, playwright-cli, PLAYWRIGHT_MCP_EXTENSION_TOKEN, Chrome プロファイル, auto mode, classifier, autoMode, 誤拒否, classifier.local.md
-- [macos-signing](macos-signing/_index.md) — macOS 配布物の codesign + notarize (証明書・Secrets・CI・TCC・トラブルシュート)。
-  発火語: codesign, notarize, Developer ID, App-Specific Password, stapler, Gatekeeper, TCC, System Extension
-- [auth-patterns](auth-patterns/_index.md) — 他プロダクトにも効く認証設計パターン (passkey の登録、peer 間相互認証、自分の endpoint の確定)。
-  発火語: passkey, WebAuthn, 登録フロー, refresh token, cookie, peer 認証, mesh, TLS, iss/aud, self の確定, endpoint, instance id, 引っ越し
+- [vcs](vcs/_index.md) — jj / git でコミット・組み替え・復旧・セットアップ・越境 push をする時に読む (構成の見分け方から)。
+  発火語: jj, colocate, worktree, PR 作成, push が拒否される, 壊した, 越境 push
+- [delegation](delegation/_index.md) — サブエージェントに委譲する時 (worker 選定・入力量の見積り・作業順序・drift の立て直し) に読む。
+  発火語: worker 選定, 委譲, Prompt is too long, 統括の立て直し
+- [testing](testing/_index.md) — コードを新規に書く・修正する時 (何をどう検証するかを決める段階) と、テストが落ちた・不安定な時に読む。
+  発火語: 実装する, コードを直す, テストを書く, flaky, たまに失敗する
+- [typescript](typescript/_index.md) — TypeScript で型・スキーマ・lint を書く時に読む。
+  発火語: valibot, zod, as を書きたい, unknown を受ける, oxlint
+- [design-spec](design-spec/_index.md) — 設計文書 (DR / プロトコル / 仕様) を書く・レビューする時に読む。
+  発火語: DR を書く, 仕様書, プロトコル設計, 設計文書のレビュー
+- [docs-authoring](docs-authoring/_index.md) — `docs/` 配下に何かを書く・置き場に迷う時に読む (構造・テンプレ・翻訳ペア・裁定待ち)。
+  発火語: docs 構造, どこに書く, 翻訳ペア, QUESTIONS.md
+- [rules-authoring](rules-authoring/_index.md) — rule / skill / reference / memory を書く・移す・改廃する時に読む。
+  発火語: rule を書く, skill を作る, reference に移す, 索引, ロードリスト
+- [justfile](justfile/_index.md) — justfile を書く時と、push 後のリリース / watch で詰まった時に読む。
+  発火語: justfile, recipe, リリースが出ない, just watch
+- [gh-ops](gh-ops/_index.md) — GitHub 上の画像を取得・投稿する時と、homebrew tap への push 権限で詰まった時に読む。
+  発火語: GitHub の画像, 画像を貼る, homebrew-tap denied
+- [agent-runtime](agent-runtime/_index.md) — 待ち方 (sleep の代替)、ブラウザ自動化のプロファイル、auto mode classifier の設定で迷った時に読む。
+  発火語: sleep で待つ, playwright-cli, Chrome プロファイル, classifier, 誤拒否
+- [macos-signing](macos-signing/_index.md) — macOS 配布物に署名・notarize する時に読む。
+  発火語: codesign, notarize, Gatekeeper, TCC
+- [auth-patterns](auth-patterns/_index.md) — 認証 (passkey 登録、peer 間相互認証、自分の endpoint の確定) を設計する時に読む。
+  発火語: passkey, peer 認証, 自分の endpoint
 - [claude-mods](claude-mods/_index.md) — Claude Code の plugin / hook / mod (function hooks) を開発・修正する時に読む。
   発火語: Claude Mods, hooks module, plugin を作る, hook を書く
-- [session-state](session-state/_index.md) — 引き継ぎ手順 (pre-clear): 状態ファイルの読み方 (load) と書き方 (write)。
-  発火語: pre-clear 出力, latest.md, 引き継ぎ, 状態ファイル, pre-compact
-- [role-main](role-main/_index.md) — 統括メイン (main role) のロードリスト段 1 (全面共通の必読 / 必要時 + 段 2 = 面の overlay、段 3 = プロジェクト CLAUDE.md への連鎖)。
-  発火語: セッション開始, 統括, main role, 必須ロード, ロードリスト, 段 1, load-role-main
+- [session-state](session-state/_index.md) — セッション境界 (clear / compact) で状態を引き継ぐ時に読む。
+  発火語: pre-clear, 引き継ぎ, 状態ファイル
+- [role-main](role-main/_index.md) — 統括メインがセッション開始時に読むロードリスト。
+  発火語: セッション開始, 統括, ロードリスト
+- [cli-design](cli-design/_index.md) — kawaz 製 CLI を設計する時に読む (好み、常駐プロセスの `daemon` / `service` サブコマンド体系)。
+  発火語: CLI 設計, サブコマンド, --help, completion, daemon サブコマンド, 常駐
 
 ## 単独の本文
 
-- [cli-daemon-subcommands](cli-daemon-subcommands.md) — kawaz 製 CLI 共通の `daemon` / `service` サブコマンド体系 (1 instance = 1 unit、JSON 出力規約、OS 常駐登録、監督者を置く目的、`version` / `daemon status` / `service status` の出力 field、launchd label / systemd unit の命名)。
-  発火語: daemon サブコマンド, service サブコマンド, supervise, 常駐プロセスの status / restart / log, launchd / systemd --user 登録, unit, restart_needed, on_disk と running の版, launchd label, 逆引き DNS, com.github.kawaz, plist の名前
-- [app-file-placement](app-file-placement.md) — アプリのファイル置き場 (設定 / データ / 状態 / キャッシュ / socket・pid) を XDG Base Directory で判定する。
-  発火語: config / data / state / cache / runtime の使い分け, XDG_CONFIG_HOME, XDG_STATE_HOME, XDG_RUNTIME_DIR が無い, unix socket path 長制限
-- [direnv-exec-cwd](direnv-exec-cwd.md) — 別ディレクトリでコマンドを実行する形と、cd だけ / direnv exec だけで踏む罠。
-  発火語: direnv exec, 別ディレクトリでコマンド実行, cd したのに .envrc が効かない, SSH_AUTH_SOCK が切り替わらない, git -C, direnv allow
-- [op-run-secret-injection](op-run-secret-injection.md) — op run で secret を env に注入する形と、masking の 2 段運用。
-  発火語: op run, 1Password CLI, op://, --no-masking, env-file, secret を env に注入
-- [say-katakana](say-katakana.md) — 音声通知 (`PushNotification` → hook の `say`) に渡す頭字語のカタカナ変換表と変換の適用範囲。
-  発火語: say, PushNotification, 音声通知, 読み上げ, 頭字語のカタカナ化
-- [cli-design-preferences](cli-design-preferences.md) — kawaz の CLI 設計の好み (サブコマンド構成 / `--help` の節構成 / bool フラグ / 引数位置 / completion)。
-  発火語: CLI 設計, サブコマンド, --help, オプション, bool フラグ, completion, 引数パーサ
-- [bark-push](bark-push.md) — iPhone / iPad の Bark アプリへ通知を送る (`bark.<host>/bark-admin/push` に `device` タグで宛先指定、cold start の 302、パラメータ、端末の追加と管理 UI)。
-  発火語: push 通知, iPhone に通知, Bark, bark-admin, 端末に知らせる, device タグ, 通知テスト
-- [artifacts-workspace](artifacts-workspace.md) — 生成物 (HTML / JS / 画像) を各リポの `artifacts/` workspace に置き、`artifacts-{owner}-{repo}.<host>.tmpspace.net` でブラウザから見る仕組み (作り方、`--include-ignored` での選択的追跡、URL 対応、sandbox site の意味)。
-  発火語: artifacts, 生成物をブラウザで見る, HTML を見せたい, tmpspace.net, file track --include-ignored, 可視化を共有
-- [findings-recording](findings-recording.md) — findings ファイルの構成テンプレと、記録をサブエージェントに委譲するプロンプトの型。
-  発火語: findings, 調査結果を記録, 検証記録, docs/findings, 記録委譲
+- [app-file-placement](app-file-placement.md) — アプリの設定 / データ / 状態 / キャッシュ / socket の置き場を決める時に読む (XDG)。
+  発火語: どこに置く, XDG, socket path
+- [direnv-exec-cwd](direnv-exec-cwd.md) — 別ディレクトリでコマンドを実行する時、.envrc が効かない時に読む。
+  発火語: direnv exec, 別ディレクトリで実行, .envrc が効かない, git -C
+- [op-run-secret-injection](op-run-secret-injection.md) — 1Password の secret をコマンドに渡す時に読む。
+  発火語: op run, op://, secret を env に
+- [say-katakana](say-katakana.md) — 音声通知の本文に略語を書く時に読む (カタカナ変換表)。
+  発火語: PushNotification, 音声通知, 読み上げ
+- [bark-push](bark-push.md) — iPhone / iPad の Bark アプリへ通知を送る時に読む。
+  発火語: iPhone に通知, Bark, 端末に知らせる
+- [artifacts-workspace](artifacts-workspace.md) — 生成物 (HTML / 画像) をブラウザで kawaz に見せる時に読む (`artifacts/` workspace と tmpspace.net)。
+  発火語: artifacts, HTML を見せたい, 可視化を共有
+- [findings-recording](findings-recording.md) — 調査・検証結果を `docs/findings/` に残す時に読む (テンプレと委譲プロンプト)。
+  発火語: findings, 調査結果を記録
 
 ## private 層 (`~/.local/share/repos/github.com/kawaz/privacy-personal/main/reference/`)
 
 本文は private リポにあり、索引だけをここに写す (privacy 側の `reference/_index.md` を更新したら同じ変更でこちらも更新する)。未 clone なら何もしない。
 
-- [kawaz-identity](~/.local/share/repos/github.com/kawaz/privacy-personal/main/reference/kawaz-identity.md) — kawaz 本人の表記正本 (漢字 / かな / ローマ字 / GitHub アカウント / 用途別の選び方 / 誤記)。
-  発火語: 署名, 対外メール, 実名表記, 差出人名, ローマ字表記, GitHub アカウント名, 業務用アカウント
+- [kawaz-identity](~/.local/share/repos/github.com/kawaz/privacy-personal/main/reference/kawaz-identity.md) — 対外文書で kawaz 本人を表記する時に読む (漢字 / かな / ローマ字 / アカウント名)。
+  発火語: 署名, 対外メール, 実名表記, 業務用アカウント

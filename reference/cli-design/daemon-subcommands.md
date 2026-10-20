@@ -152,4 +152,4 @@ daemon が socket / state / config の場所を env (`XDG_RUNTIME_DIR` / `XDG_ST
 
 ドメイン要件によっては launchd に登録する署名済み launcher を別途用意してそれを登録し、launcher は `<tool> daemon supervise` の起動と死活監視に徹する形も検討する。FDA 要求などがバージョンアップ毎に発生するのを回避するための構成。
 
-関連: [cli-design-preferences](cli-design-preferences.md)
+関連: [preferences](preferences.md)
