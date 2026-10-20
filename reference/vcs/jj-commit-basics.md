@@ -70,6 +70,8 @@ jj は Git の pre-commit フックを実行しない。push 前に手動で lin
 
 予防: **常に `jj commit -m "msg" <files...>` でパス指定** する。`jj split` も同様。docs/issue/ のような疎結合領域はパス指定で並列に進めても干渉しない。
 
+ファイルを移動・改名した時は **移動元と移動先の両方のパス**を指定する。移動先だけだと add 側だけが確定し、delete 側が @ に残って `just push` の clean 検査で止まる (残った時は `jj squash -u <移動元...>` で親に寄せる)。
+
 push 直前は `jj status` で @ に他セッション追加ファイルが居残っていないか確認し、残っていれば**放置せず**読む (= 別 commit で固定するか、削除するか判断)。詳細は `for-me/rules/push-workflow.md`。
 
 ## `jj describe` だけ実行して終わる (commit したつもり事故)
