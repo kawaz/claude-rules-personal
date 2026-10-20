@@ -1,9 +1,18 @@
 # 別ディレクトリでコマンドを実行する形 (cd と direnv exec)
 
-kawaz 環境はプロジェクト毎に `.envrc` で環境変数 (認証境界の `SSH_AUTH_SOCK` / `GH_CONFIG_DIR` / `CLAUDE_CONFIG_DIR` 等) を設定している。Claude の Bash は非対話 shell なので **cd しても direnv hook が発火しない**。一方 `direnv exec` は **env を注入するだけで cwd を変えない**。片方だけでは必ずどちらかの罠を踏む。
+kawaz 環境はプロジェクト毎に `.envrc` で環境変数 (認証境界の `SSH_AUTH_SOCK` / `GH_CONFIG_DIR` / `CLAUDE_CONFIG_DIR` 等) を設定している。
+
+**セッション起動時の cwd には direnv が既に適用されている** (Claude 自体が direnv の効いた shell から起動される)。**cwd 内 (= プロジェクトルート) で実行するコマンドには `cd` も `direnv exec` も付けない**。付けるのは別ディレクトリに出る時だけで、その時は Claude の Bash が非対話 shell で `cd` しても direnv hook が発火せず、`direnv exec` は env を注入するだけで cwd を変えないため、両方を組にする。
 
 ```bash
-# Good — env (.envrc) と cwd の両方が対象ディレクトリに揃う
+# Good — cwd 内。direnv は起動時に適用済み
+just push
+
+# 不要 — cwd 内なのに wrap している (動くが、写されて「常に wrap」の手癖になる)
+(cd "$PWD" && direnv exec . just push)
+direnv exec "$PWD" just push
+
+# Good — 別ディレクトリ。env (.envrc) と cwd の両方が対象ディレクトリに揃う
 (cd /path/to/dir && direnv exec . command args...)
 
 # Bad — env は乗るが cwd が呼び出し元のまま。cwd 依存ツール (jj / git /

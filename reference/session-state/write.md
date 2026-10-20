@@ -108,10 +108,10 @@ compaction 後の最初のターンで、自動注入は無いので `latest.md`
 compact 前の実行の場合は自己停止不要。
 
 作業終了、または新規セッションを立てて継続する場合は、本セッションで稼働中の Background や Scheduler 等は全て停止する。
-新規セッションで継続指示があった場合は以下コマンドで新規セッションを起動する。
+新規セッションで継続指示があった場合は以下コマンドで新規セッションを起動する (cwd で実行する。direnv は起動時に適用済みなので `direnv exec` は付けない)。
 
 ```bash
-direnv exec "$PWD" hyoui run --detached -- \
+hyoui run --detached -- \
   itumono-run-claude.sh --model "<自分と同じ model id>" --effort "<自分と同じ effort>" \
   '~/.cache/claude-session-state/<slug>/latest.md があれば reference の session-state/load の手順でロードし、継続指示があれば実行、無ければ次の優先作業候補を提案'
 ```
