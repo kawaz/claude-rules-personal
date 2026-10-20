@@ -47,6 +47,8 @@
   発火語: say, PushNotification, 音声通知, 読み上げ, 頭字語のカタカナ化
 - [cli-design-preferences](cli-design-preferences.md) — kawaz の CLI 設計の好み (サブコマンド構成 / `--help` の節構成 / bool フラグ / 引数位置 / completion)。
   発火語: CLI 設計, サブコマンド, --help, オプション, bool フラグ, completion, 引数パーサ
+- [bark-push](bark-push.md) — iPhone / iPad の Bark アプリへ通知を送る (`bark.<host>/bark-admin/push` に `device` タグで宛先指定、cold start の 302、パラメータ、端末の追加と管理 UI)。
+  発火語: push 通知, iPhone に通知, Bark, bark-admin, 端末に知らせる, device タグ, 通知テスト
 - [artifacts-workspace](artifacts-workspace.md) — 生成物 (HTML / JS / 画像) を各リポの `artifacts/` workspace に置き、`artifacts-{owner}-{repo}.<host>.tmpspace.net` でブラウザから見る仕組み (作り方、`--include-ignored` での選択的追跡、URL 対応、sandbox site の意味)。
   発火語: artifacts, 生成物をブラウザで見る, HTML を見せたい, tmpspace.net, file track --include-ignored, 可視化を共有
 - [findings-recording](findings-recording.md) — findings ファイルの構成テンプレと、記録をサブエージェントに委譲するプロンプトの型。
