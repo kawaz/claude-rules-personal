@@ -13,3 +13,4 @@
 - [index-lines-terse](index-lines-terse.md) — 索引の 1 行は短く (用途だけ、要約を詰めない)。
 - [workboard-personal-scheduling](workboard-personal-scheduling.md) — 先の予定は workboard-personal/main に ccmsg で送る (起こしてもらえる)。
 - [classifier-blocks-batches](classifier-blocks-batches.md) — classifier に止められる操作の型と通し方 (1 コマンド 1 単位、Read してから実行)。
+- [no-tz-change-on-running-servers](no-tz-change-on-running-servers.md) — 稼働中サーバの TZ を勝手に変えない。
