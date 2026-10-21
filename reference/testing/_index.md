@@ -1,6 +1,6 @@
 # テストの参照知識
 
-2 つの入口がある。**コードを書く・直す・レビューする** (テストは実装と不可分なので、実装に入る前に何をどう検証するかを決める) なら網羅観点とコメント様式を、**落ちているテストに手を入れる**なら対処手順と説明責任を読む。テスト改変で green を作らない禁則そのものは `for-all/rules/test-integrity.md` が正本。
+読む順: まず [why-we-test](why-we-test.md) (何のために書くか)、書く時は [test-coverage-checklist](test-coverage-checklist.md) (どの境界を引くか)、コメントは [test-as-spec-comments](test-as-spec-comments.md) (なぜをどう残すか)。落ちているテストに手を入れるなら [flaky-accountability](flaky-accountability.md)。テスト改変で green を作らない禁則そのものは `for-all/rules/test-integrity.md` が正本。
 
 ## 設計する
 
