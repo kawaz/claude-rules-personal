@@ -1,6 +1,6 @@
 # API: start / end / list / prune、follow モード、labels
 
-書き込み系を HTTP に置かない構成の proxy では、同じ意味を CLI + 制御 socket で持つ (`dump start` / `dump end` / `dump list` / `dump prune`)。応答の欄の規約: サイズは bytes の整数で `_bytes` suffix、時間は `_ms` または RFC3339 に揃える。
+書き込み系を HTTP に置かない構成の proxy では、同じ意味を CLI + 制御 socket で持つ (`dump start` / `dump stop` / `dump list` / `dump prune`)。応答の欄の規約: サイズは bytes の整数で `_bytes` suffix、時間は `_ms` または RFC3339 に揃える。
 
 ## `POST dump/start`
 
@@ -56,12 +56,12 @@
 
 `active_requested_bytes > total_available_bytes` の場合は、「全 dump が上限まで書くと途中で止まる」というサインとして読める。
 
-## `POST dump/end`
+## `POST dump/stop`
 
 指定した dump を、timeout やサイズ制限を待たずに停止する。リクエスト `{ "dump_id": "…" }`。冪等とし、既に stopped の dump に対して呼ばれてもエラーにせず、その時点の状態を返す。既に別の理由で止まっていた場合、`reason` はその元の理由になる。
 
 ```json
-{ "dump_id": "…", "state": "stopped", "reason": "ended", "stopped_at": "2026-10-21T00:55:12Z", "bytes_written": 1048576 }
+{ "dump_id": "…", "state": "stopped", "reason": "stop", "stopped_at": "2026-10-21T00:55:12Z", "bytes_written": 1048576 }
 ```
 
 ## list / prune
@@ -69,7 +69,7 @@
 終了済み・削除待ちを含む dump の一覧と状態を返す `list` と、dump を消す `prune` を持つ。dump の管理や閲覧 UI の構築に使う。
 
 - `list` と `prune` は同じ選択子を取る: labels に対する `owner=kawaz` / `pr!=1234` / `owner` (キーの存在)
-- `prune` は `dump_id` か選択子のどちらかを**必須**にする (無指定で全消しさせない)。active な dump を prune する時は stop (`reason: "ended"`) してから削除し、応答に消した `dump_id` を並べる
+- `prune` は `dump_id` か選択子のどちらかを**必須**にする (無指定で全消しさせない)。active な dump を prune する時は stop (`reason: "stop"`) してから削除し、応答に消した `dump_id` を並べる
 
 ## follow (接続を保って流す) モード
 

@@ -5,14 +5,14 @@ proxy (gateway / ロードバランサ / 中継) を通過する通信を、外�
 ## 芯になる 3 つの要件
 
 - **一時的**: `start` で始め、必ず時限で切れる。設定ファイルに書いて常設にしない (消し忘れがそのまま常設になる)
-- **外から on / off**: `start` / `end` の API (HTTP に書き込み系を置かない構成なら CLI + 制御 socket) で制御し、timer は proxy のプロセスが持つ。「ダンプ中」をディスクに書いて restart を跨いで続けない
+- **外から on / off**: `start` / `stop` の API (HTTP に書き込み系を置かない構成なら CLI + 制御 socket) で制御し、timer は proxy のプロセスが持つ。「ダンプ中」をディスクに書いて restart を跨いで続けない
 - **勝手に片付く**: 保存先は一定時間 (`dump_cleanup_ttl`) の経過後に自動削除される ([capacity](capacity.md))
 
 ## 系列 (dump) と `dump_id`
 
-`start` 1 回 = 1 dump。UUIDv7 の `dump_id` を発行し、停止条件に達するか `end` が呼ばれるまで、一致した request / response を `dump/{dump_id}/` に保存する ([files](files.md))。UUIDv7 なので `ls` で始まった順に並び、同時に始めても衝突しない。
+`start` 1 回 = 1 dump。UUIDv7 の `dump_id` を発行し、停止条件に達するか `stop` が呼ばれるまで、一致した request / response を `dump/{dump_id}/` に保存する ([files](files.md))。UUIDv7 なので `ls` で始まった順に並び、同時に始めても衝突しない。
 
-dump どうしは互いを知らない。同じ条件に期間の重なる dump を複数作ってよく、重なっている間の 1 本は動いている dump の全部に書かれる (計数もそれぞれに乗る)。「延長したい」は新しい `start`、「短くしたい」は `end` で足り、置き換えや同時 1 つの制限は要らない。
+dump どうしは互いを知らない。同じ条件に期間の重なる dump を複数作ってよく、重なっている間の 1 本は動いている dump の全部に書かれる (計数もそれぞれに乗る)。「延長したい」は新しい `start`、「短くしたい」は `stop` で足り、置き換えや同時 1 つの制限は要らない。
 
 ## 何を残すか
 
@@ -52,7 +52,7 @@ upstream を替えて試し直す proxy / LB では、1 request に複数の ups
 | `max_bytes` | その dump の `max_bytes` に達した |
 | `total_limit` | 全体の実使用量が `dump_max_total_bytes` に達した |
 | `fs_min_free` | fs 空き容量が `dump_fs_min_free` を下回る書き込みになった |
-| `ended` | `end` が呼ばれた (`prune` が active な dump を消す時もこれ) |
+| `stop` | `stop` が呼ばれた (`prune` が active な dump を消す時もこれ) |
 | `disconnected` | follow モードの接続が閉じた |
 | `lagged` | follow モードの購読者が遅く、送信バッファが溢れた |
 
