@@ -44,4 +44,4 @@
 本文は private リポにあり、索引だけをここに写す (privacy 側の `reference/_index.md` を更新したら同じ変更でこちらも更新する)。
 
 - [kawaz-identity](~/.local/share/repos/github.com/kawaz/privacy-personal/main/reference/kawaz-identity.md) — kawaz 本人に関する情報 (署名、所属、読み、メアド、各種サイトのアカウント等)。
-- [home-router-unifi](~/.local/share/repos/github.com/kawaz/privacy-personal/main/reference/home-router-unifi/_index.md) — 自宅ルータの設定ガイド
+- [home-router-unifi](~/.local/share/repos/github.com/kawaz/privacy-personal/main/reference/home-router-unifi/_index.md) — 自宅ルータの設定ガイド- [tailscale-exit-node](~/.local/share/repos/github.com/kawaz/privacy-personal/main/reference/tailscale-exit-node.md) — auditor を exit node に使う時の設定と DNS の罠
