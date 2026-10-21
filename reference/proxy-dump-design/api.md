@@ -1,6 +1,6 @@
 # API: start / end / list / prune、follow モード、labels
 
-書き込み系を HTTP に置かない構成の proxy では、同じ意味を CLI + 制御 socket で持つ (`dump start` / `dump stop` / `dump list` / `dump prune`)。応答の欄の規約: サイズは bytes の整数で `_bytes` suffix、時間は `_ms` または RFC3339 に揃える。
+書き込み系を HTTP に置かない構成の proxy では、同じ意味を CLI + 制御 socket で持つ (`dump start` / `dump stop` / `dump list` / `dump prune`)。応答の欄の規約: サイズは bytes の整数で `_bytes` suffix。時刻と期間は**アプリの既存の慣習に倣う** (既に Unix ms 整数で揃えているなら `_ms`、RFC3339 ならそれ)。lib + CLI + UI として 1 つのパッケージにするなら、`_ms` の epoch 整数 (tz / 秒 vs ms の曖昧さが無く、ソートと差分が自明) に統一し、人が読む用の RFC3339 は suffix 無しの別欄 (例 `started_at`) として足してよい。同じ瞬間を 2 欄に書く時は必ず 1 つの値から導出する (別々に取ると drift する)。
 
 ## `POST dump/start`
 
