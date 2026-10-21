@@ -2,21 +2,21 @@
 
 Claude Code の plugin が持てる TypeScript / JavaScript の hook module。engine の event と描画を `($, e, next)` の middleware で書き換え、外界へは `$` を通して届く。
 
-- [overview](overview.md) — plugin の構成、`register(on, options)`、pattern と matcher、tier、`next`、失敗と `.catch`、実行環境と時間予算、security モデル、command hook・MCP・skill との差分表。
+- [overview](overview.md) — plugin の構成、`register`、pattern と tier、`next`、失敗の扱い、他の拡張手段との差。
   発火語: mod の基本, hooks module の書き方, tier, fail open, command hook との違い, MCP との違い
-- [develop](develop.md) — built-in mod の一覧、一時読み込み、validate / test / hot-reload、型定義と tsconfig、noun の契約。
+- [develop](develop.md) — built-in mod 一覧、一時読み込み、validate / test / hot-reload、型定義。
   発火語: --plugin-dir, claude plugin validate, claude plugin test, reload されない, 型が合わない
-- [events](events.md) — hook できる event の全一覧、pattern での選び方、1 turn の実測時系列、対話と `-p` の差、`/clear` 等の意味論。
+- [events](events.md) — hook できる event の全一覧と選び方、1 turn の発火順、`-p` との差、`/clear` の意味論。
   発火語: event 一覧, 発火順, どの event で拾う, /clear を拾う, -p で動かない
-- [capabilities](capabilities.md) — event ごとの能力表 (読める欄、書き換えられる欄、model に届く文脈を足す欄、pinned な欄)、文脈を渡す時の event の選び方、thinking がどの event に来るか (読めるが書き換えは戻る、次 turn に reminder を足す経路)。
+- [capabilities](capabilities.md) — event ごとに読める・書き換えられる・文脈を足せる欄の表と、thinking の扱い。
   発火語: model に文脈を渡す, context を足す, additionalContext, 書き換えたのに効かない, 組織管理下で効かない, thinking を読む
-- [practices](practices.md) — mod を設計する時の選び方: 計測の単位、main と subagent の見分け、状態の置き場、skill と tool の分担、境界での parse、実機で確かめる (公式文言が実装より古いことがある)。
+- [practices](practices.md) — mod 設計の選び方: 計測単位、subagent の見分け、状態の置き場、skill と tool の分担。
   発火語: mod の設計, 状態をどこに持つ, skill と tool の分担, bundle, 公式 README が古い
-- [dollar-api](dollar-api.md) — `$` の noun ごとのメソッドと制限、外部プロセスとつなぐ形、`$.store` の保存先、state ライブラリ。
+- [dollar-api](dollar-api.md) — `$` の noun ごとのメソッドと制限、外部プロセスとの接続、`$.store`、state ライブラリ。
   発火語: $ で何ができる, $.store, $.http, $.process, 4 MiB, 予算
-- [dialogs](dialogs.md) — permission / AskUserQuestion / Elicitation / engine 自身のダイアログで読めるもの・割り込める点・返せるもの、deny rule との優先関係、待つ形。
+- [dialogs](dialogs.md) — permission 等のダイアログで読める・割り込める・返せるもの、deny rule との優先関係。
   発火語: permission ダイアログ, ダイアログを外から答える, deny rule が効く, Elicitation
-- [prompt-injection](prompt-injection.md) — `$.prompt.submit` と `asUser` の使い分け、外部からユーザプロンプトとして入れる手順、書きかけの退避・復元。
+- [prompt-injection](prompt-injection.md) — `$.prompt.submit` と `asUser` の使い分け、外からの入力投入、書きかけの退避・復元。
   発火語: prompt を外から入れる, 人の入力として送る, 書きかけの退避
-- [lab-setup](lab-setup.md) — 別 `CLAUDE_CONFIG_DIR` と `env -i` による隔離環境、起動・trust・debug log の見方、観測 mod (全 event を JSONL に記録) と peer socket への直接送信スクリプト。
+- [lab-setup](lab-setup.md) — 隔離環境での起動・trust・debug log、全 event を記録する観測 mod、peer socket 送信。
   発火語: mod を試す, 隔離環境, --debug, 全 event を記録, uds-send

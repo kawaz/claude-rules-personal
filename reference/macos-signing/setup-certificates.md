@@ -4,6 +4,14 @@ macOS の codesign / notarization に使う **6 種の GitHub Secrets** を投�
 
 **AI がほぼ全部できる。** kawaz に回すのは、そのプロダクト用の App-Specific Password を **新規発行する**ときだけ (発行後は 1Password 経由で AI が受け取る)。
 
+**「Secrets は人間の手作業」と丸ごと投げ返さない。** 取得元は下の表で確定している。特に `APPLE_ID` は iCloud のアカウントや証明書からは取れない (下の「`APPLE_ID` の探し方」)。
+
+新規プロダクトに署名を入れるときの動き方:
+
+1. 下の「AI が先に済ませる」1〜3 を実行 (identity / Team ID / 証明書 / Apple ID / App-Specific Password)
+2. reference の `gh-ops/homebrew-tap-deploy-key` で deploy key を作る (承認を 1 回取る)
+3. App-Specific Password が未発行のときだけ、下の「kawaz へ出す依頼文」をそのまま提示する
+
 ## 取得元
 
 | Secret | 取得元 |
