@@ -13,20 +13,20 @@
 ## 本文
 
 - [jj-commit-basics](jj-commit-basics.md) — 覚えるべき 5 コマンド、commit と split の使い分け、パス指定の禁則、describe だけで終わる事故。
-  発火語: jj commit, jj split, jj describe, jj new, jj edit, コミットしたい, パス指定, pre-commit
+  jj commit, jj split, jj describe, jj new, jj edit, コミットしたい, パス指定, pre-commit
 - [jj-restructure](jj-restructure.md) — split / squash / rebase / duplicate での組み替え、過去コミットからのパス除去。
-  発火語: jj rebase, jj squash, jj duplicate, jj abandon, コミットの並べ替え, 過去コミットから消したい, filter-repo, ignore-immutable, 作業中の ws に change を入れる
+  jj rebase, jj squash, jj duplicate, jj abandon, コミットの並べ替え, 過去コミットから消したい, filter-repo, ignore-immutable, 作業中の ws に change を入れる
 - [jj-recovery](jj-recovery.md) — op restore、bookmark 移動と push のハマりどころ、bookmark conflict、fork 追従。
-  発火語: jj op restore, op log, push が拒否される, Refusing to move bookmark backwards, Name is conflicted, bookmark を消したい, upstream に追従
+  jj op restore, op log, push が拒否される, Refusing to move bookmark backwards, Name is conflicted, bookmark を消したい, upstream に追従
 - [jj-antipatterns](jj-antipatterns.md) — 読み取りスキャンの snapshot 事故、同一 workspace の共有、git コマンド混用、worktree ツール。
-  発火語: --ignore-working-copy, 複数リポを一括スキャン, jj restore, 並列エージェント, jj-guard, jj-worktree, isolation worktree
+  --ignore-working-copy, 複数リポを一括スキャン, jj restore, 並列エージェント, jj-guard, jj-worktree, isolation worktree
 - [jj-colocate-setup](jj-colocate-setup.md) — colocate + 親ガード方式のレイアウト・新規作成・clone・旧方式からの移行・作業場所の使い分け。
-  発火語: colocate, 親ガード, jj git init, リポを作る, リポを clone, agent-worktree, main への統合, artifacts workspace, 生成物をブラウザで見る, file track --include-ignored
+  colocate, 親ガード, jj git init, リポを作る, リポを clone, agent-worktree, main への統合, artifacts workspace, 生成物をブラウザで見る, file track --include-ignored
 - [jj-bare-workspace-setup](jj-bare-workspace-setup.md) — 旧方式のセットアップ・workspace・PR 手順・署名・トラブルシュート。
-  発火語: git bare, jj workspace add, PR を作る, wip を PR に昇格, sign-on-push, stale info, tag が jj に見えない, tagOpt
+  git bare, jj workspace add, PR を作る, wip を PR に昇格, sign-on-push, stale info, tag が jj に見えない, tagOpt
 - [git-worktree-setup](git-worktree-setup.md) — git 専用リポの worktree 構成・命名・PR 手順。
-  発火語: git worktree, pr-base, worktree move, git 専用リポ, ブランチ命名
+  git worktree, pr-base, worktree move, git 専用リポ, ブランチ命名
 - [jj-rebase-options](jj-rebase-options.md) — jj のリビジョン指定オプション (`-r` / `-s` / `-b` / `--onto` 等) の完全リファレンス。
-  発火語: jj rebase, --onto, --insert-after, --insert-before, --source, --branch, jj のリビジョン指定
+  jj rebase, --onto, --insert-after, --insert-before, --source, --branch, jj のリビジョン指定
 - [cross-env-ssh-signing](cross-env-ssh-signing.md) — 複数 CLAUDE_CONFIG_DIR 環境をまたいだ push / commit signing の切替手順。
-  発火語: 越境 push, SSH sign failed, No private key found, IdentityAgent, signing.key, SSH_AUTH_SOCK
+  越境 push, SSH sign failed, No private key found, IdentityAgent, signing.key, SSH_AUTH_SOCK
