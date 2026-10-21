@@ -11,3 +11,5 @@
 - [grep-wrapper-skips-binary-looking-files](grep-wrapper-skips-binary-looking-files.md) — Bash の `grep` (ugrep ラッパ) は NUL 入り・ignore 済みファイルを無言で飛ばす。「該当なし」の前に裏を取る。
 - [webui-modern-platform-first](webui-modern-platform-first.md) — kawaz の webui はモダン CSS / JS を使い、古いハックや JS 自前制御で代替しない。
 - [index-lines-terse](index-lines-terse.md) — 索引の 1 行は短く (用途だけ、要約を詰めない)。
+- [workboard-personal-scheduling](workboard-personal-scheduling.md) — 先の予定は workboard-personal/main に ccmsg で送る (起こしてもらえる)。
+- [classifier-blocks-batches](classifier-blocks-batches.md) — classifier に止められる操作の型と通し方 (1 コマンド 1 単位、Read してから実行)。
