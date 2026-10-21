@@ -1,7 +1,7 @@
 # 参照知識の索引
 
-- 単独ファイルが大きくなったら分割しトピックに整理する。スクリプト等のリソースを持つ時もトピックにして `scripts/` `templates/` `assets/` に同梱する (構成の正本は [rules-authoring/reference-layout](rules-authoring/reference-layout.md))
-- トピック: `<topic>/_index.md` から個別ファイルを読む形
+- 単独ファイルが大きくなったら整理分割しトピックにする。
+- トピックは `<topic>/_index.md` から個別ファイルを読む形。runbook用スクリプト等のリソースも含めて良い。rules-authoring/reference-layout
 
 ## エージェントの心得やユーザ特有文書
 
@@ -43,5 +43,5 @@
 
 本文は private リポにあり、索引だけをここに写す (privacy 側の `reference/_index.md` を更新したら同じ変更でこちらも更新する)。
 
-- [kawaz-identity](~/.local/share/repos/github.com/kawaz/privacy-personal/main/reference/kawaz-identity.md) — kawaz 本人に関する情報 (実名、署名、所属、読み、メールアドレス、外部サービスのアカウント等)。
-- [home-router-unifi](~/.local/share/repos/github.com/kawaz/privacy-personal/main/reference/home-router-unifi/_index.md) — 自宅ルータ (UniFi Dream Machine) の設定を見る・調べる時に読む (API ラッパ、SSH、永続性、Route53 連携)。
+- [kawaz-identity](~/.local/share/repos/github.com/kawaz/privacy-personal/main/reference/kawaz-identity.md) — kawaz 本人に関する情報 (署名、所属、読み、メアド、各種サイトのアカウント等)。
+- [home-router-unifi](~/.local/share/repos/github.com/kawaz/privacy-personal/main/reference/home-router-unifi/_index.md) — 自宅ルータの設定ガイド
