@@ -34,6 +34,8 @@
   発火語: セッション開始, 統括, ロードリスト
 - [cli-design](cli-design/_index.md) — kawaz 製 CLI を設計する時に読む (好み、常駐プロセスの `daemon` / `service` サブコマンド体系)。
   発火語: CLI 設計, サブコマンド, --help, completion, daemon サブコマンド, 常駐
+- [proxy-dump-design](proxy-dump-design/_index.md) — proxy / gateway / LB に通信の一時ダンプ (時限・容量上限・自動削除つきで request / response をファイルに残す口) を付ける時に読む。
+  発火語: 通信をダンプ, request を残す, upstream が何を返したか, dump start, index.jsonl, max_bytes, follow, lagged
 
 ## 単独の本文
 
