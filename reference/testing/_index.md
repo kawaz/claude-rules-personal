@@ -4,6 +4,8 @@
 
 ## 設計する
 
+- [why-we-test](why-we-test.md) — 何のためにテストを書くか: 入出力の確認は最低ライン、境界を確定させる輪郭を描く作業、「なぜそうなるべきか」をテストの隣に残す。
+  テストの目的, テストを書く意味, 何をテストするか, 回帰テスト, DR を見ろだけ, テストが落ちた時に直すのはどっちか
 - [test-coverage-checklist](test-coverage-checklist.md) — RED 段階の網羅観点、観点 × 実行場所の表、書かない・削る判断、やりがちな失敗。
   テスト設計, TDD, RED, 境界値, 同値分割, デシジョンテーブル, 状態遷移テスト, カバレッジ, テストを削る
 - [test-as-spec-comments](test-as-spec-comments.md) — テストを仕様書にするコメント様式、DR 参照の書き方、self-contained にする根拠。
