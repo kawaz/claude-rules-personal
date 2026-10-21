@@ -1,6 +1,6 @@
 # 参照知識の索引
 
-- 単独ファイルが大きくなったら分割しトピックに整理する
+- 単独ファイルが大きくなったら分割しトピックに整理する。スクリプト等のリソースを持つ時もトピックにして `scripts/` `templates/` `assets/` に同梱する (構成の正本は [rules-authoring/reference-layout](rules-authoring/reference-layout.md))
 - トピック: `<topic>/_index.md` から個別ファイルを読む形
 
 ## エージェントの心得やユーザ特有文書
