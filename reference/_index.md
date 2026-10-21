@@ -44,4 +44,4 @@
 本文は private リポにあり、索引だけをここに写す (privacy 側の `reference/_index.md` を更新したら同じ変更でこちらも更新する)。
 
 - [kawaz-identity](~/.local/share/repos/github.com/kawaz/privacy-personal/main/reference/kawaz-identity.md) — kawaz 本人に関する情報 (実名、署名、所属、読み、メールアドレス、外部サービスのアカウント等)。
-- [home-router-unifi](~/.local/share/repos/github.com/kawaz/privacy-personal/main/reference/home-router-unifi.md) — 自宅ルータ (UniFi Dream Machine) の設定を見る・調べる時に読む (API ラッパ、SSH、永続性、Route53 連携)。
+- [home-router-unifi](~/.local/share/repos/github.com/kawaz/privacy-personal/main/reference/home-router-unifi/_index.md) — 自宅ルータ (UniFi Dream Machine) の設定を見る・調べる時に読む (API ラッパ、SSH、永続性、Route53 連携)。
