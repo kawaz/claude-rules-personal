@@ -8,6 +8,14 @@ proxy (gateway / ロードバランサ / 中継) を通過する通信を、外�
 - **外から on / off**: `start` / `stop` の API (HTTP に書き込み系を置かない構成なら CLI + 制御 socket) で制御し、timer は proxy のプロセスが持つ。「ダンプ中」をディスクに書いて restart を跨いで続けない
 - **勝手に片付く**: 保存先は一定時間 (`dump_cleanup_ttl`) の経過後に自動削除される ([capacity](capacity.md))
 
+## 実装の原則: 本体を阻害しない
+
+dump は proxy 本来の機能に対して**任意の付け足し**で、本体の邪魔をしないことを第一にする。
+
+- **透過**: dump を有効にしても、中継の振る舞い (ヘッダ、本文、順序、タイミング、エラーの返し方) を変えない。本文を覗くのは複製で、本体が流すバイト列に触らない
+- **同期ブロッキングを置かない**: 書き込みはバッファと別タスクに逃がし、中継の経路上で disk I/O や lock を待たない。待つ場合も上限つきで、溢れたら dump 側を止める (`lagged` / `error`)。動いている dump が無い間は原子的な load 1 つで抜け、本文のコピーもしない ([capacity](capacity.md) の「中継の速度を落とさない」)
+- **dump の失敗で本体を止めない**: ディレクトリが作れない、ディスクが書けない、パニックしうる変換、のような dump 側の失敗はその dump を `reason: "error"` で止めて log に出し、中継は何事も無く続ける。dump のコードから本体へ `?` でエラーを伝播させない
+
 ## 系列 (dump) と `dump_id`
 
 `start` 1 回 = 1 dump。UUIDv7 の `dump_id` を発行し、停止条件に達するか `stop` が呼ばれるまで、一致した request / response を `dump/{dump_id}/` に保存する ([files](files.md))。UUIDv7 なので `ls` で始まった順に並び、同時に始めても衝突しない。
@@ -55,6 +63,7 @@ upstream を替えて試し直す proxy / LB では、1 request に複数の ups
 | `stop` | `stop` が呼ばれた (`prune` が active な dump を消す時もこれ) |
 | `disconnected` | follow モードの接続が閉じた |
 | `lagged` | follow モードの購読者が遅く、送信バッファが溢れた |
+| `error` | dump 側の失敗 (書けない等)。本体は続く |
 
 停止後は、流れている途中の応答も含めて何も書かない。判定のタイミングと途中打ち切り (`truncated`) は [capacity](capacity.md)、follow は [api](api.md)。
 
