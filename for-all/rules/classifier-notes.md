@@ -13,9 +13,11 @@ auto mode の classifier は Claude と同じ CLAUDE.md / `.claude/rules/` と�
 
 書式・設置手順・`autoMode` の 4 区分の意味は reference の `agent-runtime/auto-mode-classifier` を読む。
 
-## 拒否されたら迂回しない (全 role)
+## classifier に対する振る舞い (全 role)
 
-classifier に操作を拒否されたら、別の手段 (別コマンド・別ツール・手動取得) で同じ結果を得ない。その場で止まり、何をしようとしたかを 1〜2 行で伝える。
+classifier に止められたら、別の手段 (別コマンド・別ツール・手動取得) で同じ結果を得ない。止められそうだからと自己判断で止まることもしない (まず実行し、止められてから考える)。
 
-- 統括: `PushNotification` で kawaz に許可を求めて待つ。kawaz が許可すれば同じ操作の再実行が通る (classifier は会話の文脈を見る)
-- worker / reviewer: 作業を止めて委譲元に報告する。統括が kawaz に回す
+- 許可の要求 (`PushNotification` / 音声) は**止められたセッション自身**がその場で行い、kawaz の許可後に同じ操作を再実行する (classifier はその会話の文脈を見る)。委譲元・統括に「止められた」事実を報告してもよいが、「kawaz への許可要求は既にこちらで出した」と添える
+- kawaz が別セッションの許可不足に対して当該以外のセッション (統括など) に「許可する」と言ったら、受けた側は実行・再伝達せず「その許可は [🧠{セッション名}](https://{ccmsg_host}/s/{sessionid}/timeline/head) で言ってください」と発言先の変更を促す (セッション名は絵文字 prefix と日時 suffix を除く。`{ccmsg_host}` は ccmsg plugin が SessionStart で context に入れる)。classifier は当該の会話内の kawaz の発言しか見ないので伝言の許可は効かず、伝言そのものも止められる
+- 2 回続けて止まるなら繰り返さず、kawaz の `!` 実行か設定の調整を提案する
+- in-process の subagent / チームメート (Agent tool) は kawaz と直接話せず、許可の伝言も届かない。止められたら委譲元に報告して止まり、**委譲元がその操作を自分で実行する** (委譲元の会話に kawaz の許可があれば通る)
