@@ -111,9 +111,10 @@ compact 前の実行の場合は自己停止不要。
 新規セッションで継続指示があった場合は以下コマンドで新規セッションを起動する (cwd で実行する。direnv は起動時に適用済みなので `direnv exec` は付けない)。
 
 ```bash
-hyoui run --detached -- \
-  itumono-run-claude.sh --model "<自分と同じ model id>" --effort "<自分と同じ effort>" \
-  '~/.cache/claude-session-state/<slug>/latest.md があれば reference の session-state/load の手順でロードし、継続指示があれば実行、無ければ次の優先作業候補を提案'
+itumono-run-claude.sh --model "<自分と同じ model id>" --effort "<自分と同じ effort>" \
+  <<< '~/.cache/claude-session-state/<slug>/latest.md があれば reference の session-state/load の手順でロードし、継続指示があれば実行、無ければ次の優先作業候補を提案'
 ```
+
+プロンプトは **stdin (herestring / パイプ) で渡す**。位置引数は `--model` 等の既知オプション以外は黙って捨てられるので、引数で渡すと後継は既定の「準備して待て」で立ち上がり、継続指示が実行されない。
 
 自身のプロセス終了自体は別途指示がない限りはユーザが行う。
