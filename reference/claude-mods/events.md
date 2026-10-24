@@ -110,6 +110,8 @@ Bash は `echo` で engine が allow したためダイアログ無し。`ui.ren
 |---|---|---|
 | module の読み込み | `worker` | 同じ |
 | `session.start` の `e` | `surface: 'terminal', isInteractive: true` | `surface: null, isInteractive: false` |
+| 起動時の `session.start` と `classic.SessionStart` の順 | 実測: 同じ ms か 1 ms 差で dispatch、`session.start` が先 (2.1.299) | 実測: `classic.SessionStart` が 13〜16 ms 先 (2.1.299) |
+| 起動時の `classic.SessionStart` の中の `$.session.append` | 実測: 通る (2.1.299) | 実測: `refused: this session keeps no conversation to append to` で reject (startup / resume)。`session.start` の後なら通る (2.1.299) |
 | `prompt.submit` の `origin` | `composer` | `sdk` |
 | `$.prompt.read()` | composer の中身 | `{ text: '', cursor: 0 }` |
 | `$.prompt.fill()` | `isFilled: true` | `{ isFilled: false, refusal: 'no_composer' }` |
@@ -121,12 +123,19 @@ Bash は `echo` で engine が allow したためダイアログ無し。`ui.ren
 
 ## 意味論の注意
 
-- `session.start` は「プロセスごと・plugin の読み込みごとに 1 回」で、最初の 1 回は await される (ここでの `$.tool.register` は turn 1 に間に合う)。後の回 (enable・worker の再起動・hot-reload) はその plugin の hook だけが走る。reload では変わった module だけ (どれかが `engine.create` / `plugin.register` を hook していれば全部)
+- `session.start` は「プロセスごと・plugin の読み込みごとに 1 回」で、最初の 1 回は await される (ここでの `$.tool.register` は turn 1 に間に合う)。後の回 (enable・worker の再起動・hot-reload) はその plugin の hook だけが走る。reload では変わった module だけ (どれかが `engine.create` / `plugin.register` を hook していれば全部)。`e` に startup と resume を分ける欄は無い。実測: `--resume` / `--continue` は新しい process なので毎回起きる (2.1.299)
+- 実測: hot reload でも `register` → `engine.create` → `session.start` が走り、`$.state` は reload 前の値のまま残る (2.1.299)。`session.start` で無条件に会話へ足す処理は reload のたびに重複する
 - `/clear` では `session.start` は起きない (`session.end` が `reason: 'clear'` で起き、process は新しい session id で続く)。`/clear` と `/resume` を拾うには `session.end` の `reason` か、`command.run` を `{ command: ['clear', 'resume'] }` で hook して `await next(e)` の後に状態を捨てる (built-in `diff` の形)
+- 実測: `/clear` は `command.run (clear)` → `classic.SessionEnd (reason: clear、前の id)` → `session.end (reason: clear)` → `classic.SessionStart (source: clear、新しい id)` → `command.run` の `next(e)` が resolve の順。module は読み直されず、`command.run` の after で読む `$.session.id()` は新しい id (2.1.299)
+- 実測: session の中の `/resume <sid>` は `command.run (resume)` → `classic.SessionEnd` → `session.end (reason: resume、前の id)` → `classic.SessionStart (source: resume、再開した id)` → `command.run` の resolve の順で、`session.start` は起きない。after で読む `$.session.id()` は再開した id (2.1.299)
+- 実測: `/compact` は `command.run (compact)` → `session.compact (trigger: manual)` → `classic.PreCompact` → `classic.SessionStart (source: compact、同じ id)` → `classic.PostCompact` → `session.compact` の resolve → `command.run` の resolve の順。自動 compact は `turn.start` の後、その turn の最初の request の前に起き、`command.run` を通らない (2.1.299)
+- 実測: `/model` は picker でも引数付きでも `command.run (model)` を通り、after は `classic.PostModelSwitch` の後に resolve する。`config.set` (`key: 'model'`) は既定として保存する時だけ起き、picker の「この session だけ」では起きない (2.1.299)
 - 起動直後と reload 直後は `session.start` より先に `ui.render` hook が走る (reload では既存の全 UserMessage が再 render される)。`session.start` で初期化する module 変数は、`ui.render` hook では初期値のままのことがある (実測)
 - `session.end` の `reason` は `prompt_input_exit` (/exit・ctrl+c・ctrl+d) / `clear` / `resume` / `logout` / `other` (`-p` の完了・SIGINT / SIGTERM / SIGHUP)。予算は chain 全体で既定 1.5 秒。`kill -9` では起きない (実測)
 - `turn.start` / `turn.step` / `turn.complete` は main loop と subagent・teammate の turn の両方で起きる。区別は `e.agentId` (main では無い)。agent の spawn の内側にいた hook はその agent の `turn.start` / `turn.step` を聞かないが、`turn.complete` は spawner を含む全 hook が聞く
 - `prompt.submit` の `next(e)` は model の応答を待たず、prompt が session に入り turn が始まった時点 (実測で数 ms)、または実行中の turn の後ろに queue された時点で resolve する
+- 実測: tool の実行中に人が Enter すると、その時点で `prompt.submit` と `classic.UserPromptSubmit` が起き、`next(e)` は 9〜15 ms で resolve する。queue された prompt は別の turn にならず、実行中の turn の次の request で tool_result と同じ user message に `The user sent a new message while you were working: ...` として入る (2.1.299)
+- 実測: queue された prompt の transcript の `queued_command` 行と `session.append` は、Enter の時点でなく model に渡る時点で現れる (2.1.291)。応答の stream 中の Enter は未確認
 - `prompt.submit` の `e.origin.kind` は閉じた集合: `composer` / `bridge` / `sdk` / `task-notification` / `scheduled-trigger` / `peer` / `peer-send-message` / `projects-relay` / `channel` (`server` 付き) / `coordinator` / `observer` / `observer-activity` / `auto-continuation` / `unclassified` / `slack-ping` / `plugin` (`name`、`asUser?`)。hook は origin を設定できない (`$.prompt.submit` は `{ kind: 'plugin', name }` になる)
 - 別セッションからの配送は `session.receive` を queue の前に通る。`next({ ...e, text })` で書き換え、`{ consumed: reason }` で握りつぶせる (model にも画面にも出ない)。同じ config home の SendMessage も、UDS に直接書いた frame も `origin: { kind: 'peer' }` になり、送り手の `$.session.send` だと `plugin` が付く (送り手の自己申告で、guard の鍵にしない)。agent team の mailbox 経由は `teammate` (送り手の名前) と `isVerified` が付く。続く `prompt.submit` は `peer` (plugin は落ちる、実測)
 - `ui.render` の `UserMessage` は `props.from.name` に envelope の `from-name`、`props.text` に envelope を剥がした本文を持つ (実測)

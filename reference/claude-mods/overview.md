@@ -11,8 +11,9 @@ Claude Mods は Claude Code の plugin が持てる 5 種目の hook (function h
   hooks/register.ts            register(on, options) を export する
 ```
 
-- `$.state` を型付きで使う・noun を足すなら `types/index.d.ts` に契約を書く (`declare module 'claude-code' { interface PluginState { ... } }` / `interface EngineInterface { <noun>: ... }`)。置き場が `./types/index.d.ts` なら `plugin.json` の `"types"` は省ける。別の場所なら `"types"` で名指しする
-- 拡張子は `.ts .tsx .jsx .js .mjs .cjs .mts .cts` (それ以外の名前のファイルは読まれない)。どれも ES module で `require` は無い。plugin 内の別ファイルは `import` 宣言で読む。`import()` を含む module は読み込まれない。JSX は global の `h` / `Fragment` に対してコンパイルされ (`h` / `Fragment` という名前を自分で宣言・import しない、`@jsx` pragma も書かない)、要素 (`Box` / `Text` / `Button` ...) は `$.ui.resolve(e)` で描画面ごとに取る
+- `$.state` を使う・noun を足すなら `types/index.d.ts` に契約を書く (`declare module 'claude-code' { interface PluginState { '<plugin>': { <key>: <型> } } }` / `interface EngineInterface { <noun>: ... }`)。置き場が `./types/index.d.ts` なら `plugin.json` の `"types"` は省ける。別の場所なら `"types"` で名指しする
+- 実測: `$.state` の key を `PluginState` に宣言しないと、validate が `<plugin>.<key> is not declared: the manifest's types contract must name it in interface PluginState { ... }` で落ち、module は読み込まれない。契約のファイルは型の export だけを持つ (top-level の `export {}` は `a contract exports types and nothing else` で契約として読まれない) (2.1.299 / 2.1.309)
+- 拡張子は `.ts .tsx .jsx .js .mjs .cjs .mts .cts` (それ以外の名前のファイルは読まれない)。どれも ES module で `require` は無い。plugin 内の別ファイルは `import` 宣言で読む。実測: hooks.json が名指す `register.ts` から `./notify` を相対 import する plugin (context-notify) が対話 session で動いている (2.1.299)。相対 import した別ファイルの関数が `claude plugin test` で走る (2.1.309)。`import()` を含む module は読み込まれない。JSX は global の `h` / `Fragment` に対してコンパイルされ (`h` / `Fragment` という名前を自分で宣言・import しない、`@jsx` pragma も書かない)、要素 (`Box` / `Text` / `Button` ...) は `$.ui.resolve(e)` で描画面ごとに取る
 - 同じ hooks.json の command hook 等の entry は module と並走する
 - 人が所有するフォルダから mod を読み込むたびに、engine がその mod のディレクトリへ `.claude-plugin/types/` (`claude-code/` = 型定義本体、`claude-code-tools/` = この build の built-in tool の入出力型、`claude-code-mcp/` = 最後の reload 時に接続していた MCP tool の入力型、`plugin.json` の `"dependencies"` に挙げた plugin の契約) と、自前の tsconfig が無ければそれを extends する `tsconfig.json` を書く。`-p` / SDK session では書かない
 
@@ -49,7 +50,8 @@ export function register(on) {
 }
 ```
 
-- `on(pattern, matcher?, hook)`、hook は `($, e, next)`。`$` は engine への唯一の口 (`$.noun.method(...)`)、`e` はその event の入力 (深く凍結された plain value。書き換えはコピーを `next` に渡す)、`next(e)` は下の hook と engine の既定動作を走らせて結果を返す。型定義は登録の「repeat」が throw すると書く (同じ event に matcher 違いで複数登録するのは built-in が多用している)。`register` の戻り値は捨てられ、Promise なら await される
+- `on(pattern, matcher?, hook)`、hook は `($, e, next)`。`$` は engine への唯一の口 (`$.noun.method(...)`)、`e` はその event の入力 (深く凍結された plain value。書き換えはコピーを `next` に渡す)、`next(e)` は下の hook と engine の既定動作を走らせて結果を返す。`register` の戻り値は捨てられ、Promise なら await される
+- 同じ pattern を matcher なしで 2 回 `on()` すると module ごと読み込まれない (validate もエラー。`on("session.start") is registered twice without a matcher; the first is at <file>:<line>`)。matcher 付きなら同じ pattern を何本登録してもよく、同じ matcher (`{}` 同士も) の重複も通る。`session.start` と `session.*` の組も重複ではない (実測: 2.1.308 / 2.1.309)。built-in `diff` も `command.run` を `{ command: 'diff' }` と `{ command: ['clear', 'resume'] }` に分けて登録している
 - pattern: event 名 (`tool.call`)、namespace の glob (`classic.*` / `telemetry.*`)、全部 (`*`)、否定 (`!tool.*` = それ以外全部)。`*` と否定は installed plugin には telemetry の event を選ばない (`telemetry.log` / `telemetry.*` と名指しする)
 - matcher は `e` の部分形: 葉は `===` か RegExp (`{ command: /^git / }`)、配列は any-of (`{ tool: ['Edit', 'Write'] }`)、object は入れ子の部分一致、配列の欄は要素のどれかが一致すれば当たる (`{ instructionFiles: { kind: ['project', 'local'] } }` は該当 kind の file を 1 つでも含む `e`)。8 階層まで。型付きの `e` では `{ startsWith }` のような書き方は型エラー
 - Koa 流の入れ子。`on(X, A), on(X, B)` は `A(B(core))` で、先に登録した側が外側 (強い)。plugin 間の並びは tier `prepend` (管理者が前置) → `user` (人が入れたもの) → `append` (管理者が後置) → `builtin` (binary 同梱) → `core` (engine 最内)
@@ -70,6 +72,7 @@ on('tool.check', guard).catch(() => ({ decision: 'deny' }))   // 何も走って
 
 - handler の `next` は `next.error` (`kind`: `throw` / `timeout` / `re-entry`、`message?`、`budget`) と `next.called` (失敗前に `next` を呼んだか) を持ち、replay-safe (`called` なら `next(e)` は最後の結果を返し、下は再実行されない)。handler の猶予は 1 秒 (`HookBudget.catchMs`)。`re-entry` (自分の `$` 呼び出しの下で同じ event が上がり hook が走らなかった) の時も handler が代わりに答え、その中の `$` 呼び出しは reject される
 - `.catch` を 2 つ付ける・`register` が返った後に付ける・`engine.create` に付けるのは throw
+- 実測: 同じ plugin の中で hook が失敗すると、その外側にある同じ plugin の hook は `await next(e)` の後が走らない。どの hook の `.catch` も `next(e)` を返す形で、内側の hook が `next` の後に throw しても (2.1.308 / 2.1.309) 前に throw しても (2.1.308) 同じだった (`claude plugin test` で各 1 回。対話 session では未確認)。登録を関心ごとに分けても、`.catch` は他の登録の続きを守らない
 - `claude plugin validate` は gating site (答えで拒否できる event) の hook を `.catch` の有無付きで列挙する
 
 ## 実行環境
@@ -83,6 +86,7 @@ on('tool.check', guard).catch(() => ({ decision: 'deny' }))   // 何も走って
 ## security モデル
 
 - `claude plugin validate` が module のソースを静的に走査し、hook する pattern・`$` の呼び出し (`noun.method`)・`$.env` で読み書きする変数名・`$.state` で読み書きする `{ plugin, key }` を列挙する。同じ走査結果が `plugin.register` の `e.uses` (`events` / `calls` / `env` / `state`) になる。走査に現れない呼び出しは実行時に host が拒む (`refused: its hooks module does not spell (...`)。`on` / `$` / `$.env` の変数名 / `$.state` の参照はリテラルで書く (`$.state` の family の `id` だけは計算してよい)
+- `$` そのものを渡してよいのは top-level に宣言した関数だけ。配列や object に入れた関数へ引数で渡すと `$ itself is passed as an argument (bound, passed, spread, returned or read)` で module が読み込まれない。hook の中の closure が `$` を閉じて使うのと、`register` から top-level の関数に `on` を渡して登録させる形は通る (実測: 2.1.308 / 2.1.309)
 - 組織の制御は並び順そのもの。外側の plugin が `plugin.register` で他 plugin の読み込みを拒み (`{ refuse }`)、`engine.create` で noun を足す・(`user` tier 以外は) 差し止め、`*` で監査する
 - 限界: `$.process.run` の子は `$` の外で user 権限の何でもできる。`calls` に `process.run` が出る mod は実質任意コマンドを走らせうる。`$` 経由の一元化は追跡のためで、sandbox ではない。sandbox 下の shell コマンドは `--plugin-dir` のフォルダに書けない (そこにある code は sandbox の外で reload・実行されるため)
 - 読み込まれない条件: workspace が未 trust (`hooks modules not loaded until workspace trust is accepted`。built-in も含む)、safe mode、`--bare` (managed 以外)、`disableAllHooks` / `allowManagedHooksOnly` / policy、`sec-default` の `allowManagedModsOnly`。`-p` は未 trust の cwd でも trust 確認なしで読む (実測)。remote で off にされた installed mod は turn の合間に unload される
@@ -99,7 +103,8 @@ managed settings か managed-mcp.json のある機械、または Team / Enterpr
 - `tool.register`: managed `allowedMcpServers` がある間は user tier の登録を拒む。無くても組織の MCP server・組織が座らせた plugin の名前に読める tool 名は拒む
 - `env.set`: managed `env` が設定する変数、`CLAUDE_CONFIG_DIR` 等の policy・sign-in の読み先を動かす 9 変数、`LD_PRELOAD` / `DYLD_INSERT_LIBRARIES` / `BASH_ENV` / `NODE_OPTIONS` 等の 10 変数への user tier の書き込みを拒む
 - `plugin.register`: managed settings の `pluginConfigs["cc-plugin-sec-default@builtin"].options.allowManagedModsOnly` が立っていると user tier の module (install したもの・`--plugin-dir`・mods フォルダのもの) を全部拒む
-- validate と `/plugin` は「組織が管理する環境で飛ばされる mod の hook」を名指す注記を出す (CHANGELOG)。対象はこの表と対応すると読めるが、注記の実物は未確認
+- validate と `/plugin` は「組織が管理する環境で飛ばされる mod の hook」を名指す注記を出す (CHANGELOG)。2.1.299 の validate の注記の要旨 (context-notify の DR-0003 の記録): managed settings のある機械では、利用者が自分で入れた plugin の `classic.*` / `skill.prompt` hook は走らない。`turn.step` / `tool.call` / `session.start` と `$.session.append` は対象に入らない
+- 実測: 管理されていない機械の 2.1.309 では、`classic.*` / `skill.prompt` / `prompt.attachment` / `prompt.context` / `session.compact` を hook する plugin を validate しても注記は出ない (`--json` の `notes` / `advice` にも無い)。注記の有無で hook が飛ばされるかを判断しない
 
 ## 既存の拡張機構との差分
 

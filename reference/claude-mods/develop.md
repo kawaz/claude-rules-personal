@@ -15,7 +15,7 @@
 - hook する pattern (matcher 付き)、`calls` (`noun.method`、どの関数経由か付き)、`$.env` の読み書き、`$.state` の読み書き
 - gating site (答えで拒否できる event) の hook ごとの `.catch` の有無 (`--json` では `gatingHooks`)
 - 組織が管理する環境で飛ばされる hook の注記 (`/plugin` にも出る)
-- engine が拒むもの全部。拒否理由は行と原因と直し方を名指す (例: top-level の `var` を再宣言・再代入して `$.state` の参照を読んでいる module は拒否)
+- engine が拒むもの全部。拒否理由は行と原因と直し方を名指す (例: top-level の `var` を再宣言・再代入して `$.state` の参照を読んでいる module、`PluginState` に宣言していない `$.state` の key、matcher なしの同じ pattern の重複登録、`$` を top-level 以外の関数へ引数で渡す module。後の 3 つの文言は reference の `claude-mods/overview`)
 - README に install の 1 行が無い時は貼る行を助言する。exit code は変えない (`--strict` でも)
 
 ## test
@@ -39,6 +39,7 @@ describe('register', () => {
 ```
 
 - `$` は engine 自身のもので、呼び出しは出荷時の形で読まれた mod の全 hook を通る。test の `on` で登録した hook は全 plugin の下 (外界の位置) に座り、その下には何も無い。誰も答えない呼び出しは event 名付きで throw する。test は最初の `$` 呼び出しの前に hook を登録する
+- `$.session.start(...)` を呼ぶ test は、test の側で `on('session.start', ($, e) => ({ cwd: e.cwd }))` を登録して core の代わりに答えさせる。無いと `HooksError: no implementation for session.start` で失敗する (実測: 2.1.308 / 2.1.309)
 - `mock` は外界を noun ごとに memory で答える: `mock.clock(on)` (`advance(ms)` / `set(ms)` / `settle()` / `sleep(ms)`。待ちは時計が越えた時だけ解ける)、`mock.store(on, entries)`、`mock.env(on, variables)`、`mock.session(on)` (`$.session.append` された行を `appended()` で読む)
 - `test(name, { plugins, timeoutMs, options }, body)`: `plugins` は inline plugin を横に読む (他 mod の noun の provider 等)、`timeoutMs` の既定は 5000、`options` は対象 plugin の `userConfig` の値 (省略は manifest の既定値)
 - `$.ui.mount({ plugin, surface, ... })` は component を指定 surface で描き、要素の検索・press・input・key・pointer を key で行う。`$.ui.press({ plugin, key })` は描いた `Button` を押す。`$.classic.<Event>(fields)` は classic event を上げる (`classic.PreToolUse` は `$.tool.call` の中で上がる)
@@ -48,7 +49,7 @@ describe('register', () => {
 
 ## hot-reload
 
-- `--plugin-dir` の folder は対話 session で watch され、保存で reload する (実測 `reloaded in 5.7ms`)。中身が変わらない保存では reload しない。reload で `register` と `session.start` が再度走る。headless の長寿命 session は `CLAUDE_CODE_PLUGIN_DIR_WATCH=1`
+- `--plugin-dir` の folder は対話 session で watch され、保存で reload する (実測 `reloaded in 5.7ms`)。中身が変わらない保存では reload しない。reload で `register` と `session.start` が再度走り、`$.state` は残る (reference の `claude-mods/events`)。headless の長寿命 session は `CLAUDE_CODE_PLUGIN_DIR_WATCH=1`
 - watch は idle 時 30 秒、active 時 400ms の polling なので、idle 中の保存は反映まで最大 30 秒程度かかる (実測)
 - skill `plugin-authoring` 経由の開発では `$CLAUDE_CONFIG_DIR/dev-mods/<sessionId>` が作業場所になる (skill 本文の placeholder `${CLAUDE_DEV_MODS_DIR}` が置換される。環境変数ではない)。最初の書き込みで「Enable mod hot-reloading for this session?」を 1 度訊く。この同意は人だけが答え、permission mode・rule・hook では答えられない。SDK host が答える前に閉じた場合は 3 回まで訊き直す。accept-edits mode でも、この mods フォルダに mod を作る Write / Edit は確認を挟む
 - skill `plugin-authoring` は作った mod を他人が install する 1 行のコマンドを示して README の install 節に書き、共有時は public / private を訊いてファイルを確かめてから GitHub リポを作る

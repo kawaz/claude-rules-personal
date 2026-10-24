@@ -17,7 +17,8 @@
 
 - `$.prompt.read()` → `{ text, cursor }`。書きかけが無ければ `{ text: '', cursor: 0 }`。never reject
 - `$.prompt.fill({ text, mode, decorations? })` → `{ isFilled, text, cursor, refusal? }`。`mode` は `replace` (既定) / `append` / `insert` (cursor 位置)。ダイアログ中は `refusal: 'dialog'`、`-p` / SDK や自前の composer を描く surface は `refusal: 'no_composer'`。他 plugin の `prompt.fill` hook が拒むこともあり、その時は `refusal` が無い (原因不明として扱い、box が無いとは見なさない)。返る `text` / `cursor` は module のどこかで `$.prompt.read` を呼んでいる plugin にだけ入り、それ以外には空の box が返る。端末で何も描かれない code point は除かれて入る。`decorations` (`{ start, end, color?, bold?, italic?, ... }`) で入れた文に色を塗れる (次の編集で消える)
-- `prompt.submit` hook の `await next(e)` は prompt が session に入り turn が始まった時点 (実測 2〜8ms) で resolve する。model の応答は待たない
+- `prompt.submit` hook の `await next(e)` は prompt が session に入り turn が始まった時点 (実測 2〜8ms) で resolve する。model の応答は待たない。turn の実行中 (tool の実行中) の Enter でも、その時点で起きて数 ms で resolve し、prompt は実行中の turn の次の request に入る (実測: 2.1.299。応答の stream 中は未確認、詳細は reference の `claude-mods/events`)
+- 文が session に入ったことの確認は、`prompt.submit` の `e.origin.kind === 'composer'` と、fill した文との一致で見る。実測: `classic.UserPromptSubmit` の `prompt` は fill した文から末尾の空白 (改行・空白・タブ・全角空白) を落とした形で届く (2.1.293)。`prompt.submit` の `e.text` で同じかは未確認
 - Enter の送出は mod の外。端末にキーを送れる道具 (tmux の `send-keys`、kawaz 環境なら hyoui の `key:Enter` 等) を使う
 
 ## 手順

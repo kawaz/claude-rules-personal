@@ -6,28 +6,36 @@ mod を設計する時の判断軸。事実 (event の欄、`$` の制限) は r
 
 - Claude Code の動作は「context を全部送る → response が返る」の繰り返し。この 1 往復が `turn.step` で、全部拾える
 - `tool.call` / `prompt.submit` / `turn.complete` / `classic.*` 等は、その往復の一部や前後を選ぶためのもの。選び方は `capabilities`
+- `turn.step` は stream の event で、hook は `async function*` で書き `const r = yield* next(e)` で chunk を素通しにする。`.catch` の handler も `async function* ($, e, next) { return yield* next(e) }` の形にする。普通の関数で `next(e)` を返すのは型エラー (型定義)
 
 ## main と subagent の見分け
 
 - subagent (worker) の往復にも main と同じ event が起きる
 - `e.agentId` が無ければ main、あれば subagent。main だけ見るなら `e.agentId === undefined` で絞る
-- `$.session.append` 等に `agentId` を渡すと、その subagent の会話が対象になる
+- `$.session.append` 等に `agentId` を渡すと、その subagent の会話が対象になる。届くのは走行中の subagent だけで、終わった後は reject される (`dollar-api`)
+- `$.tool.register` した tool の handler では `$.session.id()` が subagent からの呼び出しでも main の id になるので、呼び手は `e.agentId` で見分ける
 
 ## model に文脈を足す
 
-- `$.session.append({ message: { type: 'user', content: [{ type: 'text', text }] } })` で会話に 1 行足す。mod の中なら好きなタイミングで呼べ、以後のリクエストに乗り続ける
+- `$.session.append({ message: { type: 'user', content: [{ type: 'text', text }] } })` で会話に 1 行足す。足した行は以後のリクエストに乗るが、compaction で要約に置き換わる。compaction の chain の中で足した行は消え、`turn.start` で足した行はその turn の最初のリクエストに間に合わない (`dollar-api`)
 - `type: 'system'` は人向けの画面通知で、model は読まない
 - event の結果欄 (`tool.call` の `context` 等) は、その event の文脈に結び付けたい時だけ使う。一覧は `capabilities` の末尾
 - append した行は model にユーザのメッセージとして見える。通知なら `[plugin名]` の接頭辞で出所を示す
+- session の最初の request に文脈を載せるなら、`prompt.submit` の before で `$.state` の印が無ければ `$.session.append` して印を置く。加えて `session.compact` の after で「compact 済み」の印を置き、次の `prompt.submit` で足し直す。実測: 対話と `-p`、startup / resume / continue / `/clear` / compact のすべてで次の request に載り、人の prompt と同じ user message の prompt の直前に並ぶ (2.1.299。届いたかと位置は代役の API に向けた request の body で見た。`lab-setup`)
+  - `/clear` と `--resume` / `--continue` では `$.state` が空になるので印は自然に消えて足し直され、hot reload では残るので二重にならない
+  - resume のたびに 1 つずつ増える (前に足した行も残る)
+  - 自動 compact は turn の途中 (`turn.start` の後) に起きるので、足し直しはその次の turn の request からになる
+  - `session.start` で足す形は `/clear` と compact の後に載らず hot reload で重複し、`prompt.context` の独自 block は resume で作り直されない (`capabilities`)
 
 ## 状態の置き場
 
 | 置き場 | 書くのは | 寿命 |
 |---|---|---|
-| `$.state` | plugin | session の間 (hot reload は跨ぐ。`/clear`・resume・終了で消える) |
+| `$.state` | plugin | session の間 (compact と hot reload は跨ぐ。`/clear`・`--resume` / `--continue`・終了で消える。session 内の `/resume <sid>` は未観測) |
 | `$.store` | plugin | config home 単位で永続。同じ config home の全 session で共有 |
 | plugin data dir | 利用者 | plugin の update を跨ぐ。利用者がエディタで直すファイル |
 
+- 実測: `/clear` の後、`classic.SessionStart (clear)` の hook の入口ではまだ前の session の `$.state` の一部が読めることがあり、次の `prompt.submit` の時点では全部消えている (2.1.299)。「この session で済ませた」の印は `prompt.submit` 以降で読む
 - `$.store` で session 別に持つものはキーに session id を含め、古いキーは掃除する (全体 4 MiB)
 - project ディレクトリは境界に無い。分けたいならキーに含める
 - `--plugin-dir` の開発版と install 版は plugin id が違い、`$.store` も data dir も別になる
@@ -36,10 +44,10 @@ mod を設計する時の判断軸。事実 (event の欄、`$` の制限) は r
 ## skill と tool の分担
 
 - 決定的な処理 (検証、変換、状態の読み出し) は `$.tool.register` の tool に。判断や分岐が要る流れは skill md に
-- tool の入力は `inputSchema` (JSON Schema) で型が付く。出力に schema を付ける口は無い
+- tool の入力は `inputSchema` (JSON Schema) で model に示す。engine はこれで入力を検査しないので、handler の入口で parse する (`dollar-api` の「tool」節)。出力に schema を付ける口は無い
 - skill から使う tool は、手順に完全名 `mcp__<plugin>__<name>` で書く。ToolSearch は名前の分かっている tool の schema を後から引く仕組みで、使う tool の見当は付けてくれない
 - `description` は「何をするか」の 1 文。使い所は skill 側に書く
-- `isDeferred: true` で schema は呼ばれた時だけ context に載る
+- `isDeferred: true` で schema は呼ばれた時だけ context に載る。ToolSearch が無効な環境 (`ANTHROPIC_BASE_URL` が first-party でない等) では全文で載る (`dollar-api` の「tool」節)
 
 ## npm パッケージと bundle
 
