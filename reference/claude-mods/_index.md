@@ -11,7 +11,7 @@ Claude Code の plugin が持てる TypeScript / JavaScript の hook module。en
 - [capabilities](capabilities.md) — event ごとに読める・書き換えられる・文脈を足せる欄の表と、thinking の扱い。
   model に文脈を渡す, context を足す, additionalContext, additionalContext of the wrong type, isError が効かない, API error の表示文, 書き換えたのに効かない, 組織管理下で効かない, thinking を読む
 - [practices](practices.md) — mod 設計の選び方: 計測単位、subagent の見分け、状態の置き場、skill と tool の分担。
-  mod の設計, 状態をどこに持つ, $.state の寿命, 最初の turn の前に注入, compact 後に足し直す, turn.step の書き方, skill と tool の分担, bundle, 公式 README が古い
+  mod の設計, 状態をどこに持つ, $.state の寿命, 最初の turn の前に注入, compact 後に足し直す, turn.step の書き方, skill と tool の分担, tool の description を短く, inputSchema の細則, bundle, 公式 README が古い
 - [dollar-api](dollar-api.md) — `$` の noun ごとのメソッドと制限、外部プロセスとの接続、`$.store`、state ライブラリ。
   $ で何ができる, $.store, $.http, $.process, 4 MiB, 予算, ran past its 10s budget, compact 中の append, subagent に append, no running loop, $.tool.register, no tool.call hook answered, ToolSearch
 - [dialogs](dialogs.md) — permission 等のダイアログで読める・割り込める・返せるもの、deny rule との優先関係。

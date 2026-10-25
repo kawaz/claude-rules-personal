@@ -46,7 +46,7 @@ mod を設計する時の判断軸。事実 (event の欄、`$` の制限) は r
 - 決定的な処理 (検証、変換、状態の読み出し) は `$.tool.register` の tool に。判断や分岐が要る流れは skill md に
 - tool の入力は `inputSchema` (JSON Schema) で model に示す。engine はこれで入力を検査しないので、handler の入口で parse する (`dollar-api` の「tool」節)。出力に schema を付ける口は無い
 - skill から使う tool は、手順に完全名 `mcp__<plugin>__<name>` で書く。ToolSearch は名前の分かっている tool の schema を後から引く仕組みで、使う tool の見当は付けてくれない
-- `description` は「何をするか」の 1 文。使い所は skill 側に書く
+- tool の description と inputSchema は context を食う。plugin 専用の tool (発見性が要らない、skill が完全名で使い方を書く) は **型と制御性のためだけ** に tool にする: description は無しか 3 語程度、field の description は名前で中身が決まらないもの (`resume` が session id を指す等) だけに 3 語程度、型は `string` / `boolean` / enum と `required` だけで `minLength` / `pattern` / `format` 等の細則は書かない (`required` を見れば省略可は分かる)。細則は handler 側の schema で検査し、外れたら簡潔なエラー文で言い直させる。model に渡す JSON Schema は handler の schema から導き、その変換で細則を落とす (別 schema を手書きしない)。汎用ツールとして配る plugin なら tool 自体の説明は適度に持ってよいが、「言わなくても分かる」規則を書かない点は同じ (kawaz 2026-10-25)
 - `isDeferred: true` で schema は呼ばれた時だけ context に載る。ToolSearch が無効な環境 (`ANTHROPIC_BASE_URL` が first-party でない等) では全文で載る (`dollar-api` の「tool」節)
 
 ## npm パッケージと bundle
