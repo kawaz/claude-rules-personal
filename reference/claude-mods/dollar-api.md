@@ -87,7 +87,7 @@ plugin は `engine.create` で独自の noun を足せる (`return { ...beneath,
 ## 制限
 
 - `fs.read` / `fs.write` は 4 MiB を超えると reject。追記 API は無いので、log を `read` + `write` で伸ばす作りは 4 MiB で止まる (ファイルを分ける)。network 越しのパス表記は触らずに reject
-- `store` は全体で JSON 4 MiB まで。関数・循環参照は reject、`Date` は ISO 文字列、`undefined` の欄は落ち、`Map` / `Set` は `{}` になる
+- `store` は plugin ごとに config dir 配下の JSON ファイル 1 つで、全体で JSON 4 MiB まで。4 MiB は reject される線であって設計の前提にする数字ではない (1 ファイルを毎回読み書きするので、置くものは必要十分に小さく)。関数・循環参照は reject、`Date` は ISO 文字列、`undefined` の欄は落ち、`Map` / `Set` は `{}` になる
 - `env.get` / `env.set` の変数名、`state.get` / `state.set` の `plugin` / `key` は文字列リテラル必須 (validate が列挙し、列挙外は拒否)
 - hook が `next()` に渡す・返す・`$` に渡す値: 28,000 階層より深い入れ子は上限を名指して拒否。getter が `RangeError` を投げた key だけ拒否される。`__proto__` key は落ちない (data としての own key)。長い文字列は切り詰めて log される
 - `http.fetch` は http / https だけ (WebSocket・SSE・生 socket は無い)。応答は body を全部読んでから `{ status, ok, headers, text }` で返り、stream しない。body の上限は 4 MiB (`Content-Length` が超えると拒否。`HEAD` と `204` / `205` / `304` は除く)。長期接続を持つ・再接続する手段は `$` に無く、SSE の endpoint を叩けば「サーバが閉じるまで resolve しない fetch」になるだけ。長期接続が要るものは全部 `process.spawn` の子 (stdout を stream で読める) に置き、再接続も子の終了を見て spawn し直す module 側のループで行う。body は文字列。組織の web-fetch policy に従い、`CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC` の下では built-in の request と `auth` 付きの request を拒む。`socketPath` で Unix socket 越しの HTTP を話せる (絶対パス、約 100 byte まで。redirect も同じ socket、proxy 無し、`https:` は URL の host で TLS 検証)。timeout の記述は型定義に無い
