@@ -105,6 +105,7 @@ PY
 
 ## 誤拒否の見方と直し方
 
+- 止められた時にユーザへ許可を求める手順 (ccmsg の `permit` ツール、許可後は同じ操作を書き換えずに再実行、伝言の許可は効かない、subagent は委譲元が代行) は rule `classifier-notes` が正本。ここは「なぜ止まったか」を読んで設定を直す側
 - 拒否文言の `[...]` が当たった rule 名。`claude auto-mode defaults --label '<名前>'` で全文
 - 同じ送り先 (host / remote / bucket) で繰り返し止まる → `environment`、同じ操作で止まる → `allow`、1 回きり → 次の message で intent を名指しして再試行 (`/permissions` の Recently denied で `r`)
 - 「Blocked by fast classifier」は docs に無い文言 (server-side review の拒否と推測)。「no verdict」系は classifier 自体の失敗で、設定では直らない
