@@ -20,6 +20,7 @@
 - **意図的な誤判断 record** (= 「片面確認」回避目的、DR-0020 PR-2.1/2.2 のような明示意図): grep 可能な history として正規に残す
 - **Migration hint**: 削除した機能を user が探すかもしれない場面で「v0.X で `vcs:latest-tag()` は廃止、代替は ...」のような移行誘導 (= help / error message に限り、code comment ではない)
 - **DR Status: Superseded by DR-NNNN** 注記: DR 自体は判断 record、supersede 関係は構造的に必要
+- **選定判断基準日** (`<対象> 選定判断基準日: YYYY-MM-DD`): 外部情勢に依存する選定 (alg / ライブラリ / プラットフォーム対応) が依拠した時点を示し、読者に再評価のきっかけを与える。経緯ではなく現在価値を持つ。書き方は reference の `docs-authoring/decision-date-stamp`
 
 ## 適用フロー
 

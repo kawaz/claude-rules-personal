@@ -8,5 +8,7 @@ kawaz リポの `docs/` 構造標準と、何をどこに書き残すかの判�
   翻訳ペア, README-ja, DESIGN-ja, 英訳, check-outdated-translations, bump-semver vcs outdated
 - [knowledge-timing](knowledge-timing.md) — issue 解決時の記録先、DR / runbook / findings / journal を立てる時機。
   いつ DR を立てる, issue を close, 記録を残す, journal を書く, runbook 化, findings にする
+- [decision-date-stamp](decision-date-stamp.md) — 外部情勢に依存する選定 (alg / ライブラリ / プラットフォーム対応) に「選定判断基準日」を添える書き方と、経緯の記述との違い。
+  判断基準日, 選定日, いつ決めたか, alg 選定, ライブラリ選定, 見直しのきっかけ, 情勢変化
 - [questions-registry](questions-registry.md) — `docs/QUESTIONS.md` の運用 (裁定待ち Q / 確認待ち C)、AskUserQuestion 禁止。
   QUESTIONS.md, 裁定待ち, 確認待ち, AskUserQuestion, 今何待ち
