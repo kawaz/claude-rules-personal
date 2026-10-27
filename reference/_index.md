@@ -23,7 +23,7 @@
 - [app-file-placement](app-file-placement.md) — アプリの設定 / データ / 状態 / キャッシュ / socket の置き場 (XDG)。
 - [cli-design](cli-design/_index.md) — kawaz 製 CLI を設計する時に読む (好み、常駐プロセスの `daemon` / `service` サブコマンド体系)。
 - [proxy-dump-design](proxy-dump-design/_index.md) — proxy / gateway / LB に通信の一時ダンプ (時限・容量上限・自動削除つきで request / response をファイルに残す口) を付ける実装パターン。
-- [auth-patterns](auth-patterns/_index.md) — 認証 (passkey 登録、peer 間相互認証、自分の endpoint の確定) の設計パターン。
+- [auth-patterns](auth-patterns/_index.md) — 認証 (passkey 登録、peer 間相互認証、webhook 署名、自分の endpoint の確定) の設計パターン。
 - [bark-push](bark-push.md) — ユーザへのスマホ通知をアプリに組み込みたい時に読む。
 - [claude-mods](claude-mods/_index.md) — Claude Code の plugin / hook / mod (function hooks) を開発・修正する時に読む。
 
