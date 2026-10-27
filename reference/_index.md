@@ -37,7 +37,6 @@
 - [gh-ops](gh-ops/_index.md) — GitHub の画像添付・取得手順、homebrew tap への push で詰まった時に読む。
 - [agent-runtime](agent-runtime/_index.md) — 待ち方 (sleep の代替)、ブラウザ自動化のプロファイル、auto mode classifier の設定で迷った時に読む。
 - [op-run-secret-injection](op-run-secret-injection.md) — 1Password の secret をコマンドに渡す時に読む (op run, `op://`)。
-- [say-katakana](say-katakana.md) — 音声通知 (PushNotification) の本文に略語を書く時に読む (カタカナ変換表)。
 
 ## private 層 (`~/.local/share/repos/github.com/kawaz/privacy-personal/main/reference/`)
 
