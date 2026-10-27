@@ -25,7 +25,3 @@
 
 `no-historical-noise` rule が消すのは「以前は X だった」「v0.3 で変更」のような**経緯**。判断基準日は経緯ではなく「この判断が依拠した情勢の時点」で、読者が今も有効かを疑うきっかけとして**現在価値を持つ**。DR の `Status:` 行が判断の有効性を示すのと同じ役割を、文書内の個別の選定に対して持たせるもの。2 年後・10 年後に読んだ人が「この間に情勢は変わったか」と立ち止まれることが目的。
 
-## 関連
-
-- [knowledge-timing](knowledge-timing.md) — DR / runbook / findings を立てる時機
-- `auth-patterns/webhook-jws-jwks` — 適用例 (alg 選定)

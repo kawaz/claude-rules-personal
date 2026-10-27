@@ -36,7 +36,7 @@ receivers:
 algs: ["Ed25519"]                      # 許可リスト。今は 1 本だが複数前提の形
 ```
 
-S (送り側) は送信先単位で持つ。`aud` は **S が発行**し、R に転記してもらう (登録レコードを持つのは S なので)。既定値は endpoint URL で、S が知っている URL と R が自分と思っている URL は一致するので、既定のままならやり取りは要らない。`aud` の役目は「受け口ごとに一意で R が完全一致で検証する」ことだけなので、誰が決めても安全性は変わらない。
+S (送り側) は送信先単位で持つ。`aud` は **S が発行**し、R に転記してもらう (登録レコードを持つのは S なので)。既定値は endpoint URL で、S が知っている URL と R が自分と思っている URL は一致するので、既定のままならやり取りは要らない (R が自分の受け口 URL を確定する手順は [self-endpoint-identification](self-endpoint-identification.md))。`aud` の役目は「受け口ごとに一意で R が完全一致で検証する」ことだけなので、誰が決めても安全性は変わらない。
 
 ```
 webhooks:
@@ -115,7 +115,3 @@ S 側は、設定への信頼で `endpoint` が送ってよい URL だと信頼�
 - **body 以外 (method / path / header) の署名**: `aud` が宛先を束縛するので十分。必要になったら RFC 9421 へ移る
 - **detached JWS (RFC 7797 `b64: false`)**: body を平文 JSON に保てるがライブラリ対応が薄い。ログで読みたいなら R が検証後に claims をログに出す
 
-## 関連
-
-- [peer-auth-url-identity](peer-auth-url-identity.md) — ステートフル接続向けの同系統 (接続確立時に一度だけ認証)。`iss` / `aud` の完全一致、鍵空間の分離の考え方は共通
-- [self-endpoint-identification](self-endpoint-identification.md) — R が `aud` の既定値 (自分の受け口 URL) を確定する手順
