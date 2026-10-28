@@ -14,3 +14,5 @@
 - [workboard-personal-scheduling](workboard-personal-scheduling.md) — 先の予定は workboard-personal/main に ccmsg で送る (起こしてもらえる)。
 - [classifier-blocks-batches](classifier-blocks-batches.md) — classifier に止められる操作の型と通し方 (1 コマンド 1 単位、Read してから実行)。
 - [no-tz-change-on-running-servers](no-tz-change-on-running-servers.md) — 稼働中サーバの TZ を勝手に変えない。
+- [tailscale-ipv6-self-connect-timeout](tailscale-ipv6-self-connect-timeout.md) — macOS から自分の tailnet IPv6 への自己接続は timeout する (IPv4 は通る)。IPv6 のみの host の疎通確認は別端末から。
+  発火語: curl -6 が timeout, tailnet IPv6, fd7a:, 自己接続, v6-sandbox, AAAA のみ
