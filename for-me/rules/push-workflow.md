@@ -19,4 +19,4 @@ push の前提は固定された commit。**自分が修正したファイルだ
 - `jj git push` / `git push` を直接実行しない。リポの push task (justfile 等)
   を使う。直接 push しても push-guard plugin の hook がブロックする
 - rules リポでは push の deps で `just lint-rules` が走る (規約の正本は[[rule-writing-guidelines]])
-- push 後、subscribe stream に `Monitor で 'just watch' を起動して` が届いたらtask 名そのまま Monitor (persistent=true) で起動する。watch 運用の詳細・notify が無いリポでの手動手順は reference の `justfile/push-watch` 参照
+- push 後、会話に `Monitor で 'just watch' を起動して` が届いたら (ccmsg の `notify --self` が module 経由で注入する)task 名そのまま Monitor (persistent=true) で起動する。watch 運用の詳細・notify が無いリポでの手動手順は reference の `justfile/push-watch` 参照

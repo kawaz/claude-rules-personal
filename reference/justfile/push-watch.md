@@ -1,11 +1,11 @@
 # push 後の workflow watch 運用
 
-push の正規経路はリポの push task (justfile 等)。**push task は実行末尾で `ccmsg notify --self` により AI に Monitor 起動指示を流すのが canonical**。AI は subscribe stream で能動受信して `just watch` を Monitor で起動する。
+push の正規経路はリポの push task (justfile 等)。**push task は実行末尾で `ccmsg notify --self` により AI に Monitor 起動指示を流すのが canonical**。通知は ccmsg の module がセッションの会話に注入するので (peer からの `send` と同じ封筒)、AI はそれを読んで `just watch` を Monitor で起動する。
 
 `ccmsg notify --self` を canonical にする理由:
 
 - `@echo "[hint] ..."` 経路は AI が hint を読み飛ばしたり引数を勝手に arrange する事故源 (= cache-warden で実例観測)
-- `ccmsg notify --self` は subscribe stream に text 同梱で即届く、AI 側は task 名コピペだけで起動でき誤解釈の余地なし
+- `ccmsg notify --self` は自セッションの会話に text がそのまま届く、AI 側は task 名コピペだけで起動でき誤解釈の余地なし
 - watch 引数 (sha / repo / on-success action) を `just watch` task に集約できる
 
 canonical 実装は `kawaz/bump-semver` の justfile:
@@ -21,7 +21,7 @@ watch:
 
 AI 側のアクション:
 
-1. push 後、subscribe stream で `"text":"Monitor で 'just watch' を起動して"` が届いたら、**Monitor ツール**で `just watch` を `persistent=true` で起動
+1. push 後、会話に `Monitor で 'just watch' を起動して` が届いたら、**Monitor ツール**で `just watch` を `persistent=true` で起動
 2. `watch-workflow.sh` が CI / Release を SHA-pinned で監視、全 check が terminal state に到達したら自動 exit
 3. `--on-success release.yml 'just on-success-release'` 経由で `[ACTION:...]` event が emit されたら、AI は `just on-success-release` を実行 (= homebrew tap pull + brew upgrade で v 反映)
 
