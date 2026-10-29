@@ -24,9 +24,9 @@ canddy-app-proxy (kawaz/canddy-app-proxy の `Caddyfile`、sandbox block) が Ho
 
 | URL | 実体 |
 |---|---|
-| `https://artifacts-{owner}-{repo}.kawaz-mbp16-20211217.tmpspace.net/{path}` | `~/.local/share/repos/github.com/{owner}/{repo}/artifacts/{path}` |
+| `https://artifacts-{owner}-{repo}.kawaz-mbp.tmpspace.net/{path}` | `~/.local/share/repos/github.com/{owner}/{repo}/artifacts/{path}` |
 
-例: `https://artifacts-kawaz-hyoui.kawaz-mbp16-20211217.tmpspace.net/bench/index.html` → `.../kawaz/hyoui/artifacts/bench/index.html`
+例: `https://artifacts-kawaz-hyoui.kawaz-mbp.tmpspace.net/bench/index.html` → `.../kawaz/hyoui/artifacts/bench/index.html`
 
 - Host は `artifacts-` の後の**最初の `-` で owner と repo に分かれる** (owner にハイフンを含まない前提。repo はハイフン可)。repo 名に `.` を含むリポ (`kuu.mbt` 等) は hostname のラベルに `.` を入れられないため現状未対応
 - tailnet 内からのみ到達可 (`tailnet_only`)、ACME のワイルドカード証明書なので DNS 操作・証明書発行は不要

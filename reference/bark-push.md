@@ -5,7 +5,7 @@
 ## 送信
 
 ```sh
-curl -sL -X POST https://bark.kawaz-mbp16-20211217.kawaz.jp/bark-admin/push \
+curl -sL -X POST https://bark.kawaz-mbp.kawaz.jp/bark-admin/push \
   -H 'Content-Type: application/json' \
   -d '{"device":{"owner":"kawaz"},"title":"build","body":"tests passed","group":"ci"}'
 ```
@@ -36,7 +36,7 @@ body は bark V2 と同じ (`device_key(s)` の代わりに `device`)。よく�
 
 ## 端末の管理
 
-- UI: `https://bark.kawaz-mbp16-20211217.kawaz.jp/bark-admin/` (一覧 / タグ編集 / 退役 / 通知テスト / 追加)
+- UI: `https://bark.kawaz-mbp.kawaz.jp/bark-admin/` (一覧 / タグ編集 / 退役 / 通知テスト / 追加)
 - 端末の追加: UI の「デバイス追加」でタグ (`owner` `family` 等) と暗号化の有無を入れて招待を作り QR を出す。招待は何度でも使え、端末で読むたびに使い切りの登録トークンと端末別の暗号化キーが発行される。案内ページは 3 段 (サーバーを追加 → 受信確認の通知をタップ → 暗号化キーをコピーして Bark に貼り、暗号化の確認通知をタップ) で、各段の完了をページが検出して次の案内を出す。登録された端末には招待のタグ + 自動タグ (`name` / `os` は端末種別 `iphone` / `ipad` / `mac` / `android` とその OS、`lang`。Tailscale があれば `ts_user` も) が付き、名前は後で詳細画面から自由に直す
 - 暗号化キーを持つ端末には `/bark-admin/push` が自動で AES-256-GCM で暗号化して送る (送信側は何も意識しない)
 - API: `GET /bark-admin/api/devices?owner=kawaz` (jsonl)、`PATCH` / `DELETE` `/bark-admin/api/devices/:id`
