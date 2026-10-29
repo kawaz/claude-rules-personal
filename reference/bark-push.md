@@ -11,7 +11,7 @@ curl -sL -X POST https://bark.kawaz-mbp.kawaz.jp/bark-admin/push \
 ```
 
 - 常に **FQDN 経由** (tailnet 内のみ到達可)。`127.0.0.1:8086` 直結は on-demand 起動が効かない
-- サーバは常駐せず cold start では **302 が返る** (canddy が起動してから同じ URL へ戻す)。`curl -L` か 1 回リトライで吸収する。初回は 1〜2 秒かかる
+- サーバは常駐せず cold start では **302 が返る** (caddy-app-proxy が起動してから同じ URL へ戻す)。`curl -L` か 1 回リトライで吸収する。初回は 1〜2 秒かかる
 - 宛先は `device: {k: v, …}` (AND)。値は完全一致、`*v*` (両端 `*`) で部分一致、`*` でそのタグの存在。否定は無い。省略すると退役していない全台。`device_key` / `device_keys` は受け付けない (400)
 - 応答: `{"sent":[{"device_id":"…","status":200}],"skipped":0}`。`skipped` は退役済みで外した台数。該当 0 台なら 404
 - URL 形式 (`/<key>/<body>`) や root の `/push` は bark-server への透過面で、キーや本文がアクセスログに残るので自作ツールからは使わない
@@ -45,5 +45,5 @@ body は bark V2 と同じ (`device_key(s)` の代わりに `device`)。よく�
 ## 運用メモ
 
 - データ: `~/.local/share/bark-admin/devices.json`、設定: `~/.config/bark-admin/config.toml` (`server_url` / `db_path`)、ログ: `~/.local/state/bark-admin/server.log` と `~/.local/state/bark-server/server.log`
-- 起動は canddy の on-demand (`bark-admin/ondemand/bark-admin-ensure.sh` が bark-server も起こす)。手で起こすならそのスクリプト
-- bark-server のバイナリは canddy の `just bark-fetch`
+- 起動は caddy-app-proxy の on-demand (`bark-admin/ondemand/bark-admin-ensure.sh` が bark-server も起こす)。手で起こすならそのスクリプト
+- bark-server のバイナリは caddy-app-proxy の `just bark-fetch`

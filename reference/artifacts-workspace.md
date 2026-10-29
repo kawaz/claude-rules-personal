@@ -1,6 +1,6 @@
 # artifacts workspace — 生成物をブラウザで見る置き場と URL 対応
 
-Claude セッションが作る HTML / JS / 画像などの生成物を、各リポの `artifacts/` に置いてブラウザ (tailnet 内の任意デバイス) で閲覧する仕組み。置き場 (jj workspace) と配信 (canddy-app-proxy) の 2 層から成る。
+Claude セッションが作る HTML / JS / 画像などの生成物を、各リポの `artifacts/` に置いてブラウザ (tailnet 内の任意デバイス) で閲覧する仕組み。置き場 (jj workspace) と配信 (caddy-app-proxy) の 2 層から成る。
 
 ## 置き場: `{repo}/artifacts/` (jj workspace)
 
@@ -20,7 +20,7 @@ cd ../artifacts && printf '*\n' > .gitignore && jj file track --include-ignored 
 
 ## 配信: `artifacts-{owner}-{repo}.<host>.tmpspace.net`
 
-canddy-app-proxy (kawaz/canddy-app-proxy の `Caddyfile`、sandbox block) が Host 名からディレクトリへ写像する:
+caddy-app-proxy (kawaz/caddy-app-proxy の `Caddyfile`、sandbox block) が Host 名からディレクトリへ写像する:
 
 | URL | 実体 |
 |---|---|
