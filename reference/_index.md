@@ -16,6 +16,8 @@
 
 - [testing](testing/_index.md) — テストの書き方、考え方。テストに限らずコードを新規で書く・修正する・設計するなら読む。
 - [docs-authoring](docs-authoring/_index.md) — `docs/` 配下に何かを書く・置き場に迷う時に読む (構造・テンプレ・翻訳ペア・質問・裁定待ち・QUESTIONS.md)。
+- [webui-structure](webui-structure.md) — kawaz 製 webui の構成 (部品とトークンを 1 か所、ビルド可、hash 付き URL) と画面の組み方 (1 画面に置きすぎない、操作は dialog に分離、modal は背景 inert で狭い幅は全画面、中間幅の検証、状態ラベルと無効化の表現、textarea、複数案の選び方)。
+  発火語: webui, 管理画面, dialog, モーダル, コンポーネント, デザイントークン, Bun.build, 1 画面に置きすぎ, 操作ボタンの置き場, 状態ラベル, デザイン案の比較
 - [artifacts-workspace](artifacts-workspace.md) — HTML / JS / CSS 等の生ファイルを動作する形でユーザに見せたい時に読む (`artifacts/` workspace)。
 
 ## 設計パターン集
