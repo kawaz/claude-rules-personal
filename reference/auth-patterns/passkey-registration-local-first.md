@@ -21,7 +21,7 @@ attestation は `none` で足りる。「この credential を作ってよい人
 WebAuthn の RP ID は origin ではなく **domain** で、credential は「今開いているページの effective domain か、その registrable suffix」でしか作成・利用できない。
 
 - 既定の `rp_id` は入口の URL のホスト。これは webui が入口と同じホストから配られている構成を意味する
-- webui を別サブドメインに置くなら、共通の registrable domain を `rp_id` に渡す。server 側は「`rp_id` が入口のホストと一致するか、その registrable suffix である」ことだけを検証する
+- webui を別サブドメインに置くなら、共通の registrable domain を `rp_id` に渡す。server 側は「`rp_id` が入口のホストと一致するか、その registrable suffix である」ことだけを検証する。同じ registrable domain の下に信頼しないコンテンツを置かない (置くとその JS も同じ `rp_id` を使える。reference の `auth-patterns/origin-separation`)
 - `clientDataJSON.origin` の期待値は入口の origin ではなく **webui の origin 集合**。ページを配っている場所が origin を決める
 - `crossOrigin` は **`true` のときだけ拒否**する。Chrome 系は最上位フレームでも常に `false` を送るので、「present であること」を要求してはならない
 - `topOrigin` は present なら拒否する (iframe 内からの登録・認証を許さない)
@@ -66,7 +66,7 @@ access / refresh token は署名せず、乱数 (base64url) を **token family**
 - **access はブラウザのメモリにだけ置き**、WebSocket の handshake に subprotocol (`<名前空間>.token.<値>`) で載せる。server は選んだ subprotocol を echo する。proxy が `Sec-WebSocket-Protocol` を透過することが要件になる
 - subprotocol を運び手にするのは、ブラウザの `WebSocket` が handshake で JS から触れる値を **URL と subprotocol の 2 つしか持たない**ため (WHATWG WebSockets の `new WebSocket(url, protocols)`。`Authorization` 等の任意 header は付けられない)。RFC 6455 §10.5 は handshake 時の client 認証の方式を規定せず、HTTP で使える任意の仕組みに委ねているので、その範囲での選択になる。URL (query) に載せると access log・proxy log・履歴に残る。cookie に載せると JS から読めない値で認証することになり、ブラウザが自動で付けるので cross-site の WebSocket (origin 検査を忘れた時の CSWSH) にそのまま使われる。subprotocol なら JS がメモリから明示的に載せたときだけ送られ、access は短命なので handshake の header に一度載ることの露出は exp で閉じる。制約は 2 つ: server は受け取った候補のうち 1 つを echo しなければならない。候補外を返すと RFC 6455 §4.1 で client が接続を失敗させ、echo 自体を省くと RFC 上は「subprotocol なし」で成立するが、ブラウザは WHATWG WebSockets の規定で `protocols` を渡した接続の応答に `Sec-WebSocket-Protocol` が無ければ失敗させる。もう 1 つは値の文字集合で、subprotocol は RFC 2616 の `token` (§4.1 / §4.3) なので base64url を padding (`=`) 無しで使う
 - **refresh は httpOnly cookie**。名前は `__Secure-` prefix + 「発行者 id と sub のハッシュ」(同じブラウザが複数の instance / 利用者を持てるように)、`HttpOnly; Secure; SameSite=Strict`、`Path` は認証経路の prefix。**`Path` は認可境界ではない** (同一 origin の JS は任意のパスに fetch できる)。絞るのは帯域と露出面のため
-- **`__Host-` prefix ではなく `__Secure-` + `Path` を選ぶ**。同一ホストの別パス prefix (`https://h.example/` と `https://h.example/personal/`) を別の入口 (= 別登録) として扱うには cookie を `Path` で分ける必要があるが、`__Host-` は `Path=/` を強制するのでそれができない。`Path` が認可境界にならない以上この分離は帯域・露出面の絞り込みに留まり、cookie tossing (他ホストが同名 cookie を broader な `Path` で上書きする攻撃) は eTLD+1 の分離 (信頼するアプリと sandbox で登録ドメイン自体を分ける) で構造的に封じるのが前提になる
+- **`__Host-` prefix ではなく `__Secure-` + `Path` を選ぶ**。同一ホストの別パス prefix (`https://h.example/` と `https://h.example/personal/`) を別の入口 (= 別登録) として扱うには cookie を `Path` で分ける必要があるが、`__Host-` は `Path=/` を強制するのでそれができない。`Path` が認可境界にならない以上この分離は帯域・露出面の絞り込みに留まり、cookie tossing (他ホストが同名 cookie を broader な `Path` で上書きする攻撃) は eTLD+1 の分離 (信頼するアプリと sandbox で登録ドメイン自体を分ける。reference の `auth-patterns/origin-separation`) で構造的に封じるのが前提になる
 - localStorage には置かない。XSS 1 つで長期 token が抜ける
 
 ### rotate と再利用検知

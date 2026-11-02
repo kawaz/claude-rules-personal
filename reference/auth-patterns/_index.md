@@ -6,6 +6,8 @@
 
 - [passkey-registration-local-first](passkey-registration-local-first.md) — 登録をローカル CLI に閉じた passkey 設計 (登録 URL、RP ID、token と cookie、複製)。
   passkey, WebAuthn, 登録フロー, RP ID, attestation, signCount, user handle, access token, refresh token, httpOnly cookie, token rotate, 再利用検知, デバイス一覧
+- [origin-separation](origin-separation.md) — 信頼するアプリと sandbox を登録ドメイン (eTLD+1) で分ける理由と不変条件。
+  オリジン分離, sandbox, eTLD+1, registrable domain, サブドメイン分離, cookie tossing, SameSite, passkey 窃取, rpId, 信頼しないプレビュー, usercontent
 - [multi-tab-token-refresh](multi-tab-token-refresh.md) — 複数タブ / プロセスで access token を共有しつつ安全に refresh する手順。
   複数タブ, refresh token, Web Locks, BroadcastChannel, rotate, 同時 refresh, タブ間共有
 - [peer-auth-url-identity](peer-auth-url-identity.md) — TLS を信頼の根にした peer 間相互認証と、固定 id / 可変 endpoint の分離。
