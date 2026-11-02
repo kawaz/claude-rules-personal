@@ -15,3 +15,4 @@
 - [classifier-blocks-batches](classifier-blocks-batches.md) — classifier に止められる操作の型と通し方 (1 コマンド 1 単位、Read してから実行)。
 - [no-tz-change-on-running-servers](no-tz-change-on-running-servers.md) — 稼働中サーバの TZ を勝手に変えない。
 - [macos-bind-privileged-port](macos-bind-privileged-port.md) — macOS の非 root は特定 IP + 特権 port に bind できない。全 IF listen + 送信元 IP で絞る。
+- [acme-dns01-least-privilege](acme-dns01-least-privilege.md) — ACME DNS-01 用 IAM を Route53 の条件キーで TXT と `_acme-challenge.` 名に絞る。
