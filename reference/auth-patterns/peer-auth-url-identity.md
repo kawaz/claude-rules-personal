@@ -118,4 +118,4 @@ id を持たない行も一覧に出す。config が挙げた peer は handshake
 | TLS exporter で challenge を不要にする | TLS 終端がアプリ自身である構成を要求し、LB 終端を許さなくなる |
 | `jti` + 受信側のリプレイ記録 | 記録の保持と期限管理という状態が増える。ステートフル接続なら challenge を接続に従属させると状態が消える |
 | id を endpoint URL (やそのハッシュ) にする | 引っ越しで record・メッセージ id・kv の鍵が全部無効になる |
-| 検証を迂回するテスト用フラグ | 迂回路が本番バイナリに残る。テスト用 CA を信頼ルートに注入すれば同じことが迂回路なしでできる |
+| 検証を迂回するテスト用フラグ | 迂回路が本番バイナリに残る。テスト用 CA を信頼ルートに注入すれば同じことが迂回路なしでできる (CA は caddy-app-proxy リポの `certs/make-scoped-ca.sh` で作れる。nameConstraints critical で発行先ドメインを制限した専用 CA、サーバ証明書、fullchain を出す) |
