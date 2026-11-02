@@ -2,6 +2,8 @@
 
 ここの各文書は kawaz 製の他プロダクトへ持ち帰る (バックポートする) 前提の標準である。各リポの DESIGN / DR は独自に書き起こさず、ここを正本として参照し、差分だけを書く。
 
+前段の前提: kawaz の環境では、常設のローカルアプリは全部 Caddy (caddy-app-proxy リポ) 経由で tailnet の FQDN + https / wss で出す。各文書が置く「公開 FQDN + TLS」の前提は、この環境では caddy-app-proxy が満たす。TLS は前段の Caddy で終端し、daemon は内側 (127.0.0.1) で平文の http / ws を listen する。信頼するアプリと sandbox (信頼しないコンテンツ) は登録ドメイン (eTLD+1) を 2 本に分ける (origin-separation)。到達性は tailnet 内に限り、本人認証は各アプリが passkey で行う。
+
 - [passkey-registration-local-first](passkey-registration-local-first.md) — 登録をローカル CLI に閉じた passkey 設計 (登録 URL、RP ID、token と cookie、複製)。
   passkey, WebAuthn, 登録フロー, RP ID, attestation, signCount, user handle, access token, refresh token, httpOnly cookie, token rotate, 再利用検知, デバイス一覧
 - [multi-tab-token-refresh](multi-tab-token-refresh.md) — 複数タブ / プロセスで access token を共有しつつ安全に refresh する手順。
