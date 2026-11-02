@@ -14,3 +14,4 @@
 - [workboard-personal-scheduling](workboard-personal-scheduling.md) — 先の予定は workboard-personal/main に ccmsg で送る (起こしてもらえる)。
 - [classifier-blocks-batches](classifier-blocks-batches.md) — classifier に止められる操作の型と通し方 (1 コマンド 1 単位、Read してから実行)。
 - [no-tz-change-on-running-servers](no-tz-change-on-running-servers.md) — 稼働中サーバの TZ を勝手に変えない。
+- [macos-bind-privileged-port](macos-bind-privileged-port.md) — macOS の非 root は特定 IP + 特権 port に bind できない。全 IF listen + 送信元 IP で絞る。
