@@ -120,6 +120,17 @@ S は 401・5xx・接続失敗 (タイムアウト含む) だけを再署名し�
 - fetch は https のみ、redirect を追わない、タイムアウト (数秒)、サイズ上限 (数十 KB)、リトライは頑張らない (次の受信か定期で拾う)
 - JWK は `kty: "OKP"`、`crv: "Ed25519"`、`use: "sig"` (あれば) を確認してから取り込む。`alg` があれば `algs` にあるものだけ取り込む
 
+## body の無い request への適用 (読み出し API の呼び手認証)
+
+webhook (S が R へ本文を押す) だけでなく、**S が R の読み出し API を呼ぶ時の呼び手認証**にも同じ鍵と検証を使える。違いは token の運び方と claims だけ。
+
+- token は body でなく `Authorization: Bearer <JWT>` で運ぶ。body は空か、アプリの平文のまま
+- claims から `event` を落とし、`aud` を **`<METHOD> <path>`** (例 `GET /api/sessions/abc`) にする。query と body は覆わない (覆うなら RFC 9421 へ移る。移る条件は「リプレイや改変で副作用のある request を受ける」になった時)
+- `typ` は用途ごとに分ける (webhook は `webhook+jwt`、読み出しの呼び手は `request+jwt` のように)。R は受け口ごとに期待する `typ` を 1 つ持ち、他を断る (RFC 8725。ログイン token や webhook の token が読み出しに流用されるのを防ぐ)
+- 長く繋ぐ request (SSE 等) は繋ぐ時の 1 request だけ検証し、接続が続く間は再検証しない
+- `jti` の使用済み集合は、読み出しの口 (リプレイされても同じ答えが返るだけ、か no-op) に限り、R のインスタンスごとに持ってよい。副作用のある口は共有が要る
+- 検証順序、鍵キャッシュ、再取得、stale の上限、再送規則は webhook と同じ
+
 ## 信頼の連鎖
 
 R が初期状態で信頼しているのは、設定 (`path` → `jwks_url`) と CA の 2 つだけ。設定への信頼で `jwks_url` が送り元の鍵置き場だと信頼する → `jwks_url` の TLS でその内容 (JWK) を信頼する → JWK で署名を信頼する → 署名で claims を信頼する → `aud` で「自分宛て」を、`jti` + `exp` で「初見で新鮮」を確定する。
