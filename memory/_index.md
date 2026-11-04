@@ -17,3 +17,7 @@
 - [macos-bind-privileged-port](macos-bind-privileged-port.md) — macOS の非 root は特定 IP + 特権 port に bind できない。全 IF listen + 送信元 IP で絞る。
 - [acme-dns01-least-privilege](acme-dns01-least-privilege.md) — ACME DNS-01 用 IAM を Route53 の条件キーで TXT と `_acme-challenge.` 名に絞る。
 - [strip-forwarded-headers-for-naive-backend](strip-forwarded-headers-for-naive-backend.md) — 転送ヘッダを誤認する backend には reverse proxy で全部剥がす。
+- [cargo-build-fails-under-bare-git-guard](cargo-build-fails-under-bare-git-guard.md) — 自前 `.git` の無い jj workspace で `cargo build` が上位の bare ガード `.git` に当たって失敗する。ソースを mktemp に複製して build する。
+  発火語: cargo build, did not expect repo to be bare, fingerprint, jj workspace, incubator, Rust
+- [teammate-resume-after-process-restart](teammate-resume-after-process-restart.md) — プロセス再起動後の teammate は名前では届かないが、spawn 時の agentId 宛に SendMessage すると transcript 込みで再開できる。
+  発火語: resume, プロセス再起動, teammate が居ない, No agent named, agentId, SendMessage
