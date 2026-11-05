@@ -27,6 +27,8 @@
 - [proxy-dump-design](proxy-dump-design/_index.md) — proxy / gateway / LB に通信の一時ダンプ (時限・容量上限・自動削除つきで request / response をファイルに残す口) を付ける実装パターン。
 - [auth-patterns](auth-patterns/_index.md) — 認証 (passkey 登録、peer 間相互認証、webhook 署名、自分の endpoint の確定) の設計パターン。
 - [bark-push](bark-push.md) — ユーザへのスマホ通知をアプリに組み込みたい時に読む。
+- [local-translate](local-translate.md) — 英文をクラウドを使わずに日本語へ訳したい時に読む (translate-server、OpenAI 互換 API、`chat_template_kwargs`、段落分割の指針)。
+  発火語: 翻訳, 英日, translate-server, PLaMo, thinking の翻訳, 日英混在, 常体 / 敬体, glossary
 - [claude-mods](claude-mods/_index.md) — Claude Code の plugin / hook / mod (function hooks) を開発・修正する時に読む。
 
 ## 特定ツール・作業・言語
