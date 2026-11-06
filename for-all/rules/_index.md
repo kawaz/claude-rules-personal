@@ -46,7 +46,7 @@
 
 ## CI・リリース
 
-- [[notification-tips]] — 音声通知 (`mcp__ccmsg-v1__say`)・1Password エラーに遭ったとき
+- [[notification-tips]] — 音声通知 (ccmsg の say ツール)・1Password エラーに遭ったとき
 - [[empirical-verification]] — 失敗を「たぶんこう」で片付けそうなとき
 - [[public-repo-contribution]] — 公共パッケージリポへ publish するとき
 
