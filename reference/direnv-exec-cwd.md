@@ -34,3 +34,20 @@ cd /path/to/dir && command
 - `git -C dir push` も `direnv exec` を経由しないので同じ理由で避ける
 - 特に **git push / gh / ssh を伴う越境操作は direnv exec 必須**
 - direnv 未 allow のディレクトリでは `direnv exec` がエラーになる。勝手に `direnv allow` せず指示を仰ぐ
+
+## プロジェクトの scripts は自分で direnv を当てる
+
+特定プロジェクトの環境 (その `.envrc` の認証境界・変数) を前提に動くスクリプト (`scripts/` 配下の観測・運用スクリプト等) は、呼び出し側に `(cd && direnv exec .)` を強いず、冒頭で自分のディレクトリに `cd` して `direnv exec` し直す (kawaz 2026-11-06)。別の `.envrc` が効いている場所から呼ばれても正しい環境に揃う。
+
+```bash
+set -euo pipefail
+if [[ -z ${APPLIED_MY_DIRENV:-} ]]; then
+  real0=$(realpath "$0")
+  cd "$(dirname "$real0")" && APPLIED_MY_DIRENV=1 exec direnv exec . "$real0" "$@"
+fi
+unset APPLIED_MY_DIRENV
+```
+
+- 目印は自前の変数で持つ (`DIRENV_DIR` は「どこかの `.envrc` が当たっている」しか分からず、別リポから呼ばれた時に当て直せない)
+- `exec` で親を置き換える (返ってきた親が本体をもう 1 回走らせないため)。`cd` の失敗は `set -e` で止まる
+- 対象は「そのプロジェクトの環境で動くもの」だけ。`~/bin/` に置く汎用スクリプトのように呼び出し元の環境で動くべきものには入れない
