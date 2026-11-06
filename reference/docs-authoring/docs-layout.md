@@ -4,7 +4,7 @@ kawaz/* の各リポジトリで `docs/` 構成を揃えるためのルール。
 
 ## 命名規則
 
-- **リポジトリ直下にあるドキュメントは `README{,-ja}.md` のみ** (Unix 慣例。`LICENSE` も慣例的に直下)
+- **リポジトリ直下にあるドキュメントは `README{,-ja}.md` と、任意の `CHANGELOG.md`** (Unix 慣例。`LICENSE` も慣例的に直下。CHANGELOG は GitHub が直下のものを特別扱いし、版の見出しアンカーで外から飛べるので直下に置く。無くてもよい)
 - **`docs/` 直下のドキュメントは大文字 + `.md`**: `DESIGN.md` `STRUCTURE.md` `ROADMAP.md` `MANUAL.md`
   - 大文字でサブディレクトリ（小文字）と視覚区別できる
 - **`docs/` 配下のサブディレクトリは小文字**: `decisions/` `findings/` `journal/` `research/` `knowledge/` `runbooks/` `issue/` `design/`
@@ -17,6 +17,7 @@ kawaz/* の各リポジトリで `docs/` 構成を揃えるためのルール。
 
 ```
 README{,-ja}.md         ユーザ向けの最初の窓口（リポジトリ直下、英訳必須）
+CHANGELOG.md            版ごとの簡潔な変更点（任意、Keep a Changelog の体裁、1 版 = 数行）
 LICENSE                 MIT License (kawaz リポジトリの規約)
 docs/
   DESIGN{,-ja}.md       現実装の説明（ドメイン + アーキテクチャ。英訳必須）
