@@ -2,7 +2,7 @@
 
 ## 音声通知は ccmsg の say ツールで
 
-kawaz に音声で呼びかける時 (作業の区切り、判断を仰ぎたい時、止まった時) は ccmsg の say ツールを使う (`{ "text": "<短い日本語の文>" }`。daemon が音声で読み上げ、webui のそのセッションにも 🔔 で残る。使い方の正本は ccmsg plugin の skill)。「離席中のときだけ」という一般の遠慮は要らない。`say` コマンドを直接叩かない。Claude Code 組み込みの `PushNotification` は音声に繋がらないので使わない (ccmsg の tool が無い環境でだけ代替)。
+kawaz に音声で呼びかける時 (作業の区切り、判断を仰ぎたい時、止まった時) は ccmsg の say ツールを使う。
 
 読み上げの誤読 (英単語・頭字語) は ccmsg の `say` が発声直前に辞書 `${XDG_CONFIG_HOME:-~/.config}/ccmsg/say-dictionary.tsv` (`word<TAB>読み`) で直すので、本文は普通に書く。変な読みに気づいたら、その単語を辞書に 1 行足す (次の発声から効く)。
 
