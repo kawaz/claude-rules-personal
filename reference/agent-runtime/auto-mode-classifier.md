@@ -23,7 +23,12 @@ auto mode では tool call を classifier (別モデル) が審査する。何�
 
 ## 課金とコスト
 
-- server-side review (対話セッションで既定、gateway 経由でも v2.1.278+ で既定): session の model request に同梱され別 call は無い。gateway が review を落とすと local classifier に fallback
+- server-side review (gateway 経由でも env 未設定で既定 on、2.1.319 で実測): session の model request の `safeguards` 欄で頼み、応答の `safeguard_results` で判定が返る。別 call は無い。transcript の assistant に `serverClassifierRequest` が付くのが頼んだ印
+- server が判定を返さない時 (gateway の openai 経路を通った main / subagent):
+  - feature flag と telemetry を止めていない環境 (kawaz の今の gateway 構成): その 1 本で以後プロセス全体が local classifier に切り替わる (ラッチ、再起動で戻る)。main も課金対象の local 判定になる
+  - `CLAUDE_CODE_DISABLE_FEATURE_FLAGS` / `DISABLE_TELEMETRY` / `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC` のどれかを設定した環境 (2.1.319+): local に落ちず、その call は `Auto mode is unavailable: its safety check does not run for this session` で拒否 (`reasonCode` `classifier:auto-mode:unavailable`)。ラッチは立たず main は server 判定のまま。openai 経路の worker の tool call は全部拒否になる
+  - `CLAUDE_CODE_AUTO_MODE_SERVER=0` は常に local classifier だけを使う (上の拒否も起きない)。`=1` は `CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS` があっても server を使う (2.1.319+)
+  - 観測: `--debug-file` の `[server-classifier]` 行と `[API REQUEST] source=side_query` (local classifier の request)。手順は lab-claude の `experiments/01-auto-mode-server-2-1-319/`
 - local classifier: Claude Code 自身が Sonnet 5 に別 request を投げ、API / Enterprise では token usage に数える
 - どちらでも entries と CLAUDE.md は毎 check の request に載る。**書く量の規律は rule と同じ**
 
