@@ -35,6 +35,7 @@
 
 - [direnv-exec-cwd](direnv-exec-cwd.md) — プロジェクト外パスでのコマンド実行方法 (gh トークン、ssh key の不一致で困った時にも)。
 - [macos-signing](macos-signing/_index.md) — macOS 配布物に署名・notarize する時に読む (codesign, notarize, Gatekeeper, TCC)。
+- [default-convergence](default-convergence/_index.md) — Rust / Go / TypeScript のコードを書く前に読む、手癖のデフォルトに流れやすい書き方の言語別一覧。
 - [typescript](typescript/_index.md) — TypeScript で型・スキーマ・lint を書く時に読む (valibot, zod, `as` を書きたい, unknown を受ける)。
 - [vcs](vcs/_index.md) — jj / git でコミット・組み替え・復旧・リポジトリセットアップ・越境 push (構成の見分け方から)。
 - [justfile](justfile/_index.md) — justfile を書く時と、push 後のリリース / watch で詰まった時に読む。

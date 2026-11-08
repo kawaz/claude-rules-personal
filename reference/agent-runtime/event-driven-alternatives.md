@@ -14,10 +14,10 @@
 | Claude Code 自身 | **Monitor tool** (= `tail -f` + grep / inotify / WebSocket frame 等を event stream として扱える)、`Bash` tool の `run_in_background` + 完了通知 |
 | HTTP / API | server-sent events (SSE) / WebSocket / long polling (= server 側で blocking)、純粋ポーリングは最終手段 |
 
-なぜ event-driven に倒すか (rule 側の要約の補足):
+なぜ event-driven に倒すか:
 
 - **正解時刻を捉え損ねない**: poll は最大「次の poll 周期」分遅れる。event-driven は真の遷移瞬間を観測する
-- **CPU/IO トレードオフが消える**: 短間隔 idle 占有 vs 長間隔反応性低下の二択自体が無くなる
+- **間隔値の根拠が要らない**: 短すぎれば idle 占有・false negative、長すぎれば反応性低下・外側 timeout。event-driven ならこの二択自体が無くなる
 - **race を見逃さない**: poll 間に「進んで戻った」遷移は poll では観測不能
 
 ## sleep / polling が正当な例外
