@@ -81,7 +81,7 @@ allow は当たれば必ず通すので、広い allow は deny より危険 (`c
 - JSON の文字列に入るので、コマンド中の `\n` は `\\n` と書く
 - `.gitignore` に `.claude/settings.local.json` を入れ、commit しない
 
-エージェントは `.claude/settings*.json` を書けない (Write / Edit / `cp` とも、許可の後でも fast classifier が止める)。足す時は一時ファイル (mktemp) に設置後の中身全体を作り、ccmsg の `permit` ツールの `attachments` でそのファイルを見せ、`commands` に `cp <一時ファイル> <repo>/.claude/settings.local.json` を書く。kawaz が webui から実行する。
+エージェントは `.claude/settings*.json` を書けない (Write / Edit / `cp` とも、許可の後でも fast classifier が止める)。足す時は ccmsg の `permit` ツールの `project_permissions` に `{ "add": "<rule>" }` (要らなくなった rule は `{ "remove": "<rule>" }`) を書く。kawaz が webui で押すと ccmsg の daemon がそのセッションのプロジェクトの `.claude/settings.local.json` に書き、起動中のセッションにすぐ効く (再起動不要。差分が `ccmsg:daemon` の封筒で届く)。今止められた操作をすぐ再実行したい時は `commands` / `intents` も一緒に出す。Edit の rule は `~/` でなく絶対パス (`Edit(/Users/…/file.toml)`) で書く (`~/` 形は効かなかった、実測 2026-11-08)。
 
 ## 誤拒否の見方と直し方
 

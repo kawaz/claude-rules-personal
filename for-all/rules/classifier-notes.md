@@ -9,7 +9,7 @@ auto mode の classifier が見るのはユーザの発言と user settings の 
 
 - settings の `autoMode` は **kawaz の明示指示なしに編集しない** (soft_deny にも同じ文を入れて classifier 側でも止める)
 - プロジェクトの完全一致 allow に入れるのは実際に繰り返し止められた操作だけ。先回りで列挙しない
-- エージェントは `.claude/settings*.json` を書けない (`cp` も含め、許可後でも fast classifier が止める)。mktemp の一時ファイルに中身を作り、permit ツールの `attachments` で見せて `cp` を `commands` に書き、kawaz が webui から実行する
+- エージェントは `.claude/settings*.json` を書けない (`cp` も含め、許可後でも fast classifier が止める)。足す時は permit ツールの `project_permissions` に `{ "add": "<rule>" }` を書く (kawaz が webui で押すと daemon が書き、すぐ効く)。Edit の rule は絶対パスで書く (`~/` は効かない)
 - `autoMode` の entries は個別列挙より状況の包括記述を優先する。個別に書くのは名前で同一性を判定するもの (host / remote / path の例外) と deny だけ。entries は毎 check で context に載るので rule と同じ省コンテキストの規律
 
 完全一致 allow の書き方・`autoMode` の 4 区分の意味は reference の `agent-runtime/auto-mode-classifier` を読む。
