@@ -40,6 +40,7 @@
 - [vcs](vcs/_index.md) — jj / git でコミット・組み替え・復旧・リポジトリセットアップ・越境 push (構成の見分け方から)。
 - [justfile](justfile/_index.md) — justfile を書く時と、push 後のリリース / watch で詰まった時に読む。
 - [gh-ops](gh-ops/_index.md) — GitHub の画像添付・取得手順、homebrew tap への push で詰まった時に読む。
+- [x-posts](x-posts/_index.md) — X（Twitter）の投稿原文・メディアと、最近の話題・動画内容を調べる時に読む (x.com, x_search, Grok)。
 - [agent-runtime](agent-runtime/_index.md) — 待ち方 (sleep の代替)、ブラウザ自動化のプロファイル、auto mode classifier の設定で迷った時に読む。
 - [op-run-secret-injection](op-run-secret-injection.md) — 1Password の secret をコマンドに渡す時に読む (op run, `op://`)。
 
