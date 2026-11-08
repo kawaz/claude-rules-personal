@@ -1,6 +1,6 @@
 ---
 title: claude-plugin-reference plugin を退役させ、必要な事実だけ reference/claude-plugins/ に書き直す
-status: open
+status: resolved
 category: task
 created: 2026-09-29T14:45:45+09:00
 last_read:
@@ -9,10 +9,10 @@ wip_entered:
 blocked_entered:
 pending_entered:
 discarded_entered:
-resolved_entered:
+resolved_entered: 2026-11-08T09:58:03+09:00
 discard_reason:
 pending_reason:
-close_reason:
+close_reason: ["引き継ぎ: lab-claude の docs/issue/2026-11-08-retire-claude-plugin-reference.md に移した (kawaz 2026-11-08、Claude Code の知識の保守役を lab-claude にした)"]
 blocked_by:
 origin: ccmsg (クロスプロジェクト起票)
 ---
