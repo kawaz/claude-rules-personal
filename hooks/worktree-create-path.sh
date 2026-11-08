@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # WorktreeCreate hook — worktree を kawaz のパス規約 ({repo}/{name}/) に作る。
 #
-# 契約 (claude-plugin-reference hooks.md §6.2、実機検証済: v2.1.237):
+# 契約 (実機検証済: v2.1.237):
 #   - stdin に {"cwd": "<元リポの絶対パス>", "name": "agent-<id>", ...} が来る
 #   - stdout に「作成済みディレクトリの絶対パス」を生パスで echo する (JSON にしない)
 #   - hook が先にディレクトリを作る。パスを返さないと既定動作に fallback せず

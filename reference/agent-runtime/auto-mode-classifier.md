@@ -28,6 +28,7 @@ auto mode では tool call を classifier (別モデル) が審査する。何�
   - feature flag と telemetry を止めていない環境 (kawaz の今の gateway 構成): その 1 本で以後プロセス全体が local classifier に切り替わる (ラッチ、再起動で戻る)。main も課金対象の local 判定になる
   - `CLAUDE_CODE_DISABLE_FEATURE_FLAGS` / `DISABLE_TELEMETRY` / `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC` のどれかを設定した環境 (2.1.319+): local に落ちず、その call は `Auto mode is unavailable: its safety check does not run for this session` で拒否 (`reasonCode` `classifier:auto-mode:unavailable`)。ラッチは立たず main は server 判定のまま。openai 経路の worker の tool call は全部拒否になる
   - `CLAUDE_CODE_AUTO_MODE_SERVER=0` は常に local classifier だけを使う (上の拒否も起きない)。`=1` は `CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS` があっても server を使う (2.1.319+)
+  - `claude -p` は main の call がこの拒否を受けると exit 1 (JSON は `subtype:"success"` のまま `permission_denials` に載る)。subagent の call だけの拒否は exit 0 なので、script では `permission_denials` を見る
   - 観測: `--debug-file` の `[server-classifier]` 行と `[API REQUEST] source=side_query` (local classifier の request)。手順は lab-claude の `experiments/01-auto-mode-server-2-1-319/`
 - local classifier: Claude Code 自身が Sonnet 5 に別 request を投げ、API / Enterprise では token usage に数える
 - どちらでも entries と CLAUDE.md は毎 check の request に載る。**書く量の規律は rule と同じ**
