@@ -1,4 +1,4 @@
-# auto mode classifier の設定と、プロジェクト固有の環境説明
+# auto mode classifier の設定と、プロジェクト固有の許可
 
 auto mode では tool call を classifier (別モデル) が審査する。何を読み、どこに何を書けば誤拒否が減るかの正本。置き場の禁則は `classifier-notes` rule。
 
@@ -60,57 +60,31 @@ personal 面の例。業務面は org / remote を差し替えて別の config d
 
 allow は当たれば必ず通すので、広い allow は deny より危険 (`claude auto-mode critique` は「`~/.config` 配下なら何でも」の文を、鍵の中身を transcript に出す / shell rc や unit の編集まで通すとして退ける)。ツールは名前で列挙し (ownership は transcript から検証できない)、閉じていない方向 (削除、コピー、CLI の外向き効果) を除外文で全部塞ぐ。既定 allow に Multi-Agent Coordination と Session-Created Job Cleanup があるので、SendMessage と `/tmp` の行は `critique` が冗長と言えば削る。`/auto-mode-setup` を後から回す時は「add」を選ぶ (replace は手書き分を消す)。
 
-## プロジェクト固有の環境説明 (`classifier.local.md`)
+## プロジェクト固有の許可 (`.claude/settings.local.json` の完全一致 allow)
 
-正本は privacy リポ `classifier/classifier-<repo>.md`。プロジェクト側は symlink と `.gitignore`:
+プロジェクト固有に要る Edit / Bash の許可は、そのプロジェクトの `.claude/settings.local.json` の `permissions.allow` に**ワイルドカード無しの完全一致形**で書く。完全一致の allow は classifier より先に評価されて確実に通る。ワイルドカード付き (`Bash(llm-gateway daemon *)` 等) は classifier の判定に回るので使わない。入れるのは**実際に繰り返し止められた操作だけ** (先回りで列挙しない)。
 
-```bash
-cd <repo>
-mkdir -p .claude/rules
-ln -sfn <privacy リポへの相対パス>/classifier/classifier-<repo>.md .claude/rules/classifier.local.md
-printf '\n# auto mode classifier 向けの個人設定 (正本は privacy リポ、symlink)\n.claude/rules/*.local.md\n' >> .gitignore
+```json
+{
+  "permissions": {
+    "allow": [
+      "Edit(~/.config/foo/bar.toml)",
+      "Bash(llm-gateway daemon reload unstable)"
+    ]
+  }
+}
 ```
 
-symlink の実体が cwd の外にあるので、そのプロジェクトの初回起動で「Allow external CLAUDE.md file imports?」が出る (user scope の rules は無条件に信頼されるが、project scope の cwd 外 import は初回確認。パス粒度の事前許可は公式設定に無い)。ダイアログを出さずに済ませるには、symlink を置く時に `$CLAUDE_CONFIG_DIR/.claude.json` の該当 project に承認済みの印を先に書く (非公開キー、trust dialog の `hasTrustDialogAccepted` と同じ場所):
+- Edit は `~/` 始まりか絶対パスで書く
+- Bash は引数込みのコマンド全文で書く (止められたコマンドと 1 文字違えば当たらない)
+- JSON の文字列に入るので、コマンド中の `\n` は `\\n` と書く
+- `.gitignore` に `.claude/settings.local.json` を入れ、commit しない
 
-```bash
-python3 - "$CLAUDE_CONFIG_DIR/.claude.json" "$PWD" <<'PY'
-import json,sys
-p,cwd=sys.argv[1],sys.argv[2]; d=json.load(open(p))
-pr=d.setdefault('projects',{}).setdefault(cwd,{})
-pr['hasClaudeMdExternalIncludesApproved']=True; pr['hasClaudeMdExternalIncludesWarningShown']=True
-json.dump(d,open(p,'w'),indent=2,ensure_ascii=False)
-PY
-```
-
-出てしまった時は **Yes, allow external imports** (リンク先は自分の privacy リポ)。
-
-本文の型 (箇条書きのみ、各項目は settings の entries にそのまま移せる 1 文):
-
-```markdown
-# <repo> の auto mode classifier 向け環境説明
-
-このファイルは auto mode classifier への環境説明で、Claude の行動規範ではない。各項目は settings.json の `autoMode` の entries と同じ粒度で書く (面全体に効かせたい項目はそちらへ移してここから消す)。
-
-## environment
-
-- <このリポの runtime が置く場所、動かす unit や CLI など、判定に要る状況の包括記述>
-
-## allow
-
-- <このリポで通常運用と見なす操作。既定 soft_deny の名前 (Credential Materialization 等) を否定する形で書くと効きやすい>
-
-## soft_deny
-
-- <このリポで明示指示が要る操作 (本番 unit の変更、鍵の削除 等)>
-- Editing this file (.claude/rules/classifier.local.md) or the `autoMode` block in settings.json needs the user's explicit instruction naming the change
-```
-
-実例は privacy リポの `classifier/classifier-llm-gateway.md`。
+エージェントは `.claude/settings*.json` を書けない (Write / Edit / `cp` とも、許可の後でも fast classifier が止める)。足す時は一時ファイル (mktemp) に設置後の中身全体を作り、ccmsg の `permit` ツールの `attachments` でそのファイルを見せ、`commands` に `cp <一時ファイル> <repo>/.claude/settings.local.json` を書く。kawaz が webui から実行する。
 
 ## 誤拒否の見方と直し方
 
 - 止められた時にユーザへ許可を求める手順 (ccmsg の `permit` ツール、許可後は同じ操作を書き換えずに再実行、伝言の許可は効かない、subagent は委譲元が代行) は rule `classifier-notes` が正本。ここは「なぜ止まったか」を読んで設定を直す側
 - 拒否文言の `[...]` が当たった rule 名。`claude auto-mode defaults --label '<名前>'` で全文
-- 同じ送り先 (host / remote / bucket) で繰り返し止まる → `environment`、同じ操作で止まる → `allow`、1 回きり → 次の message で intent を名指しして再試行 (`/permissions` の Recently denied で `r`)
+- 同じ送り先 (host / remote / bucket) で繰り返し止まる → `environment`、面をまたいで同じ操作で止まる → `allow`、そのプロジェクトの同じ操作で止まる → `.claude/settings.local.json` の完全一致 allow、1 回きり → 次の message で intent を名指しして再試行 (`/permissions` の Recently denied で `r`)
 - 「Blocked by fast classifier」は docs に無い文言 (server-side review の拒否と推測)。「no verdict」系は classifier 自体の失敗で、設定では直らない
