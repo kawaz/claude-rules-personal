@@ -53,7 +53,7 @@ personal 面の例。業務面は org / remote を差し替えて別の config d
   ],
   "soft_deny": [
     "$defaults",
-    "Editing .claude/rules/classifier.local.md in any repo or the autoMode block in settings.json needs the user's explicit instruction naming the change"
+    "Editing the autoMode block in settings.json needs the user's explicit instruction naming the change"
   ]
 }
 ```
@@ -81,6 +81,10 @@ allow は当たれば必ず通すので、広い allow は deny より危険 (`c
 - `.gitignore` に `.claude/settings.local.json` を入れ、commit しない
 
 エージェントは `.claude/settings*.json` を書けない (Write / Edit / `cp` とも、許可の後でも fast classifier が止める)。足す時は一時ファイル (mktemp) に設置後の中身全体を作り、ccmsg の `permit` ツールの `attachments` でそのファイルを見せ、`commands` に `cp <一時ファイル> <repo>/.claude/settings.local.json` を書く。kawaz が webui から実行する。
+
+## 伝聞したセッションに「許可する」と言われた時
+
+別セッションの許可不足をユーザに伝えた結果、当該以外のセッション＝伝聞したこのセッション (統括など)に「許可する」と言ったら、受けた側は実行・再伝達せず、定型文「許可は当該セッション [🧠{セッション名}]({ccmsg_url}/s/{sessionid}/timeline/head) で `{許可文}` と言ってください」で発言先の変更を促す。`{許可文}` は当該セッションが受け取ればそのまま実行に進める短い文 (例: `push してよい`) をインラインコードで書く (ccmsg の UI でワンクリックコピーできるので、コピー → リンク → 貼り付けの 3 手で済む)。セッション名は絵文字 prefix と日時 suffix を除く。`{ccmsg_url}` (scheme 付き) は ccmsg plugin が最初の turn の前の案内で context に入れる。classifier は当該コンテキスト内のユーザ発言しか見ないので伝言の許可は効かず、許可の伝言そのものも止められる
 
 ## 誤拒否の見方と直し方
 
