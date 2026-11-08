@@ -3,7 +3,7 @@
 auto mode の classifier が見るのはユーザの発言と user settings の `autoMode`、完全一致の allow だけで、CLAUDE.md / `.claude/rules/` の本文は効かない (実測 2026-11-08)。classifier 向けの許可・環境説明は次の 2 か所に置き、rule や CLAUDE.md に書かない。
 
 - **面横断** (信頼リポ、secrets の置き場、XDG 配下の自作ツール、セッション間の協調): user settings の `autoMode` (`environment` / `allow` / `soft_deny` / `hard_deny`)
-- **プロジェクト固有**: そのプロジェクトの `.claude/settings.local.json` (gitignore 済みで commit しない) の `permissions.allow` にワイルドカード無しの完全一致形 (`Edit(~/.config/foo/bar.toml)`、`Bash(llm-gateway daemon reload unstable)`) で足す。完全一致は classifier を通らず確実に効く (ワイルドカード付きは classifier に回るので使わない)
+- **プロジェクト固有**: そのプロジェクトの `.claude/settings.local.json` (gitignore 済みで commit しない) の `permissions.allow` にワイルドカード無しの完全一致形 (`Edit(/Users/<user>/.config/foo/bar.toml)`、`Bash(llm-gateway daemon reload unstable)`) で足す。完全一致は classifier を通らず確実に効く (ワイルドカード付きは classifier に回るので使わない)
 
 ## 禁則
 
