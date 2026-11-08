@@ -8,11 +8,9 @@
 bash ~/.local/share/repos/github.com/kawaz/claude-rules-personal/main/reference/x-posts/scripts/fx.sh --help
 ```
 
-以下の例は `reference/x-posts/` に移動済みの場合。
-
 ```bash
-bash scripts/fx.sh 'https://x.com/NASA/status/2119136607009734978'
-bash scripts/fx.sh 'https://x.com/NASA/status/2119136607009734978' --json
+bash ~/.local/share/repos/github.com/kawaz/claude-rules-personal/main/reference/x-posts/scripts/fx.sh 'https://x.com/NASA/status/2119136607009734978'
+bash ~/.local/share/repos/github.com/kawaz/claude-rules-personal/main/reference/x-posts/scripts/fx.sh 'https://x.com/NASA/status/2119136607009734978' --json
 ```
 
 `fx.sh` は投稿 URL の数値 ID を抽出して `https://api.fxtwitter.com/2/status/<id>` に GET する。URL のユーザー名には依存しない。公開投稿ではトップレベルに `code`, `status`, `thread` があり、`status` に `text`, `author.name`, `author.screen_name`, `created_at`, `media.all[]`, `quote`, `replying_to` が入る。`--json` はサービスの JSON 全体をそのまま表示する。メディアの `url` は画像または動画の直接 URL で、`altText`、動画の `thumbnail_url`、`formats[]` などは `--json` で確認できる。**動画 URL が分かっても、その映像で何が起きるかは本文からは分からない。**
@@ -29,9 +27,9 @@ curl -fsS 'https://api.fxtwitter.com/2/conversation/2119143141450428828' | jq '{
 ## X で最近の話題や投稿の動画・画像の中身を調べる（Grok）
 
 ```bash
-bash scripts/x-search.sh 'X でここ24時間の Grok 4.7 について、具体的な投稿を挙げて何が話題ですか？' --unit unstable
-bash scripts/x-search.sh 'この動画では何が起きていますか？ 投稿本文からの推測と区別してください' --url 'https://x.com/NASA/status/2119136607009734978' --unit unstable
-bash scripts/x-search.sh '直近1週間の話題を教えて' --since 7d --model grok-4.7
+bash ~/.local/share/repos/github.com/kawaz/claude-rules-personal/main/reference/x-posts/scripts/x-search.sh 'X でここ24時間の Grok 4.7 について、具体的な投稿を挙げて何が話題ですか？' --unit unstable
+bash ~/.local/share/repos/github.com/kawaz/claude-rules-personal/main/reference/x-posts/scripts/x-search.sh 'この動画では何が起きていますか？ 投稿本文からの推測と区別してください' --url 'https://x.com/NASA/status/2119136607009734978' --unit unstable
+bash ~/.local/share/repos/github.com/kawaz/claude-rules-personal/main/reference/x-posts/scripts/x-search.sh '直近1週間の話題を教えて' --since 7d --model grok-4.7
 ```
 
 `--unit stable`（既定）は `http://127.0.0.1:11302/ns-personal/api.x.ai/v1/responses`、`--unit unstable` はポート `11301` に送る。認証は `llm-gateway auth token --config ~/.config/llm-gateway/config-11302-stable.toml --ns personal --sub x-search` と同様にスクリプト内で短命 token を取得し、レスポンス表示後に捨てる。gateway は上流 xAI の認証に差し替える。利用者が token や xAI key を渡す必要はない。依存は macOS の `date`、`curl`、`jq`、`llm-gateway`。サーバーが稼働し、ns personal にアクセスできる必要がある。
