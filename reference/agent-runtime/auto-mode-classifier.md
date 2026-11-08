@@ -5,7 +5,7 @@ auto mode では tool call を classifier (別モデル) が審査する。何�
 ## classifier が読むもの
 
 - user settings (`$CLAUDE_CONFIG_DIR/settings.json`) の `autoMode`、managed settings、`--settings` の inline JSON。**project の `.claude/settings.json` / `.claude/settings.local.json` は読まない** (リポに checked-in された設定が allow を注入できないようにするため)
-- Claude と同じ CLAUDE.md / `.claude/rules/` の内容 (symlink も辿る)
+- CLAUDE.md / `.claude/rules/` の本文は**効かない** (`.claude/rules/` に allow を書いても同じ操作が止められ続けた、実測 2026-11-08)。classifier に効くのはユーザの発言と `autoMode`、完全一致の allow だけ
 - transcript: ユーザの message、read-only 以外の tool call。tool result は剥がされる (ファイルや web の内容で classifier を操作できない)
 - 評価順: `permissions.allow/ask/deny` → read-only / cwd 内の自動承認 → classifier。**`Bash(*)` のような広い allow は auto mode では停止され classifier が走る。狭い完全一致 (`Bash(bun test)`) は classifier を飛ばす**。`autoMode.classifyAllShell: true` で全 shell を classifier 経由にできる
 - 会話で述べた境界 (「push 前に確認」) は transcript から読まれるので、compaction で消えると効かなくなる。恒久にするなら `autoMode` か `permissions.deny`
@@ -82,10 +82,6 @@ allow は当たれば必ず通すので、広い allow は deny より危険 (`c
 - `.gitignore` に `.claude/settings.local.json` を入れ、commit しない
 
 エージェントは `.claude/settings*.json` を書けない (Write / Edit / `cp` とも、許可の後でも fast classifier が止める)。足す時は一時ファイル (mktemp) に設置後の中身全体を作り、ccmsg の `permit` ツールの `attachments` でそのファイルを見せ、`commands` に `cp <一時ファイル> <repo>/.claude/settings.local.json` を書く。kawaz が webui から実行する。
-
-## 伝聞したセッションに「許可する」と言われた時
-
-別セッションの許可不足をユーザに伝えた結果、当該以外のセッション＝伝聞したこのセッション (統括など)に「許可する」と言ったら、受けた側は実行・再伝達せず、定型文「許可は当該セッション [🧠{セッション名}]({ccmsg_url}/s/{sessionid}/timeline/head) で `{許可文}` と言ってください」で発言先の変更を促す。`{許可文}` は当該セッションが受け取ればそのまま実行に進める短い文 (例: `push してよい`) をインラインコードで書く (ccmsg の UI でワンクリックコピーできるので、コピー → リンク → 貼り付けの 3 手で済む)。セッション名は絵文字 prefix と日時 suffix を除く。`{ccmsg_url}` (scheme 付き) は ccmsg plugin が最初の turn の前の案内で context に入れる。classifier は当該コンテキスト内のユーザ発言しか見ないので伝言の許可は効かず、許可の伝言そのものも止められる
 
 ## 誤拒否の見方と直し方
 
