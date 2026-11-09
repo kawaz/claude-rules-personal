@@ -7,7 +7,7 @@
 
 - [delegation](delegation/_index.md) — サブエージェントに委譲する時 (worker 選定・移譲・入力量の見積り・作業順序・drift の立て直し) に読む。
 - [design-spec](design-spec/_index.md) — 設計文書 (DR / プロトコル / 仕様) を書く・レビューする時に読む。
-- [session-state](session-state/_index.md) — LLM のセッション境界 (pre-clear / pre-compact / new) で状態を引き継ぐ際のハンドオフ手順書。
+- [session-state](session-state/_index.md) — 作業を新しいセッションへ引き継ぐ時に読む (既定は同 cwd に launch して send で渡すライブ引き継ぎ、clear / compaction 前は状態ファイル)。
 - [rules-authoring](rules-authoring/_index.md) — LLM ハーネスの rule / skill / reference / memory を書く・移す・改廃する時に読む。
 - [findings-recording](findings-recording.md) — 調査・検証結果を `docs/findings/` に残す時に読む (テンプレと委譲プロンプト)。
 - [role-main](role-main/_index.md) — 統括メインがセッション開始時に読むロードリスト。
