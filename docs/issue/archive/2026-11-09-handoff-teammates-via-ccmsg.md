@@ -1,6 +1,6 @@
 ---
 title: ライブ引き継ぎで温まっている worker を新セッションに渡す (ccmsg send の session_id + agent_id)
-status: open
+status: resolved
 category: task
 created: 2026-11-09T15:48:11+09:00
 last_read:
@@ -9,10 +9,10 @@ wip_entered:
 blocked_entered:
 pending_entered:
 discarded_entered:
-resolved_entered:
+resolved_entered: 2026-11-09T15:51:38+09:00
 discard_reason:
 pending_reason:
-close_reason:
+close_reason: ["implemented","commit/ec08d775"]
 blocked_by:
 origin: pam-passkey
 ---

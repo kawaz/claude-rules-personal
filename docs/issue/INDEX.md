@@ -4,7 +4,6 @@ active な issue の一覧。close 済みは archive/ にあり、ここには�
 
 | date | category | status | slug | 概要 |
 |---|---|---|---|---|
-| 2026-11-09 | task | open | [handoff-teammates-via-ccmsg](./2026-11-09-handoff-teammates-via-ccmsg.md) | ライブ引き継ぎで温まっている worker を新セッションに渡す (ccmsg send の session_id + agent_id) |
 | 2026-10-20 | task | open | [classifier-blocks-subagent-sendmessage](./2026-10-20-classifier-blocks-subagent-sendmessage.md) | auto mode classifier が subagent 宛 SendMessage と claude plugin validate/test を止める (2026-10-20 の thinking-guard 作業で 4 件)。許可を worker に中継… |
 | 2026-09-30 | bug | open | [vcs-guide-misclassifies-colocate-secondary-workspace](./2026-09-30-vcs-guide-misclassifies-colocate-secondary-workspace.md) | vcs-guide hook が colocate の恒久 workspace (incubator/ 等) を旧方式 (bare+jj) と誤判定して案内する |
 | 2026-09-19 | design | pending-sublimation | [rule-index-fire-conditions](./2026-09-19-rule-index-fire-conditions.md) | for-all/rules/_index.md の要旨に発火条件 (該当する時 / しない時) を書くと機械判定に使える |
