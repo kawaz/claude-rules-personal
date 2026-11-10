@@ -8,7 +8,7 @@ permission の確認・AskUserQuestion・MCP Elicitation・engine 自身のダ�
 - **表示中のダイアログを閉じる**ことは `tool.call` の during 配置でできる。AskUserQuestion は答え (`{ result }`) を返せる。permission は `{ deny }` だけ (許可側は tool の実行結果を作れないので、出る前に決める)
 - **engine が描いたダイアログのボタンを押す API は無い**。`ui.press` / `ui.input` / `ui.select` の対象は plugin 自身が描いた要素だけ
 - **描き換えられるダイアログは AskUserQuestion だけ**。permission のダイアログは engine だけが描く (mod は `$.ui.notice(tool_use_id, text)` で下に 1 行足せる)
-- **engine 自身のダイアログ** (workspace trust / hot-reload の同意 / update / login / `/config` / cross-session 受信の保留確認 / survey) には event も component も無く、触れない。trust の前は module 自体が読まれない
+- **engine 自身のダイアログ** (workspace trust / Claude が書いた mod を有効にするかの質問 (2.1.321 の auto / bypass では出ない) / update / login / `/config` / cross-session 受信の保留確認 / survey) には event も component も無く、触れない。trust の前は module 自体が読まれない
 
 ## permission の時系列
 

@@ -5,7 +5,7 @@ Claude Code の plugin が持てる TypeScript / JavaScript の hook module。en
 - [overview](overview.md) — plugin の構成、`register`、pattern と tier、`next`、失敗の扱い、他の拡張手段との差。
   mod の基本, hooks module の書き方, tier, fail open, command hook との違い, MCP との違い, on() の重複, registered twice without a matcher, $ itself is passed as an argument, PluginState, is not declared, 相対 import
 - [develop](develop.md) — built-in mod 一覧、一時読み込み、validate / test / hot-reload、型定義。
-  --plugin-dir, claude plugin validate, claude plugin test, reload されない, 型が合わない, no implementation for session.start
+  --plugin-dir, skills-dir, Turn on the mods Claude writes, claude plugin validate, claude plugin test, reload されない, 型が合わない, no implementation for session.start
 - [events](events.md) — hook できる event の全一覧と選び方、1 turn の発火順、`-p` との差、`/clear` の意味論。
   event 一覧, 発火順, どの event で拾う, /clear を拾う, /resume を拾う, compact の順, /model を拾う, busy 中の Enter, hot reload で重複, -p で動かない
 - [capabilities](capabilities.md) — event ごとに読める・書き換えられる・文脈を足せる欄の表と、thinking の扱い。
@@ -13,7 +13,7 @@ Claude Code の plugin が持てる TypeScript / JavaScript の hook module。en
 - [practices](practices.md) — mod 設計の選び方: 計測単位、subagent の見分け、状態の置き場、skill と tool の分担。
   mod の設計, 状態をどこに持つ, $.state の寿命, 最初の turn の前に注入, compact 後に足し直す, turn.step の書き方, skill と tool の分担, tool の description を短く, inputSchema の細則, bundle, 公式 README が古い
 - [dollar-api](dollar-api.md) — `$` の noun ごとのメソッドと制限、外部プロセスとの接続、`$.store`、state ライブラリ。
-  $ で何ができる, $.store, $.http, $.process, 4 MiB, 予算, ran past its 10s budget, compact 中の append, subagent に append, no running loop, $.tool.register, no tool.call hook answered, ToolSearch
+  $ で何ができる, $.store, $.http, $.process, 4 MiB, 予算, ran past its 10s budget, compact 中の append, subagent に append, no running loop, $.tool.register, no tool.call hook answered, a mod's own call can't ask for it, ToolSearch
 - [dialogs](dialogs.md) — permission 等のダイアログで読める・割り込める・返せるもの、deny rule との優先関係。
   permission ダイアログ, ダイアログを外から答える, deny rule が効く, Elicitation
 - [prompt-injection](prompt-injection.md) — `$.prompt.submit` と `asUser` の使い分け、外からの入力投入、書きかけの退避・復元。

@@ -1,10 +1,11 @@
 # Claude Mods の開発ループ
 
-一時読み込み、validate / test / hot-reload / 型定義の書き出し。Claude Code 2.1.299 の型定義と公式リポの `mods/` (README と built-in mod のテスト)、skill `plugin-authoring`、実機による。隔離環境での起動手順は reference の `claude-mods/lab-setup`。
+一時読み込み、validate / test / hot-reload / 型定義の書き出し。Claude Code 2.1.299 の型定義と公式リポの `mods/` (README と built-in mod のテスト)、skill `plugin-authoring`、実機による (読み込み・hot-reload の mode ごとの挙動は 2.1.321)。隔離環境での起動手順は reference の `claude-mods/lab-setup`。
 
 ## 読み込み
 
 - built-in mod: `sec-default` (組織の機械でだけ最外に座る。reference の `claude-mods/overview`)、`diff` (`/diff` の pane)、`telemetry` (built-in plugin の analytics。analytics が有効な build だけ)、`agents-md` (`AGENTS.md` を instruction file として読む。option `instructionFiles`)、`cc-plugin-you-should-know` (side agent が見落としを指摘する。`/plugin enable cc-plugin-you-should-know@builtin`、first-party でかつ telemetry 有効の session)。ソースは anthropics/claude-code の `mods/` に build と同じ形で公開されていて、`claude --plugin-dir mods/diff` でソースから読める
+- skills-dir: project の `.claude/skills/<name>/` か user の `$CLAUDE_CONFIG_DIR/skills/<name>/` に `.claude-plugin/plugin.json` と hooks module を置くと `<name>@skills-dir` として読まれる (debug log `Loaded 1 skills-as-plugins`)。project の分は未 trust の cwd では `-p` でも読まれない (2.1.321 で 1 回)
 - 一時読み込み: `claude --plugin-dir <folder>` (session 限り、複数可、folder of plugins も可)、`CLAUDE_CODE_PLUGIN_DIRS` (プロセス環境か user settings の `env`)。読めなかった `--plugin-dir` は stream-json の `system/init` の `plugin_errors` に `path` 付きで出る
 - `claude plugin init` は command hook 型の雛形を作るもので、mod の雛形ではない
 
@@ -49,9 +50,9 @@ describe('register', () => {
 
 ## hot-reload
 
-- `--plugin-dir` の folder は対話 session で watch され、保存で reload する (実測 `reloaded in 5.7ms`)。中身が変わらない保存では reload しない。reload で `register` と `session.start` が再度走り、`$.state` は残る (reference の `claude-mods/events`)。headless の長寿命 session は `CLAUDE_CODE_PLUGIN_DIR_WATCH=1`
+- `--plugin-dir` の folder は対話 session で watch され、保存で reload する (実測 `reloaded in 5.7ms`)。中身が変わらない保存では reload しない。reload で `register` と `session.start` が再度走り、`$.state` は残る (reference の `claude-mods/events`)。headless の長寿命 session では `--plugin-dir` は watch されず、`CLAUDE_CODE_PLUGIN_DIR_WATCH=1` で watch する。skills-dir の mod (上の「読み込み」) は headless でも既定で watch され、保存の 1〜3 秒後に reload する (`<name>@skills-dir reloaded in ...`)。`=0` で止まる (2.1.321 で実測)
 - watch は idle 時 30 秒、active 時 400ms の polling なので、idle 中の保存は反映まで最大 30 秒程度かかる (実測)
-- skill `plugin-authoring` 経由の開発では `$CLAUDE_CONFIG_DIR/dev-mods/<sessionId>` が作業場所になる (skill 本文の placeholder `${CLAUDE_DEV_MODS_DIR}` が置換される。環境変数ではない)。最初の書き込みで「Enable mod hot-reloading for this session?」を 1 度訊く。この同意は人だけが答え、permission mode・rule・hook では答えられない。SDK host が答える前に閉じた場合は 3 回まで訊き直す。accept-edits mode でも、この mods フォルダに mod を作る Write / Edit は確認を挟む
+- skill `plugin-authoring` 経由の開発では `$CLAUDE_CONFIG_DIR/dev-mods/<sessionId>` が作業場所になる (skill 本文の placeholder `${CLAUDE_DEV_MODS_DIR}` が置換される。環境変数ではない)。mod を有効にするかは permission mode で決まる (2.1.321 で実測): bypassPermissions と auto では訊かずに有効になり (`Mods: In this permission mode the mods Claude writes turn on without asking.`、turn の終わりに読まれ、読み込みの通知で model がもう 1 turn 応える)、dontAsk では有効にならない (debug log `dev mods: mod hot-reloading is off here (dont_ask)`)。それ以外の mode は最初の書き込みで `Mods` の質問「Turn on the mods Claude writes in this session?」(How does this work? / Turn them on / Not now) を 1 度訊き、人だけが答えられる (rule・hook では答えられない。default で訊くことはコードの読み取りで、2.1.321 の実機では未確認)。SDK host が答える前に閉じた場合は 3 回まで訊き直す。起動時にそのフォルダに既に置いてある mod は、同じ session id で起動すると訊かずに読まれる (dontAsk を除く)。accept-edits mode でも、この mods フォルダに mod を作る Write / Edit は確認を挟む
 - skill `plugin-authoring` は作った mod を他人が install する 1 行のコマンドを示して README の install 節に書き、共有時は public / private を訊いてファイルを確かめてから GitHub リポを作る
 
 ## 型定義
