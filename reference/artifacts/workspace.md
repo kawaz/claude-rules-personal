@@ -12,7 +12,7 @@ jj workspace add -r 'root()+ & ::main' ../artifacts
 cd ../artifacts && printf '*\n' > .gitignore && jj file track --include-ignored .gitignore && jj commit -m "artifacts: 既定で追跡しない枝 (残す物だけ jj file track --include-ignored)" .gitignore
 ```
 
-- 枝は main 本編の**最初の commit** から生やす別枝。main の履歴に生成物を混ぜない。bookmark は作らず push もしない (ローカル枝。新規リポ作成手順にも組み込み済み、既存 colocate リポは 2026-10-10 に一括作成済み)
+- 枝は main 本編の**最初の commit** から生やす別枝。main の履歴に生成物を混ぜない。bookmark は作らず push もしない (ローカル枝。新規リポ作成手順にも組み込み済み)
 - `.gitignore` は `*` 1 行。既定では何も追跡しない (jj の snapshot にも乗らないので、巨大ファイルや作り直しで store が肥大しない)
 - 版管理して残したい物だけ `jj file track --include-ignored <paths>` → `jj commit -m "..." <paths>`。**`--include-ignored` を落とすと exit 0 のまま何も起きない**
 - 中に symlink を置かない (file_server が追って配信してしまう)
@@ -38,4 +38,5 @@ caddy-app-proxy (kawaz/caddy-app-proxy の `Caddyfile`、sandbox block) が Host
 
 - 画面を伴う成果 (可視化、レポート HTML、eli5 の図、ベンチ結果、スクリーンショット集) を kawaz に見せたい時。チャットにパスを書く代わりに URL を書く
 - PoC の UI を手元のブラウザや iPhone で触ってもらう時
+- tailnet の外の人に見せる時は、ここに置いた生成物を [share](share.md) で期限付きの公開 URL に上げる
 - 使わない場面: 本番の webui や daemon の配信 (apps 側の site block に個別追加する)、外部由来の HTML を他人に公開する用途 (tailnet 限定が前提)

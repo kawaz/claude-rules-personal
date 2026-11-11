@@ -60,7 +60,7 @@ cd ../artifacts && printf '*\n' > .gitignore && jj file track --include-ignored 
 
 ## artifacts workspace (ブラウザで見る生成物の置き場)
 
-`{repo}/artifacts/` は生成物を `artifacts-{owner}-{repo}.<host>.tmpspace.net` で閲覧するための workspace。運用 (選択的追跡、URL 対応、sandbox の意味) は reference の `artifacts-workspace` が正本で、ここでは作り方だけ: 上の 3 行を既存リポにもそのまま使う (`root()+ & ::main` が main の最初の commit。旧方式リポでは root 直下に default workspace の空 @ が居るので `root()+` 単独だとマージ親になる)。
+`{repo}/artifacts/` は生成物を `artifacts-{owner}-{repo}.<host>.tmpspace.net` で閲覧するための workspace。運用 (選択的追跡、URL 対応、sandbox の意味) は reference の `artifacts/workspace` が正本で、ここでは作り方だけ: 上の 3 行を既存リポにもそのまま使う (`root()+ & ::main` が main の最初の commit。旧方式リポでは root 直下に default workspace の空 @ が居るので `root()+` 単独だとマージ親になる)。
 
 ## 既存リポジトリの clone
 

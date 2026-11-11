@@ -1,0 +1,413 @@
+#!/usr/bin/env bash
+# artifacts-share — artifacts workspace の下のディレクトリを、期限付きの公開 URL で共有する (作成 / 更新 / 削除)
+#
+# 用途: kawaz が tailnet の外の人に見せたい生成物 (比較用の HTML、スクリーンショット) を、インターネットから
+#       見られる場所に置く。置き場は kawaz 個人の Cloudflare R2 バケットで、期限が来ると自動で消える。
+# 実行: artifacts-share new   [--dry-run] <ディレクトリ> [<期限>]   新しい URL で上げる (期限は省略すると 3d)
+#       artifacts-share sync  [--dry-run] <UUID>                     手元の中身に揃え直す
+#       artifacts-share prune [--dry-run] <UUID>                     公開を取り下げる
+# 出力: new / sync は記録と同じ形の JSON に url を足した 1 行 (stdout) {updated_at, uuid, ttl, path, url}。
+#       url は共有先のディレクトリの URL で、共有する URL はその後ろに index.html 等を続けたもの。
+# 記録: 共有したディレクトリの .artifacts-share.jsonl に {updated_at, uuid, ttl, path} を残す (手元だけ。
+#       R2 は 1 ファイル単位で非公開にできないので、上げない。ドットファイルは一切上げない)
+# 前提: キーチェーンに 2 項目があること (作り方は claude-rules-personal の reference artifacts/share)。
+#         -s artifacts-share -a settings  設定の JSON {account_id, bucket, public_url, token_id} (秘密ではない)
+#         -s artifacts-share -a r2-token  このバケットのオブジェクトの読み書きだけを許した API トークン (秘密)
+#       curl (--aws-sigv4) と jq があること。
+# 規約: 個人情報・秘密が写るものは、上げる前に kawaz に確認する。
+set -euo pipefail
+
+readonly KEYCHAIN_SERVICE="artifacts-share"
+readonly KEYCHAIN_SETTINGS="settings"
+readonly KEYCHAIN_TOKEN="r2-token"
+# バケットのライフサイクルのルールにある期限だけを受け付ける (ルールに無い prefix に置くと 30 日まで消えない)
+readonly TTLS=(1d 3d 7d)
+readonly DEFAULT_TTL=3d
+# 上げてよいのは、この下の <owner>/<repo>/artifacts/<整理用ディレクトリ>/ の下 (実体のパスで判定する)。
+# sync / prune もこの下の artifacts workspace から記録を探す
+readonly REPOS_ROOT="${XDG_DATA_HOME:-$HOME/.local/share}/repos/github.com"
+readonly RECORD=".artifacts-share.jsonl"
+readonly UUID_RE='^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
+readonly PROG="${0##*/}"
+
+usage() {
+  cat <<EOF
+Usage: $PROG <subcommand> [--dry-run] <args>
+
+artifacts workspace の下のディレクトリを、期限付きの公開 URL で共有する。
+
+Subcommands:
+  new <ディレクトリ> [<期限>]  新しい URL で上げる
+                             ディレクトリは ~/.local/share/repos/github.com/<owner>/<repo>/artifacts/<整理用ディレクトリ>/ の下。相対パスでもよい
+                             期限は ${TTLS[*]} のどれかで、省略すると ${DEFAULT_TTL}。期限が来ると自動で消える (期限後おおむね 24 時間以内)
+  sync <UUID>                手元のディレクトリの中身に揃え直す (全ファイルを上げ直し、手元に無いものは消す)
+                             上げ直したファイルの期限は、その時点から数え直しになる。URL は変わらない
+  prune <UUID>               公開を取り下げる (リモートのファイルと手元の記録を消す)
+
+Options:
+  --dry-run  何をするかを出すだけで、上げも消しもしない
+  --help     このヘルプを出す
+
+new / sync の出力は JSON 1 行 {updated_at, uuid, ttl, path, url} (記録 $RECORD の 1 行に url を足した形)。
+共有する URL は、url の後ろに index.html 等を続けたもの。
+公開 URL は推測できない UUID を含むが、知った人は誰でも見られる。
+個人情報・秘密が写るものは、上げる前に kawaz に確認する。
+EOF
+}
+
+die() { printf '%s: %s\n' "$PROG" "$1" >&2; exit 1; }
+warn() { printf '%s: %s\n' "$PROG" "$1" >&2; }
+
+# 拡張子から MIME 型を決める。macOS の file --mime-type は CSS / JS を text/plain と判定するので使わない
+content_type() {
+  local name=${1##*/} ext
+  [[ $name == *.* ]] || return 1
+  ext=$(printf '%s' "${name##*.}" | tr '[:upper:]' '[:lower:]')
+  case $ext in
+    html | htm) echo "text/html; charset=utf-8" ;;
+    css) echo "text/css; charset=utf-8" ;;
+    js | mjs) echo "text/javascript; charset=utf-8" ;;
+    json | map) echo "application/json; charset=utf-8" ;;
+    txt | log) echo "text/plain; charset=utf-8" ;;
+    md) echo "text/markdown; charset=utf-8" ;;
+    csv) echo "text/csv; charset=utf-8" ;;
+    svg) echo "image/svg+xml" ;;
+    png) echo "image/png" ;;
+    jpg | jpeg) echo "image/jpeg" ;;
+    gif) echo "image/gif" ;;
+    webp) echo "image/webp" ;;
+    avif) echo "image/avif" ;;
+    ico) echo "image/x-icon" ;;
+    pdf) echo "application/pdf" ;;
+    woff) echo "font/woff" ;;
+    woff2) echo "font/woff2" ;;
+    mp4) echo "video/mp4" ;;
+    webm) echo "video/webm" ;;
+    *) return 1 ;;
+  esac
+}
+
+now_utc() { date -u '+%Y-%m-%dT%H:%M:%SZ'; }
+
+# stdout に出す 1 行: 記録と同じ形の JSON に url を足したもの
+emit() { jq -c --arg url "$2" '. + {url: $url}' <<<"$1"; }
+
+# jsonl を、同じディレクトリの一時ファイル経由で置き換える (途中で止まっても元の記録を壊さない)。
+# 一時ファイルもドットファイルなので、残っても上がらない。結果が空ならファイルごと消す
+rewrite_record() {
+  local jsonl=$1 filter=$2 uuid=$3 tmp
+  tmp=$(mktemp "$jsonl.XXXXXX")
+  jq -c --arg u "$uuid" --arg n "$(now_utc)" "$filter" "$jsonl" >"$tmp"
+  if [[ -s $tmp ]]; then mv "$tmp" "$jsonl"; else rm -f "$tmp" "$jsonl"; fi
+}
+
+valid_ttl() {
+  local t
+  for t in "${TTLS[@]}"; do [[ $1 == "$t" ]] && return 0; done
+  return 1
+}
+
+expire_date() {
+  local days=${1%d}
+  # PATH の date が GNU (coreutils) か BSD (macOS 標準) かで書き方が違う
+  date -d "+$days days" '+%Y-%m-%d' 2>/dev/null || date -v+"${days}"d '+%Y-%m-%d'
+}
+
+# --- 設定 (キーチェーンの settings 項目。秘密ではないが、スクリプトに直書きしない) ---
+# 形を確かめてから使う。どれかが欠けた・壊れた値なら止まる
+BUCKET="" URL_BASE="" S3_ENDPOINT="" TOKEN_ID=""
+load_settings() {
+  local raw parsed
+  raw=$(security find-generic-password -s "$KEYCHAIN_SERVICE" -a "$KEYCHAIN_SETTINGS" -w 2>/dev/null) ||
+    die "キーチェーンに設定が無い (-s $KEYCHAIN_SERVICE -a $KEYCHAIN_SETTINGS)。作り方は reference の artifacts/share"
+  parsed=$(jq -r '
+    def need($k; $re): (.[$k] | if type == "string" and test($re) then . else error("\($k) の形が不正") end);
+    [ need("account_id"; "^[0-9a-f]{32}$"),
+      need("bucket"; "^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$"),
+      need("public_url"; "^https://[A-Za-z0-9.-]+$"),
+      need("token_id"; "^[0-9a-f]{32}$") ] | @tsv' <<<"$raw" 2>&1) ||
+    die "キーチェーンの設定 (-s $KEYCHAIN_SERVICE -a $KEYCHAIN_SETTINGS) が読めない: $parsed"
+  local account
+  IFS=$'\t' read -r account BUCKET URL_BASE TOKEN_ID <<<"$parsed"
+  # 上げ下ろしは R2 の S3 互換 API で行う。バケット 1 つに絞ったトークンの権限は、S3 互換 API でだけ効く
+  # (Cloudflare の REST API と、それを使う cf r2 objects では 403 になる)
+  S3_ENDPOINT="https://$account.r2.cloudflarestorage.com"
+}
+
+# 上げてよいディレクトリか。実体のパス (末尾 /) を返す
+resolve_allowed() {
+  local src=$1 real root rel
+  [[ -e $src ]] || die "ディレクトリが無い: $src"
+  [[ -d $src ]] || die "ディレクトリを指定する (ファイル 1 つは上げない): $src"
+  real=$(realpath "$src")/
+  root=$(realpath "$REPOS_ROOT") || die "リポの置き場が無い: $REPOS_ROOT"
+  [[ $real == "$root"/* ]] || die "上げてよい場所でない: $real ($REPOS_ROOT/<owner>/<repo>/artifacts/<整理用ディレクトリ>/ の下だけを上げる)"
+  rel=${real#"$root"/}
+  # <owner>/<repo>/artifacts/<整理用ディレクトリ>/ 以下。artifacts/ そのもの (.jj や .gitignore がある) は上げない
+  [[ $rel =~ ^[^/.][^/]*/[^/.][^/]*/artifacts/[^/.][^/]*/ ]] ||
+    die "上げてよい場所でない: $real ($REPOS_ROOT/<owner>/<repo>/artifacts/<整理用ディレクトリ>/ の下だけを上げる)"
+  # 途中のディレクトリにドットで始まるものがあれば、ドットディレクトリの中身を上げることになるので断る
+  [[ /$rel != */.* ]] || die "ドットで始まるディレクトリの中は上げない: $real"
+  printf '%s' "$real"
+}
+
+# 上げるファイルを files[] / types[] に集める。ドットファイル (記録の jsonl を含む) はここで必ず除く
+collect() {
+  local real=$1 f rel ct links
+  # symlink はリンク先の中身まで公開してしまうので、1 つでもあれば止める
+  links=$(find "$real" -type l) || die "ディレクトリの中を読めない: $real"
+  [[ -z $links ]] || die "symlink がある (artifacts の中に symlink は置かない): ${links//$'\n'/, }"
+  files=()
+  types=()
+  local listing
+  # 一覧は変数に受けてから使う (プロセス置換で読むと、find の失敗で止まらず一部だけ上げて進む)
+  listing=$(find "$real" -type f -print0 | sort -z | tr '\0' '\036') || die "ディレクトリの中を読めない: $real"
+  while IFS= read -r -d $'\036' f; do
+    rel=${f#"$real"}
+    # ドットファイルと、ドットで始まるディレクトリの中は上げない。記録 ($RECORD) は警告も出さずに除く
+    if [[ /$rel == */.* ]]; then
+      [[ $rel == "$RECORD" ]] || warn "ドットファイルは上げない: $rel"
+      continue
+    fi
+    if ! ct=$(content_type "$rel"); then
+      ct="application/octet-stream"
+      warn "MIME 型が分からない拡張子 (ブラウザでは開かずダウンロードになる): $rel"
+    fi
+    files+=("$rel")
+    types+=("$ct")
+  done <<<"$listing"
+  ((${#files[@]} > 0)) || die "上げるファイルが無い: $real"
+}
+
+# --- R2 (S3 互換 API) ---
+# 鍵は最初に R2 を触るときに 1 度だけ読む (new --dry-run のようにリモートを触らない操作では読まない)
+s3_secret=""
+load_credentials() {
+  [[ -z $s3_secret ]] || return 0
+  local token
+  token=$(security find-generic-password -s "$KEYCHAIN_SERVICE" -a "$KEYCHAIN_TOKEN" -w 2>/dev/null) ||
+    die "キーチェーンにトークンが無い (-s $KEYCHAIN_SERVICE -a $KEYCHAIN_TOKEN)。作り直し方は reference の artifacts/share"
+  # S3 のアクセスキー ID は API トークンの id (設定の token_id)、シークレットはトークンの値の SHA-256
+  s3_secret=$(printf '%s' "$token" | shasum -a 256 | cut -d' ' -f1)
+  unset token
+}
+
+# キーをパスの区切り (/) を残して URL エンコードする (日本語・空白・記号を含むファイル名のため)
+enc_key() { jq -rn --arg k "$1" '$k | split("/") | map(@uri) | join("/")'; }
+
+# S3 互換 API を呼び、応答の本文を出す。HTTP の状態が 2xx でなければ本文を stderr に出して 1 を返す。
+# 鍵は引数に出さず、プロセス置換で curl の設定として渡す (ps に出ない)
+s3() {
+  load_credentials
+  local out code
+  out=$(curl -sS --aws-sigv4 "aws:amz:auto:s3" -K <(printf 'user = "%s:%s"\n' "$TOKEN_ID" "$s3_secret") \
+    -w $'\n%{http_code}' "$@" 2>&1) || { printf '%s\n' "${out%$'\n'*}" >&2; return 1; }
+  code=${out##*$'\n'}
+  out=${out%$'\n'*}
+  if [[ $code != 2?? ]]; then
+    printf 'HTTP %s %s\n' "$code" "$out" >&2
+    return 1
+  fi
+  printf '%s' "$out"
+}
+
+# S3 の XML の値を元の文字に戻す (&amp; は最後に戻す。先に戻すと &amp;lt; が < になる)
+xml_unescape() { sed -e 's/&lt;/</g' -e 's/&gt;/>/g' -e 's/&quot;/"/g' -e "s/&apos;/'/g" -e 's/&amp;/\&/g'; }
+
+# 1 件の共有の prefix (ttl-<期限>/<UUIDv4>)。UUID の形を確かめてから組む (空や壊れた値で prefix が広がらないように)
+share_prefix() {
+  [[ $2 =~ $UUID_RE ]] || die "内部エラー: UUID の形でない: $2"
+  [[ $1 =~ ^[0-9]+d$ ]] || die "内部エラー: 期限の形でない: $1"
+  printf 'ttl-%s/%s' "$1" "$2"
+}
+
+# 共有 1 件 (prefix = ttl-<期限>/<UUID>) の下のキーを 1 行 1 件で出す。ページ送りを最後まで辿る
+remote_keys() {
+  local prefix=$1/ out token args uuid
+  uuid=${1#*/}
+  [[ $1 == ttl-*d/* && $uuid =~ $UUID_RE ]] || die "内部エラー: 一覧の prefix が不正: $prefix"
+  token=""
+  while :; do
+    args=(-G --data-urlencode "list-type=2" --data-urlencode "prefix=$prefix" --data-urlencode "max-keys=1000")
+    [[ -n $token ]] && args+=(--data-urlencode "continuation-token=$token")
+    out=$(s3 "${args[@]}" "$S3_ENDPOINT/$BUCKET") || die "一覧を取れなかった: $prefix"
+    [[ $out == *'<ListBucketResult'* ]] || die "一覧の応答が想定と違う: $prefix"
+    { grep -o '<Key>[^<]*</Key>' <<<"$out" || true; } | sed -e 's/^<Key>//' -e 's/<\/Key>$//' | xml_unescape
+    [[ $out == *'<IsTruncated>true</IsTruncated>'* ]] || break
+    token=$(grep -o '<NextContinuationToken>[^<]*</NextContinuationToken>' <<<"$out" | sed -e 's/<[^>]*>//g' | xml_unescape)
+    [[ -n $token ]] || die "一覧の続きの token が無い: $prefix"
+  done
+}
+
+upload_all() {
+  local prefix=$1 real=$2 i key
+  for i in "${!files[@]}"; do
+    key="$prefix/${files[$i]}"
+    printf 'up: %s  (%s)\n' "$key" "${types[$i]}" >&2
+    s3 -o /dev/null -T "$real${files[$i]}" -H "Content-Type: ${types[$i]}" "$S3_ENDPOINT/$BUCKET/$(enc_key "$key")" >/dev/null ||
+      die "上げられなかった: ${files[$i]} (やり直すなら $PROG sync ${prefix#*/})"
+  done
+}
+
+# 消すキーは、必ずその共有の prefix の下にあることを確かめてから消す
+delete_key() {
+  local prefix=$1 key=$2
+  [[ $key == "$prefix/"?* ]] || die "内部エラー: 共有の外のキーを消そうとした: $key"
+  printf 'rm: %s\n' "$key" >&2
+  s3 -X DELETE "$S3_ENDPOINT/$BUCKET/$(enc_key "$key")" >/dev/null || die "消せなかった: $key"
+}
+
+# 記録から UUID の行を探す。見つかれば「jsonl のパス<TAB>記録の JSON」を 1 行出す。
+# 同じ UUID が複数の記録にある (ディレクトリを丸ごと複製した) ときは、どれが元か決められないので止まる
+find_record() {
+  local uuid=$1 j line hits=()
+  shopt -s globstar nullglob
+  # ** はドットで始まるディレクトリ (.jj 等) に降りない。記録はドットファイルなので名前で直接当てる
+  for j in "$REPOS_ROOT"/*/*/artifacts/**/"$RECORD"; do
+    [[ -f $j && ! -L $j ]] || continue
+    if ! line=$(jq -c --arg u "$uuid" 'select(.uuid == $u)' "$j" 2>/dev/null); then
+      warn "記録が読めない (飛ばした): $j"
+      continue
+    fi
+    line=${line%%$'\n'*}
+    [[ -n $line ]] && hits+=("$j"$'\t'"$line")
+  done
+  shopt -u globstar nullglob
+  if ((${#hits[@]} > 1)); then
+    local paths=("${hits[@]%%$'\t'*}")
+    die "同じ UUID の記録が複数ある (どれが元か決められない。複製した方の記録を消す): $(IFS=,; printf '%s' "${paths[*]}")"
+  fi
+  ((${#hits[@]} == 0)) || printf '%s\n' "${hits[0]}"
+}
+
+cmd_new() {
+  (($# == 1 || $# == 2)) || die "new の引数は <ディレクトリ> [<期限>] (--help で使い方)"
+  local ttl=${2:-$DEFAULT_TTL} real uuid prefix url rec i
+  [[ ! $1 =~ ^[0-9]+d$ ]] || die "引数の順は <ディレクトリ> [<期限>] (期限が先に来ている: $*)"
+  valid_ttl "$ttl" || die "期限は ${TTLS[*]} のどれか: $ttl"
+  real=$(resolve_allowed "$1")
+  collect "$real"
+  uuid=$(uuidgen | tr '[:upper:]' '[:lower:]')
+  prefix=$(share_prefix "$ttl" "$uuid")
+  url="$URL_BASE/$prefix/"
+  # updated_at は最後に全ファイルを上げた時刻。自動削除はファイルごとに上げた時点から数えるので、期限の起点になる
+  rec=$(jq -cn --arg n "$(now_utc)" --arg u "$uuid" --arg t "$ttl" --arg p "$real" \
+    '{updated_at: $n, uuid: $u, ttl: $t, path: $p}')
+  if $dry_run; then
+    for i in "${!files[@]}"; do printf '%s  (%s)\n' "$prefix/${files[$i]}" "${types[$i]}" >&2; done
+    warn "dry-run: ${#files[@]} ファイルを上げる予定 (上げていない)。消えるのは $(expire_date "$ttl") ごろ"
+    emit "$rec" "$url"
+    return 0
+  fi
+  # 上げる前に記録する。途中で失敗しても、記録から sync でやり直せ、prune で消せる
+  printf '%s\n' "$rec" >>"$real$RECORD"
+  upload_all "$prefix" "$real"
+  warn "${#files[@]} ファイルを上げた (記録: $real$RECORD)。消えるのは $(expire_date "$ttl") ごろ"
+  emit "$rec" "$url"
+}
+
+cmd_sync() {
+  (($# == 1)) || die "sync の引数は <UUID> の 1 つ (--help で使い方)"
+  local uuid=$1 hit jsonl rec ttl path real prefix url key i stale=()
+  [[ $uuid =~ $UUID_RE ]] || die "UUID の形でない: '$uuid' (new の出力の uuid をそのまま渡す)"
+  hit=$(find_record "$uuid")
+  [[ -n $hit ]] || die "記録が無い: $uuid ($REPOS_ROOT/*/*/artifacts の下の $RECORD を探した)"
+  jsonl=${hit%%$'\t'*}
+  rec=${hit#*$'\t'}
+  ttl=$(jq -r '.ttl' <<<"$rec")
+  path=$(jq -r '.path' <<<"$rec")
+  valid_ttl "$ttl" || die "記録の期限が不正: $ttl ($jsonl)"
+  real=$(resolve_allowed "$path")
+  # 記録はそれが指すディレクトリの直下にあるはず。食い違うなら (記録だけ動かした) どちらが正しいか決められない
+  [[ $real$RECORD == "$(realpath "${jsonl%/*}")/$RECORD" ]] || die "記録の場所と記録の path が食い違う: $jsonl (path: $path)"
+  collect "$real"
+  prefix=$(share_prefix "$ttl" "$uuid")
+  url="$URL_BASE/$prefix/"
+  # リモートにあって手元に無いもの (手元で消したファイル) を集める。
+  # 一覧は変数に受けてから使う (プロセス置換で読むと、一覧の失敗で止まらず「消すもの無し」と誤って進む)
+  load_credentials
+  local -A want=()
+  local listed
+  for key in "${files[@]}"; do want["$prefix/$key"]=1; done
+  listed=$(remote_keys "$prefix") || die "一覧を取れなかったので止めた (何も上げ下ろししていない)"
+  while IFS= read -r key; do
+    [[ -n $key && -z ${want["$key"]:-} ]] && stale+=("$key")
+  done <<<"$listed"
+  if $dry_run; then
+    for i in "${!files[@]}"; do printf 'up: %s  (%s)\n' "$prefix/${files[$i]}" "${types[$i]}" >&2; done
+    for key in "${stale[@]}"; do printf 'rm: %s\n' "$key" >&2; done
+    warn "dry-run: ${#files[@]} ファイルを上げ直し、${#stale[@]} ファイルを消す予定 (何もしていない)"
+    emit "$rec" "$url"
+    return 0
+  fi
+  # 全ファイルを上げ直してから、手元に無いものを消す (途中で止まっても、ページが欠けた状態を作らない)。
+  # 全部を上げ直すので、どのファイルも期限がこの時点から数え直しになる
+  upload_all "$prefix" "$real"
+  for key in "${stale[@]}"; do delete_key "$prefix" "$key"; done
+  # shellcheck disable=SC2016 # $u / $n は jq の変数 (rewrite_record が --arg で渡す)
+  rewrite_record "$jsonl" 'if .uuid == $u then .updated_at = $n else . end' "$uuid"
+  warn "${#files[@]} ファイルを上げ直し、${#stale[@]} ファイルを消した。消えるのは $(expire_date "$ttl") ごろ"
+  # 出力は書き換えた後の記録 (updated_at が今回の時刻) から作る
+  rec=$(jq -c --arg u "$uuid" 'select(.uuid == $u)' "$jsonl" | head -1)
+  emit "$rec" "$url"
+}
+
+cmd_prune() {
+  (($# == 1)) || die "prune の引数は <UUID> の 1 つ (--help で使い方)"
+  local uuid=$1 hit t i prefix key keys=() prefixes=() jsonl listed
+  [[ $uuid =~ $UUID_RE ]] || die "UUID の形でない: '$uuid' (new の出力の uuid をそのまま渡す)"
+  hit=$(find_record "$uuid")
+  load_credentials
+  # 記録が消えていても取り下げられるよう、リモートは全期限の prefix を探す。
+  # 一覧は変数に受けてから使う (プロセス置換で読むと、一覧の失敗で止まらず「消すもの無し」と誤って進む)
+  for t in "${TTLS[@]}"; do
+    prefix=$(share_prefix "$t" "$uuid")
+    listed=$(remote_keys "$prefix") || die "一覧を取れなかったので止めた (何も消していない): $prefix/"
+    while IFS= read -r key; do
+      [[ -n $key ]] || continue
+      keys+=("$key")
+      prefixes+=("$prefix")
+    done <<<"$listed"
+  done
+  ((${#keys[@]} > 0)) || [[ -n $hit ]] || die "リモートにも記録にも無い: $uuid"
+  if $dry_run; then
+    for key in "${keys[@]}"; do printf 'rm: %s\n' "$key" >&2; done
+    if [[ -n $hit ]]; then warn "dry-run: ${#keys[@]} ファイルを消し、記録 ${hit%%$'\t'*} から外す予定 (何もしていない)"
+    else warn "dry-run: ${#keys[@]} ファイルを消す予定 (手元の記録は無い。何もしていない)"; fi
+    return 0
+  fi
+  for i in "${!keys[@]}"; do delete_key "${prefixes[$i]}" "${keys[$i]}"; done
+  if [[ -n $hit ]]; then
+    jsonl=${hit%%$'\t'*}
+    # shellcheck disable=SC2016 # $u は jq の変数
+    rewrite_record "$jsonl" 'select(.uuid != $u)' "$uuid"
+    warn "${#keys[@]} ファイルを消し、記録から外した: $jsonl"
+  else
+    warn "${#keys[@]} ファイルを消した (手元の記録は無かった)"
+  fi
+}
+
+# --- 引数 (オプションは位置を問わない。-- 以降は引数として扱う) ---
+dry_run=false
+args=()
+while (($#)); do
+  case $1 in
+    --dry-run) dry_run=true ;;
+    --help) usage; exit 0 ;;
+    --) shift; args+=("$@"); break ;;
+    -*) die "知らないオプション: $1 (--help で使い方)" ;;
+    *) args+=("$1") ;;
+  esac
+  shift
+done
+if ((${#args[@]} == 0)); then usage; exit 0; fi
+sub=${args[0]}
+rest=("${args[@]:1}")
+case $sub in
+  new | sync | prune)
+    if ((${#rest[@]} == 0)); then usage; exit 0; fi
+    load_settings
+    "cmd_$sub" "${rest[@]}"
+    ;;
+  *) die "知らないサブコマンド: $sub (new / sync / prune。--help で使い方)" ;;
+esac
