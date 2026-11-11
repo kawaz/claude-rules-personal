@@ -4,8 +4,9 @@
 # 用途: 生成物をブラウザで見せる置き場 (claude-rules-personal の reference artifacts/workspace) を用意する。
 #       何度実行しても同じ結果になる (既にあれば何もしない)。
 # 実行: リポの workspace の中 (どの階層でもよい) で、引数なしで実行する。
-# 前提: パスが ~/.local/share/repos/github.com/{owner}/{repo}/{workspace} の形で、{repo}/main が jj のリポであること
-#       (レイアウトは reference の vcs/jj-colocate-setup)。前提に合わない場所では何も作らずにエラーで終わる。
+# 前提: パスが ~/.local/share/repos/github.com/{owner}/{repo}/{workspace} の形で、{repo}/main が jj のリポであり、
+#       履歴の起点が空の commit (Initial empty commit) であること (レイアウトは reference の vcs/jj-colocate-setup)。
+#       前提に合わない場所では何も作らずにエラーで終わる。
 # 出力: 無し。作れた・既にあるなら 0 で終わり、作れない時だけ理由を stderr に出して 1 で終わる。
 set -euo pipefail
 
@@ -41,10 +42,11 @@ if [[ -e $target || -L $target ]]; then
 fi
 $registered && die "jj に artifacts workspace の登録だけが残っている (ディレクトリが無い): ${repo_dir}。jj workspace forget artifacts してから実行する"
 
-# 枝は main の最初の commit から生やす。ちょうど 1 つに決まらないリポ (main bookmark が無い等) では作らない
-base=$(cd "$main" && jj log --ignore-working-copy --no-graph -r 'root()+ & ::main' -T 'commit_id ++ "\n"' 2>/dev/null) ||
-  die "main の最初の commit を引けない (main bookmark が無い): $main"
-[[ -n $base && $base != *$'\n'* ]] || die "main の最初の commit が 1 つに決まらない: $main"
+# 枝は履歴の起点の空の commit から生やす (生成物の枝に本編のファイルを持ち込まない)。
+# root の直下にある空の commit のうち、作業コピーの空 @ でないものが、ちょうど 1 つあるリポでだけ作る
+base=$(cd "$main" && jj log --ignore-working-copy --no-graph -r 'root()+ & empty() & ~working_copies()' -T 'commit_id ++ "\n"') ||
+  die "履歴の起点を引けない: $main"
+[[ -n $base && $base != *$'\n'* ]] || die "履歴の起点に空の commit がちょうど 1 つ無い: $main"
 
 # ここまでの確認がすべて通ってから作る
 # jj の出力は、失敗した時だけ出す
