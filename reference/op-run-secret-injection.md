@@ -2,6 +2,8 @@
 
 env に `op://...` 参照を書いて op run に解決させる。
 
+人が対話で使う secret の渡し方。launchd や定時実行で無人で読むツールの secret はキーチェーンに置く (reference の `keychain-secrets`)。
+
 ```bash
 # .env に op:// 参照
 SOMEVAR=op://Vault/Item/field

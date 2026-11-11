@@ -43,6 +43,7 @@
 - [x-posts](x-posts/_index.md) — X（Twitter）の投稿原文・メディアと、最近の話題・動画内容を調べる時に読む (x.com, x_search, Grok)。
 - [agent-runtime](agent-runtime/_index.md) — 待ち方 (sleep の代替)、ブラウザ自動化のプロファイル、auto mode classifier の設定で迷った時に読む。
 - [op-run-secret-injection](op-run-secret-injection.md) — 1Password の secret をコマンドに渡す時に読む (op run, `op://`)。
+- [keychain-secrets](keychain-secrets.md) — 自作ツールが無人で読む secret をキーチェーンに置く・読む時に読む (security, launchd, 定時実行)。
 - [jev](jev/_index.md) — TypeSafe AI の判断 API Jev に質問を組む・答えを読む時に読む (Choice / Score / Noul, state, confidence)。
 
 ## private 層 (`~/.local/share/repos/github.com/kawaz/privacy-personal/main/reference/`)
