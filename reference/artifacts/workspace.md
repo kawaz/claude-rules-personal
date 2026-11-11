@@ -12,6 +12,8 @@ jj workspace add -r 'root()+ & ::main' ../artifacts
 cd ../artifacts && printf '*\n' > .gitignore && jj file track --include-ignored .gitignore && jj commit -m "artifacts: 既定で追跡しない枝 (残す物だけ jj file track --include-ignored)" .gitignore
 ```
 
+この 3 行は同トピックの `scripts/artifacts-setup` が冪等に行う (workspace の中で引数なしで実行する。既にあれば何もしない。jj でないリポや main bookmark の無いリポでは何も作らずエラーで終わる)。セッションの起動ラッパーが起動のたびに呼ぶので、通常は手で作らなくてよい。
+
 - 枝は main 本編の**最初の commit** から生やす別枝。main の履歴に生成物を混ぜない。bookmark は作らず push もしない (ローカル枝。新規リポ作成手順にも組み込み済み)
 - `.gitignore` は `*` 1 行。既定では何も追跡しない (jj の snapshot にも乗らないので、巨大ファイルや作り直しで store が肥大しない)
 - 版管理して残したい物だけ `jj file track --include-ignored <paths>` → `jj commit -m "..." <paths>`。**`--include-ignored` を落とすと exit 0 のまま何も起きない**

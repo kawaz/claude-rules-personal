@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+# artifacts-setup — 今いるリポに artifacts workspace ({repo}/artifacts/) が無ければ作る
+#
+# 用途: 生成物をブラウザで見せる置き場 (claude-rules-personal の reference artifacts/workspace) を用意する。
+#       何度実行しても同じ結果になる (既にあれば何もしない)。
+# 実行: リポの workspace の中 (どの階層でもよい) で、引数なしで実行する。
+# 前提: パスが ~/.local/share/repos/github.com/{owner}/{repo}/{workspace} の形で、{repo}/main が jj のリポであること
+#       (レイアウトは reference の vcs/jj-colocate-setup)。前提に合わない場所では何も作らずにエラーで終わる。
+# 出力: 無し。作れた・既にあるなら 0 で終わり、作れない時だけ理由を stderr に出して 1 で終わる。
+set -euo pipefail
+
+readonly REPOS_ROOT="${XDG_DATA_HOME:-$HOME/.local/share}/repos/github.com"
+readonly PROG="${0##*/}"
+
+die() { printf '%s: %s\n' "$PROG" "$1" >&2; exit 1; }
+
+(($# == 0)) || die "引数は取らない (リポの workspace の中で引数なしで実行する)"
+
+root=$(realpath "$REPOS_ROOT") || die "リポの置き場が無い: $REPOS_ROOT"
+here=$(pwd -P)
+[[ $here/ == "$root"/*/*/*/* ]] || die "リポの workspace の中でない: $here ($REPOS_ROOT/{owner}/{repo}/{workspace} の下で実行する)"
+rel=${here#"$root"/}
+owner=${rel%%/*}
+rel=${rel#*/}
+repo=${rel%%/*}
+repo_dir="$root/$owner/$repo"
+main="$repo_dir/main"
+target="$repo_dir/artifacts"
+
+[[ -d $main/.jj ]] || die "jj のリポでない ($main/.jj が無い)"
+
+# 一覧は変数に受けてから使う (jj の失敗を「workspace 無し」と読み違えない)。main の作業コピーは読まない
+workspaces=$(cd "$main" && jj workspace list --ignore-working-copy -T 'name ++ "\n"') || die "jj workspace list に失敗した: $main"
+registered=false
+grep -qx artifacts <<<"$workspaces" && registered=true
+
+if [[ -e $target || -L $target ]]; then
+  [[ -d $target && ! -L $target ]] || die "artifacts がディレクトリでない: $target"
+  $registered && [[ -e $target/.jj ]] || die "artifacts があるが jj の workspace でない: $target"
+  exit 0
+fi
+$registered && die "jj に artifacts workspace の登録だけが残っている (ディレクトリが無い): ${repo_dir}。jj workspace forget artifacts してから実行する"
+
+# 枝は main の最初の commit から生やす。ちょうど 1 つに決まらないリポ (main bookmark が無い等) では作らない
+base=$(cd "$main" && jj log --ignore-working-copy --no-graph -r 'root()+ & ::main' -T 'commit_id ++ "\n"' 2>/dev/null) ||
+  die "main の最初の commit を引けない (main bookmark が無い): $main"
+[[ -n $base && $base != *$'\n'* ]] || die "main の最初の commit が 1 つに決まらない: $main"
+
+# ここまでの確認がすべて通ってから作る
+# jj の出力は、失敗した時だけ出す
+out=$(
+  {
+    cd "$main" && jj workspace add -r "$base" ../artifacts &&
+      cd "$target" && printf '*\n' >.gitignore &&
+      jj file track --include-ignored .gitignore &&
+      jj commit -m "artifacts: 既定で追跡しない枝 (残す物だけ jj file track --include-ignored)" .gitignore
+  } 2>&1
+) || die "artifacts workspace を作れなかった: $target
+$out"
