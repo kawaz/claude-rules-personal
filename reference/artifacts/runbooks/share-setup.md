@@ -28,6 +28,15 @@ security find-generic-password -s artifacts-share -a r2-token >/dev/null && echo
 - トークンに期限は付けていない。漏れたら上の手順で作り直し、古いトークンをダッシュボードで消す
 - `security -i` の出力は捨てる (エラー時に入力の行をそのまま出すことがあるため)
 
+## owner を足す
+
+上げてよいリポの owner は設定の `owners` (owner 名の配列) で決まる。足すのは kawaz が決めたものだけ。
+
+```bash
+cfg=$(security find-generic-password -s artifacts-share -a settings -w)
+security add-generic-password -U -s artifacts-share -a settings -w "$(jq -c '.owners += ["<owner>"] | .owners |= unique' <<<"$cfg")"
+```
+
 ## バケットから作る
 
 ```bash
@@ -41,7 +50,7 @@ RULES=$(jq -cn '[{id:"Default Multipart Abort Rule",enabled:true,conditions:{},a
 cf r2 buckets lifecycle update "$B" --rules "$RULES" --force   # ルールの更新は全体の置き換え
 D=$(cf r2 buckets domains managed update "$B" --enabled --force | jq -r .domain)   # r2.dev で公開。これが公開ドメイン
 security add-generic-password -U -s artifacts-share -a settings \
-  -w "$(jq -cn --arg a "$A" --arg b "$B" --arg u "https://$D" '{account_id: $a, bucket: $b, public_url: $u}')"
+  -w "$(jq -cn --arg a "$A" --arg b "$B" --arg u "https://$D" '{account_id: $a, bucket: $b, public_url: $u, owners: ["<owner>"]}')"
 ```
 
 続けて上の「トークンを作り直す」を実行する (設定に `token_id` が入る)。

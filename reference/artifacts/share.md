@@ -25,7 +25,7 @@ artifacts-share: 12 ファイルを上げた (記録: …/artifacts/design-optio
 
 - 引数は `<ディレクトリ> [<期限>]`。期限は `1d` / `3d` / `7d` で、**省略すると `3d`** (送って見てもらうのに足り、週末をまたいでも残る。長く見せたいときは sync で延ばせる)
 - stdout は JSON 1 行 `{updated_at, uuid, ttl, path, url}` だけ (記録の 1 行に `url` を足した形。進み具合と注意は stderr)。`uuid` が sync / prune で指すもの。`jq -r .url` / `jq -r .uuid` で取り出す
-- ディレクトリは相対パスでもよい。実体のパス (realpath) に直したうえで、`~/.local/share/repos/github.com/<owner>/<repo>/artifacts/<整理用ディレクトリ>/` の下だけを受け付ける (どのリポの artifacts workspace でもよい)。`artifacts/` そのもの (`.jj` や `.gitignore` がある)、リポのルート、worktree (`main/` 等) の中、ドットで始まるディレクトリの中は上げられない
+- ディレクトリは相対パスでもよい。実体のパス (realpath) に直したうえで、`~/.local/share/repos/github.com/<owner>/<repo>/artifacts/<整理用ディレクトリ>/` の下だけを受け付ける。`<owner>` は設定の `owners` に挙げたものだけ (挙げていない owner のリポの生成物は、このバケットに出さない)。`artifacts/` そのもの (`.jj` や `.gitignore` がある)、リポのルート、worktree (`main/` 等) の中、ドットで始まるディレクトリの中は上げられない
 - ディレクトリの構成をそのまま保って上げる。HTML から相対パスで読む CSS・JS・画像もそのまま動く
 - 同じディレクトリで new を繰り返すと、そのたびに別の UUID・別の URL になる (前の URL も期限まで残る)
 
@@ -80,7 +80,7 @@ kawaz 個人の Cloudflare アカウントの R2 バケット 1 つ。アカウ�
 
 | キーチェーン | 中身 |
 |---|---|
-| `-s artifacts-share -a settings` | 設定の JSON `{"account_id", "bucket", "public_url", "token_id"}` (秘密ではない。`public_url` は `https://pub-<…>.r2.dev` で末尾の `/` なし) |
+| `-s artifacts-share -a settings` | 設定の JSON `{"account_id", "bucket", "public_url", "token_id", "owners"}` (秘密ではない。`public_url` は `https://pub-<…>.r2.dev` で末尾の `/` なし。`owners` は上げてよいリポの owner 名の配列) |
 | `-s artifacts-share -a r2-token` | このバケットのオブジェクトの読み書き・一覧・削除だけを許した API トークンの値 (秘密) |
 
 ```bash
@@ -102,6 +102,7 @@ security find-generic-password -s artifacts-share -a settings -w | jq .   # 設�
 | メッセージ | 状況 | 対処 |
 |---|---|---|
 | 上げてよい場所でない | `<owner>/<repo>/artifacts/<整理用ディレクトリ>/` の下でない (sync なら、記録の元のディレクトリが動いた) | 生成物を artifacts workspace の整理用ディレクトリに置いてから、そこを指す |
+| この owner のリポは上げない | リポの owner が設定の `owners` に無い | その owner の生成物をこのバケットで共有してよいなら、kawaz に確認してから設定の `owners` に足す ([置き場を作る・トークンを作り直す](runbooks/share-setup.md) の「owner を足す」) |
 | ドットで始まるディレクトリの中は上げない | 指したディレクトリの途中にドットで始まるディレクトリがある | ドットで始まらないディレクトリに置く |
 | symlink がある | 上げるディレクトリの中に symlink がある | symlink を実ファイルに置き換えるか消す |
 | 期限は 1d 3d 7d のどれか | 期限が規約外 | 3 つのどれかにする。スクリプトで選べる期限を足すなら `TTLS` に足す (バケットのルールは 1〜30 日ぶんある) |
