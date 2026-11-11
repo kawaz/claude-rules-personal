@@ -31,7 +31,7 @@ echo "guard: 上位への .jj 探索を止める (実体は main/)" > .jj/README
 
 ```bash
 cd "$REPO_PARENT/main"
-jj workspace add -r 'root()+ & empty() & ~working_copies()' ../artifacts
+jj workspace add -r 'root()+ & ::main' ../artifacts
 cd ../artifacts && printf '*\n' > .gitignore && jj file track --include-ignored .gitignore && jj commit -m "artifacts: 既定で追跡しない枝 (残す物だけ jj file track --include-ignored)" .gitignore
 ```
 
@@ -60,7 +60,7 @@ cd ../artifacts && printf '*\n' > .gitignore && jj file track --include-ignored 
 
 ## artifacts workspace (ブラウザで見る生成物の置き場)
 
-`{repo}/artifacts/` は生成物を `artifacts-{owner}-{repo}.<host>.tmpspace.net` で閲覧するための workspace。運用 (選択的追跡、URL 対応、sandbox の意味) は reference の `artifacts/workspace` が正本で、ここでは作り方だけ: 上の 3 行を既存リポにもそのまま使う (`root()+ & empty() & ~working_copies()` が履歴の起点の空の commit。root 直下に workspace の空 @ が居るリポがあるので、作業コピーを除く。起点が空の commit でないリポには作らない)。同じことを reference の `artifacts/scripts/artifacts-setup` が冪等に行う。
+`{repo}/artifacts/` は生成物を `artifacts-{owner}-{repo}.<host>.tmpspace.net` で閲覧するための workspace。運用 (選択的追跡、URL 対応、sandbox の意味) は reference の `artifacts/workspace` が正本で、ここでは作り方だけ: 上の 3 行を既存リポにもそのまま使う (`root()+ & ::main` が main の最初の commit。旧方式リポでは root 直下に default workspace の空 @ が居るので `root()+` 単独だとマージ親になる)。同じことを reference の `artifacts/scripts/artifacts-setup` が冪等に行う (履歴の最初の commit が空の commit のリポでだけ作る)。
 
 ## 既存リポジトリの clone
 

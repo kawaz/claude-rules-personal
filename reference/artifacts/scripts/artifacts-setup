@@ -42,11 +42,11 @@ if [[ -e $target || -L $target ]]; then
 fi
 $registered && die "jj に artifacts workspace の登録だけが残っている (ディレクトリが無い): ${repo_dir}。jj workspace forget artifacts してから実行する"
 
-# 枝は履歴の起点の空の commit から生やす (生成物の枝に本編のファイルを持ち込まない)。
-# root の直下にある空の commit のうち、作業コピーの空 @ でないものが、ちょうど 1 つあるリポでだけ作る
-base=$(cd "$main" && jj log --ignore-working-copy --no-graph -r 'root()+ & empty() & ~working_copies()' -T 'commit_id ++ "\n"') ||
-  die "履歴の起点を引けない: $main"
-[[ -n $base && $base != *$'\n'* ]] || die "履歴の起点に空の commit がちょうど 1 つ無い: $main"
+# 枝は履歴の最初の commit から生やす。それが空の commit (新規リポ作成手順の Initial empty commit) 1 つのリポでだけ作る
+first=$(cd "$main" && jj log --ignore-working-copy --no-graph -r 'root()+' -T 'commit_id ++ " " ++ empty ++ "\n"') ||
+  die "履歴の最初の commit を引けない: $main"
+[[ $first =~ ^([0-9a-f]+)\ true$ ]] || die "履歴の最初の commit が空の commit 1 つでない: $main"
+base=${BASH_REMATCH[1]}
 
 # ここまでの確認がすべて通ってから作る
 # jj の出力は、失敗した時だけ出す
