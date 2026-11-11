@@ -20,6 +20,9 @@ set -euo pipefail
 readonly KEYCHAIN_SERVICE="artifacts-share"
 readonly KEYCHAIN_SETTINGS="settings"
 readonly KEYCHAIN_TOKEN="r2-token"
+readonly SECURITY=/usr/bin/security
+# find-generic-password が「項目が無い」時に返す終了コード (errSecItemNotFound)
+readonly KC_NOT_FOUND=44
 # バケットのライフサイクルのルールにある期限だけを受け付ける (ルールに無い prefix に置くと 30 日まで消えない)
 readonly TTLS=(1d 3d 7d)
 readonly DEFAULT_TTL=3d
@@ -57,6 +60,17 @@ EOF
 }
 
 die() { printf '%s: %s\n' "$PROG" "$1" >&2; exit 1; }
+
+# キーチェーンの 1 項目を読む。項目が無い (44) のと、それ以外の失敗 (ロック等) を分けて止まる。値はエラーに入れない
+keychain_read() {
+  local account=$1 rc=0
+  "$SECURITY" find-generic-password -s "$KEYCHAIN_SERVICE" -a "$account" -w 2>/dev/null || rc=$?
+  case $rc in
+    0) ;;
+    "$KC_NOT_FOUND") die "キーチェーンに項目が無い (-s $KEYCHAIN_SERVICE -a $account)。作り方は reference の artifacts/runbooks/share-setup" ;;
+    *) die "キーチェーンを引けない (-s $KEYCHAIN_SERVICE -a $account、終了コード $rc。ロック等を確認)" ;;
+  esac
+}
 warn() { printf '%s: %s\n' "$PROG" "$1" >&2; }
 
 # 拡張子から MIME 型を決める。macOS の file --mime-type は CSS / JS を text/plain と判定するので使わない
@@ -119,8 +133,7 @@ expire_date() {
 BUCKET="" URL_BASE="" S3_ENDPOINT="" TOKEN_ID="" OWNERS=()
 load_settings() {
   local raw parsed
-  raw=$(security find-generic-password -s "$KEYCHAIN_SERVICE" -a "$KEYCHAIN_SETTINGS" -w 2>/dev/null) ||
-    die "キーチェーンに設定が無い (-s $KEYCHAIN_SERVICE -a $KEYCHAIN_SETTINGS)。作り方は reference の artifacts/share"
+  raw=$(keychain_read "$KEYCHAIN_SETTINGS") || exit 1
   parsed=$(jq -r '
     def need($k; $re): (.[$k] | if type == "string" and test($re) then . else error("\($k) の形が不正") end);
     [ need("account_id"; "^[0-9a-f]{32}$"),
@@ -193,8 +206,8 @@ s3_secret=""
 load_credentials() {
   [[ -z $s3_secret ]] || return 0
   local token
-  token=$(security find-generic-password -s "$KEYCHAIN_SERVICE" -a "$KEYCHAIN_TOKEN" -w 2>/dev/null) ||
-    die "キーチェーンにトークンが無い (-s $KEYCHAIN_SERVICE -a $KEYCHAIN_TOKEN)。作り直し方は reference の artifacts/share"
+  token=$(keychain_read "$KEYCHAIN_TOKEN") || exit 1
+  [[ -n $token ]] || die "キーチェーンのトークンが空 (-s $KEYCHAIN_SERVICE -a $KEYCHAIN_TOKEN)"
   # S3 のアクセスキー ID は API トークンの id (設定の token_id)、シークレットはトークンの値の SHA-256
   s3_secret=$(printf '%s' "$token" | shasum -a 256 | cut -d' ' -f1)
   unset token

@@ -110,7 +110,7 @@ security find-generic-password -s artifacts-share -a settings -w | jq .   # 設�
 | UUID の形でない | sync / prune に UUIDv4 (小文字) でない値を渡した | new の出力の `uuid` をそのまま渡す |
 | 記録が無い | sync で、UUID の記録がどの artifacts workspace にも無い (prune 済み、ディレクトリを消した) | 上げ直すなら new で新しい URL を作る |
 | 同じ UUID の記録が複数ある / 記録の場所と記録の path が食い違う | ディレクトリや記録を複製・移動した | 元でない方の記録を消す。ディレクトリを動かしたなら、元の共有は prune して new し直す |
-| キーチェーンに設定が無い / 設定が読めない | `-s artifacts-share -a settings` が無い・形が壊れている | [置き場を作る・トークンを作り直す](runbooks/share-setup.md) |
-| キーチェーンにトークンが無い | `-s artifacts-share -a r2-token` が無い | 同上 |
+| キーチェーンに項目が無い (`-a settings` / `-a r2-token`) / キーチェーンの設定が読めない | 設定かトークンの項目が無い、または設定の形が壊れている | [置き場を作る・トークンを作り直す](runbooks/share-setup.md) |
+| キーチェーンを引けない (終了コード …) | キーチェーンがロックされている等 | キーチェーンを開いてからやり直す |
 | 上げられなかった / 一覧を取れなかった (`HTTP 401` / `HTTP 403` / `InvalidAccessKeyId` / `SignatureDoesNotMatch`) | トークンが失効した・消された、または作り直したのに設定の `token_id` が古い | 同上。new の途中で止まったなら、記録は先に残っているので `sync <UUID>` でやり直せる |
 | 一覧を取れなかったので止めた | sync / prune で一覧が取れなかった (上と同じ原因か、ネットワーク) | 何も上げ下ろししていないので、原因を直してからやり直す |

@@ -4,7 +4,7 @@
 
 ## 値の扱い
 
-- トークンの値は**表示しない・コマンドの引数に出さない・ファイルに書かない**。`cf user tokens create` の応答を変数に受け、`security -i` の標準入力でキーチェーンに入れる (`security add-generic-password -w <値>` と書くと `ps` に出る)。`$(…)` で受けた値を echo しない
+- トークンの値は**表示しない・コマンドの引数に出さない・ファイルに書かない**。`cf user tokens create` の応答を変数に受け、`security -i` の標準入力に 16 進 (`-X`) でキーチェーンに入れる (`security add-generic-password -w <値>` と書くと `ps` に出る。書き方の一般形は reference の `keychain-secrets`)。`$(…)` で受けた値を echo しない
 - アカウント ID・バケット名・公開ドメイン・トークンの id は秘密ではないが、公開リポには書かない。キーチェーンの `settings` 項目にだけ置く
 
 ## トークンを作り直す (バケットはそのまま)
@@ -17,7 +17,7 @@ A=$(jq -r .account_id <<<"$cfg"); B=$(jq -r .bucket <<<"$cfg"); jq -r '.token_id
 # 権限グループ Workers R2 Storage Bucket Item Write (オブジェクトの読み書き・一覧・削除) を、このバケット 1 つだけに
 POL="[{\"effect\":\"allow\",\"permission_groups\":[{\"id\":\"2efd5506f9c8494dacb1fa10a3e7d5b6\"}],\"resources\":{\"com.cloudflare.edge.r2.bucket.${A}_default_${B}\":\"*\"}}]"
 resp=$(cf user tokens create --name "artifacts-share ($B objects)" --policies "$POL" 2>/dev/null)
-printf 'add-generic-password -U -s artifacts-share -a r2-token -w "%s"\n' "$(jq -r .value <<<"$resp")" | security -i >/dev/null 2>&1
+printf 'add-generic-password -U -s artifacts-share -a r2-token -X %s\n' "$(jq -j .value <<<"$resp" | od -An -v -tx1 | tr -d ' \n')" | security -i >/dev/null 2>&1
 NEW=$(jq -r .id <<<"$resp"); unset resp
 security add-generic-password -U -s artifacts-share -a settings -w "$(jq -c --arg id "$NEW" '.token_id = $id' <<<"$cfg")"
 security find-generic-password -s artifacts-share -a r2-token >/dev/null && echo "r2-token: 入った"   # -w を付けないので値は出ない
