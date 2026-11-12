@@ -21,3 +21,5 @@
   発火語: cargo build, did not expect repo to be bare, fingerprint, jj workspace, incubator, Rust
 - [teammate-resume-after-process-restart](teammate-resume-after-process-restart.md) — プロセス再起動後の teammate は名前では届かないが、spawn 時の agentId 宛に SendMessage すると transcript 込みで再開できる。
   発火語: resume, プロセス再起動, teammate が居ない, No agent named, agentId, SendMessage
+- [xdg-override-breaks-jj-ignore](xdg-override-breaks-jj-ignore.md) — `XDG_CONFIG_HOME` を上書きしたシェルで jj を実行すると ignore 対象が作業コピーに取り込まれる。上書きはプロセスの呼び出しにだけ付ける。
+  発火語: XDG_CONFIG_HOME, jj status, ignore, untrack, settings.local.json, Per-repo config not found
