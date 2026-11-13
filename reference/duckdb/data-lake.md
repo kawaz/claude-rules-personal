@@ -21,7 +21,7 @@
 ライブの層は書き手の都合で選んでよい。分析は常に Parquet を読む。
 
 - **1 回の書き込みが記録の最後に 1 回だけ** (定期計測のように、メモリで集計して最後に書く) なら、直接 `scans/` に Parquet を書く。途中で落ちても「その回の記録が無い」だけで、壊れた状態が残らない
-- **少しずつ書き続ける** (イベントの追記) なら、ライブは SQLite や追記の JSONL にし、区切りで Parquet に書き出す。ただし読む側が「直近はライブの置き場、過去は Parquet」の 2 か所を読むことになり、境目の処理が要る。避けられるなら避ける
+- **少しずつ書き続ける** (イベントの追記、1 行ずつ届くログ) なら、ライブは SQLite か追記の JSONL にし、区切りで Parquet に書き出す。Parquet は追記ができない (ファイルを書き直すしかない) ので、この場面では SQLite の方が素直 (1 行ずつ確実に書け、途中で落ちても書いた分が残る)。ただし読む側が「直近はライブの置き場、過去は Parquet」の 2 か所を読むことになり、境目の処理が要る。DuckDB から SQLite を読むには sqlite 拡張が要り、拡張の取得 (ネットワーク) と自動読み込みの設定がはまりどころとして増える。避けられるなら避ける
 
 ## まとめ方 (日次・月次)
 
@@ -31,11 +31,13 @@
 
 **ファイルの中の並べ方が大きさを決める。** 同じキー (パスなど) の行を隣に集め、その中を時刻の順に並べる (`ORDER BY <キー>, <id>`)。計測をまたいで値が変わらない行が多いデータでは、列ごとの圧縮 (辞書・差分) がそれを丸ごと畳む。
 
-| 並べ方 (ディレクトリの大きさの記録、1 回 約 1.7 万行、170 回分) | 大きさ |
+| 並べ方 (ディレクトリの大きさの記録、1 回 約 1.7 万行の実データを元に、170 回分を模したもの。回ごとに 1 割の行の値が変わる想定) | 大きさ |
 |---|---|
 | SQLite (パス文字列は別表で 1 回だけ持つ形) | 約 1.1 GB (1 回 約 6.5 MB の実測を 170 回分に積算) |
 | Parquet zstd 19、キーの順 | 2.8 MB |
 | Parquet zstd 19、記録の順 | 16 MB |
+
+実データの 1 回分は 0.2 MB、1 日 4 回分を日次にまとめて 0.32 MB。1 年分を模した記録 (月次 12 ファイル) で計 18 MB。
 
 ## 落ちても壊れない手順
 
@@ -60,7 +62,50 @@
 
 ## DuckDB をどう持つか
 
-- 書き手が Rust なら `duckdb` crate (`features = ["bundled", "parquet"]`)。書き出し・まとめ直し・集計を同じ SQL で書ける。代わりにバイナリが約 45 MB 増え、依存を最初からビルドすると数分かかる。`parquet` / `arrow` crate で書けばバイナリは小さいが、まとめ直しの重複除去と並べ替えを自前で書くことになる
-- 拡張の自動読み込み・自動インストールは切る (`autoinstall_known_extensions = false`、`autoload_known_extensions = false`)。Parquet は組み込み
-- まとめ直しで zstd 19 を使うと CPU を食うので、低優先度で走るジョブではスレッド数を 1 に絞る (`SET threads = 1`)
-- 分析は手元の `duckdb` CLI か、ブラウザの DuckDB-WASM で、同じ `read_parquet` の SQL を書く
+**既定は `duckdb` の CLI を子プロセスで呼ぶ** (書き出し・まとめ直し・分割・集計とも)。プロジェクトの言語によらず同じ SQL・同じ罠の対処が使い回せ、複雑でない表なら CLI で十分効率的。
+
+- ライブラリを使うのは、CLI で書きにくい処理 (行ごとに自前のロジックを挟む等) に踏み込み、ライブラリの方が明らかに楽な場合だけ。言語ごとの知見は案件で積む
+  - Rust の `duckdb` crate: API は rusqlite と同じ形 (`Connection` / `prepare` / `query_map`、行の流し込みは `Appender`) だが、Parquet の処理は結局 SQL の文字列になる。`features = ["bundled"]` は DuckDB の C++ をソースからビルドし、バイナリが約 45 MB 増え、最初からのビルドに数分、ビルド用のディレクトリが 1 つ 3 GB 余り (debug・テスト・release で別々)。crate の版は DuckDB の版を埋め込んだ形 (`1.10506.1` = DuckDB 1.5 系、`1.20000.1` = 2.0) で、`"1.10506.1"` とだけ書くと Cargo のキャレット指定で DuckDB のメジャー版が上がる。`~1.10506.1` のように留める
+  - TypeScript の DuckDB-WASM: ブラウザでは唯一の手段 ([wasm-dashboard](wasm-dashboard.md))。ローカル (bun / Node) ではファイルの読み方が面倒なので、ローカルの処理は CLI にする
+- CLI の場所は `<APP>_DUCKDB` (絶対パス) で指定でき、無ければ `PATH` から探す。launchd / systemd から起きるジョブは shell の `PATH` を持たないので、登録時に解決した絶対パスを unit に固定する (reference の `cli-design/daemon-subcommands` の「場所を決める env を unit に固定」と同じ仕組み)
+
+### CLI の呼び方
+
+```
+duckdb -no-init -bail -json < <SQL>
+```
+
+- **`-no-init`**: 利用者の `~/.duckdbrc` を読ませない。rc の `.thousand_sep` / `.mode` 等で出力の書式が変わり、parse が壊れる。テストは一時 HOME に書式を変える rc を置いて走らせ、rc が読まれていないことを確かめる
+- **`-bail`**: 無いと、エラーの後ろの文も実行される
+- **`-json`**: 結果を JSON の配列で受け、呼び出し側でスキーマに通す。**UBIGINT は文字列 (`"42"`) で返る** (BIGINT は数)。整数の列は数と文字列の両方を受けるようにする
+- SQL は stdin で渡し、引数に埋め込まない。SQL が長く出力も多い時は、stdin への書き込みを別スレッドにする (パイプが詰まって互いに待ち合わないため)
+- 毎回の先頭に付ける:
+
+  ```sql
+  SET threads = 1;                             -- zstd 19 のまとめ直しで CPU を食わない (読むだけの対話的な処理では外してよい)
+  SET autoinstall_known_extensions = false;    -- 実行時に拡張をネットワークから取りに行かない
+  SET autoload_known_extensions = false;
+  SET temp_directory = '<data_dir>/spill.tmp'; -- メモリ上の DB の既定は cwd の .tmp
+  ```
+
+- json と parquet の拡張は CLI に静的にリンクされていて、自動読み込みを切っても使える
+- 版は外 (パッケージマネージャ) から変わるので、使った版を記録に残し、想定の版とメジャー・マイナーが違えば警告する。Parquet はファイル形式として安定しているので止めるほどではない
+
+### 呼び出し側から CLI へ行を渡す
+
+行を一時ファイル (JSON Lines) に書き、`read_json` で**列の型を明示して**読ませる。型の推測に任せない (大きな整数・NULL だけの列・パスに入る特殊な文字で、型や値が変わる)。
+
+```sql
+COPY (SELECT id, path, bytes, files
+      FROM read_json('<staging>/sizes.jsonl', format = 'newline_delimited', auto_detect = false,
+                     columns = {id: 'BIGINT', path: 'VARCHAR', bytes: 'UBIGINT', files: 'UBIGINT'})
+      ORDER BY path, id)
+  TO '<dest>.parquet.tmp' (FORMAT parquet, COMPRESSION zstd, COMPRESSION_LEVEL 19);
+```
+
+- `read_json` は、行に無いキーを**黙って NULL** にし、小数 (`1.5`) を BIGINT に**黙って丸める** (`2`)。書く側の不具合が NULL として記録に紛れ込むので、往復テスト (書いた値が Parquet から同じ値で読めること。改行・タブ・制御文字・引用符・バックスラッシュ・合成文字・U+2028、整数の端の値、NULL の列を含める) で検知する
+- 一時ファイルはデータディレクトリの中 (書き出し先と同じファイルシステム) に置き、終わったら消す
+
+### かかる時間の目安
+
+1 回 約 1.7 万行の書き出し (4 表) が約 1 秒、1 日分 (7 回分) のまとめ直しが約 1 秒 (CLI の起動 1 回 数十 ms を含む)。読む側の集計は CLI を数回起動して 0.2 秒前後。
