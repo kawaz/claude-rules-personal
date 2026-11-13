@@ -1,6 +1,6 @@
 # DuckDB
 
 - [data-lake](data-lake.md) — 定期的な計測・ログを溜めて推移を集計する置き方 (ライブの層 + 日次・月次の zstd Parquet、DuckDB で読む)。
-  データを溜める, 時系列, 計測の記録, ログを貯める, Parquet, zstd, 日次, 月次, まとめ直し, compaction, 間引き, read_parquet, union_by_name, SQLite が大きい, データレイク, duckdb CLI, -no-init, duckdbrc, -bail, read_json, UBIGINT が文字列, temp_directory, duckdb crate, Appender, 子プロセス
-- [wasm-dashboard](wasm-dashboard.md) — 溜めた Parquet をブラウザの DuckDB-WASM で集計する画面を artifacts に置く形 (data の symlink、一覧の取り方、CDN の版を揃える理由)。
-  ダッシュボード, DuckDB-WASM, duckdb-wasm, ブラウザで集計, artifacts に置く, data の symlink, jsDelivr, getJsDelivrBundles, Blob URL の worker, LOAD parquet, read_parquet is not in the catalog, glob できない, キャッシュの共有, 版を揃える
+  データを溜める, 時系列, 計測の記録, ログを貯める, Parquet, zstd, 日次, 月次, まとめ直し, compaction, 間引き, read_parquet, union_by_name, SQLite が大きい, データレイク, lake ディレクトリ, データディレクトリの構成, 外に切り出す, duckdb CLI, -no-init, duckdbrc, -bail, read_json, UBIGINT が文字列, temp_directory, duckdb crate, Appender, 子プロセス
+- [wasm-dashboard](wasm-dashboard.md) — 溜めた Parquet をブラウザの DuckDB-WASM で集計する画面を artifacts に置く形 (data の symlink、manifest、CDN の版を揃える理由)。
+  ダッシュボード, DuckDB-WASM, duckdb-wasm, ブラウザで集計, artifacts に置く, data の symlink, jsDelivr, getJsDelivrBundles, Blob URL の worker, LOAD parquet, read_parquet is not in the catalog, glob できない, manifest.json, キャッシュの共有, 版を揃える

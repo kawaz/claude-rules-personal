@@ -9,9 +9,7 @@
   package.json  build.ts  index.html  src/*.ts
 <repo>/artifacts/dashboard/       # 成果物 (版管理しない)。https://artifacts-<owner>-<repo>.<host>.tmpspace.net/dashboard/
   index.html  app.js  styles.css
-  data/scans   -> <data_dir>/scans     # 記録の層への symlink (層ごとに張る)
-  data/daily   -> <data_dir>/daily
-  data/monthly -> <data_dir>/monthly
+  data -> <app_data_dir>/lake         # データレイクへの symlink 1 本
 ```
 
 - ソースは main で書いて版管理し、ビルドの成果物だけを artifacts に置く。置く処理は justfile のレシピにする (型検査・lint・テスト・ビルド・配置を 1 本で)
@@ -22,18 +20,16 @@
 
 artifacts の運用は「中に symlink を置かない (file_server が追って配信してしまう)」だが、ダッシュボードの data は**記録を配信すること自体が目的**なので、意図して symlink を置く (写しを作ると写し直しの仕組みが要り、実体とずれる)。
 
-- つなぐのは記録の層 (`scans` / `daily` / `monthly`) だけ。データディレクトリ全体をつなぐと、ロックファイル・移行前の DB・書き出し先まで配信される
-- まだ無い層 (`monthly` は月をまたぐまで無い) は、先の無い symlink のままでよい (一覧が 404 になるのを空として扱う)
+- つなぐのはデータレイクのディレクトリ (`lake/`) だけ。アプリのデータディレクトリ全体をつなぐと、ロックファイル・一時置き場・アプリのほかのデータまで配信される。データレイクを 1 段切っておく理由はこれ ([data-lake](data-lake.md))
 - caddy の file_server は symlink の先も 200 で返し、Range にも 206 で答える。CORS を許した別サブドメインは要らない
 
 ## 読むファイルの一覧
 
-DuckDB-WASM は HTTP 越しに glob (`*.parquet`) ができないので、読むファイルの一覧を別に作って 1 つずつ登録する。
+DuckDB-WASM は HTTP 越しに glob (`*.parquet`) ができないので、読むファイルの一覧を別に取って 1 つずつ登録する。
 
-- caddy の file_server のディレクトリに `Accept: application/json` で GET すると、`[{"name","size","url","mod_time","is_dir",...}]` が返る。層 × 表のディレクトリを 1 つずつ一覧にする
-- 一覧の取り方は 1 つのモジュールに閉じ込める (書き手が `manifest.json` を書くようになったら差し替えるため)
-- 一覧は外から来るデータなので、スキーマに通してから使う (valibot 等。reference の `typescript/_index.md`)。`.parquet` で終わるファイルだけを拾う (書きかけの `.parquet.tmp` を読まない)
-- 一覧と取得の間に、書き手のまとめ直しが元のファイルを消すことがある (ロックはブラウザから取れない)。取得の 404 では一覧を取り直して 1 回だけやり直す
+- 一覧は書き手が `lake/manifest.json` に書く ([data-lake](data-lake.md))。ダッシュボードは manifest を取り、スキーマに通してから使う (valibot 等。reference の `typescript/_index.md`)。配信している HTTP サーバの機能 (caddy の file_server のディレクトリ一覧 JSON 等) に頼らない
+- manifest が無い時 (書き手がまだ一度も書いていない) は、それと分かる表示にする
+- manifest と取得の間に、書き手のまとめ直しが元のファイルを消すことがある (ロックはブラウザから取れない)。取得の 404 では manifest を取り直して 1 回だけやり直す
 - 同じ記録が 2 つのファイルに入っていることがある (まとめ直しの途中で落ちた時)。読む側は記録の id で重複を除く。除き方は書き手 (CLI 側) と同じ規則にする
 
 ## DuckDB-WASM の読み込み

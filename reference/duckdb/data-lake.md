@@ -5,16 +5,21 @@
 ## 構成
 
 ```
-<data_dir>/
-  scans/<表>/<id>.parquet          # 1 回の記録 = 1 ファイル (ライブの層)
-  daily/<表>/YYYY-MM-DD.parquet    # 終わった日の分を 1 ファイルにまとめたもの
-  monthly/<表>/YYYY-MM.parquet     # 終わった月の日次を 1 ファイルにまとめたもの
-  <名前>.lock                       # 排他用
+<app_data_dir>/                    # アプリのデータディレクトリ (${XDG_DATA_HOME:-~/.local/share}/<app>)
+  lake/                            # データレイク。外に切り出して見せる単位
+    scans/<表>/<id>.parquet        # 1 回の記録 = 1 ファイル (ライブの層)
+    daily/<表>/YYYY-MM-DD.parquet  # 終わった日の分を 1 ファイルにまとめたもの
+    monthly/<表>/YYYY-MM.parquet   # 終わった月の日次を 1 ファイルにまとめたもの
+    manifest.json                  # 層 × 表のファイルの一覧 (glob できない読み手のため)
+  <名前>.lock                       # 排他用。lake の外
+  staging.tmp/  spill.tmp/         # 書き出し前の行・メモリに収まらない時の書き出し先。lake の外
 ```
 
-- 一番上を層、その下を表で分ける。全期間は `read_parquet('<data_dir>/*/<表>/*.parquet')` の 1 本で読める。層ごとの量 (まとめ忘れが溜まっていないか) は `ls` で見える
+- **データレイクはアプリのデータディレクトリの直下に展開せず、必ず 1 段ディレクトリ (`lake/`) を切る**。Parquet の部分だけを外に切り出して見せる (ダッシュボードの data を symlink 1 本でつなぐ等) ことがあり、アプリのデータディレクトリの直下には、ロックファイル・一時置き場や、今後アプリが置く別のデータが並ぶため。今は直下に何も無くても切る
+- `lake/` の中は、一番上を層、その下を表で分ける。全期間は `read_parquet('<lake>/*/<表>/*.parquet')` の 1 本で読める。層ごとの量 (まとめ忘れが溜まっていないか) は `ls` で見える
 - 過去分は 1 年あたり月次 12 ファイルになる。間引き (古いものを粗く残す) は要らない。全部の記録を残しても小さいので、間引きで情報を落とす理由が無い
 - 表は 1 ファイル 1 表 (Parquet の制約)。表どうしは記録の id の列で結ぶ。どの表にも id の列を持たせる
+- `manifest.json` は、記録のファイルを書き換えるたびに (書き出し・まとめ直しの後) 書き直す。書き方はほかのファイルと同じ (一時名 → fsync → rename)
 
 ## ライブの層
 
@@ -85,7 +90,7 @@ duckdb -no-init -bail -json < <SQL>
   SET threads = 1;                             -- zstd 19 のまとめ直しで CPU を食わない (読むだけの対話的な処理では外してよい)
   SET autoinstall_known_extensions = false;    -- 実行時に拡張をネットワークから取りに行かない
   SET autoload_known_extensions = false;
-  SET temp_directory = '<data_dir>/spill.tmp'; -- メモリ上の DB の既定は cwd の .tmp
+  SET temp_directory = '<app_data_dir>/spill.tmp'; -- メモリ上の DB の既定は cwd の .tmp
   ```
 
 - json と parquet の拡張は CLI に静的にリンクされていて、自動読み込みを切っても使える
@@ -100,11 +105,11 @@ COPY (SELECT id, path, bytes, files
       FROM read_json('<staging>/sizes.jsonl', format = 'newline_delimited', auto_detect = false,
                      columns = {id: 'BIGINT', path: 'VARCHAR', bytes: 'UBIGINT', files: 'UBIGINT'})
       ORDER BY path, id)
-  TO '<dest>.parquet.tmp' (FORMAT parquet, COMPRESSION zstd, COMPRESSION_LEVEL 19);
+  TO '<lake>/<層>/<表>/<name>.parquet.tmp' (FORMAT parquet, COMPRESSION zstd, COMPRESSION_LEVEL 19);
 ```
 
 - `read_json` は、行に無いキーを**黙って NULL** にし、小数 (`1.5`) を BIGINT に**黙って丸める** (`2`)。書く側の不具合が NULL として記録に紛れ込むので、往復テスト (書いた値が Parquet から同じ値で読めること。改行・タブ・制御文字・引用符・バックスラッシュ・合成文字・U+2028、整数の端の値、NULL の列を含める) で検知する
-- 一時ファイルはデータディレクトリの中 (書き出し先と同じファイルシステム) に置き、終わったら消す
+- 一時ファイルはアプリのデータディレクトリの中 (`lake/` の外、書き出し先と同じファイルシステム) に置き、終わったら消す
 
 ### かかる時間の目安
 
