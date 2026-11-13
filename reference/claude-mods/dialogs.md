@@ -77,7 +77,7 @@ permission の確認・AskUserQuestion・MCP Elicitation・engine 自身のダ�
 
 ## 2026-10-14 時点の未確認
 
-- auto mode で `classic.PermissionRequest` が起きるか (haiku は auto mode 非対応で試せていない)
+- auto mode で `classic.PermissionRequest` が起きるか
 - `classic.Elicitation` に型に無い `action` / `content` を返した時の runtime の扱い
 - AskUserQuestion の入力 schema が 2 系統 (`kind` 付きと無し) あり、既定でどちらが model に出ているか
 - AFK 自動解決の既定値の出所と、during 配置の hook が `hasExternalRacer` に当たるか

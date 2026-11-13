@@ -10,6 +10,12 @@ auto mode では tool call を classifier (別モデル) が審査する。何�
 - 評価順: `permissions.allow/ask/deny` → read-only / cwd 内の自動承認 → classifier。**`Bash(*)` のような広い allow は auto mode では停止され classifier が走る。狭い完全一致 (`Bash(bun test)`) は classifier を飛ばす**。`autoMode.classifyAllShell: true` で全 shell を classifier 経由にできる
 - 会話で述べた境界 (「push 前に確認」) は transcript から読まれるので、compaction で消えると効かなくなる。恒久にするなら `autoMode` か `permissions.deny`
 
+## auto で始まるか (モデルによる)
+
+- llm-gateway 経由 (`ANTHROPIC_BASE_URL`) の anthropic 経路 (`claude-sonnet-5-5`、`claude-haiku-5-5`) は、`--permission-mode auto` でも settings の `defaultMode: "auto"` でも、`CLAUDE_CODE_AUTO_MODE_SERVER` が未設定でも `=0` でも auto で始まる (2.1.323 で実測。debug log `verifyAutoModeGateAccess: ... canEnterAuto=true`)
+- haiku を名前に含むモデルは `claude-haiku-5-5` 以外 (`claude-haiku` の alias、`claude-haiku-4-5-20251001`) auto に入れず、default (Manual) に落ちる (2.1.323 で実測)。debug log は `verifyAutoModeGateAccess: model=claude-haiku modelSupported=false ... canEnterAuto=false` と `kickOutOfAutoIfNeeded applying: ctx.mode=auto ... reason=model`。`-p` はエラー終了せず (exit 0)、tool call は全部 `This command requires approval` で `permission_denials` に載る。無人の worker で haiku を使うなら `claude-haiku-5-5` と書く
+- gateway の openai 経路 (`gpt-6-sol` 等) も auto で始まり、classifier は下の「server が判定を返さない時」の local classifier に落ちる (2.1.323 で実測)
+
 ## `autoMode` の 4 区分 (`claude auto-mode defaults` で既定を印字)
 
 | 区分 | 意味 | 既定 |
@@ -23,9 +29,9 @@ auto mode では tool call を classifier (別モデル) が審査する。何�
 
 ## 課金とコスト
 
-- server-side review (gateway 経由でも env 未設定で既定 on、2.1.319 で実測): session の model request の `safeguards` 欄で頼み、応答の `safeguard_results` で判定が返る。別 call は無い。transcript の assistant に `serverClassifierRequest` が付くのが頼んだ印
+- server-side review (gateway 経由でも env 未設定で既定 on、2.1.319 で実測。2.1.323 は anthropic 経路で `[server-classifier]` の fallback 行が出ないことまで確認): session の model request の `safeguards` 欄で頼み、応答の `safeguard_results` で判定が返る。別 call は無い。transcript の assistant に `serverClassifierRequest` が付くのが頼んだ印
 - server が判定を返さない時 (gateway の openai 経路を通った main / subagent):
-  - feature flag と telemetry を止めていない環境 (kawaz の今の gateway 構成): その 1 本で以後プロセス全体が local classifier に切り替わる (ラッチ、再起動で戻る)。main も課金対象の local 判定になる
+  - feature flag と telemetry を止めていない環境 (kawaz の今の gateway 構成): その 1 本で以後プロセス全体が local classifier に切り替わる (ラッチ、再起動で戻る)。main も課金対象の local 判定になる。拒否 (fail closed) にはならない (debug log `[server-classifier] ... server_no_result`。openai 経路の main で 2.1.323 で実測)
   - `CLAUDE_CODE_DISABLE_FEATURE_FLAGS` / `DISABLE_TELEMETRY` / `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC` のどれかを設定した環境 (2.1.319+): local に落ちず、その call は `Auto mode is unavailable: its safety check does not run for this session` で拒否 (`reasonCode` `classifier:auto-mode:unavailable`)。ラッチは立たず main は server 判定のまま。openai 経路の worker の tool call は全部拒否になる
   - `CLAUDE_CODE_AUTO_MODE_SERVER=0` は常に local classifier だけを使う (上の拒否も起きない)。`=1` は `CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS` があっても server を使う (2.1.319+)
   - `claude -p` は main の call がこの拒否を受けると exit 1 (JSON は `subtype:"success"` のまま `permission_denials` に載る)。subagent の call だけの拒否は exit 0 なので、script では `permission_denials` を見る

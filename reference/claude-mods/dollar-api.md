@@ -28,7 +28,7 @@ mod が engine と外界に触れる唯一の口。呼び方は `$.noun.method(.
 | `settings` | `read` | settings のマージ結果か 1 source 分 (`{ source: 'user' / 'project' / 'local' / 'flag' / 'policy' }`)。読み取り専用。`env` や helper コマンドも含めて全 key がそのまま渡る。`~/.claude.json` と OAuth は読まない |
 | `env` | `get`, `set` | プロセス環境。`set` は以後起動する Bash / MCP / `process.run` の子に継承される。`undefined` で unset |
 
-plugin は `engine.create` で独自の noun を足せる (`return { ...beneath, <noun>: ... }`。他 plugin の noun を置き換えると読み込み失敗)。型の契約の書き方は reference の `claude-mods/develop`。
+plugin は `engine.create` で独自の noun を足せる。`on('engine.create', ...)` と名前で hook し、`const { ...beneath } = await next(e)` で受けて最後の 1 文で `return { ...beneath, <noun>: ... }` を返す (validate が受け付ける唯一の形。`*` / `engine.*` の hook で返した noun は無視される。2.1.323 で実測)。他 plugin の noun を置き換えると読み込み失敗、user tier で core の noun (`clock`、`process` 等) を置き換える・差し止めると module ごと外れる (形と実測の詳細は reference の `claude-mods/capabilities` の `engine.create` 行)。足した method の本体は空でもよく、呼び出しは `undefined` を返す。型の契約の書き方は reference の `claude-mods/develop`。
 
 ### ui
 
@@ -76,6 +76,7 @@ plugin は `engine.create` で独自の noun を足せる (`return { ...beneath,
 - handler の中の `$.session.id()` は subagent からの呼び出しでも main の session id で、呼び手の区別は `e.agentId` だけ。`$.session.cwd()` は作業ディレクトリの realpath
 - `isDeferred: true` が効くのは ToolSearch が有効な時だけ。`ANTHROPIC_BASE_URL` が first-party の host でないと ToolSearch は無効になり (debug log `[ToolSearch:optimistic] disabled: ANTHROPIC_BASE_URL=... is not a first-party Anthropic host`)、deferred の tool も全文で `tools` に載る。`ENABLE_TOOL_SEARCH=true` で有効にできる
 - 読み込み前の deferred の plugin tool を名前で直接呼んでも handler に届いた (対話 1 回)
+- `$.tool.register` を通さず、`tool.list` hook の答えに entry を足しても model の tool 一覧 (main・subagent) に載り、built-in の tool を外すこともできる (2.1.323 で実測。答えの形は reference の `claude-mods/capabilities` の `tool.list` 行)。その call に答える `tool.call` hook は自分で持つ
 
 ### managed で install された mod だけの口
 

@@ -4,8 +4,8 @@
 
 - [model-effort-matrix](model-effort-matrix.md) — 課題の性質から agent を選ぶ表、モデル特性差、tier 分担の禁則、委譲プロンプトの規約。
   worker 選定, サブエージェント委譲, model と effort, subagent_type, tier 分担, モデル特性, sonnet の手抜き, codex は不具合調査に強い, [1m], 委譲プロンプト, 監査側の禁則
-- [context-budget](context-budget.md) — 経路ごとの実効入力余地と見積り式、codex に大入力を渡す `~/.claude-bare` 経路。
-  context が足りない, Prompt is too long, 実効余地, 見積り, 272K 超, 割増料金, claude-bare, codex 大入力, disallowedTools, prompt.md
+- [context-budget](context-budget.md) — 経路ごとの実効入力余地と見積り式、未知のモデル ID の window、codex に大入力を渡す `~/.claude-bare` 経路。
+  context が足りない, Prompt is too long, contextWindow, CLAUDE_CODE_DISABLE_1M_CONTEXT, 残量表示が合わない, 実効余地, 見積り, 272K 超, 割増料金, claude-bare, codex 大入力, disallowedTools, prompt.md
 - [orchestration-phases](orchestration-phases.md) — Phase 0-4 の実行順序制御、適用ゲート、常時 rules との分担。
   Phase 0, 完了条件, 検証方法, やらないこと, リスク順分解, 実行ループ, 全体検証
 - [main-role-playbook](main-role-playbook.md) — 統括の 5 責務・立て直しの型・codex 委譲時のルール・開始時チェックリスト。

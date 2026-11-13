@@ -11,7 +11,7 @@
 - **messaging socket は隔離できない前提で扱う**。harness が作る socket は `/tmp/cc-socks/<pid>.sock` か `/tmp/cc-socks-<uid>/<pid>.sock` で、実セッションと同じ場所に並ぶ。2.1.299 の `env -i` 起動では `XDG_RUNTIME_DIR` / `CLAUDE_CODE_TMPDIR` / `TMPDIR` を作業ディレクトリに向けても `/tmp/cc-socks-<uid>/` に作られ、`TMPDIR` と `XDG_*_HOME` を向けた別の起動では `/tmp/cc-socks/` に作られた。どちらのディレクトリになるかの条件は切り分けていない。pid で区別できるので実害は無いが、後始末で消し忘れを探す時はこの 2 か所を見る。hyoui を使うなら `HYOUI_STATE_DIR` は作業ディレクトリに向ける
 - **`--plugin-dir <mod>`** で mod を session 限りで読む
 - **`--debug`** で `$CLAUDE_CONFIG_DIR/debug/<sessionId>.txt` に module の読み込み・reload・hook の所要時間が出る
-- 安いモデル (`--model haiku`) で十分。ただし haiku は auto mode 非対応 (`auto mode disabled: model ... does not support auto mode`)
+- 安いモデル (`--model haiku`) で十分。auto mode も試すなら `claude-haiku-5-5` を名指す。haiku を名前に含むそれ以外のモデル (`claude-haiku` の alias、`claude-haiku-4-5-20251001`) は auto に入れず default (Manual) で始まる (gateway 経由、2.1.323 で実測。reference の `agent-runtime/auto-mode-classifier`)
 
 ## 用意
 
@@ -85,6 +85,7 @@ trust の承諾前は `hooks modules not loaded until workspace trust is accepte
 作りの注意 (観測結果に効く):
 
 - `*` hook は `$` に触らない (`engine.create` の時点で `$` が空)。書き出しは `session.start` で始めた `$.clock.every(1000)` で行う
+- `*` hook は `engine.create` を観測するだけで、`next(e)` 以外を返しても無視される (2.1.323 で実測)。観測 mod から noun を足す改造をするなら `on('engine.create', ...)` を別に名前で登録する
 - `*` hook を改造して `$` を `await` してから行を書くと、同じ ms に来た event の記録順が dispatch の順と入れ替わりうる。順を見るなら hook の入口 (最初の `await` の前) で連番を取る
 - 型定義は「installed plugin の `*` は telemetry の event (`telemetry.log` / `telemetry.mark`) を選ばない」と書く。user tier の `--plugin-dir` の mod も同じ扱いと読める (未確認)。見るなら `telemetry.*` を別に登録する
 - timer callback から呼んだ `$` は自分の `*` hook に現れないので、記録処理自体の `fs.read` / `fs.write` はほぼ log に混ざらない。hook の中から `$` を呼ぶ処理を足すと、その呼び出しは `by: { plugin: 'observe-mod' }` で混ざる

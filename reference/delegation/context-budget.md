@@ -11,6 +11,8 @@ model×effort と同時に「タスクが運ぶ入力量 vs 経路の余地」�
 | codex (preset / 対話) | 1M (272K 超は割増) | preset ~67-77k | 割増境界まで ~200k |
 | codex 大入力経路 (`CLAUDE_CONFIG_DIR=~/.claude-bare claude -p`) | 同上 | ~17k | 割増境界まで ~250k |
 
+Claude Code が知らないモデル ID (gateway の openai 経路の `gpt-6-sol` / `gpt-6.1-terra`、`claude-haiku` の alias 等) は context window 1M として扱われる (2.1.323 で実測: `-p --output-format json` の `modelUsage.<model>.contextWindow` が 1000000、autocompact の `effectiveWindow` が 980000)。`CLAUDE_CODE_DISABLE_1M_CONTEXT=1` で 200K (effectiveWindow 180000) に戻る。window を分母にする残量の表示・通知は、モデルの実際の上限が 1M 未満なら残量を過大に見せる (gateway が openai 経路に実際に何 token 通すかは未確認)。
+
 subagent 側の注入 (~67k) の正体はツールスキーマ + ハーネス機構で、CLAUDE.md ではない。frontmatter で削る手段は無い (`omitClaudeMd` はユーザ agent では無効)。
 
 ## 見積り式

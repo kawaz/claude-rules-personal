@@ -8,6 +8,11 @@
 - skills-dir: project の `.claude/skills/<name>/` か user の `$CLAUDE_CONFIG_DIR/skills/<name>/` に `.claude-plugin/plugin.json` と hooks module を置くと `<name>@skills-dir` として読まれる (debug log `Loaded 1 skills-as-plugins`)。project の分は未 trust の cwd では `-p` でも読まれない (2.1.321 で 1 回)
 - 一時読み込み: `claude --plugin-dir <folder>` (session 限り、複数可、folder of plugins も可)、`CLAUDE_CODE_PLUGIN_DIRS` (プロセス環境か user settings の `env`)。読めなかった `--plugin-dir` は stream-json の `system/init` の `plugin_errors` に `path` 付きで出る
 - `claude plugin init` は command hook 型の雛形を作るもので、mod の雛形ではない
+- `plugin.json` の `engines["claude-code"]` (版の範囲) が効くのは cache に複製して install する経路 (git の url source 等) だけ (2.1.323 で実測):
+  - 範囲外の install は止まる (rc=1、`"<name>" was not installed: it needs Claude Code >=9.0.0, this is 2.1.323.` に続けて、下限で外れた時は `claude update` を、上限で外れた時は `A newer version of the plugin may fit.` を促す)
+  - 範囲外になった install 済みの plugin は読まれず、`claude plugin list` に `Status: ⚠ not loaded` と `Error: Plugin "<name>" not loaded: needs Claude Code ...`、`-p` の `system/init` の `plugin_errors` に `{"type": "engine-range-unsatisfied", ...}` が出る
+  - local folder の marketplace からの install は範囲外でも成功して読まれる (install 時と `claude plugin list` に `Note: "<name>" needs Claude Code >=9.0.0, this is 2.1.323, but loads anyway because it's read from a local folder`)
+  - `--plugin-dir` は範囲外・不正な範囲でも黙って読む (debug log・`plugin_errors`・stderr に何も出ない)
 
 ## validate
 
@@ -18,6 +23,9 @@
 - 組織が管理する環境で飛ばされる hook の注記 (`/plugin` にも出る)
 - engine が拒むもの全部。拒否理由は行と原因と直し方を名指す (例: top-level の `var` を再宣言・再代入して `$.state` の参照を読んでいる module、`PluginState` に宣言していない `$.state` の key、matcher なしの同じ pattern の重複登録、`$` を top-level 以外の関数へ引数で渡す module。後の 3 つの文言は reference の `claude-mods/overview`)
 - README に install の 1 行が無い時は貼る行を助言する。exit code は変えない (`--strict` でも)
+- `.ts` の module を `claude-code` の型で検査し、型エラーを警告で出す (`line 4, column 7: error TS2322: Type 'string' is not assignable to type 'number'.`。`$` の method の引数の型違い (`TS2345`) や `e` に無い欄 (`TS2339`) も型名付きで出る)。警告だけなら rc=0 で、`--strict` で rc=1。`--json` では `contents[]` の module の `warnings` に `{ path: "line 8, column 14", message: "error TS2345: ...", code: null }` で入り `success: true`。mod 側に tsconfig も `.claude-plugin/types/` も無くても型は解決され、validate は mod のフォルダにファイルを書かない。`.js` の module は JSDoc で型を付けても検査されない (2.1.323 で実測)
+- `engine.create` の hook ごとに `$` へ何をするかを列挙する: `adds to $: <noun>` / `withholds from $: <noun>` / `replaces on $: <noun>`。user tier で core の noun を差し止める・置き換えるものには `(the fold refuses this and unloads the module)` が付く。hook が validate の受け付ける形 (reference の `claude-mods/capabilities` の `engine.create` 行) を外れると `this engine.create hook is outside its form: ...` (`clock both withheld and written`、`a return that is not the one last statement of the hook's body`、`bound with let or var (const only)`、`the value of next(e) at engine.create is passed as an argument` 等) で失敗する。validate で落ちても読み込みは止まらない (最後以外の `return` を持つ hook は `--plugin-dir` でも git の marketplace からの install でも読まれ、noun が足された)。`*` / `engine.*` の hook には `adds to $` が出ない (2.1.323 で実測)
+- `plugin.json` の `engines: { "claude-code": "<範囲>" }` は、範囲の書式だけを検査する (範囲外でも何も言わない。`"not a range"` は error `Must be a version range such as ">=2.1.0"; ...`、rc=1)。効き方は下の「読み込み」 (2.1.323 で実測)
 
 ## test
 
@@ -63,7 +71,7 @@ describe('register', () => {
 
 ## noun の契約 (mod 同士の合成)
 
-- `engine.create` で `$` に noun を足す mod は、その型を `types/index.d.ts` 1 か所に持つ: import の無い宣言ファイルで、noun 名 (PascalCase) で始まる型を export し、`declare module 'claude-code' { interface EngineInterface { <noun>: <Type> } }` で宣言する。自分の hooks はそこから import し、`engine.create` が返す値は `EngineInterface['<noun>']` で検査される
+- `engine.create` で `$` に noun を足す mod は、その型を `types/index.d.ts` 1 か所に持つ: import の無い宣言ファイルで、noun 名 (PascalCase) で始まる型を export し、`declare module 'claude-code' { interface EngineInterface { <noun>: <Type> } }` で宣言する。自分の hooks はそこから import し、`engine.create` が返す noun の値は `EngineInterface['<noun>']` で検査される。hook は `on('engine.create', ...)` と名前で書き、`const { ...beneath } = await next(e)` → return しない文 → 最後の 1 文で `return { ...beneath, <noun>: ... }` の形にする (validate が受け付ける唯一の形。reference の `claude-mods/capabilities` の `engine.create` 行)
 - 他 mod の noun を呼ぶ mod は契約を写さず読む: `plugin.json` の `"dependencies"` に挙げると engine がその契約を `.claude-plugin/types/` に置く (公式リポでは `mods/tsconfig.json` の include で読む)
 - noun を呼ぶ mod の test は provider (`engine.create` で noun を足す inline plugin) を `plugins` で座らせ、`on('<noun>.<method>', ...)` で答える。provider が無いと `$` の build が「誰も提供しない noun」を名指して hook を拒む
 - served `$` method (plugin が足した noun の method) は、呼んだ agent の cwd で走る

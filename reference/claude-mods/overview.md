@@ -87,7 +87,7 @@ on('tool.check', guard).catch(() => ({ decision: 'deny' }))   // 何も走って
 
 - `claude plugin validate` が module のソースを静的に走査し、hook する pattern・`$` の呼び出し (`noun.method`)・`$.env` で読み書きする変数名・`$.state` で読み書きする `{ plugin, key }` を列挙する。同じ走査結果が `plugin.register` の `e.uses` (`events` / `calls` / `env` / `state`) になる。走査に現れない呼び出しは実行時に host が拒む (`refused: its hooks module does not spell (...`)。`on` / `$` / `$.env` の変数名 / `$.state` の参照はリテラルで書く (`$.state` の family の `id` だけは計算してよい)
 - `$` そのものを渡してよいのは top-level に宣言した関数だけ。配列や object に入れた関数へ引数で渡すと `$ itself is passed as an argument (bound, passed, spread, returned or read)` で module が読み込まれない。hook の中の closure が `$` を閉じて使うのと、`register` から top-level の関数に `on` を渡して登録させる形は通る (実測: 2.1.308 / 2.1.309)
-- 組織の制御は並び順そのもの。外側の plugin が `plugin.register` で他 plugin の読み込みを拒み (`{ refuse }`)、`engine.create` で noun を足す・(`user` tier 以外は) 差し止め、`*` で監査する
+- 組織の制御は並び順そのもの。外側の plugin が `plugin.register` で他 plugin の読み込みを拒み (`{ refuse }`)、`engine.create` を名前で hook して noun を足す・(`user` tier 以外は) 差し止め、`*` で監査する (`*` の hook は `engine.create` を観測するだけで noun を足せない。2.1.323 で実測)
 - 限界: `$.process.run` の子は `$` の外で user 権限の何でもできる。`calls` に `process.run` が出る mod は実質任意コマンドを走らせうる。`$` 経由の一元化は追跡のためで、sandbox ではない。sandbox 下の shell コマンドは `--plugin-dir` のフォルダに書けない (そこにある code は sandbox の外で reload・実行されるため)
 - 読み込まれない条件: workspace が未 trust (`hooks modules not loaded until workspace trust is accepted`。built-in も含む)、safe mode、`--bare` (managed 以外)、`disableAllHooks` / `allowManagedHooksOnly` / policy、`sec-default` の `allowManagedModsOnly`。`-p` は未 trust の cwd でも trust 確認なしで読む (実測)。remote で off にされた installed mod は turn の合間に unload される
 
