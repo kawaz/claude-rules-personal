@@ -18,7 +18,8 @@ cd ../artifacts && printf '*\n' > .gitignore && jj file track --include-ignored 
 - `.gitignore` は `*` 1 行。既定では何も追跡しない (jj の snapshot にも乗らないので、巨大ファイルや作り直しで store が肥大しない)
 - 版管理して残したい物だけ `jj file track --include-ignored <paths>` → `jj commit -m "..." <paths>`。**`--include-ignored` を落とすと exit 0 のまま何も起きない**
 - 中に symlink を置かない (file_server が追って配信してしまう)
-- 置くファイルの名前は URL になるので、`index.html` を各ディレクトリに置くと `/<dir>/` で開ける。無いディレクトリは一覧 (browse) が出る
+- 置くファイルの名前は URL になるので、`index.html` を各ディレクトリに置くと `/<dir>/` で開ける。無いディレクトリはビューア (ファイルツリー + md・コード・画像・PDF のプレビュー) が出る。md やコードを見せるだけなら `index.html` を作らず、ファイルを置いてディレクトリの URL を渡せばよい
+- `index.html` のあるディレクトリでも、URL に `?ls` を付けるとビューアで開ける (`/<dir>/?ls`)。ビューアで選んだファイルは URL の `#` 以降に載るので、その URL を渡すと同じファイルが選ばれた状態で開く
 
 ## 配信: `artifacts-{owner}-{repo}.<host>.tmpspace.net`
 
