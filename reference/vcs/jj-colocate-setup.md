@@ -19,6 +19,8 @@
 
 ## 新規リポジトリ作成
 
+リポ名・plugin 名に `claude` / `anthropic` 系の接頭辞を付けない (auto mode の classifier などに止められやすくなる)。扱う対象や機能の語で付ける。
+
 ```bash
 mkdir -p "$REPO_PARENT/main" && cd "$REPO_PARENT/main"
 # commit を挟んでから jj git init (main bookmark が立つ)、workspace 名は default のままなので rename まで 1 行で
