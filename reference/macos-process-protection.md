@@ -1,6 +1,8 @@
 # macOS で秘密をメモリに持つプロセスの守り: 最低限満たす条件
 
-macOS で、秘密 (鍵、token、認証の可否のような判定の結論) をメモリに持つプロセス (常駐 daemon、agent、CLI) が、同じ uid の他のプロセスから読まれない・書き換えられない・乗っ取られないために、最低限満たす条件の一覧。設計とレビューで 1 項目ずつ照合する。対象は macOS だけで、Linux は扱わない。
+macOS で、秘密 (鍵、token、認証の可否のような判定の結論) をメモリに持つプロセス (常駐 daemon、agent、CLI) が、同じ uid で動く他のコードに秘密を読まれない・書き換えられない・乗っ取られないために、最低限満たす条件の一覧。設計とレビューで 1 項目ずつ照合する。対象は macOS だけで、Linux は扱わない。
+
+カーネルが断るのは、Apple 専用の entitlement を持たないプロセスからの読み書きまで。Apple の診断ツールは対象のメモリを読める。その中身が相手に渡らないことは、道具の作りに依る (「観測の要点」の「Apple の診断ツール」)。
 
 ## このリストの読み方
 
@@ -13,29 +15,67 @@ macOS で、秘密 (鍵、token、認証の可否のような判定の結論) �
   - **観測**: 実機で確かめたもの
   - **推定**: 観測や資料からの推論で、確かめていないもの
 - 観測は、特記が無ければ macOS 26.5.2 (25F84)、SIP 有効、開発者モード無効 (`DevToolsSecurity -status`) の Mac でのもの。**プロセスの守りの観測基準日: 2026-11-15** (観測をやり直したら、この日付と版と各項目の根拠も一緒に更新する)。OS の版が変われば結果は変わりうる
+- 本文が名前で指す一次資料の所在
+  - Hardened Runtime: https://developer.apple.com/documentation/security/hardened-runtime
+  - Debugging tool entitlement (`com.apple.security.cs.debugger`): https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.cs.debugger
+  - Allow DYLD environment variables entitlement: https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.cs.allow-dyld-environment-variables
+  - Disable Library Validation Entitlement: https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.cs.disable-library-validation
+  - Disable Executable Memory Protection Entitlement: https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.cs.disable-executable-page-protection
+  - Resolving common notarization issues (`get-task-allow` の節): https://developer.apple.com/documentation/security/resolving-common-notarization-issues
+  - Disabling and Enabling System Integrity Protection: https://developer.apple.com/documentation/security/disabling-and-enabling-system-integrity-protection
+  - Code Signing Requirement Language: https://developer.apple.com/library/archive/documentation/Security/Conceptual/CodeSigningGuide/RequirementLang/RequirementLang.html
+  - POSIX `kill()`: https://pubs.opengroup.org/onlinepubs/9799919799/functions/kill.html
+  - `taskgated(8)`、`DevToolsSecurity(8)`、`setrlimit(2)` は Mac の man
 
 ## 想定する相手
 
 - 同じ uid で動く、root でないプロセス。任意のコードを実行でき、自分のバイナリを ad-hoc 署名できる
 - ad-hoc 署名のバイナリは、`com.apple.security.cs.debugger` を自分に付けて起動できる。カーネルはこれを「宣言済みのデバッガ」として扱う。`lldb` (Apple の `debugserver`) も宣言済みのデバッガに当たる (観測)
-- ad-hoc 署名のバイナリは、Apple 専用の entitlement (`com.apple.system-task-ports.read` 等) を付けると起動時に kill される (観測。amfid のログは `The file is adhoc signed but contains restricted entitlements`)
+- ad-hoc 署名のバイナリは、Apple 専用の entitlement を自分に付けられない。`com.apple.system-task-ports.read` を付けたものは起動時に kill された (観測。amfid のログは `The file is adhoc signed but contains restricted entitlements`)。`com.apple.system-task-ports.read.safe` も同じ扱いと見られる (推定。そのものでは試していない)
+- 相手は Apple の診断ツールを実行できる。道具の出力は相手に渡る
+- 相手は、利用者の画面に認可のダイアログを出させられる (宣言済みのデバッガで、hardened runtime でない対象か `get-task-allow` のある対象の task port を求める)
 - 扱わない相手: root、カーネル、SIP を無効にできる者、Mac に物理的に触れる者。プロセス自身の不具合 (入力の解釈の誤りからの乗っ取り) も扱わない
 
 ## 観測の要点
+
+### 署名の組み合わせと 4 つの手段
 
 署名だけを変えた同じ試験プログラム (ヒープとスタックに目印を置いて待つ) に、同じ uid から 4 つの手段を当てた結果。M1 と M2 はこの表から出ている。
 
 | 対象の署名 | entitlement を持たないプロセスからの task port と ptrace | 宣言済みのデバッガからの task port | 起動時の `DYLD_INSERT_LIBRARIES` | コアダンプ (`ulimit -c unlimited`) |
 |---|---|---|---|---|
-| hardened runtime なし、`get-task-allow` なし | カーネルが断る | カーネルを通り、利用者の認可のダイアログに進む | 読み込まれる | カーネルが断る |
-| hardened runtime、`get-task-allow` なし (満たすべき形) | カーネルが断る | カーネルが断る (利用者の認可より前) | 読み込まれない | カーネルが断る |
-| hardened runtime、`get-task-allow` あり | カーネルが断る | カーネルの拒否が出ず、認可待ちと見られる状態で止まる | dyld が変数を読み、library validation が Team ID の不一致で拒む | 書かれる (ヒープの目印を含む) |
-| hardened runtime なし、`get-task-allow` あり | 取れる。メモリを読め、書き換えられ、ptrace も接続できる | 同上 (止まる) | 読み込まれる | 書かれる (ヒープの目印を含む) |
+| hardened runtime なし、`get-task-allow` なし | カーネルが断る | カーネルを通り、利用者の認可の段に進む。認可があれば取れて、読み書きできる | 読み込まれる | カーネルが断る |
+| hardened runtime、`get-task-allow` なし (満たすべき形) | カーネルが断る | カーネルが断る (認可があっても) | 読み込まれない | カーネルが断る |
+| hardened runtime、`get-task-allow` あり | カーネルが断る | カーネルが断らない。認可があれば取れて、読み書きできる (認可が無い時は止まる) | dyld が変数を読み、library validation が Team ID の不一致で拒む | 書かれる (ヒープの目印を含む) |
+| hardened runtime なし、`get-task-allow` あり | 取れる。メモリを読め、書き換えられ、ptrace も接続できる | 同上 | 読み込まれる | 書かれる (ヒープの目印を含む) |
 
-- 断るのはカーネル (AMFI) で、理由が unified log に出る。満たすべき形の対象では、呼び出し側が宣言済みのデバッガであることを認めた上で断る: `macOSTaskPolicy: (<呼び出し側>) may not get the task control port of (<対象>) (pid: <pid>): (<対象>) is hardened, (<対象>) doesn't have get-task-allow, (<呼び出し側>) is a declared debugger…`。この拒否は taskgated と利用者の認可 (`system.privilege.taskport`) より前に起きるので、ダイアログは出ず、利用者が認可しても通らない
+- 断るのはカーネル (AMFI) で、理由が unified log に出る。満たすべき形の対象では、呼び出し側が宣言済みのデバッガであることを認めた上で断る: `macOSTaskPolicy: (<呼び出し側>) may not get the task control port of (<対象>) (pid: <pid>): (<対象>) is hardened, (<対象>) doesn't have get-task-allow, (<呼び出し側>) is a declared debugger…`。この拒否は taskgated と利用者の認可 (`system.privilege.taskport`) より前に起きるので、ダイアログは出ない。認可がある状態でも断られた
 - 断られる時は、task port の control / read / inspect のどれも断られる。name port だけは取れるが、name port ではメモリの読み書きも領域の一覧もできない
-- 満たすべき形の結果は、Developer ID で署名した実物のバイナリでも同じだった。task port、ptrace、`lldb` は、利用者が起動したものと、root のプロセスがユーザ権限に永久降格してから exec したものの両方で確かめた。起動時の差し込みは利用者が起動したものだけ、コアダンプは試験プログラムだけで観測した
+- 満たすべき形の結果は、Developer ID で署名した実物のバイナリでも同じだった。認可が無い時の task port、ptrace、`lldb` は、利用者が起動したものと、root のプロセスがユーザ権限に永久降格してから exec したものの両方で確かめた。認可がある時と、起動時の差し込みは、利用者が起動したものだけ。コアダンプは試験プログラムだけで観測した
 - コアダンプは `get-task-allow` の有無で決まり、hardened runtime の有無は関係しない。`get-task-allow` の無い対象は `ulimit -c` が 0 でも unlimited でもカーネルが断る (`AMFI: Denying core dump for pid <pid>`)
+
+### 利用者の認可は強い境界ではない
+
+宣言済みのデバッガの要求がカーネルを通った先にあるのは、利用者の認可 (`system.privilege.taskport`) だけ。この認可は次の性質を持つ (観測)。
+
+- ダイアログの文言は「Developer Tools Access はデバッグを続行するために別のプロセスを制御する必要があります」で、要求したプログラムも対象のプロセスも示さない。Touch ID で応じられる
+- 別の確認の操作の最中にこのダイアログが出ると、利用者はその一部だと思って応じる。同じ日に 2 回起きた
+- 1 つの要求に認可が下りると、その後は別のプロセスもダイアログ無しで同じ認可を使えた。設定は共有 (`shared`) で 10 時間 (`timeout: 36000`)。要求した検査プログラムを止めた後も、ダイアログは画面に残る
+- `security authorize -d system.privilege.taskport` では取り消せなかった。ログアウトで消える見込み (推定)
+- `lldb` (`debugserver`) は別の right (`system.privilege.taskport.debug`) を求め、改めてダイアログが出た
+
+したがって、認可の段まで進む対象 (上の表の 1 行目、3 行目、4 行目) の守りは、「利用者がダイアログを断ること」ですらなく、「利用者がその瞬間に何のダイアログかを見分けること」に依る。
+
+### Apple の診断ツール
+
+- `com.apple.system-task-ports.read.safe` を持つ Apple の道具 (`vmmap`、`heap`、`leaks`、`stringdups`、`malloc_history`、`sample`、`atos`、`footprint`) は、満たすべき形の対象でもカーネルに断られず、書き込み可能なメモリを実際に読む。`leaks --debug=contents` は、ヒープのブロックを指す値を対象の `__bss` とスタックの中から見つけて、その場所を出した
+- 道具は、`get-task-allow` の無い対象のメモリの中身を、出力にもファイルにも出さない (`Process <pid> is not debuggable. Due to security restrictions, ... can only show contents of readonly memory of restricted processes.`)。これは道具の判断で、カーネルの強制ではない
+- 中身が出うる使い方 (中身の説明、memory graph の保存と読み直し、corpse、`leaks --debug` の各モード) を全部当てても、満たすべき形の対象では目印は 1 つも出なかった。`get-task-allow` のある対象では同じ使い方で出た
+- 道具が出すもの: 領域の一覧、malloc のノード数と型の集計、確保済みのブロックを指す値がある場所
+- `com.apple.system-task-ports.read` だけを持つ道具 (`lsmp`、`symbols`) と `gcore` は、満たすべき形の対象の read port をカーネルに断られた
+- 道具へのライブラリの差し込み (`DYLD_INSERT_LIBRARIES`) は効かず、対象の port を持っている最中の道具への task port の要求もカーネルが断った
+
+守りは 2 つに依る。相手がその entitlement を自分のバイナリに付けられないこと (OS の強制) と、Apple の道具が中身を出力しないこと (道具の作りで、境界ではない)。
 
 ## 経路と、それを受け持つ項目
 
@@ -44,7 +84,7 @@ macOS で、秘密 (鍵、token、認証の可否のような判定の結論) �
 | 経路 | 受け持つ項目 | 根拠 |
 |---|---|---|
 | entitlement を持たないプロセスが、task port か ptrace でメモリを読む・書く | M1 か、M2 のうち `get-task-allow` を付けないこと、のどちらか一方があれば断られる。両方を外すと開く | 観測 |
-| 宣言済みのデバッガが task port を取る | M1 と M2 の両方。片方でも欠けると、カーネルが断らなくなる。その先に残る守りは、利用者が認可のダイアログを断ることだけと見られる | 観測 (認可した後は未観測) |
+| 宣言済みのデバッガが task port を取る | M1 と M2 の両方。片方でも欠けると、カーネルが断らなくなり、残るのは利用者の認可だけ (強い境界ではない) | 観測 |
 | 起動時にライブラリを差し込む | M1 と M2 の両方。M1 だけだと (`get-task-allow` があると) library validation だけが残る | 観測 |
 | 保護の無い、同じ身元の別のビルドを持ち込み、ライブラリを差し込んで、コードの身元で渡される秘密を読む | M3 | 観測、推定 |
 | コアダンプに写ったメモリを読む | M2 (`get-task-allow` を付けない)。S1 が重ねる | 観測 (試験プログラム) |
@@ -58,10 +98,11 @@ macOS で、秘密 (鍵、token、認証の可否のような判定の結論) �
 
 | 経路 | 状態 | 根拠 |
 |---|---|---|
-| プロセスにシグナルを送って止める・殺す | 同じ uid のプロセスは送れる。可用性は守れない。結論の偽造にならないようにすることだけ M7 が受け持つ | 一次資料 (POSIX `kill`) |
+| Apple の診断ツールが、対象の書き込み可能なメモリを読む | カーネルは断らない。相手に渡るのは道具の出力 (領域の一覧、型の集計、ブロックを指す値の場所) で、中身は出ない。中身が出ないことは道具の作りに依る。S2 と S3 が、崩れた時の被害を減らす | 観測 |
+| 利用者に認可のダイアログで応じさせる | M1 と M2 を満たした対象には届かない。満たさない対象では、利用者が見分けることに依る | 観測 |
+| Keychain のダイアログで、利用者に「常に許可」を押させる | 利用者の操作に依る | 観測 |
+| プロセスにシグナルを送って止める・殺す | 同じ uid のプロセスは送れる。可用性は守れない。結論の偽造にならないようにすることだけ M7 が受け持つ | 一次資料 (POSIX `kill()`) |
 | Keychain の項目を消す、同名で作り直す | ACL の外の相手にもできる | 観測 |
-| 利用者にダイアログで許可させる (Keychain の「常に許可」、hardened runtime でない対象への task port の認可) | 利用者の操作に依る | 観測 |
-| Apple の道具 (`vmmap`、引数なしの `heap`) で、領域の一覧と malloc の型の集計を見る | 満たすべき形の対象でも出る。メモリの中身は出ない | 観測 |
 | 末尾の「未調査・未観測の経路」に挙げたもの | 確かめていない | — |
 
 ## MUST
@@ -71,27 +112,28 @@ macOS で、秘密 (鍵、token、認証の可否のような判定の結論) �
 - 条件: 配る実行ファイルとインストールする実行ファイルを `codesign --options runtime` で署名する
 - 守るもの
   - 起動時のライブラリの差し込み (`DYLD_INSERT_LIBRARIES`)。M2 も満たしている時
-  - 宣言済みのデバッガからの task port の取得。M2 も満たしている時
+  - 宣言済みのデバッガからの task port の取得。M2 も満たしている時。利用者の認可があっても断られる
   - entitlement を持たないプロセスからの task port の取得と ptrace の接続 (これは M2 だけでも断られる)
 - 守らないもの
+  - Apple の診断ツール (`com.apple.system-task-ports.read.safe` を持つもの) が、対象の書き込み可能なメモリを読むこと。カーネルは断らない。中身が相手に渡らないのは、道具が出力しないことに依る → 受け持つ項目なし (S2、S3 が被害を減らす)
   - `get-task-allow` が付いている時の、宣言済みのデバッガ、差し込み (library validation だけが残る)、コアダンプ → M2
   - コアダンプ。hardened runtime の有無は関係しない → M2、S1
   - 同じ身元で hardened runtime なしに署名された別のビルドを通じて、コードの身元で渡される秘密を読むこと → M3
   - 秘密を置いたファイルや Keychain の項目を、別の経路で読むこと → M4
   - 入口から秘密を出させること → M5。argv や環境変数から読むこと → M6
-  - プロセスにシグナルを送ること、領域の一覧と型の集計を見ること → 受け持つ項目なし
+  - プロセスにシグナルを送ること → 受け持つ項目なし
 - なぜ守られるか
   - task port: 相手が task port を求めた時 (`task_for_pid` 等、ptrace の接続) に、カーネルの AMFI が、対象の署名のフラグ (hardened runtime か) と entitlement (`get-task-allow` があるか)、呼び出し側が宣言済みのデバッガか root かを見て決める。`mach_vm_read` や `mach_vm_write` でのメモリの読み書きには task port が要るので、port が渡らなければこの手段は使えない
   - 差し込み: プロセスの起動時、`main` より前に、dyld が対象の署名を見て `DYLD_` で始まる変数を扱うかを決める。hardened runtime で `get-task-allow` も無い対象では、ライブラリを開こうとした跡がログに出ない (変数を読んでいないと見られる)
 - 欠けた時に起きること
   - `DYLD_INSERT_LIBRARIES` を付けて起動すると、ライブラリが読み込まれる。ライブラリの constructor は `main` より前に、そのプロセスのコードの身元で動く (Keychain の ACL も通る。M3)
-  - 宣言済みのデバッガの task port の要求がカーネルを通り、利用者の認可のダイアログに進む。認可した後に port が渡るかは観測していない (カーネルのログの文言からは渡る見込み。推定)
+  - 宣言済みのデバッガの task port の要求がカーネルを通り、利用者の認可の段に進む。認可があれば port が渡り、メモリを読み書きできる。認可は 1 度下りると共有され、その後は別のプロセスもダイアログ無しで通る。守りは、利用者がその瞬間に何のダイアログかを見分けることに依る (「利用者の認可は強い境界ではない」)
 - 確かめ方: `codesign -d -v <ファイルか pid>` の `CodeDirectory` の行の `flags` に `runtime` (0x10000) がある
-- 根拠: 観測 (差し込みと宣言済みのデバッガ)、一次資料 (Apple の Hardened Runtime のページ。保護は「SIP と組で」と書く)
+- 根拠: 観測 (差し込み、宣言済みのデバッガ、認可がある時とない時)、一次資料 (Hardened Runtime。保護は「SIP と組で」と書く)
 
 ### M2: 保護を緩める entitlement を付けない
 
-- 条件: 次の 4 つの key を署名に入れない。値が false でも key があれば不合格にする (一次資料は、false の entitlement を書かないことを求めている)
+- 条件: 次の 4 つの key を署名に入れない。値が false でも key があれば不合格にする (一次資料の Hardened Runtime は、false の entitlement を書かないことを求めている)
   - `com.apple.security.get-task-allow`
   - `com.apple.security.cs.allow-dyld-environment-variables`
   - `com.apple.security.cs.disable-library-validation`
@@ -100,18 +142,20 @@ macOS で、秘密 (鍵、token、認証の可否のような判定の結論) �
   - コアダンプに写るメモリ (`get-task-allow` が無ければ、上限に依らず書かれない)
   - entitlement を持たないプロセスからの task port の取得と ptrace の接続 (`get-task-allow` が無ければ、M1 が無くても断られる)
   - M1 と合わせて、宣言済みのデバッガからの task port の取得と、起動時の差し込み
+  - Apple の診断ツールが中身を出すこと (道具は `get-task-allow` のある対象の中身を出す。道具の作りに依る)
 - 守らないもの
   - hardened runtime が無い時の、差し込みと宣言済みのデバッガ → M1
+  - Apple の診断ツールが対象の書き込み可能なメモリを読むこと自体 → 受け持つ項目なし (M1 と同じ)
   - M1 が守らないものと同じ経路 (別のビルド → M3、置き場 → M4、入口 → M5、argv と環境変数 → M6、シグナル → 受け持つ項目なし)
 - なぜ守られるか: M1 と同じ時点で、同じ仕組み (AMFI、dyld) が entitlement を見る。コアダンプは、コアダンプを起こすシグナルを対象が受けた時に、AMFI が `get-task-allow` を見て断る
 - 欠けた時に起きること
-  - `get-task-allow` (観測): hardened runtime があっても、dyld が `DYLD_` の変数を読むようになり (残る守りは library validation だけ)、宣言済みのデバッガの要求をカーネルが断らなくなり、上限 (`ulimit -c`) が許せばコアダンプが書かれる。hardened runtime も無ければ、entitlement を持たないプロセスがそのままメモリを読み書きできる
+  - `get-task-allow` (観測): hardened runtime があっても、dyld が `DYLD_` の変数を読むようになり (残る守りは library validation だけ)、宣言済みのデバッガの要求をカーネルが断らなくなり (認可があれば読み書きできる)、上限 (`ulimit -c`) が許せばコアダンプが書かれ、Apple の診断ツールが中身を出す。hardened runtime も無ければ、entitlement を持たないプロセスがそのままメモリを読み書きできる
   - `allow-dyld-environment-variables` (一次資料): dyld が `DYLD_` の変数を読むようになる
   - `disable-library-validation` (一次資料): Apple か同じ Team ID の署名でないライブラリも読み込むようになる
   - `disable-executable-page-protection` (一次資料): コード署名の保護が全部外れ、実行コードを検出されずに書き換えられる
-- Xcode は開発用のビルドに `get-task-allow` を自動で足す (`CODE_SIGN_INJECT_BASE_ENTITLEMENTS`。一次資料)。配るビルドで外れていることを確かめる
+- Xcode は開発用のビルドに `get-task-allow` を自動で足す (`CODE_SIGN_INJECT_BASE_ENTITLEMENTS`。一次資料の Resolving common notarization issues)。配るビルドで外れていることを確かめる
 - 確かめ方: `codesign -d --entitlements - --xml <ファイル>` の出力に上の key が無い
-- 根拠: `get-task-allow` は観測。他の 3 つは一次資料 (個別の観測はしていない)
+- 根拠: `get-task-allow` は観測。他の 3 つは一次資料 (それぞれの entitlement のページ。個別の観測はしていない)
 
 ### M3: 保護の無い署名済みのビルドを作らない・残さない
 
@@ -123,12 +167,12 @@ macOS で、秘密 (鍵、token、認証の可否のような判定の結論) �
   - 保護のあるビルドの入口から秘密を出させること → M5
   - コードの身元に依らない置き場 (ファイル、全アプリ可の項目) → M4
 - なぜ要るか: OS はこの経路を止めない
-  - Keychain の ACL は、項目を読む要求が来た時に、securityd が要求したプロセスのコードの署名を requirement に照らして判定する。見るのはプロセスの本体の身元だけで、読み込まれたライブラリは見ない (観測)
-  - requirement は信頼アプリの designated requirement (identifier、Apple が発行した証明書、Team ID) になる。requirement の言語には署名のフラグの条件が無く、hardened runtime を条件に書けない (一次資料: Code Signing Requirement Language。公開 API で信頼アプリを作る関数は `SecTrustedApplicationCreateFromPath` だけ)
+  - Keychain の ACL は、項目を読む要求が来た時に、要求したプロセスのコードの署名を requirement に照らして判定する。見るのはプロセスの本体の身元だけで、読み込まれたライブラリは見ない (観測)
+  - requirement は信頼アプリの designated requirement (identifier、Apple が発行した証明書、Team ID) になる。requirement の言語には署名のフラグの条件が無く、hardened runtime を条件に書けない (一次資料: Code Signing Requirement Language。公開 API で信頼アプリを作る関数は SDK の `SecTrustedApplicationCreateFromPath` だけ)
 - 欠けた時に起きること
   - hardened runtime でないバイナリにライブラリを差し込むと、そのバイナリだけを許す ACL の項目を、ライブラリの constructor が読めた。hardened runtime のバイナリでは読み込まれず、読めなかった (観測。ad-hoc 署名のバイナリと試験用の keychain)
   - したがって、保護の無い署名済みのビルドが 1 つでもあれば、相手はそのファイルを持ち込み (守りたい Mac に元から在る必要は無い)、ライブラリを差し込んで、ACL を通って秘密を読める見込み
-- 確かめ方: 下の `check_hardened` を署名の直後に呼ぶ。条件を満たすファイルは残り、hardened runtime の無いものと `get-task-allow` 付きのものは消えて失敗することを確かめてある
+- 確かめ方: 下の `check_hardened` を署名の直後に呼ぶ。条件を満たすファイルは残り、hardened runtime の無いものと `get-task-allow` 付きのものは消えて失敗する (観測)
 
   ```bash
   # 署名の直後に呼ぶ。条件を満たさなければ、署名済みのファイルを消して失敗する
@@ -175,7 +219,7 @@ macOS で、秘密 (鍵、token、認証の可否のような判定の結論) �
   - 項目の削除と、同名での作り直し。読んだ値が自分の書いた値であることは ACL では保証されない (要るなら値に署名を付ける) → 受け持つ項目なし
   - ACL の外の相手が読もうとした時に出るパスワード付きのダイアログで、利用者が「常に許可」を押すこと (その相手が ACL に加わる) → 受け持つ項目なし
   - メモリに読んだ後の秘密 → M1、M2
-- なぜ守られるか: 項目の復号を求められた時に、securityd が、求めたプロセスのコードの署名を ACL の requirement に照らす。満たさなければ、ダイアログを出すか (対話が許されている時)、失敗を返す
+- なぜ守られるか: 項目の復号を求められた時に、Keychain が、求めたプロセスのコードの署名を ACL の requirement に照らす。満たさなければ、ダイアログを出すか (対話が許されている時)、失敗を返す
 - 欠けた時に起きること: `security` コマンドで作った項目や「全アプリ可」の ACL の項目は、同じ uid の任意のプロセスが確認なしで読める。モード 600 のファイルも同じ uid から読める。メモリを守っても、置き場から読まれる
 - 読み手の身元を固定できない場合 (スクリプト、`security` コマンドで読むツール) は、この条件を満たせない。権限を絞った token だけを置く (reference の `keychain-secrets`)
 - 確かめ方: 同じ作り方で試験用の項目を作り、ACL の外のバイナリ (`security find-generic-password -s <service> -a <account> -w`) から読んで、失敗するかダイアログになることを見る。ダイアログでは「拒否」を押す
@@ -190,7 +234,7 @@ macOS で、秘密 (鍵、token、認証の可否のような判定の結論) �
 - 守るもの: 相手が、メモリも ACL も破らずに、正規の入口から秘密の値を得ること・秘密を使う操作をさせること
 - 守らないもの
   - メモリと置き場への直接の経路 → M1〜M4
-  - 本人確認を通した利用者自身の操作 (利用者が騙されて承認する) → 受け持つ項目なし
+  - 本人確認を通した利用者自身の操作 (利用者が、何の確認かを見分けずに応じる) → 受け持つ項目なし
   - 相手のコードの身元を検査する方法の抜け道 → 未調査
 - なぜ要るか: OS はこの経路を止めない。Keychain の ACL はコードの身元で判定し、誰が起動したかを問わない (観測)。署名済みのバイナリは同じ uid の誰でも起動でき、開いている socket には同じ uid の誰でも繋げる
 - 欠けた時に起きること: 入口が秘密を出す・使うなら、相手は M1〜M4 を 1 つも破らずに目的を果たす
@@ -231,15 +275,15 @@ macOS で、秘密 (鍵、token、認証の可否のような判定の結論) �
 - なぜ守られるか: 信頼する側が、起動した直後に Security.framework で、その pid で走っているコードの署名を調べる (`SecCodeCopyGuestWithAttributes` (pid) → `SecCodeCheckValidity` (requirement) → `SecCodeCopySigningInformation` (`kSecCSDynamicInformation`))。OS が自動で行うものではなく、検査を書いた側が呼ぶ。保護の無いビルドは、観測の要点の表のとおり同じ uid から差し込める・書き換えられるので、この検査で受け取らないことにする
 - 欠けた時に起きること: 保護の無いビルドの結論を受け取る。そのプロセスには同じ uid からライブラリを差し込める・メモリを書き換えられるので、結論を偽れる
 - 確かめ方: hardened runtime の無い ad-hoc 署名のバイナリと、4 つの entitlement を 1 つずつ付けたバイナリを起動して、検査が不合格にすることをテストで固定する。手では `codesign -v -R='<requirement>' <pid>` と `codesign -d -v --entitlements - <pid>`
-- 根拠: 観測 (保護の無い対象が差し込まれ・書き換えられること、走っているプロセスに requirement と署名の情報を評価できること、自己署名が `anchor apple generic` を満たさないこと)、一次資料 (POSIX `kill`: 同じ uid はシグナルを送れる)、推定 (起動する前の検査が差し替えに負けること)
+- 根拠: 観測 (保護の無い対象が差し込まれ・書き換えられること、走っているプロセスに requirement と署名の情報を評価できること、自己署名が `anchor apple generic` を満たさないこと)、一次資料 (POSIX `kill()`: 同じ uid はシグナルを送れる)、推定 (起動する前の検査が差し替えに負けること)
 
 ### M8: SIP が有効な Mac で動かす
 
 - 条件: SIP が有効であること。無効なら、M1 と M2 の守りが効いていない前提で扱う
 - 守るもの: M1 と M2 が依る、カーネルの判定そのもの
 - 守らないもの: SIP が有効でも、M1〜M7 のどれかが欠けて開く経路はそのまま開く。SIP は他の項目の代わりにならない
-- なぜ要るか: 一次資料は hardened runtime の保護を「SIP と組で」と書き、`get-task-allow` の無いプロセスの task port が取れないことを「SIP に守られている」と書く。SIP は Recovery の `csrutil` でだけ切り替えられる
-- 欠けた時に起きること: SIP を無効にした Mac での振る舞いは観測していない。一次資料は、無効にすると悪意あるコードに対して脆弱になると警告する
+- なぜ要るか: 一次資料の Hardened Runtime は保護を「SIP と組で」と書き、Debugging tool entitlement は `get-task-allow` の無いプロセスの task port が取れないことを「SIP に守られている」と書く。SIP は Recovery の `csrutil` でだけ切り替えられる
+- 欠けた時に起きること: SIP を無効にした Mac での振る舞いは観測していない。一次資料の Disabling and Enabling System Integrity Protection は、無効のままにすると悪意あるコードに対して脆弱になると警告する
 - 確かめ方: `csrutil status`
 - 根拠: 一次資料 (観測なし)
 
@@ -247,12 +291,13 @@ macOS で、秘密 (鍵、token、認証の可否のような判定の結論) �
 
 守りが効いていることを確かめる時は、次の全部を守る。1 つでも欠けた検証の結果は、守りの根拠にしない。
 
-- **Apple の診断ツールの結果を証拠にしない**。`vmmap`、`heap`、`stringdups` は Apple 専用の entitlement (`com.apple.system-task-ports.read` と `.read.safe`) を持ち、普通のプロセスより多くを読める。entitlement を持たないプロセスが port を取れない対象でも、中身を出す。「読めなかった」は守りの証拠にならず、「読めた」は普通のプロセスが読める証拠にならない。道具の entitlement は `codesign -d --entitlements - /usr/bin/heap` で見られる
+- **Apple の診断ツールの結果を証拠にしない**。`vmmap`、`heap`、`stringdups` 等は Apple 専用の entitlement (`com.apple.system-task-ports.read.safe`) を持ち、満たすべき形の対象でもカーネルから read port を受け取って、書き込み可能なメモリを読んでいる。中身を出さないのは道具の判断で、カーネルが断った結果ではない。「道具で読めなかった」は守りの証拠にならず、「道具で読めた」は普通のプロセスが読める証拠にならない。道具の entitlement は `codesign -d --entitlements - /usr/bin/heap` で見られる
 - **陽性対照を置く**。同じ検査の手段が、守りの無い対象 (hardened runtime なし、`get-task-allow` あり) で成功することを、同じ回に確かめる。断られた結果だけでは、守りが効いたのか、検査が壊れているのかを区別できない
 - **拒否の理由をカーネルのログで確かめる**。戻り値だけでは、断ったのがカーネルか、利用者の認可の不足かを区別できない (`lldb` は `Not allowed to attach to process` で断られることも、認可待ちで止まることもあり、表示だけでは理由が分からない)
-  - task port と ptrace: `log show --last 5m --style compact --predicate 'eventMessage CONTAINS "macOSTaskPolicy"'`
-  - 差し込みとコアダンプ: `log show --last 5m --style compact --predicate 'sender == "AppleMobileFileIntegrity" OR process == "amfid"'` (`Library Validation failed`、`Denying core dump`)
-  - 認可の段に進んだか: `log show --last 5m --predicate 'process == "taskgated"'`
+  - task port と ptrace: `/usr/bin/log show --last 5m --style compact --predicate 'eventMessage CONTAINS "macOSTaskPolicy"'`
+  - 差し込みとコアダンプ: `/usr/bin/log show --last 5m --style compact --predicate 'sender == "AppleMobileFileIntegrity" OR process == "amfid"'` (`Library Validation failed`、`Denying core dump`)
+  - 認可の段に進んだか、認可が下りたか: `/usr/bin/log show --last 5m --style compact --predicate 'process == "taskgated" OR process == "authd"'`
+  - `log` は zsh の組み込みと名前が衝突するので、絶対パスで呼ぶ
 - **呼び出し側を 2 種類にする**。entitlement を持たない検査プログラムと、`com.apple.security.cs.debugger` を自分で付けた ad-hoc 署名の検査プログラム (加えて `lldb -p <pid>`)。片方だけでは、hardened runtime の寄与が見えない
 - **対象は、自分で作った試験プログラムと自分のバイナリだけにする**。他のプロセスには当てない。root は使わない
 - **署名の組み合わせで寄与を切り分ける**。試験プログラムを hardened runtime の有無と `get-task-allow` の有無の 4 通りに署名し、実物のバイナリを加える。plist は、該当の key (`com.apple.security.get-task-allow`、`com.apple.security.cs.debugger`) を true にした dict だけのもの
@@ -266,8 +311,12 @@ macOS で、秘密 (鍵、token、認証の可否のような判定の結論) �
   ```
 
 - **当てる手段**: `task_for_pid` / `task_read_for_pid` / `task_inspect_for_pid` / `task_name_for_pid`、取れた port での `mach_vm_read_overwrite` と `mach_vm_write`、`ptrace(PT_ATTACHEXC)`、`DYLD_INSERT_LIBRARIES` (constructor が印を出すだけのライブラリ)、コアダンプ (`ulimit -c unlimited` で起動して `kill -QUIT`、`/cores` を見る)
-- **認可のダイアログに備える**。宣言済みのデバッガを hardened runtime でない対象に当てると、利用者の画面に認可のダイアログが出て残る。検査には打ち切り (`timeout`) を付け、カーネルが断る見込みの組から先に当て、ダイアログには応じない。認可は共有され 10 時間続く設定になっている (`security authorizationdb read system.privilege.taskport` の `shared` と `timeout`)
-- **記録に環境を書く**。macOS の版、SIP の状態、開発者モードの状態、日付。当てていない組は「未観測」と書き、観測した組からの推論と分ける
+- **認可のダイアログに備える**。宣言済みのデバッガを、満たすべき形でない対象 (hardened runtime なし、または `get-task-allow` あり) に当てると、利用者の画面に認可のダイアログが出る
+  - ダイアログが出うる試行の前に、Mac の前に居る利用者に「このダイアログには応じない」と伝える。出たらキャンセルしてもらう。ダイアログは要求元も対象も示さないので、伝えていないと、利用者は別の操作の確認だと思って応じる
+  - 検査には打ち切り (`timeout`) を付け、カーネルが断る見込みの組 (満たすべき形の対象) から先に当てる。打ち切った後もダイアログは画面に残る
+  - 応じてしまうと、認可は共有されて 10 時間続き、その間は宣言済みのデバッガを名乗る任意のプロセスが、満たすべき形でない対象をダイアログ無しで読み書きできる。`security authorize -d` では取り消せなかった。ログアウトする
+  - 認可がある状態とない状態を分けて記録する (結果が変わる)
+- **記録に環境を書く**。macOS の版、SIP の状態、開発者モードの状態、認可の有無、日付。当てていない組は「未観測」と書き、観測した組からの推論と分ける
 
 ## SHOULD
 
@@ -287,7 +336,7 @@ macOS で、秘密 (鍵、token、認証の可否のような判定の結論) �
 ### S2: 秘密を、使い終わったら消える型で包む
 
 - 条件: 秘密を素の文字列やバイト列で持たず、drop の時に 0 で上書きする型 (Rust なら `secrecy`、`zeroize`) で包む。ログやデバッグ出力に中身が出ない型を選ぶ
-- 守るもの: 使い終わった後にメモリに残る写し。MUST の前提が崩れて読まれた時に、読める秘密と時間を減らす
+- 守るもの: 使い終わった後にメモリに残る写し。MUST の前提が崩れた時や、Apple の診断ツールの作りが変わって中身が出るようになった時に、読める秘密と時間を減らす
 - 守らないもの
   - 使っている間の値。動作中のメモリを読める相手には読める → M1、M2
   - 包んでも消せない写し (Keychain の API の内部、JSON のパーサの作業用のバッファ、ライブラリが導いた鍵、再確保で解放された領域) → 受け持つ項目なし
@@ -300,7 +349,7 @@ macOS で、秘密 (鍵、token、認証の可否のような判定の結論) �
   - 読まれると承認の偽造や権限の昇格に直結する鍵 (署名鍵、全権の token) を、常駐するプロセスに持たせない。使う操作の間だけ読む短命のプロセスに分ける
   - 常駐するプロセスが持つのは、漏れても損失が狭い秘密 (権限を絞った token、要求ごとの使い捨ての鍵) にする (reference の `keychain-secrets`)
   - 取り出せない鍵 (Keychain の非抽出の鍵、Secure Enclave) は、前提が崩れた時に鍵の値の持ち出しを防ぐ選択肢
-- 守るもの: MUST の前提が崩れた時の、被害の上限
+- 守るもの: MUST の前提が崩れた時と、Apple の診断ツールの作りが変わった時の、被害の上限
 - 守らないもの
   - 読まれること自体 → M1〜M6
   - 取り出せない鍵でも、プロセスの制御を取られた時に勝手に使われること。使うたびに生体を求める鍵でなければ防げない (推定)
@@ -320,19 +369,26 @@ macOS で、秘密 (鍵、token、認証の可否のような判定の結論) �
 ## やっても守りに数えないもの
 
 - **プロセスの中の自己検査** (起動時に自分の署名やフラグを確かめてから秘密を読む)。守りたい場面は、hardened runtime でないビルドにライブラリを差し込まれた時だが、差し込まれた constructor は `main` より前に動き、検査を経ずに秘密を読む (観測)。この経路を受け持つのは M3
-- **`ptrace(PT_DENY_ATTACH)`**。寄与を観測していない (未調査の節)
+- **利用者の認可のダイアログ**。満たすべき形でない対象の守りとして数えない (「利用者の認可は強い境界ではない」)
 - **Apple の診断ツールで中身が出ないことの確認** (検証の決まり)
+- **`ptrace(PT_DENY_ATTACH)`**。寄与を観測していない (未調査の節)
 
 ## 未調査・未観測の経路
 
 MUST を全部満たしていても、次は確かめていない。
 
-- Apple の道具 (task port を取れる entitlement を持つもの) を、同じ uid のプロセスが実行するだけで、満たすべき形の対象のメモリの中身を取り出せるか。分かっているのは次まで
-  - `vmmap` は領域の一覧を出し、引数なしの `heap` は malloc のノード数と型の集計を出す (観測)。中身ではないが、配置と型の情報は同じ uid から取れる
-  - `heap --addresses=all` と `stringdups` は、`get-task-allow` の無い対象には `can only show contents of readonly memory of restricted processes` と出して中身を出さない (観測)。これがカーネルの強制か、道具の判断かは確かめていない
-- 宣言済みのデバッガに利用者が認可を与えた後の、hardened runtime でない対象の扱い。認可が同じログインセッションの他のプロセスに共有されるか
-- 開発者モードを有効にした Mac (`DevToolsSecurity -enable`)。変わるのは利用者の認可の段で、満たすべき形の対象への要求は認可より前にカーネルが断るので、影響しない見込み (推定)
+- Apple の診断ツールで中身を取り出す経路のうち、試していないもの
+  - `--help` に載らないオプションや、`DYLD_` 以外の環境変数で、道具の出力の制限を外せるか
+  - 将来の版の道具の振る舞い (中身が出ないことは道具の作りに依る)
+  - Instruments と `xctrace` (Allocations 等)
+  - root が要る道具 (`tailspin`、`spindump`、`trace`、`ktrace`、`fs_usage`、`powermetrics`、`dtrace`)
+  - 道具が書く一時ファイルや、道具が使う XPC サービスを経由して中身が出るか
+  - 道具が出す「確保済みのブロックを指す値の場所」から秘密が漏れうるか (秘密の値がブロックのアドレスと一致する時だけ出る形なので、乱数の鍵ではまず起きないと見るが、推定)
+- 認可がある状態での、root のプロセスが降格して起動した対象への宣言済みのデバッガ (利用者が起動した対象では、認可があっても断られた)
+- 認可がログアウトで消えるか
+- 開発者モードを有効にした Mac (`DevToolsSecurity -enable`)。変わるのは利用者の認可の段で、満たすべき形の対象への要求は認可より前にカーネルが断るので、影響しない見込み (推定)。満たすべき形でない対象は、ダイアログ無しで読まれうる (推定)
 - カーネルのログに出る `declared read-only debugger` に当たる entitlement の名前と、ad-hoc 署名で自分に付けられるか
+- `com.apple.system-task-ports.read.safe` を ad-hoc 署名で自分に付けた時の扱い (`.read` は起動時に kill された)
 - Developer ID で署名した実物のバイナリのコアダンプ (観測は試験プログラムだけ)。`get-task-allow` のある対象で `ulimit -c` が 0 の時
 - Developer ID の designated requirement の ACL の項目を、同じ identifier と Team ID で hardened runtime なしに署名したビルドに差し込んだライブラリから読めるか (M3 の推定の部分)。System Keychain の項目での同じ観測
 - SIP を無効にした Mac での、表の各手段の結果
