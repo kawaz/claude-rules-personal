@@ -53,5 +53,7 @@
 本文は private リポにあり、索引だけをここに写す (privacy 側の `reference/_index.md` を更新したら同じ変更でこちらも更新する)。
 
 - [kawaz-identity](~/.local/share/repos/github.com/kawaz/privacy-personal/main/reference/kawaz-identity.md) — kawaz 本人に関する情報 (署名、所属、読み、メアド、各種サイトのアカウント等)。
-- [home-router-unifi](~/.local/share/repos/github.com/kawaz/privacy-personal/main/reference/home-router-unifi/_index.md) — 自宅ルータの設定ガイド- [tailscale-exit-node](~/.local/share/repos/github.com/kawaz/privacy-personal/main/reference/tailscale-exit-node.md) — auditor を exit node に使う時の設定と DNS の罠
+- [home-router-unifi](~/.local/share/repos/github.com/kawaz/privacy-personal/main/reference/home-router-unifi/_index.md) — 自宅ルータの設定ガイド
+- [tailscale-exit-node](~/.local/share/repos/github.com/kawaz/privacy-personal/main/reference/tailscale-exit-node.md) — auditor を exit node に使う時の設定と DNS の罠
+- [anthropic-agreements](~/.local/share/repos/github.com/kawaz/privacy-personal/main/reference/anthropic-agreements/_index.md) — Anthropic と個別に結んだ規約の控えと、利用時に守る条件。
 - [family](~/.local/share/repos/github.com/kawaz/privacy-personal/main/reference/family.md) — 家族の呼び名 (父 / こちゃ / なお) と family カレンダーの定例予定。
