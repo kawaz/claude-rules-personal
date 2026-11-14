@@ -1,6 +1,6 @@
 # webui の構成と画面の組み方
 
-kawaz 製の webui (管理画面・ダッシュボード・PWA) を作る時の構造と画面設計の規約。モダン CSS / JS の採否は memory の `webui-modern-platform-first` を読む。
+kawaz 製の webui (管理画面・ダッシュボード・PWA) を作る時の構造と画面設計の規約。モダン CSS / JS の採否は memory の `webui-modern-platform-first` を読む。個々の部品・機能の実装手順は reference の `modern-web-guides` で引く。
 
 ## 構成
 
