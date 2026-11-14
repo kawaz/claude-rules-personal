@@ -37,15 +37,14 @@ jj workspace add -r 'root()+ & ::main' ../artifacts
 cd ../artifacts && printf '*\n' > .gitignore && jj file track --include-ignored .gitignore && jj commit -m "artifacts: 既定で追跡しない枝 (残す物だけ jj file track --include-ignored)" .gitignore
 ```
 
-続けて VS Code の workspace ファイルを作る。名前は `{repo}.local.code-workspace` (グローバル gitignore の `*.local.*` に載るので commit されない。リポに追跡させる workspace ファイルは作らない):
+続けて VS Code の workspace ファイルを `main/` 直下に作る。名前は `{repo}.local.code-workspace` (グローバル gitignore の `*.local.*` に載るので commit されない。リポに追跡させる workspace ファイルは作らない):
 
-```jsonc
-// {repo}.local.code-workspace (main/ 直下)
+```json
 {
   "folders": [
     { "name": "@main", "path": "." },
     { "name": "@artifacts", "path": "../artifacts" },
-    { "name": "CONFIG", "path": "/Users/kawaz/.config/{app}" }, // {app}: XDG 置き場があれば実名に書き換える。無ければ無視されるので書き換え不要
+    { "name": "CONFIG", "path": "/Users/kawaz/.config/{app} XDG 置き場があれば実名に書き換える。無ければ無視されるので書き換え不要" },
     { "name": "DATA", "path": "/Users/kawaz/.local/share/{app}" },
     { "name": "STATE", "path": "/Users/kawaz/.local/state/{app}" },
     { "name": "rules-personal", "path": "/Users/kawaz/.local/share/repos/github.com/kawaz/claude-rules-personal/main" },
