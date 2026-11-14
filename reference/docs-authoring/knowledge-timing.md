@@ -2,11 +2,11 @@
 
 構造定義 (= どこに何を置くか) は reference の `docs-authoring/docs-layout`。ここは **いつ何を書くか** のタイミングと習慣。
 
-issue 運用は **[claude-local-issue plugin](https://github.com/kawaz/claude-local-issue)** が正本 (= write / read / update / list / migrate の 5 sub-command で frontmatter / INDEX / archive を一括管理)。ここでは plugin が前提とする運用上の判断軸 (= 何を / どこへ昇華するか) を定める。plugin が扱う status / frontmatter / archive の仕組みは plugin 側 `SKILL.md` / `docs/DESIGN.md` を参照。
+issue 運用は **[claude-local-issue plugin](https://github.com/kawaz/claude-local-issue)** が正本 (= issue ファイルは直接読み書きし、plugin の mod が frontmatter の正規化 / INDEX の生成 / archive への移動を行う)。ここでは plugin が前提とする運用上の判断軸 (= 何を / どこへ昇華するか) を定める。plugin が扱う status / frontmatter / archive の仕組みは plugin 側の README-ja.md と DR-0006 を参照。
 
 ## issue 解決時のフロー
 
-`docs/issue/<file>.md` の解決は **local-issue plugin の `update <slug> close` で行う** (= archive へ移動 + close_reason 記録、`status: resolved` 遷移)。close 前に、解決の性格に応じて以下に記録を残す:
+`docs/issue/<file>.md` の解決は **frontmatter の `status` を `resolved` か `discarded` にして `close_reason` を書く** ことで行う (= plugin が archive へ移動する)。close 前に、解決の性格に応じて以下に記録を残す:
 
 | 解決の性格 | 記録先 |
 |---|---|
@@ -15,14 +15,14 @@ issue 運用は **[claude-local-issue plugin](https://github.com/kawaz/claude-lo
 | 運用上の再発可能性がある (手順化しておきたい) | `docs/runbooks/<topic>.md` |
 | 経緯・試行錯誤・ハマり所を残したい | `docs/journal/YYYY-MM-DD-<slug>.md` |
 
-複数該当する場合は複数記録する。close 後の issue は `docs/issue/archive/` に物理移動し、frontmatter の全 timestamp + close_reason が DB として残る。`list` sub-command は archive を既定で除外するので、メインコンテキストからは「消えた」ように振る舞う一方、`grep -r docs/issue/archive/` で過去事例は探せる。
+複数該当する場合は複数記録する。close 後の issue は `docs/issue/archive/` に物理移動し、frontmatter の `close_reason` が残る。`INDEX.md` には載らないので、メインコンテキストからは「消えた」ように振る舞う一方、`grep -r docs/issue/archive/` で過去事例は探せる。
 
 ## issue 運用 (= plugin に委譲、原則だけ)
 
-- **frontmatter / status 遷移 / INDEX / archive** の機械的詳細は plugin が担う (正本は plugin の `SKILL.md` / `docs/DESIGN.md`)。手書きで frontmatter を作らない、INDEX も自動更新に任せる。
-- 仕掛中の issue は本文に `## TODO` checkbox を持たせて進捗を可視化 (`update <slug> status=wip` と併用)。
-- status 値は plugin が schema (`idea` / `open` / `wip` / `blocked` / `pending-sublimation` / `discarded` / `resolved`) を固定している。**状態遷移はユーザ意図**なので `update` sub-command の引数で明示的に渡す (自由記述で書かない)。
-- 完了は `update <slug> close` で `discarded` or `resolved` 遷移 + archive 自動移動。
+- **frontmatter の正規化 / INDEX / archive** の機械的詳細は plugin が担う (正本は plugin の README-ja.md と DR-0006)。INDEX.md は手で編集せず、生成に任せる。
+- 仕掛中の issue は本文に `## TODO` checkbox を持たせて進捗を可視化し、frontmatter の `status` を `wip` にする。
+- status 値は plugin が schema (`idea` / `open` / `wip` / `blocked` / `resolved` / `discarded`) を固定している。**状態遷移はユーザ意図**なので、frontmatter の `status` を書き換えて明示する (自由記述で書かない)。
+- 完了は `status` を `resolved` か `discarded` にして `close_reason` を書く。plugin が archive へ移動する。
 
 ## 並列作業時の journal 習慣
 

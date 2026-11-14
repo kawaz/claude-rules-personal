@@ -2,18 +2,7 @@
 title: "{タイトル}"
 status: open
 category: task
-created: YYYY-MM-DDTHH:MM:SS+09:00
-last_read:
-open_entered: YYYY-MM-DDTHH:MM:SS+09:00
-wip_entered:
-blocked_entered:
-pending_entered:
-discarded_entered:
-resolved_entered:
-discard_reason:
-pending_reason:
-close_reason:
-blocked_by:
+created: YYYY-MM-DD
 origin: "{自リポ TODO / 他プロジェクト依頼 (= 依頼元プロジェクト)}"
 ---
 
@@ -46,4 +35,4 @@ origin: "{自リポ TODO / 他プロジェクト依頼 (= 依頼元プロジェ�
 - 運用上の再発可能性: `runbooks/<topic>.md`
 - 経緯・ハマり所を残したい: `journal/YYYY-MM-DD-<slug>.md`
 
-解決時は plugin の `update <slug> close` で `docs/issue/archive/` へ移動 (= 削除ではない、履歴は DB として残る)。
+解決時は status を `resolved` か `discarded` にして `close_reason` を書けば、plugin が `docs/issue/archive/` へ移動する (= 削除ではない)。

@@ -59,7 +59,7 @@ docs/
 | DR 本体 | `decisions/DR-NNNN-template.md` |
 | DR INDEX | `decisions/INDEX.template.md` |
 | DR archive INDEX | `decisions/archive/INDEX.template.md` |
-| issue | `issue/YYYY-MM-DD-template.md` (claude-local-issue plugin の `write` が生成する形の参考。起票は `write` で行い、このテンプレから手書きしない) |
+| issue | `issue/YYYY-MM-DD-template.md` (このテンプレを写して `docs/issue/YYYY-MM-DD-<slug>.md` に書く。frontmatter の残りは claude-local-issue plugin が揃える) |
 | journal | `journal/YYYY-MM-DD-template.md` |
 | findings | `findings/YYYY-MM-DD-template.md` |
 | runbooks (汎用) | `runbooks/topic-template.md` |
@@ -83,7 +83,7 @@ docs/
 
 `issue/`:
 
-- 運用の正本は **[claude-local-issue plugin](https://github.com/kawaz/claude-local-issue)** (sub-command: `write` / `read` / `update` / `list` / `migrate`)。本節は plugin が前提とする運用方針 (= 何を / どこに置くか) のみ扱う。frontmatter / status 遷移 / archive の機械的詳細は plugin の `SKILL.md` / `docs/DESIGN.md`
+- issue は `docs/issue/YYYY-MM-DD-<slug>.md` を Read / Write / Edit で直接読み書きする。**[claude-local-issue plugin](https://github.com/kawaz/claude-local-issue)** (mod 1 つ) が tool の実行後に frontmatter の正規化、`INDEX.md` の生成、close した issue の `archive/` への移動を行う。本節は何を / どこに置くかの運用方針のみ扱い、frontmatter の欄・status・archive の機械的詳細は plugin の README-ja.md と DR-0006 が正本。`INDEX.md` は手で編集しない
 - 用途は (a) 自リポの TODO + (b) **他プロジェクトから受けた依頼/要望** (自リポを「依頼受付窓口」として運用) + (c) **ゆるいメモ置き場 / セッション跨ぎ議論記録** の 3 方向
 - 認識: **GitHub flow のような厳密な issue 回しではない、一段ゆるい運用**。具体的には以下のような使い方が想定される:
   - 比較的大きな改修アイデアで時間をかけたいもの (今すぐ手をつけないが頭の中に残しておくと邪魔なメモ)
@@ -93,11 +93,12 @@ docs/
 - 起票の「重さ」に幅を持たせて良い:
   - **small issue** (= 数行のメモ、1 セッションで解決可) も OK、過剰に構造化しなくて良い
   - **large issue** (= 設計検討込み長文、複数セッションで議論を追記しながら成熟させる) も OK
-  - frontmatter の管理は plugin の sub-command (= `write` / `update`) が担うので手書きしない
+  - frontmatter は `title` / `status` / `category` / `created` が要る (`created` と `title` はファイル名と見出しから補われる)。足りない値や不正な値は plugin が直すか指摘する
 - **他プロジェクトへ依頼する場合は相手プロジェクトの `docs/issue/`** に書く (自リポに書くと相手が見つけられない)。発端は別ローカルプロジェクト間での依頼受付として設計したもの
+- 他プロジェクトの `docs/issue/` に書いた時は、書いたセッションが相手リポでパスを絞って commit する (push は相手リポの決まりに従う)
 - 想定する「相手プロジェクト」は kawaz 自身が管理するリポに限定される。本ルールはその前提で設計されている
 - 相手リポが `docs/issue/` 慣習を持っていない場合は、依頼自体は新ルール (`docs/issue/YYYY-MM-DD-<slug>.md`) で起票し、同時に「docs/ 構造標準への移行依頼」を別 issue として相手リポに作成する (kawaz の自リポ群で揃える方針のため)
-- 解決した issue は plugin の **`update <slug> close`** で archive へ移動 (= `docs/issue/archive/<file>.md`、`status: resolved` 遷移、`close_reason` 記録)。frontmatter の全 timestamp が DB として残るので、過去経緯は `grep -r docs/issue/archive/` で参照可
+- 解決した issue は frontmatter の `status` を `resolved` か `discarded` にして `close_reason` を書く。plugin が `docs/issue/archive/<file>.md` へ移す。過去経緯は `grep -r docs/issue/archive/` で参照できる
 - archive 移動の前に、内容に応じて `decisions/` `runbooks/` `journal/` に記録を残す (reference の `docs-authoring/knowledge-timing` 参照)
 
 `journal/` と `findings/` の境界:

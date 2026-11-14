@@ -26,13 +26,12 @@ kawaz の全ローカルリポを
 
 2. **各リポ docs/issue の鮮度と旧形式検出**
    ```bash
-   # 旧形式 (frontmatter 不在 / INDEX 未登録) の一括検出は migrate、状況確認は list
-   # local-issue plugin: /local-issue:list (放置日数降順) / /local-issue:migrate (正本化)
+   # 一覧は各リポの docs/issue/INDEX.md を読む (local-issue plugin が生成する)
    for d in ~/.local/share/repos/github.com/kawaz/*/main; do
      ls "$d/docs/issue"/*.md >/dev/null 2>&1 && echo "$d に issue あり"
    done
    ```
-   放置が長い / 旧形式が残るリポは `local-issue:migrate` で正本化
+   INDEX.md が無い / frontmatter の形式が揃っていないリポは、そのリポで local-issue plugin の入ったセッションを起動すれば揃う
 
 3. **marketplace / plugins.json の参照整合**
    ```bash
