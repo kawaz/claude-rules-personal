@@ -6,14 +6,18 @@
 # 実行: artifacts-share new   [--dry-run] <ディレクトリ> [<期限>]   新しい URL で上げる (期限は省略すると 3d)
 #       artifacts-share sync  [--dry-run] <UUID>                     手元の中身に揃え直す
 #       artifacts-share prune [--dry-run] <UUID>                     公開を取り下げる
-# 出力: new / sync は記録と同じ形の JSON に url を足した 1 行 (stdout) {updated_at, uuid, ttl, path, url}。
+# 出力: new / sync は記録と同じ形の JSON に url と viewer_url を足した 1 行 (stdout) {updated_at, uuid, ttl, path, url, viewer_url}。
 #       url は共有先のディレクトリの URL で、共有する URL はその後ろに index.html 等を続けたもの。
+#       viewer_url は url の後ろに dirview.html を続けたもので、共有したファイルをツリーとプレビューで見るビューア。
+# 同梱: 手元のファイルに加えて、dirview-bundle (kawaz/dirview) が一時ディレクトリに作るビューア dirview.html と
+#       一覧 dirview-list.json を、共有の直下に上げる。一覧は上げるファイルと同じ集合であることを確かめてから上げる。
+#       共有するディレクトリの直下に同じ名前のファイルがあれば、何も上げずに止まる
 # 記録: 共有したディレクトリの .artifacts-share.jsonl に {updated_at, uuid, ttl, path} を残す (手元だけ。
 #       R2 は 1 ファイル単位で非公開にできないので、上げない。ドットファイルは一切上げない)
 # 前提: キーチェーンに 2 項目があること (作り方は claude-rules-personal の reference artifacts/share)。
 #         -s artifacts-share -a settings  設定の JSON {account_id, bucket, public_url, token_id, owners} (秘密ではない)
 #         -s artifacts-share -a r2-token  このバケットのオブジェクトの読み書きだけを許した API トークン (秘密)
-#       curl (--aws-sigv4) と jq があること。
+#       curl (--aws-sigv4) と jq があること。kawaz/dirview が clone してあり (DIRVIEW_BUNDLE)、bun があること。
 # 規約: 個人情報・秘密が写るものは、上げる前に kawaz に確認する。
 set -euo pipefail
 
@@ -32,6 +36,10 @@ readonly REPOS_ROOT="${XDG_DATA_HOME:-$HOME/.local/share}/repos/github.com"
 readonly RECORD=".artifacts-share.jsonl"
 readonly UUID_RE='^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
 readonly PROG="${0##*/}"
+# ビューアと一覧を作る単体スクリプトと、それが書く 2 ファイルの名前 (共有の直下に置く)
+readonly DIRVIEW_BUNDLE="$REPOS_ROOT/kawaz/dirview/main/bin/dirview-bundle"
+readonly VIEWER_NAME="dirview.html"
+readonly VIEWER_LIST="dirview-list.json"
 
 usage() {
   cat <<EOF
@@ -48,12 +56,16 @@ Subcommands:
                              上げ直したファイルの期限は、その時点から数え直しになる。URL は変わらない
   prune <UUID>               公開を取り下げる (リモートのファイルと手元の記録を消す)
 
+new / sync は、手元のファイルに加えてビューア $VIEWER_NAME と一覧 $VIEWER_LIST を共有の直下に上げる
+(作るのは $DIRVIEW_BUNDLE。bun が要る)。
+共有するディレクトリの直下に同じ名前のファイルがあれば、何も上げずに止まる。
+
 Options:
-  --dry-run  何をするかを出すだけで、上げも消しもしない
+  --dry-run  何をするかを出すだけで、上げも消しもしない (ビューアと一覧は一時ディレクトリに作って捨てる)
   --help     このヘルプを出す
 
-new / sync の出力は JSON 1 行 {updated_at, uuid, ttl, path, url} (記録 $RECORD の 1 行に url を足した形)。
-共有する URL は、url の後ろに index.html 等を続けたもの。
+new / sync の出力は JSON 1 行 {updated_at, uuid, ttl, path, url, viewer_url} (記録 $RECORD の 1 行に url と viewer_url を足した形)。
+共有する URL は、ビューアで見せるなら viewer_url (url の後ろに $VIEWER_NAME)、自前のページを見せるなら url の後ろに index.html 等を続けたもの。
 公開 URL は推測できない UUID を含むが、知った人は誰でも見られる。
 個人情報・秘密が写るものは、上げる前に kawaz に確認する。
 EOF
@@ -104,8 +116,8 @@ content_type() {
 
 now_utc() { date -u '+%Y-%m-%dT%H:%M:%SZ'; }
 
-# stdout に出す 1 行: 記録と同じ形の JSON に url を足したもの
-emit() { jq -c --arg url "$2" '. + {url: $url}' <<<"$1"; }
+# stdout に出す 1 行: 記録と同じ形の JSON に url と viewer_url (同梱したビューアの URL) を足したもの
+emit() { jq -c --arg url "$2" --arg viewer "$VIEWER_NAME" '. + {url: $url, viewer_url: ($url + $viewer)}' <<<"$1"; }
 
 # jsonl を、同じディレクトリの一時ファイル経由で置き換える (途中で止まっても元の記録を壊さない)。
 # 一時ファイルもドットファイルなので、残っても上がらない。結果が空ならファイルごと消す
@@ -172,7 +184,8 @@ resolve_allowed() {
   printf '%s' "$real"
 }
 
-# 上げるファイルを files[] / types[] に集める。ドットファイル (記録の jsonl を含む) はここで必ず除く
+# 上げるファイルを files[] (共有の中の相対パス) / types[] (MIME 型) / srcs[] (読み出し元の実パス) に集める。
+# 3 つは添字で揃える。ドットファイル (記録の jsonl を含む) はここで必ず除く
 collect() {
   local real=$1 f rel ct links
   # symlink はリンク先の中身まで公開してしまうので、1 つでもあれば止める
@@ -180,6 +193,7 @@ collect() {
   [[ -z $links ]] || die "symlink がある (artifacts の中に symlink は置かない): ${links//$'\n'/, }"
   files=()
   types=()
+  srcs=()
   local listing
   # 一覧は変数に受けてから使う (プロセス置換で読むと、find の失敗で止まらず一部だけ上げて進む)
   listing=$(find "$real" -type f -print0 | sort -z | tr '\0' '\036') || die "ディレクトリの中を読めない: $real"
@@ -196,8 +210,54 @@ collect() {
     fi
     files+=("$rel")
     types+=("$ct")
+    srcs+=("$f")
   done <<<"$listing"
   ((${#files[@]} > 0)) || die "上げるファイルが無い: $real"
+}
+
+# --- 同梱するビューア (dirview-bundle が作る dirview.html と dirview-list.json) ---
+# 作る先は一時ディレクトリで、終了時に必ず消す (共有するディレクトリには何も書かない)
+bundle_dir=""
+cleanup() { [[ -z $bundle_dir ]] || rm -rf -- "$bundle_dir"; }
+trap cleanup EXIT
+# シグナルで止まったときも EXIT の trap を通して片付ける
+trap 'exit 129' HUP
+trap 'exit 130' INT
+trap 'exit 143' TERM
+
+# collect の後で呼ぶ。ビューアと一覧を作り、files[] / types[] / srcs[] の末尾に足す (最後に上がるので、
+# 一覧が指すファイルは一覧より先に上がっている)。作れなければ、何も上げ下ろしする前に止まる
+bundle_viewer() {
+  local real=$1 out err name
+  [[ -e $DIRVIEW_BUNDLE ]] ||
+    die "ビューアを作る dirview-bundle が無い: $DIRVIEW_BUNDLE (kawaz/dirview を ${DIRVIEW_BUNDLE%/bin/*} に clone する。何も上げ下ろししていない)"
+  [[ -f $DIRVIEW_BUNDLE && -x $DIRVIEW_BUNDLE ]] ||
+    die "dirview-bundle を実行できない: $DIRVIEW_BUNDLE (実行権限のある通常ファイルか確かめる。何も上げ下ろししていない)"
+  [[ -z $bundle_dir ]] || die "内部エラー: ビューアを 2 度作ろうとした"
+  bundle_dir=$(mktemp -d) || die "一時ディレクトリを作れない"
+  # dirview-bundle の出力先は空のディレクトリ (out/) にし、照合用のファイル名の一覧 (names) はその外に置く
+  out=$bundle_dir/out
+  mkdir "$out" || die "一時ディレクトリを作れない: $out"
+  # 成功時の dirview-bundle の stderr (一時ディレクトリ名と件数) は出さない。失敗時はそのまま見せて補う
+  if ! err=$("$DIRVIEW_BUNDLE" "$real" "$out" 2>&1); then
+    printf '%s\n' "$err" >&2
+    die "ビューアを作れなかったので止めた (何も上げ下ろししていない)。上の dirview-bundle のエラーに従う: 共有するディレクトリの直下の $VIEWER_NAME / $VIEWER_LIST は改名する、bun が無ければ入れる、released viewer not found なら dirview リポで just release する"
+  fi
+  for name in "$VIEWER_NAME" "$VIEWER_LIST"; do
+    [[ -f $out/$name && ! -L $out/$name ]] || die "dirview-bundle が $name を作らなかった (何も上げ下ろししていない)"
+  done
+  # 一覧は公開されるので、載るファイル (= ビューアから見える名前) が上げるファイルと同じ集合であることを確かめる
+  # (規則がずれて、上げないファイルの名前が一覧から漏れる・一覧に無いファイルが上がるのを防ぐ)。
+  # ファイル名は NUL 区切りのファイルで渡す (引数で渡すと、ファイルが多いとき引数の長さの上限に当たる)
+  printf '%s\0' "${files[@]}" >"$bundle_dir/names" || die "一時ファイルに書けない: $bundle_dir/names"
+  # shellcheck disable=SC2016 # $d / $names は jq の変数
+  jq -e --rawfile names "$bundle_dir/names" \
+    '[.dirs | to_entries[] | .key as $d | .value[] | select(.is_dir | not) | $d + .name] | sort
+     == ($names | split("\u0000") | .[:-1] | sort)' <"$out/$VIEWER_LIST" >/dev/null ||
+    die "dirview-bundle の一覧と上げるファイルが食い違う (何も上げ下ろししていない。dirview-bundle と $PROG の除外の規則を揃える)"
+  files+=("$VIEWER_NAME" "$VIEWER_LIST")
+  types+=("$(content_type "$VIEWER_NAME")" "$(content_type "$VIEWER_LIST")")
+  srcs+=("$out/$VIEWER_NAME" "$out/$VIEWER_LIST")
 }
 
 # --- R2 (S3 互換 API) ---
@@ -260,12 +320,14 @@ remote_keys() {
   done
 }
 
+# files[] の順に上げる。中身は srcs[] (手元のファイルか、同梱するビューアの一時ファイル) から読む
 upload_all() {
-  local prefix=$1 real=$2 i key
+  local prefix=$1 i key
+  ((${#files[@]} == ${#srcs[@]} && ${#files[@]} == ${#types[@]})) || die "内部エラー: 上げるファイルの一覧の長さが揃っていない"
   for i in "${!files[@]}"; do
     key="$prefix/${files[$i]}"
     printf 'up: %s  (%s)\n' "$key" "${types[$i]}" >&2
-    s3 -o /dev/null -T "$real${files[$i]}" -H "Content-Type: ${types[$i]}" "$S3_ENDPOINT/$BUCKET/$(enc_key "$key")" >/dev/null ||
+    s3 -o /dev/null -T "${srcs[$i]}" -H "Content-Type: ${types[$i]}" "$S3_ENDPOINT/$BUCKET/$(enc_key "$key")" >/dev/null ||
       die "上げられなかった: ${files[$i]} (やり直すなら $PROG sync ${prefix#*/})"
   done
 }
@@ -308,6 +370,7 @@ cmd_new() {
   valid_ttl "$ttl" || die "期限は ${TTLS[*]} のどれか: $ttl"
   real=$(resolve_allowed "$1")
   collect "$real"
+  bundle_viewer "$real"
   uuid=$(uuidgen | tr '[:upper:]' '[:lower:]')
   prefix=$(share_prefix "$ttl" "$uuid")
   url="$URL_BASE/$prefix/"
@@ -316,14 +379,14 @@ cmd_new() {
     '{updated_at: $n, uuid: $u, ttl: $t, path: $p}')
   if $dry_run; then
     for i in "${!files[@]}"; do printf '%s  (%s)\n' "$prefix/${files[$i]}" "${types[$i]}" >&2; done
-    warn "dry-run: ${#files[@]} ファイルを上げる予定 (上げていない)。消えるのは $(expire_date "$ttl") ごろ"
+    warn "dry-run: ${#files[@]} ファイル (ビューアと一覧を含む) を上げる予定 (上げていない)。消えるのは $(expire_date "$ttl") ごろ"
     emit "$rec" "$url"
     return 0
   fi
   # 上げる前に記録する。途中で失敗しても、記録から sync でやり直せ、prune で消せる
   printf '%s\n' "$rec" >>"$real$RECORD"
-  upload_all "$prefix" "$real"
-  warn "${#files[@]} ファイルを上げた (記録: $real$RECORD)。消えるのは $(expire_date "$ttl") ごろ"
+  upload_all "$prefix"
+  warn "${#files[@]} ファイル (ビューアと一覧を含む) を上げた (記録: $real$RECORD)。消えるのは $(expire_date "$ttl") ごろ"
   emit "$rec" "$url"
 }
 
@@ -342,9 +405,10 @@ cmd_sync() {
   # 記録はそれが指すディレクトリの直下にあるはず。食い違うなら (記録だけ動かした) どちらが正しいか決められない
   [[ $real$RECORD == "$(realpath "${jsonl%/*}")/$RECORD" ]] || die "記録の場所と記録の path が食い違う: $jsonl (path: $path)"
   collect "$real"
+  bundle_viewer "$real"
   prefix=$(share_prefix "$ttl" "$uuid")
   url="$URL_BASE/$prefix/"
-  # リモートにあって手元に無いもの (手元で消したファイル) を集める。
+  # リモートにあって手元に無いもの (手元で消したファイル) を集める。同梱するビューアと一覧は files[] に入っているので消さない。
   # 一覧は変数に受けてから使う (プロセス置換で読むと、一覧の失敗で止まらず「消すもの無し」と誤って進む)
   load_credentials
   local -A want=()
@@ -357,17 +421,17 @@ cmd_sync() {
   if $dry_run; then
     for i in "${!files[@]}"; do printf 'up: %s  (%s)\n' "$prefix/${files[$i]}" "${types[$i]}" >&2; done
     for key in "${stale[@]}"; do printf 'rm: %s\n' "$key" >&2; done
-    warn "dry-run: ${#files[@]} ファイルを上げ直し、${#stale[@]} ファイルを消す予定 (何もしていない)"
+    warn "dry-run: ${#files[@]} ファイル (ビューアと一覧を含む) を上げ直し、${#stale[@]} ファイルを消す予定 (何もしていない)"
     emit "$rec" "$url"
     return 0
   fi
   # 全ファイルを上げ直してから、手元に無いものを消す (途中で止まっても、ページが欠けた状態を作らない)。
   # 全部を上げ直すので、どのファイルも期限がこの時点から数え直しになる
-  upload_all "$prefix" "$real"
+  upload_all "$prefix"
   for key in "${stale[@]}"; do delete_key "$prefix" "$key"; done
   # shellcheck disable=SC2016 # $u / $n は jq の変数 (rewrite_record が --arg で渡す)
   rewrite_record "$jsonl" 'if .uuid == $u then .updated_at = $n else . end' "$uuid"
-  warn "${#files[@]} ファイルを上げ直し、${#stale[@]} ファイルを消した。消えるのは $(expire_date "$ttl") ごろ"
+  warn "${#files[@]} ファイル (ビューアと一覧を含む) を上げ直し、${#stale[@]} ファイルを消した。消えるのは $(expire_date "$ttl") ごろ"
   # 出力は書き換えた後の記録 (updated_at が今回の時刻) から作る
   rec=$(jq -c --arg u "$uuid" 'select(.uuid == $u)' "$jsonl" | head -1)
   emit "$rec" "$url"
