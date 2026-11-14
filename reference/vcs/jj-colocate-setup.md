@@ -45,19 +45,19 @@ cd ../artifacts && printf '*\n' > .gitignore && jj file track --include-ignored 
   "folders": [
     { "name": "@main", "path": "." },
     { "name": "@artifacts", "path": "../artifacts" },
-    { "name": "CONFIG", "path": "${XDG_CONFIG_HOME:-$HOME/.config}/${APP}" },
-    { "name": "DATA", "path": "${XDG_DATA_HOME:-$HOME/.local/share}/${APP}" },
-    { "name": "STATE", "path": "${XDG_STATE_HOME:-$HOME/.local/state}/${APP}" },
-    { "name": "rules-personal", "path": "$HOME/.local/share/repos/github.com/kawaz/claude-rules-personal/main" },
-    { "name": "privacy-personal", "path": "$HOME/.local/share/repos/github.com/kawaz/privacy-personal/main" }
+    { "name": "CONFIG", "path": "/Users/kawaz/.config/{app}" },
+    { "name": "DATA", "path": "/Users/kawaz/.local/share/{app}" },
+    { "name": "STATE", "path": "/Users/kawaz/.local/state/{app}" },
+    { "name": "rules-personal", "path": "/Users/kawaz/.local/share/repos/github.com/kawaz/claude-rules-personal/main" },
+    { "name": "privacy-personal", "path": "/Users/kawaz/.local/share/repos/github.com/kawaz/privacy-personal/main" }
   ],
   "settings": {}
 }
 ```
 
-- この 7 行をそのまま全リポに書く。無いパスは無視されるので、XDG 置き場を使わないリポでも CONFIG / DATA / STATE の行を消さない (置き場ができた時にそのまま出る)
+- この 7 行をそのまま全リポに書く (`{app}` だけそのプロジェクトの XDG 置き場の名前に置き換える)。無いパスは無視されるので、XDG 置き場を使わないリポでも CONFIG / DATA / STATE の行を消さない (置き場ができた時にそのまま出る)
 - 相対パスで書くのは自分のリポの workspace (`.`、`../<name>`) だけ。それ以外 (XDG 置き場、rules / privacy、関連リポ) は絶対パスで書く (離れた場所を相対で書くと、どこを指すか読み取りにくい)
-- workspace ファイルでは変数展開されないので、作成時に `$HOME`、`${XDG_*_HOME}`、`${APP}` を実値に展開して書く (追跡されないファイルなので sanitize の対象外)
+- workspace ファイルでは変数展開されないので、パスは実値で書く (`$HOME` や `${XDG_*_HOME}` を書かない)
 - 恒久 workspace を足したら `{ "name": "@<name>", "path": "../<name>" }` を足す。関連リポを一緒に開きたい時は `{ "name": "<repo>", "path": "<そのリポの main/ の絶対パス>" }` を足す
 
 ## artifacts workspace (ブラウザで見る生成物の置き場)
