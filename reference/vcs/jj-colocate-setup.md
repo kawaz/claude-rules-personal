@@ -94,10 +94,11 @@ echo "guard: 上位への .jj 探索を止める (実体は main/)" > .jj/README
 | 作業場所 | 作り方 | 中で使える VCS |
 |---|---|---|
 | `main/` | (実体) | **jj を使う** (git も動くが統合は jj で) |
-| 恒久 workspace `<name>/` | `main/` 内から `jj workspace add ../<name>` | **jj** (自分の workspace を正しく掴む。実測済み) |
+| 恒久 workspace `<name>/` | `main/` 内から `jj workspace add ../<name>` | **jj を使う** (workspace も colocate なので git・gh も動く。下記) |
 | 使い捨て `agent-<id>/` | WorktreeCreate hook (自動) | **git のみ** |
 | 手動の git worktree | `git worktree add ../<name> -b <branch>` | **git のみ** |
 
+- **恒久 workspace も colocate にする**: colocate な `main/` から `jj workspace add` で作った workspace は colocate で作られる (`.git` が `gitdir: ../main/.git/worktrees/<name>` を指すファイルになり、git の HEAD は detached。実測済み)。colocate でない workspace では `gh` / `git` が親ガードの `.git` に当たって止まるので、`jj git colocation status` が「not colocated」と答える workspace では、その中で `jj git colocation enable` を 1 回実行する (冪等で、既に colocate なら何もしない)。`jj workspace forget` は対応する git worktree の登録も消す (実測済み)
 - **git worktree の中で jj を叩かない**: git worktree は `.jj` を持たないため、jj はリポを見つけられずエラー停止する (親ガードのおかげで main 誤爆はしないが作業不能)。worktree 内の作業・コミットは git で行う
 - **main への統合は jj で行う** (`jj bookmark set main -r <rev>` 等)。jj 操作後の main/ の git HEAD は detached になるため (実測済み)、`git merge` は使えない。git worktree で作った branch のコミットは jj 側から change として見えるので、jj で main に取り込む
 - colocate なので jj bookmark と git branch は自動同期する (`jj bookmark set main` → `git branch` の main も同じ commit を指す。実測済み)
