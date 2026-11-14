@@ -43,22 +43,21 @@ cd ../artifacts && printf '*\n' > .gitignore && jj file track --include-ignored 
 // {repo}.local.code-workspace (main/ 直下)
 {
   "folders": [
-    { "name": "{repo}@{ws}", "path": "../../../{owner}/{repo}/{ws}" },
-    { "name": "{repo}@artifacts", "path": "../../../{owner}/{repo}/artifacts" },
-    // アプリのリポなら、そのアプリの XDG 置き場を大文字の名前で常に並べる (無いものはツリーに何も出ないだけなので存在確認は要らない)。
-    // workspace ファイルでは変数展開されないので、作成時に ${XDG_*_HOME} と ${APP} を実値に展開して書く
+    { "name": "@main", "path": "." },
+    { "name": "@artifacts", "path": "../artifacts" },
     { "name": "CONFIG", "path": "${XDG_CONFIG_HOME:-$HOME/.config}/${APP}" },
     { "name": "DATA", "path": "${XDG_DATA_HOME:-$HOME/.local/share}/${APP}" },
     { "name": "STATE", "path": "${XDG_STATE_HOME:-$HOME/.local/state}/${APP}" },
-    { "name": "CACHE", "path": "${XDG_CACHE_HOME:-$HOME/.cache}/${APP}" }
+    { "name": "rules-personal", "path": "../../claude-rules-personal/main" },
+    { "name": "privacy-personal", "path": "../../privacy-personal/main" }
   ],
-  "settings": {
-    "prettier.enable": false
-  }
+  "settings": {}
 }
 ```
 
-自分のリポも `.` でなく `../../../{owner}/{repo}/{ws}` (main/ から見て repo → owner → github.com の 3 段上) で書く (workspace ファイルごと別リポにコピーした時に name と path の対応が崩れないため)。関連リポや設定ディレクトリを一緒に開きたい時は `folders` に同じ形で足す (`$HOME` 配下の設定は絶対パスでよい。追跡されないファイルなので sanitize の対象外)。
+- この 7 行をそのまま全リポに書く。無いパスは無視されるので、XDG 置き場を使わないリポでも CONFIG / DATA / STATE の行を消さない (置き場ができた時にそのまま出る)
+- CONFIG / DATA / STATE はそのプロジェクトの XDG 置き場。workspace ファイルでは変数展開されないので、作成時に `${XDG_*_HOME}` と `${APP}` を実値の絶対パスに展開して書く (追跡されないファイルなので sanitize の対象外)
+- 恒久 workspace を足したら `{ "name": "@<name>", "path": "../<name>" }` を足す。関連リポを一緒に開きたい時は `{ "name": "<repo>", "path": "../../<repo>/main" }` の形で足す
 
 ## artifacts workspace (ブラウザで見る生成物の置き場)
 
