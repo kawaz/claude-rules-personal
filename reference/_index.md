@@ -28,6 +28,7 @@
 - [duckdb](duckdb/_index.md) — 計測・ログを溜めて DuckDB で集計する置き方 (日次・月次の zstd Parquet、ブラウザの DuckDB-WASM のダッシュボード)。
 - [proxy-dump-design](proxy-dump-design/_index.md) — proxy / gateway / LB に通信の一時ダンプ (時限・容量上限・自動削除つきで request / response をファイルに残す口) を付ける実装パターン。
 - [auth-patterns](auth-patterns/_index.md) — 認証 (passkey 登録、peer 間相互認証、webhook 署名、自分の endpoint の確定) の設計パターン。
+- [crypto-key-management-glossary](crypto-key-management-glossary.md) — 暗号と鍵管理の用語集 (KDF、AEAD、鍵の包み方、HPKE、署名、PAKE、SE / TPM、FIDO。用語ごとの保証・弱点・新規開発での推奨)。
 - [macos-process-protection](macos-process-protection.md) — macOS で秘密 (鍵、token、判定の結論) をメモリに持つ daemon / agent / CLI を、同じ uid の他のプロセスから守る最低限の条件と、守りを確かめる時の決まり (hardened runtime, entitlement, Keychain の ACL)。
 - [bark-push](bark-push.md) — ユーザへのスマホ通知をアプリに組み込みたい時に読む。
 - [local-translate](local-translate.md) — 英文をクラウドを使わずに日本語へ訳したい時に読む (translate-server、OpenAI 互換 API、`chat_template_kwargs`、段落分割の指針)。
