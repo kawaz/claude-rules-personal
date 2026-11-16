@@ -88,9 +88,18 @@ warn() { printf '%s: %s\n' "$PROG" "$1" >&2; }
 # 拡張子から MIME 型を決める。macOS の file --mime-type は CSS / JS を text/plain と判定するので使わない
 content_type() {
   local name=${1##*/} ext
+  # 拡張子の無い、中身がテキストと決まっている名前
+  case $name in
+    README | LICENSE | NOTICE | CHANGELOG | Makefile | justfile | Dockerfile) echo "text/plain; charset=utf-8"; return 0 ;;
+  esac
   [[ $name == *.* ]] || return 1
   ext=$(printf '%s' "${name##*.}" | tr '[:upper:]' '[:lower:]')
   case $ext in
+    # ソースコードと設定は text/plain で出す (ブラウザはそのまま表示するだけで、実行も解釈もしない)
+    ts | tsx | jsx | cjs | mts | cts | py | rb | rs | go | java | kt | swift | c | h | cc | cpp | hpp | cs | php | lua | sql | \
+      sh | bash | zsh | fish | toml | yaml | yml | ini | conf | cfg | properties | diff | patch | \
+      tsv | jsonl | ndjson | lock | mbt | nix | tf | vue | svelte | astro | scss | sass | less | graphql | proto | tex | rst | adoc | org)
+      echo "text/plain; charset=utf-8" ;;
     html | htm) echo "text/html; charset=utf-8" ;;
     css) echo "text/css; charset=utf-8" ;;
     js | mjs) echo "text/javascript; charset=utf-8" ;;

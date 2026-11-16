@@ -93,7 +93,7 @@ new したディレクトリの直下に、共有 1 件につき 1 行 `{updated
 
 - **symlink** が 1 つでもあれば、何も上げずに止まる (リンク先の中身まで公開してしまうため。artifacts workspace にはもともと置かない)
 - **ドットファイル** (`.DS_Store`、記録の jsonl 等) と、ドットで始まるディレクトリの中は上げない (警告を出して飛ばす)
-- **MIME 型が分からない拡張子**は `application/octet-stream` で上げ、警告を出す (ブラウザでは開かずダウンロードになる)。拡張子から決めるのは html / css / js / mjs / json / map / txt / log / md / csv / svg / png / jpg / gif / webp / avif / ico / pdf / woff / woff2 / mp4 / webm。`Content-Type` を付けないと全部ダウンロードになり CSS / JS も効かないので、足すときはスクリプトの `content_type` に足す (macOS の `file --mime-type` は CSS / JS を `text/plain` にするので使わない)
+- **MIME 型が分からない拡張子**は `application/octet-stream` で上げ、警告を出す (ブラウザでは開かずダウンロードになる)。拡張子から決めるのは html / css / js / mjs / json / map / txt / log / md / csv / svg / png / jpg / gif / webp / avif / ico / pdf / woff / woff2 / mp4 / webm。ソースコードと設定の拡張子 (ts / py / rs / go / sh / toml / yaml / diff 等) と、拡張子の無い README / LICENSE / Makefile / justfile / Dockerfile 等は `text/plain` で上げる (ブラウザはそのまま表示する)。`Content-Type` を付けないと全部ダウンロードになり CSS / JS も効かないので、足すときはスクリプトの `content_type` に足す (macOS の `file --mime-type` は CSS / JS を `text/plain` にするので使わない)
 
 ## 置き場の中身
 
