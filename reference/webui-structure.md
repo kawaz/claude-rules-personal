@@ -8,7 +8,7 @@ kawaz 製の webui (管理画面・ダッシュボード・PWA) を作る時の�
 - **ビルドしてよい**。bun なら起動時の `Bun.build` でメモリ上に bundle する形で、成果物をリポに置かずに済む。サーバ側テンプレート + 共通 CSS でもよい。「静的 HTML + fetch で DOM を組む」をページごとに書くのは避ける
 - クライアント側も API の応答はスキーマで parse してから使う (TypeScript の水準は rule `typescript-typing`)
 - 静的ファイルは内容 hash 付き URL (`?v=<hash>`) + `Cache-Control: no-cache` + ETag。HTML と JS の版ずれを検出したら「再読み込み」を促す
-- 外部フォント・CDN は使わない (tailnet 内で外に出ないため)。system-ui 系で組む
+- 外部フォント・CDN は既定では使わない (tailnet 内で外に出ないため)。system-ui 系で組む。大きなライブラリを必要な時だけ読む場合は、版とハッシュ (SRI) を固定し、利用者の操作で読み込む形なら使ってよい
 
 ## 画面の組み方
 
