@@ -1,14 +1,13 @@
 # ロードリストの規律 (role-main)
 
-統括メインがセッション開始時に読むものは、3 段のロードリストで決まる。各段の索引がそのまま「何を読むか」の正本になる。
+統括メインがセッション開始時に読むものは、2 段のロードリストで決まる。各段の索引がそのまま「何を読むか」の正本になる。
 
 | 段 | 場所 | 内容 |
 |---|---|---|
 | 段 1 | claude-rules-personal の `reference/role-main/_index.md` | 面によらず共通 |
 | 段 2 | 現在の面の overlay ルールリポの `reference/role-main/_index.md` | その面の業務知識 |
-| 段 3 | cwd のプロジェクトの `CLAUDE.md` | そのプロジェクトの起動時手順 |
 
-段 1 → 段 2 → 段 3 の順に辿る。段 2 の overlay のパスは、その面の rule が案内する (面の判別と越境は `claude-config-dir-isolation` rule)。
+段 1 → 段 2 の順に辿る。プロジェクト固有の指示は cwd の `CLAUDE.md` に書く (ハーネスが自動で読み込むので、ロードリストには載せない)。段 2 の overlay のパスは、その面の rule が案内する (面の判別と越境は `claude-config-dir-isolation` rule)。
 
 worker / reviewer role はこのリストを読まない (必要なものを agent 定義の frontmatter で明示指定する)。
 

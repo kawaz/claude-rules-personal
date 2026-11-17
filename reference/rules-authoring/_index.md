@@ -8,7 +8,7 @@ rule / skill / 参照知識 (reference / memory / privacy) を書く・移す・
   reference の構成, トピックを作る, 分割, scripts を同梱, templates, 索引に載せない, 見つからない, rg で探す
 - [index-conventions](index-conventions.md) — 索引エントリの書式と発火語、本文と索引の 1:1、private 層の写し、lint の検査項目。
   _index.md, 索引, 発火語, 索引漏れ, lint-rules, FATAL, dead wikilink, .lint-external-slugs
-- [role-main-loading](role-main-loading.md) — 3 段のロードリスト、必読 / 必要時の 2 節構成、必要時から必読への昇格。
+- [role-main-loading](role-main-loading.md) — 2 段のロードリスト、必読 / 必要時の 2 節構成、必要時から必読への昇格。
   ロードリスト, role-main, 必読, 必要時, 段 1, 段 2, 昇格, 読んでない
 - [migration](migration.md) — rule / skill を reference へ降ろす手順、参照の書き換えと skill 削除、配布の差。
   reference へ移す, skill をやめる, 降ろす, plugin-release, 反映されない, 触ったついで移行

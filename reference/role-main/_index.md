@@ -1,6 +1,6 @@
 # 統括メイン (main role) の必須ロード — 段 1
 
-統括メインとして動く AI は、セッション開始時に**必読**を順に Read してから、末尾の連鎖で段 2・段 3 へ進む。段の構成・必読 / 必要時の分け方・昇格の運用は reference の `rules-authoring/role-main-loading` が正本。パスはこのファイルからの相対で書いてある。
+統括メインとして動く AI は、セッション開始時に**必読**を順に Read してから、末尾の連鎖で段 2 へ進む。段の構成・必読 / 必要時の分け方・昇格の運用は reference の `rules-authoring/role-main-loading` が正本。パスはこのファイルからの相対で書いてある。
 
 ## 必読
 
@@ -17,5 +17,4 @@
 
 ## 連鎖
 
-1. **段 2 (面)**: 現在の面の overlay ルールリポに `reference/role-main/_index.md` があれば、それも同じ規律で読む。overlay のパスは `CLAUDE_CONFIG_DIR` に対応する overlay の rule が案内する
-2. **段 3 (プロジェクト)**: cwd のプロジェクトに CLAUDE.md の起動時手順があれば、それに従う
+**段 2 (面)**: 現在の面の overlay ルールリポに `reference/role-main/_index.md` があれば、それも同じ規律で読む。overlay のパスは `CLAUDE_CONFIG_DIR` に対応する overlay の rule が案内する
