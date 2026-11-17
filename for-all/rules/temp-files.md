@@ -7,4 +7,4 @@
 - **`TMPDIR` が `tmp.local/` の下を向いていない時**: `tmp.local/<セッション id>/` を自分で作って使う (既にあればそのまま使う)
 - **worker を使う時**: worker も同じ `$TMPDIR` を使う。並行する worker どうしで固定名がぶつからないよう、worker ごとにディレクトリを分ける (worker が `mktemp -d` するか、親が実パスをプロンプトに書く)
 - **テストコード**: `mkdtemp` 等のランダム名の一時ディレクトリを使い、終わったら片付ける (他の環境でも走るので期限を当てにしない)
-- **Unix socket**: パス長制限 (sun_path) は bind / connect に渡すパス文字列の長さ制限。cwdからの相対パスでよくsymlinkで短くすれば良い。TMPDIRの長さで先に心配するな。
+- **Unix socket**: パス長制限 (sun_path) は bind / connect に渡すパス文字列の長さ制限。cwdからの相対パスでよくsymlinkで短くすれば良い。TMPDIRの長さで先に心配するな。手の選び方と試験の書き方は reference の `unix-socket-path` を読む。
