@@ -11,4 +11,4 @@ fable と mythos の違いは、dual-use の領域への追加の制限 (censor)
 
 2026-11-17 時点の該当: procline、pam-passkey、cache-warden など。
 
-**How to apply:** これらのプロジェクトでセッションを起動する・引き継ぐ時は、model に mythos を選ぶ (「mythos で続けてよいか」と聞かない)。ccmsg の `launch` が mythos を受け付けない時は、そのセッションに載っている ccmsg の module が古い (v0.275.0 より前)。セッションの再起動か、webui からの起動で通る。
+**How to apply:** これらのプロジェクトでセッションを起動する・引き継ぐ時は、model に mythos を選ぶ (「mythos で続けてよいか」と聞かない)。
