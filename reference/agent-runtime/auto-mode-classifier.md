@@ -31,7 +31,8 @@ auto mode では tool call を classifier (別モデル) が審査する。何�
 
 - server-side review (gateway 経由でも env 未設定で既定 on、2.1.319 で実測。2.1.323 は anthropic 経路で `[server-classifier]` の fallback 行が出ないことまで確認): session の model request の `safeguards` 欄で頼み、応答の `safeguard_results` で判定が返る。別 call は無い。transcript の assistant に `serverClassifierRequest` が付くのが頼んだ印
 - server が判定を返さない時 (gateway の openai 経路を通った main / subagent):
-  - feature flag と telemetry を止めていない環境 (kawaz の今の gateway 構成): その 1 本で以後プロセス全体が local classifier に切り替わる (ラッチ、再起動で戻る)。main も課金対象の local 判定になる。拒否 (fail closed) にはならない (debug log `[server-classifier] ... server_no_result`。openai 経路の main で 2.1.323 で実測)
+  - feature flag と telemetry を止めていない環境 (kawaz の今の gateway 構成): その 1 本で以後プロセス全体が local classifier に切り替わる (ラッチ、再起動で戻る)。main も課金対象の local 判定になる。拒否 (fail closed) にはならない (debug log `[server-classifier] ... server_no_result`。openai 経路の main と subagent で 2.1.327 で実測)
+  - この fallback は消える予告がある: 2.1.327 の通知 (`-p` は stderr、対話は最初の checked action を止めて Enter を待つ) が「An upcoming release removes this fallback. In sessions like this one, each checked action will then be asked about or denied」と書く。消えると openai 経路の session の checked action は確認か拒否になり、人に聞けない subagent は拒否になる見込み。gateway 側の要件は docs `auto-mode-classifier-billing` (`anthropic-beta` header と `safeguards` 欄を対で素通し、`safeguard_results` を落とさない) で、anthropic 経路は今の llm-gateway で満たしている。openai の upstream は判定できないので素通しでは直らない
   - `CLAUDE_CODE_DISABLE_FEATURE_FLAGS` / `DISABLE_TELEMETRY` / `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC` のどれかを設定した環境 (2.1.319+): local に落ちず、その call は `Auto mode is unavailable: its safety check does not run for this session` で拒否 (`reasonCode` `classifier:auto-mode:unavailable`)。ラッチは立たず main は server 判定のまま。openai 経路の worker の tool call は全部拒否になる
   - `CLAUDE_CODE_AUTO_MODE_SERVER=0` は常に local classifier だけを使う (上の拒否も起きない)。`=1` は `CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS` があっても server を使う (2.1.319+)
   - `claude -p` は main の call がこの拒否を受けると exit 1 (JSON は `subtype:"success"` のまま `permission_denials` に載る)。subagent の call だけの拒否は exit 0 なので、script では `permission_denials` を見る
@@ -82,12 +83,13 @@ allow は当たれば必ず通すので、広い allow は deny より危険 (`c
 }
 ```
 
-- Edit は `~/` 始まりか絶対パスで書く
+- Edit の path は `~/` 始まりか `//` 始まり (`Edit(//Users/<user>/...)`) で書く。`/` 1 つで始めると settings の置き場からの相対になり、絶対パスとしては当たらない (2.1.327 で実測、`--settings` でも `.claude/settings.local.json` でも同じ)。auto mode では classifier が許せば通るので効いているように見えるが、transcript の `permissionDecision` は `reasonType:"classifier"` で、`//` / `~/` の時だけ `reasonType:"rule"` になる
+- symlink を通る path (kawaz の `~/.config` → `~/.dotfiles/config/` → dotfiles リポの実体) への書き込みは、symlink 側と実体側の両方の綴りに rule が要る。途中の hop の綴りは要らない (2.1.327 で実測。lab-claude `docs/findings/2026-11-18-symlink-path-checks-2-1-327.md`)
 - Bash は引数込みのコマンド全文で書く (止められたコマンドと 1 文字違えば当たらない)
 - JSON の文字列に入るので、コマンド中の `\n` は `\\n` と書く
 - `.gitignore` に `.claude/settings.local.json` を入れ、commit しない
 
-エージェントは `.claude/settings*.json` を書けない (Write / Edit / `cp` とも、許可の後でも fast classifier が止める)。足す時は ccmsg の `permit` ツールの `project_permissions` に `{ "add": "<rule>" }` (要らなくなった rule は `{ "remove": "<rule>" }`) を書く。kawaz が webui で押すと ccmsg の daemon がそのセッションのプロジェクトの `.claude/settings.local.json` に書き、起動中のセッションにすぐ効く (再起動不要。差分が `ccmsg:daemon` の封筒で届く)。今止められた操作をすぐ再実行したい時は `commands` / `intents` も一緒に出す。Edit の rule は `~/` でなく絶対パス (`Edit(/Users/…/file.toml)`) で書く (`~/` 形は効かなかった、実測 2026-11-08)。
+エージェントは `.claude/settings*.json` を書けない (Write / Edit / `cp` とも、許可の後でも fast classifier が止める)。足す時は ccmsg の `permit` ツールの `project_permissions` に `{ "add": "<rule>" }` (要らなくなった rule は `{ "remove": "<rule>" }`) を書く。kawaz が webui で押すと ccmsg の daemon がそのセッションのプロジェクトの `.claude/settings.local.json` に書き、起動中のセッションにすぐ効く (再起動不要。差分が `ccmsg:daemon` の封筒で届く)。今止められた操作をすぐ再実行したい時は `commands` / `intents` も一緒に出す。Edit の rule の path の書き方は上の箇条と同じ (`~/` か `//` 始まり、symlink を通るなら両方の綴り)。
 
 ## 誤拒否の見方と直し方
 
