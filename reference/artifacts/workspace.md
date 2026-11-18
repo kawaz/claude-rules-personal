@@ -17,7 +17,7 @@ cd ../artifacts && printf '*\n' > .gitignore && jj file track --include-ignored 
 - 枝は main 本編の**最初の commit** (Initial empty commit) から生やす別枝。main の履歴に生成物を混ぜない。bookmark は作らず push もしない (ローカル枝。新規リポ作成手順にも組み込み済み)
 - `.gitignore` は `*` 1 行。既定では何も追跡しない (jj の snapshot にも乗らないので、巨大ファイルや作り直しで store が肥大しない)
 - 版管理して残したい物だけ `jj file track --include-ignored <paths>` → `jj commit -m "..." <paths>`。**`--include-ignored` を落とすと exit 0 のまま何も起きない**
-- 中に symlink を置かない (file_server が追って配信してしまう)
+- 中に symlink を置かない (file_server が追って配信してしまう)。例外は `artifacts/docs -> ../main/docs` の 1 つで、セッションの起動ラッパーが main workspace の `docs/` を見られるように自動で作る (`/docs/` でビューアから読める。`docs/` があり、`artifacts/docs` がまだ無い時だけ)
 - 置くファイルの名前は URL になるので、`index.html` を各ディレクトリに置くと `/<dir>/` で開ける。無いディレクトリはビューア (ファイルツリー + md・コード・画像・PDF のプレビュー) が出る。md やコードを見せるだけなら `index.html` を作らず、ファイルを置いてディレクトリの URL を渡せばよい
 - `index.html` のあるディレクトリでも、URL に `?ls` を付けるとビューアで開ける (`/<dir>/?ls`)。ビューアで選んだファイルは URL の `#` 以降に載るので、その URL を渡すと同じファイルが選ばれた状態で開く
 
