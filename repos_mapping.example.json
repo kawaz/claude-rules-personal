@@ -1,6 +1,6 @@
 {
   "_comment": "参考用。実運用の一覧は repos_mapping.local.json (gitignore)",
-  "$schema-hint": "Master list of all claude-rules-* repos and which CLAUDE_CONFIG_DIR each one owns. scripts/rules.sh (just rules-*) reads this to decide where to symlink for-me/for-others/for-all layers. 'pluginOnlyHomes' lists CLAUDE_CONFIG_DIRs that get no rules layers, only the listed plugins (scripts/plugins.sh, via `just plugins-*`, checks/installs/updates them; 'marketplaces' maps a marketplace name to owner/repo for `marketplace add` — omit entries that are registered by the tool itself, e.g. ccmsg's directory marketplace).",
+  "$schema-hint": "Master list of all claude-rules-* repos and which CLAUDE_CONFIG_DIR each one owns. scripts/rules.sh (just rules-*) reads this to decide where to symlink for-me/for-others/for-all layers. 'pluginOnlyHomes' lists CLAUDE_CONFIG_DIRs that get no rules layers, only the listed plugins (scripts/plugins.sh, via `just plugins-*`, checks/installs/updates them; 'marketplaces' maps a marketplace name to owner/repo for `marketplace add`).",
   "repos": [
     {
       "name": "personal",
@@ -20,11 +20,10 @@
       "name": "bare",
       "home": "~/.claude-bare",
       "plugins": [
-        "ccmsg@ccmsg",
-        "claude-ccmsg@claude-ccmsg"
+        "ccmsg-v1@ccmsg-v1"
       ],
       "marketplaces": {
-        "claude-ccmsg": "kawaz/claude-ccmsg"
+        "ccmsg-v1": "kawaz/claude-ccmsg"
       }
     }
   ]
