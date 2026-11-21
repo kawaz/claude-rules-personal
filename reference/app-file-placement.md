@@ -64,7 +64,7 @@ mkdir -p "$runtime_dir" && chmod 700 "$runtime_dir"
 
 ### unix socket の path 長制限
 
-`sun_path` は macOS で **104 bytes** (`sys/un.h` で実測)、Linux で 108。macOS の `TMPDIR` は `/var/folders/xx/<28文字>/T/` と長いので、`$TMPDIR/myapp-501/daemon.sock` でこの上限に迫る。socket を置くときは**組み立てた絶対パスの長さを検査**し、超えるなら `/tmp/{appname}-{uid}/` に退避する。置き場を変えずに長いパスのまま bind / connect する手は reference の `unix-socket-path` を読む。
+`sun_path` は macOS で **104 bytes** (`sys/un.h` で実測)、Linux で 108。macOS の `TMPDIR` は `/var/folders/xx/<28文字>/T/` と長いので、`$TMPDIR/myapp-501/daemon.sock` でこの上限に迫る。長いパスのまま bind / connect する手は reference の `unix-socket-path` を読む。
 
 ## 迷いやすい判例
 
