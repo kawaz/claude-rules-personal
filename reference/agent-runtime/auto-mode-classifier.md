@@ -4,7 +4,7 @@ auto mode では tool call を classifier (別モデル) が審査する。何�
 
 ## classifier が読むもの
 
-- user settings (`$CLAUDE_CONFIG_DIR/settings.json`) の `autoMode`、managed settings、`--settings` の inline JSON。**project の `.claude/settings.json` / `.claude/settings.local.json` は読まない** (リポに checked-in された設定が allow を注入できないようにするため)
+- user settings (`$CLAUDE_CONFIG_DIR/settings.json`) の `autoMode`、managed settings、`--settings` の inline JSON。**project の `.claude/settings.json` / `.claude/settings.local.json` は読まない** (リポに checked-in された設定が allow を注入できないようにするため。2.1.330 で実測)。プロジェクトごとに要るなら ccmsg の Status タブの autoMode (起動時に `--settings` で渡る)
 - CLAUDE.md / `.claude/rules/` の本文は**効かない** (`.claude/rules/` に allow を書いても同じ操作が止められ続けた、実測 2026-11-08)。classifier に効くのはユーザの発言と `autoMode`、完全一致の allow だけ
 - transcript: ユーザの message、read-only 以外の tool call。tool result は剥がされる (ファイルや web の内容で classifier を操作できない)
 - 評価順: `permissions.allow/ask/deny` → read-only / cwd 内の自動承認 → classifier。**`Bash(*)` のような広い allow は auto mode では停止され classifier が走る。狭い完全一致 (`Bash(bun test)`) は classifier を飛ばす**。`autoMode.classifyAllShell: true` で全 shell を classifier 経由にできる
