@@ -10,7 +10,7 @@ macOS の codesign / notarization に使う **6 種の GitHub Secrets** を投�
 
 1. 下の「AI が先に済ませる」1〜3 を実行 (identity / Team ID / 証明書 / Apple ID / App-Specific Password)
 2. reference の `gh-ops/homebrew-tap-deploy-key` で deploy key を作る (承認を 1 回取る)
-3. App-Specific Password が未発行のときだけ、下の「kawaz へ出す依頼文」をそのまま提示する
+3. そのプロダクト用の App-Specific Password が未発行なら、共用の物で先に進め、記録を残す (下の「専用の App-Specific Password が無い時」)。専用の物は後で kawaz に頼む
 
 ## 取得元
 
@@ -21,7 +21,7 @@ macOS の codesign / notarization に使う **6 種の GitHub Secrets** を投�
 | `APPLE_CERTIFICATE_BASE64` | 一時 keychain 経由で p12 化 (Keychain のダイアログを kawaz が 1 回承認) |
 | `APPLE_CERTIFICATE_PASSWORD` | ランダム生成してそのまま投入 |
 | `APPLE_ID` | **1Password の「Apple Signing and Notarization」** |
-| `APPLE_APP_SPECIFIC_PASSWORD` | 同上 (プロダクト別に発行。無ければ kawaz へ依頼) |
+| `APPLE_APP_SPECIFIC_PASSWORD` | 同上 (プロダクト別に発行。無い間は共用の「CICD Notarization on GitHub」) |
 
 Homebrew tap へ配信するなら `HOMEBREW_TAP_DEPLOY_KEY` も要る。これも AI が全部できる (reference の `gh-ops/homebrew-tap-deploy-key`。承認を 1 回取ってから実行)。
 
@@ -91,7 +91,7 @@ op item get "Apple Signing and Notarization" --fields label=<product 用のフ�
 ```
 
 - `op whoami` が `account is not signed in` なら、まず kawaz にサインインを頼む
-- **そのプロダクト用の App-Specific Password がまだ無ければ** 下記の依頼文を出す
+- **そのプロダクト用の App-Specific Password がまだ無ければ**、共用の「CICD Notarization on GitHub」を入れて先に進む (次の節)
 - op が使えない状況で kawaz が手元にいるなら、クリップボード経由でも受け取れる。 **形式検査だけして値は表示しない**:
 
 ```bash
@@ -107,14 +107,26 @@ printf '%s' "$V" | grep -qE '^[a-z]{4}-[a-z]{4}-[a-z]{4}-[a-z]{4}$' \
 gh secret list --repo "$REPO"    # 6 種が並ぶ
 ```
 
+## 専用の App-Specific Password が無い時
+
+立ち上げの検証や最初のリリースの足を止めないため、1Password の「Apple Signing and Notarization」にある共用の「CICD Notarization on GitHub」を `APPLE_APP_SPECIFIC_PASSWORD` に入れて進めてよい。
+
+```bash
+op item get "Apple Signing and Notarization" --fields "label=CICD Notarization on GitHub" --reveal \
+  | tr -d '\n' | gh secret set APPLE_APP_SPECIFIC_PASSWORD --repo "$REPO"
+```
+
+- 共用の物を入れたら、**そのことを忘れない所に記録する**: そのプロダクトのリポの `docs/issue/` に「専用の App-Specific Password に差し替える」issue を起票する (セッションの会話や memory だけにしない)
+- 最初の勢いが落ち着いたら (最初のリリースが出て、手作業の依頼が途切れた頃)、下の依頼文で kawaz に専用の物を作ってもらう。受け取ったら secret を差し替え、issue を閉じる
+
 ## kawaz へ出す依頼文 (このまま提示する)
 
-App-Specific Password が未発行のときだけ必要。**ログイン先・名前・保存先・受け渡し方まで書く。**
+専用の App-Specific Password を作ってもらう時に出す。**ログイン先・名前・保存先・受け渡し方まで書く。** 手順の説明や理由は添えず、やってほしいことだけを書く。
 
 ```markdown
-`APPLE_APP_SPECIFIC_PASSWORD` の発行をお願いします。他の Secrets は投入済みです。
+<product> 用の notarize のパスワードを、そろそろ作ってください (今は共用の「CICD Notarization on GitHub」で動かしています)。
 
-- <https://appleid.apple.com> に <署名用の Apple ID> でログイン
+- <https://account.apple.com/account/manage> に <署名用の Apple ID> でログイン
   (1Password の「Apple Signing and Notarization」にあるアカウント)
 - 「サインインとセキュリティ」→「App 用パスワード」に移動
 - 「<product> Notarization」という名前で新規作成
@@ -127,7 +139,7 @@ App-Specific Password が未発行のときだけ必要。**ログイン先・�
 
 ## secrets はプロダクト別 (方針)
 
-別プロダクトの secrets を使い回さない。漏洩時の rotate 単位と影響範囲がプロダクトに閉じる。
+別プロダクトの secrets を使い回さない。漏洩時の rotate 単位と影響範囲がプロダクトに閉じる。立ち上げの間に共用の「CICD Notarization on GitHub」を使うのは例外で、記録を残して後で専用の物に差し替える (上の「専用の App-Specific Password が無い時」)。
 
 **rotate 単位の主対象は `APPLE_APP_SPECIFIC_PASSWORD`**。`APPLE_ID` / `APPLE_TEAM_ID` / `APPLE_SIGNING_IDENTITY` は Team 共通値なので結果的に既存プロダクトと同じになるが、AI が ローカルと 1Password から取り直すので値の受け渡しは発生しない。証明書 (p12) も既存の Developer ID Application を流用するが、**p12 は毎回エクスポートし直す**。
 
@@ -143,9 +155,9 @@ notarization には **Developer ID Application** が必須 ($99/年の Apple Dev
 
 ## ローテーション / 廃止
 
-- App-Specific Password rotate: appleid.apple.com で旧パスワード無効化 → 依頼文を再提示
+- App-Specific Password rotate: <https://account.apple.com/account/manage> で旧パスワード無効化 → 依頼文を再提示
 - 証明書入れ替え: 「AI が先に済ませる」の 2 を再実行して 2 種を上書き
-- プロダクト廃止: `gh secret delete <NAME> --repo "$REPO"` を 6 種分。 App-Specific Password は appleid.apple.com 側でも無効化する
+- プロダクト廃止: `gh secret delete <NAME> --repo "$REPO"` を 6 種分。 App-Specific Password は <https://account.apple.com/account/manage> でも無効化する
 
 ## ローカル署名 (CI を待たず手元で試す)
 

@@ -6,7 +6,7 @@ kawaz の macOS 配布物 (CLI バイナリ / .app バンドル) を Apple Devel
 
 ## 索引
 
-- [setup-certificates](setup-certificates.md) — 初回セットアップ: AI の手順、kawaz への依頼文、GitHub Secrets 6 種とプロダクト別の方針。
+- [setup-certificates](setup-certificates.md) — 初回セットアップ: AI の手順、GitHub Secrets 6 種とプロダクト別の方針、専用の App-Specific Password が無い間の共用の物と後で頼む依頼文。
   APPLE_SIGNING_IDENTITY, APPLE_CERTIFICATE_BASE64, App-Specific Password, Developer ID Application, 署名 secrets が無くて CI が落ちた, p12 エクスポート
 - [ci-release-pipeline](ci-release-pipeline.md) — release.yml の署名・notarize ステップの並びと、.app あり / bare binary のみの 2 形態。
   release.yml に署名を入れる, codesign bottom-up, notarytool submit, stapler staple, Hardened Runtime, 一時 keychain
