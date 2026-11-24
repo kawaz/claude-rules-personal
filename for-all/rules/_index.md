@@ -76,6 +76,7 @@
 ## メタ (ルール・docs 運用そのもの)
 
 - [[work-principles]] — 全フェーズ横断の作業原則 (指示遵守 / TODO / 委譲)
+- [[language-settings]] — 書く・話す・考えるとき全部 (日本語で考える、技術用語を無理に訳さない、語を作らない、相手の語を言い換えない)
 - [[rule-writing-guidelines]] — rule / skill / 参照知識を書く・移す・改廃するとき (禁則と、reference の `rules-authoring` への入口)
 - [[no-hard-wrap]] — rule / skill / docs の md で行長を揃える改行をしない
 - [[no-md-html-comments]] — md に HTML コメントを書かない (補足は見える本文で書く)
