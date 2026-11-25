@@ -30,9 +30,9 @@ agy -p "<依頼の本文>" --model gemini-4-carbon-high --output-format json
 | Claude | `claude-opus-5-5-low` 〜 `-high`、`claude-sonnet-5-5-low` 〜 `-high` |
 | GPT-OSS | `gpt-oss-120b-medium` |
 
-- `--effort` (low|medium|high|xhigh|max) は `--model` と併せて指定できる。`--model gemini-3.8-flash-low --effort low` は約 3 秒、思考 0 トークンで返った
+- `--effort` (low|medium|high|xhigh|max) を、強さ付きのモデル名と違う強さで併せるとエラーで起きない (`conflicts with --effort=…`、終了コード 1)。通るのは、強さ付きの名前だけ、同じ強さの `--effort` を併せる、強さの無い系列名 + `--effort` (`--model gemini-3.8-flash --effort high`)、`--effort` だけ。知らないモデル名・無い effort も同じ形のエラー
 - `--model` を省いた時に使われるモデルは、出力に出ない
-- サインインしていないと `agy models` は `Please sign in to view available models` で失敗し、`-p` は認証の入力待ちのまま 60 秒で失敗する。サインインは人が引数なしの `agy` を端末で 1 回起動して行う
+- サインインしていないと `agy models` は `Please sign in to view available models` で失敗する。`-p` は端末から起こすと認証の入力待ちのまま 60 秒で失敗し、stream-json で標準入力が pipe の時は約 0.2 秒で失敗する (標準エラーに `authentication required. Run 'antigravity' to log in`、終了コード 1)。サインインは人が引数なしの `agy` を端末で 1 回起動して行う
 
 ## 出力の形
 
@@ -40,9 +40,13 @@ agy -p "<依頼の本文>" --model gemini-4-carbon-high --output-format json
 |---|---|
 | `text` (既定) | 応答の本文だけ |
 | `json` | 1 個の JSON。`conversation_id`、`status` (`SUCCESS` / `ERROR`)、`response`、`duration_seconds`、`num_turns`、`usage` (入力・出力・思考・cache の各トークン)。失敗時は `error` と `finished_reason`、拒否された道具があれば `denied_actions` |
-| `stream-json` | 1 行 1 イベントの NDJSON。最初に `init` (作業ディレクトリ、使える道具の一覧、`permission_mode`)、途中は `step_update` (`text_delta` で応答の断片)、最後に `result` (`json` と同じ中身) |
+| `stream-json` | 1 行 1 イベントの NDJSON。最初に `init` (作業ディレクトリ、使える道具の一覧、`permission_mode`)、途中は `step_update` (`text_delta` で応答の断片)、各依頼の終わりに `result` (`json` と同じ中身) |
 
-`--json-schema <JSON の文字列か、ファイルのパス>` を付けると、応答がスキーマに沿い、`json` の出力に `structured_output` の欄が足される。
+- **`result` の `usage`・`duration_seconds`・`num_turns` は会話全体の累計** (前のプロセスの分も含む)。`duration_seconds` は会話が始まってからの経過。1 回の依頼の使用量は、`step_update` のうち `step_type:"agent_response"`・`state:"DONE"` の行の `usage` に出る
+- 起動に失敗した時 (未サインイン、モデル名と effort の食い違い等) は、`init` の前に `conversation_id` が空の `"status":"ERROR"` の `result` が 1 行出る
+- 標準出力をファイルに向けても、行は step ごとに逐次書かれる。シェル 1 回と 300 語の文章の 1 回で約 17 KB (うち `step_update` が約 12.5 KB)
+
+`--json-schema <JSON の文字列か、ファイルのパス>` を付けると、応答がスキーマに沿い、`result` に `structured_output` の欄が足される (stream-json でも、各依頼の `result` に入る)。
 
 ```bash
 agy -p 'Give the capital of Japan and France.' \
@@ -71,18 +75,21 @@ agy --input-format stream-json --output-format stream-json < in.jsonl
 ```
 
 - 1 行ごとに 1 回の応答が走り、それぞれ `result` が出る。`init` は最初の 1 回だけで、`conversation_id` も 1 つ。2 回目の依頼で 7733 と答えた (文脈は続く)
-- 起動が 1 回で済むので、`--conversation` で毎回起動するより速い。2 回目以降は cache が効き、入力が 2,000 トークン前後に減った
-- ドキュメントは「今の回の `result` を受け取ってから次を書く」と書くが、回の途中で次の依頼を書いても、agy が今の回を終えてから順に処理した
-- 標準入力を閉じると、今の回を終えてから正常に終わる
+- 起動が 1 回で済むので、`--conversation` で毎回起動するより速い
+- ドキュメントは「今の回の `result` を受け取ってから次を書く」と書くが、回の途中で次の依頼を書いても、agy が今の回を終えてから書いた順に処理し、`result` も書いた順に出る。`result` に依頼を見分ける欄は無いので、書いた順に当てる
+- 回の途中も標準入力を読み進める。1 行 1.2 MB の依頼も即座に書き切れた
+- 標準入力を閉じると、今の回と書いてあった残りの依頼を処理してから正常に終わる。起こした親が終わっても (SIGKILL でも) 同じで、親の居ないまま書き切って終わる
 - この形では `-p` の本文は捨てられる。`--input-format stream-json` には `--output-format stream-json` が必須
 - `--conversation <ID>` と併せて起動すると、終わったプロセスの会話を同じ ID のまま続けられる。再開時に `--model` を替えても同じ会話として続く (ただし下の cache が効かなくなる)
-- 起動から約 4 秒で `init` が出て、そこに `conversation_id` が入る (応答を待たずに ID が分かる)
+- 起動から 3.5〜5 秒で、依頼を書く前に `init` が出て、そこに `conversation_id` が入る (応答を待たずに ID が分かる)
+- 走っているプロセスの会話の ID は、外からも分かる。`--conversation` 無しで起こしたプロセスでも、`lsof` で開いているファイル (`~/.gemini/antigravity-cli/conversations/<ID>.db`、`presence/<ID>.lock`) の名前に出る (`init` の前から)。引数と起動時刻は `ps` で読める
 
 ## 回を止める
 
 今の回だけを止めてプロセスを生かす口は無い (`control_request` を送るとエラーで終わる)。
 
-- 本体のプロセスに SIGINT か SIGTERM を送ると、すぐに `"status":"ERROR"`、`"finished_reason":"interrupted"` の `result` を出して、プロセスが終わる。SIGINT の後に書いた依頼は処理されない
+- 本体のプロセスか、その process group に SIGINT か SIGTERM を送ると、約 40 ms で `"status":"ERROR"`、`"finished_reason":"interrupted"` の `result` を出して、終了コード 1 で終わる。書いてあってまだ始まっていなかった依頼は処理されず、`result` も出ない
+- exec しないシェルを挟んで起こした時は、そのシェルの pid に送っても本体に届かない。process group に送れば届く
 - 止めた会話は `--conversation <ID>` で再開でき、壊れていない (止める前に覚えさせた事を答え、止めたコマンドは「中断されて出力が無い」と把握していた)
 - `agy` はラッパのシェルスクリプトで、本体 `antigravity` を exec する。プロセスを名前で探す時は `antigravity` で探す (`agy` の名前で探すと外れ、信号がラッパを起動したシェルに行く)
 
@@ -92,14 +99,14 @@ agy --input-format stream-json --output-format stream-json < in.jsonl
 
 ## cache
 
-`usage.cache_read_tokens` が cache から読んだ分 (`input_tokens` は cache 以外の分)。cache に書いた分と TTL は出力に出ない。
+`usage.cache_read_tokens` が cache から読んだ分 (`input_tokens` は cache 以外の分)。cache に書いた分と TTL は出力に出ない。下の数字は、`result` の累計から前の回の値を引いた、再開した 1 回分の値。
 
-- agy 経由の `claude-sonnet-5-5-low` で、会話を閉じてから再開するまでの間隔を変えて測った (2026-11-25): 1 分後・3 分半後は会話の分まで cache が効き (`cache_read_tokens` 約 21,000、`input_tokens` 約 6,500)、6 分半後・11 分半後・21 分半後は会話の分が外れた (`cache_read_tokens` 約 15,400、`input_tokens` 約 12,000)。会話の cache の寿命は 3 分半〜6 分半の間 (5 分前後)
-- 約 15,400 の分は、どの会話でも効いていた (agy のシステムプロンプト等、会話をまたいで共通の部分)
+- agy 経由の `claude-sonnet-5-5-low` で、会話を閉じてから再開するまでの間隔を変えて測った (2026-11-25): 1 分後・3 分半後は会話の分まで cache が効き (cache 約 13,300、cache 以外約 600)、6 分半後・11 分半後・21 分半後は会話の分が外れた (cache 約 7,700、cache 以外約 6,200)。会話の cache の寿命は 3 分半〜6 分半の間 (5 分前後)
+- 約 7,700 の分は、どの会話の最初の回でも効いていた (agy のシステムプロンプト等、会話をまたいで共通の部分)
 - プロセスを生かしておいても、cache の寿命は延びない (cache はモデルの提供元の側にある)。間を 5 分以上空けると、次の回は会話の分を cache 無しで読み直す
 - `--model` を替えると cache は効かない
 - TTL を選ぶオプション・設定は無い (help、ドキュメント、`settings.json`、本体の文字列で確かめた)。個人のアカウントでは要求が Google のサーバを経てモデルに渡るので、TTL はその側が決める
-- Gemini は当たり外れが決まらない。`gemini-3.8-flash-low` で同じ測り方をすると (2026-11-25)、最初の回は `cache_read_tokens` が 0。再開時は、効いた時でも約 6,900 (入力全体の約 18,000 のうち、会話をまたいで共通の部分と見られる量) で、外れると 0。再開までの間隔ごとの当たり外れは、2 分後・4 分後・12 分後が当たり、7 分後・22 分後・42 分後が外れ。間隔で決まる寿命は読み取れない (Gemini の暗黙の cache は、当たるかが保証されない仕組み)
+- Gemini は当たり外れが決まらない。`gemini-3.8-flash-low` で同じ測り方をすると (2026-11-25)、最初の回は `cache_read_tokens` が 0。再開した 1 回分は、当たると cache 約 6,900・cache 以外約 2,300、外れると cache 0・cache 以外約 9,100。再開までの間隔ごとの当たり外れは、2 分後・4 分後・12 分後が当たり、7 分後・22 分後・42 分後が外れ。間隔で決まる寿命は読み取れない (Gemini の暗黙の cache は、当たるかが保証されない仕組み)
 
 ## 失敗の見分け方
 
