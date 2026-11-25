@@ -32,7 +32,7 @@ agy -p 'Run `uname -s`.' --settings '{"permissions":{"allow":["command(uname -s)
 | 指定 | 結果 |
 |---|---|
 | `--sandbox` + `--dangerously-skip-permissions` | 何も縛らない。作業ディレクトリの外 (`/tmp` を含む) への書き込み、`/etc/hosts` の読み取り、外部への HTTP がすべて通った |
-| `--sandbox` だけ、または `--settings` で許したコマンドと併せる | シェルのコマンドが `sandbox-exec` の中で走ろうとして、シェル自体が起動できずに終わる (`sandbox-exec: execvp() of '/etc/profiles/per-user/kawaz/bin/zsh' failed: Operation not permitted`、終了コード 71)。nix のプロファイルにあるシェルが sandbox の許可に入っていないため |
+| `--sandbox` だけ、または `--settings` で許したコマンドと併せる | シェルのコマンドが `sandbox-exec` の中で走ろうとして、シェル自体が起動できずに終わる (`sandbox-exec: execvp() of '/etc/profiles/per-user/<user>/bin/zsh' failed: Operation not permitted`、終了コード 71)。ログインシェルが nix のプロファイルにあり、sandbox の許可に入っていないためと推測 (未確認) |
 
 - `stream-json` の `init` の `permission_mode` は、指定によらず `proceed-in-sandbox` だった (ドキュメントは既定を `request-review`、全許可を `always-proceed` と書いている)
 - 全許可で流す時に、書ける範囲を縛るものは agy の側に無い。作業場所を決めても、それはモデルへの依頼にすぎない
