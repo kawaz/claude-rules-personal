@@ -98,6 +98,7 @@ agy --input-format stream-json --output-format stream-json < in.jsonl
 - 約 15,400 の分は、どの会話でも効いていた (agy のシステムプロンプト等、会話をまたいで共通の部分)
 - プロセスを生かしておいても、cache の寿命は延びない (cache はモデルの提供元の側にある)。間を 5 分以上空けると、次の回は会話の分を cache 無しで読み直す
 - `--model` を替えると cache は効かない
+- TTL を選ぶオプション・設定は無い (help、ドキュメント、`settings.json`、本体の文字列で確かめた)。個人のアカウントでは要求が Google のサーバを経てモデルに渡るので、TTL はその側が決める
 - Gemini のモデルの寿命は未確認
 
 ## 失敗の見分け方
