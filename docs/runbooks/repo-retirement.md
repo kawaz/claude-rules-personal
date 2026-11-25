@@ -76,4 +76,4 @@ README に「着手せず廃止」と後継 / 代替を明記して archive)。
 ## 関連
 
 - `docs/runbooks/fleet-audit.md` — 引退漏れを定期検出する横断監査
-- `for-all/rules/dogfooding-feedback-upstream.md` — 後継リポへの知見還元スタンス
+- `for-me/rules/dogfooding-feedback-upstream.md` — 後継リポへの知見還元スタンス

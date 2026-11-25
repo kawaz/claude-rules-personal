@@ -60,3 +60,4 @@
 - [tailscale-exit-node](~/.local/share/repos/github.com/kawaz/privacy-personal/main/reference/tailscale-exit-node.md) — auditor を exit node に使う時の設定と DNS の罠
 - [anthropic-agreements](~/.local/share/repos/github.com/kawaz/privacy-personal/main/reference/anthropic-agreements/_index.md) — Anthropic と個別に結んだ規約の控えと、利用時に守る条件。
 - [family](~/.local/share/repos/github.com/kawaz/privacy-personal/main/reference/family.md) — 家族の呼び名 (父 / こちゃ / なお) と family カレンダーの定例予定。
+- [contacts](~/.local/share/repos/github.com/kawaz/privacy-personal/main/reference/contacts/_index.md) — 取引先・関係者の名簿 (誰が・どのアドレスで・どの組織の人か)。メールを送る・宛先や担当者を確かめる時に読む。

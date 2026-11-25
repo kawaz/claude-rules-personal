@@ -97,4 +97,4 @@ mkdir -p "$runtime_dir" && chmod 700 "$runtime_dir"
 
 ## 関連
 
-- `docs-structure` skill — リポ内の docs/ 配置 (本項は実行時ファイルが対象)
+- reference の `docs-authoring/docs-layout` — リポ内の docs/ 配置 (本項は実行時ファイルが対象)

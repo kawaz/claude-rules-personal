@@ -9,7 +9,7 @@ AI が長文を渡す kawaz 製 CLI (ccmsg の本文、Jev の state、issue の
 
 ## Why
 
-- 引数渡しは AI が shell 文字列を組み立てるので、ダブルクォート内のバッククォートがコマンド置換される・`$` や `!` が展開される・glob がエラーになる、の事故が消えない ([[ccmsg-backtick-command-substitution]])
+- 引数渡しは AI が shell 文字列を組み立てるので、ダブルクォート内のバッククォートがコマンド置換される・`$` や `!` が展開される・glob がエラーになる、の事故が消えない ([ccmsg-backtick-command-substitution](ccmsg-backtick-command-substitution.md))
 - stdin 渡しもパイプの手前 (`echo '...' |`、heredoc) で結局 shell の引用が要り、事故の場所が変わるだけ。シングルクォートは本文中の `'` で壊れる
 - `Write` tool は本文を JSON パラメータで受けるので shell も展開も通らず、AI 側のエスケープ責務がゼロになる。transcript に残るのはパスだけなので長文でも context を食わない
 

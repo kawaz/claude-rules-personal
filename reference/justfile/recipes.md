@@ -1,6 +1,6 @@
 # justfile の recipe 設計
 
-各リポのタスクランナーは **`justfile`** を canonical とする。kawaz/bump-semver の `justfile` が基準実装。新規リポでは kawaz のアクティブなリポジトリの justfile を参考に書く。言語やカテゴリが近いリポ以外も含む最低 5 個を読んで共通パターンの把握と進出の良パターンを取り入れる検討をする。
+各リポのタスクランナーは **`justfile`** を canonical とする。kawaz/bump-semver の `justfile` が基準実装。新規リポでは kawaz のアクティブなリポジトリの justfile を参考に書く。言語やカテゴリが近いリポ以外も含む最低 5 個を読んで共通パターンの把握と新出の良パターンを取り入れる検討をする。
 
 ```bash
 ls -lt ~/.local/share/repos/github.com/kawaz/*/main/justfile | head
