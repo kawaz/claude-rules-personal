@@ -1,23 +1,17 @@
 ---
 title: "業務固有名詞サニタイズの機械判定 hook 化 (claude-sanitize-guard) 設計案"
-status: pending-sublimation
+status: open
 category: design
 created: 2026-07-03T14:06:03+09:00
-last_read:
-open_entered:
-wip_entered:
-blocked_entered:
-pending_entered: 2026-09-23T22:47:22+09:00
-discarded_entered:
-resolved_entered:
-discard_reason:
-pending_reason: ["SH-Q1 裁定 (2026-07-29, kawaz) = c: 保留継続。warn-only の補助機構で緊急性なし。gh-issue-guard の運用実績 (false positive 傾向) を見てから同型構成で設計を再検討する", "kawaz 指示 (2026-09-23): 一旦 pending。sandbox-jev の docs-lint (機械検査 work-identifier + visibility 軸) が同領域を覆うため、その方向性検討の結果に従属させる"]
-close_reason:
-blocked_by:
 origin: "エコシステム横断監査 (2026-07-03)"
 ---
 
 # 業務固有名詞サニタイズの機械判定 hook 化 (claude-sanitize-guard) 設計案
+
+## 保留の理由
+
+- SH-Q1 裁定 (2026-07-29, kawaz) = c: 保留継続。warn-only の補助機構で緊急性なし。gh-issue-guard の運用実績 (false positive 傾向) を見てから同型構成で設計を再検討する
+- kawaz 指示 (2026-09-23): 一旦 pending。sandbox-jev の docs-lint (機械検査 work-identifier + visibility 軸) が同領域を覆うため、その方向性検討の結果に従属させる
 
 ## 概要
 
