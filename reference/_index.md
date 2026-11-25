@@ -46,7 +46,8 @@
 - [justfile](justfile/_index.md) — justfile を書く時と、push 後のリリース / watch で詰まった時に読む。
 - [gh-ops](gh-ops/_index.md) — GitHub の画像添付・取得手順、homebrew tap への push で詰まった時に読む。
 - [x-posts](x-posts/_index.md) — X（Twitter）の投稿原文・メディアと、最近の話題・動画内容を調べる時に読む (x.com, x_search, Grok)。
-- [agent-runtime](agent-runtime/_index.md) — 待ち方 (sleep の代替)、ブラウザ自動化のプロファイル、auto mode classifier の設定、別のモデルに仕事を出す `agy` の使い方で迷った時に読む。
+- [agent-runtime](agent-runtime/_index.md) — 待ち方 (sleep の代替)、ブラウザ自動化のプロファイル、auto mode classifier の設定で迷った時に読む。
+- [agy](agy/_index.md) — Antigravity の CLI `agy` で Gemini 等の別のモデルに仕事を出す時に読む (非対話、権限、agent / workflow、Claude Code から回す台)。
 - [op-run-secret-injection](op-run-secret-injection.md) — 1Password の secret をコマンドに渡す時に読む (op run, `op://`)。
 - [keychain-secrets](keychain-secrets.md) — 自作ツールが無人で読む secret をキーチェーンに置く・読む時に読む (security, launchd, 定時実行)。
 - [jev](jev/_index.md) — TypeSafe AI の判断 API Jev に質問を組む・答えを読む時に読む (Choice / Score / Noul, state, confidence)。
