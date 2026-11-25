@@ -50,10 +50,21 @@ worker (Opus high) が、版ごとに clone の差分を全部読み、元の状
 | 新しく持ち込んだ言い方 | およそ 25 | 25 |
 | 手を付けていない所 | for-all の rule 18 本、reference のトピック 22 のうち 14、privacy の本文のほとんど | for-all の 12 ファイル、reference 146 のうち 131、privacy の本文の大半 |
 
-- どちらの版も、文章を縮める中で、禁則・条件・理由・kawaz の発言の引用を落としたり、指示を足したりしている。報告は「表現の改善」「冗長表現の圧縮」とまとめていて、意味の変更としては書いていない。そのまま入れると、rule の指示が変わる
-- FATAL が消えたのは、索引から `local-translate.md` の項目を消したため。このファイルは手元にあり、全体の gitignore の `local-*` に当たってコミットに入っていないだけなので、項目を消すのは逆向きの直し
-- Carbon に emrd の overlay を渡していないので、public に書いてよい語 (`emrd`) まで一般化している (`p3-free-1step`)
-- 元から壊れていた所の指摘は、`p3-free-1step` が 33 件のうち本当 19・一部本当 10、`p4-improve-only` が 19 件本当。今の元のリポで確かめ直して、迷いなく直せる物を直し、判断が要る物を一覧にする作業を別に進めている (`compare/broken-in-origin.md`)
+- どちらの版も、文章を縮める中で、禁則・条件・理由・kawaz の発言の引用を落としたり、指示を足したりしている。報告は「表現の改善」「冗長表現の圧縮」とまとめていて、意味の変更としては書いていない
+- FATAL が消えたのは、索引から `local-translate.md` の項目を消したため。このファイルは手元にあり、全体の gitignore の `local-*` に当たって clone に入っていなかっただけ。リポの `.gitignore` で、このファイルだけを否定して版管理に入れた (kawaz の裁定)。版を当てる時、索引のこの行は項目ありのままにする
+- 元から壊れていた所の指摘は、今の元のリポで確かめ直した (`compare/broken-in-origin.md`。46 件)。迷いなく直せる 12 件は直して push した。判断が要る 23 件と、public のリポに出ている疑いの 11 件は、直さずに一覧にしてある
+
+## kawaz の判断 (2026-11-25)
+
+kawaz が、意味の変わった所の差分 (`classifier-notes`・`discussion-style`・`empirical-verification`・`no-excessive-apology`・`feedback-evaluation`・`synthesis-temptation-guard`・`push-workflow`・`index-lines-terse`・`claude-config-dir-isolation`・`reference/_index.md` の private 層) を見た結果:
+
+- 大体問題ない。落ちた行には、元々意味の無かった物がある (例: `discussion-style` の「NG なのは『方針が決まった気になって本実装に突入する』こと」)。落ちた行を一律に戻す対象として扱わない
+- `emrd` は、必要な所 (設定や運用スクリプトで、フルパスで書かないと意味が無い所) で許される語。説明の文の中の物は一般化してよい
+- `push-workflow` に足された「`jj describe` 単体は使わない」は、そのままでよい
+- `classifier-notes` の `Edit` の rule のパスの書き方は、どちらの書き方も要らない (書き方は ccmsg が直すので、知る必要が無い)。元の rule からその文を外した。classifier の運用は、kawaz がプロジェクトごとに `autoMode` を調整する
+- 入れない物: `p3-free-1step` が `reference/docs-authoring/knowledge-timing.md` の status の値に足した `pending-sublimation` (claude-local-issue v1.0.3 では、`open` として読み替える古い値)
+
+まだ決まっていない事: どの版を土台にするか (残りの 2 つの版が出てから、4 つを並べて決める)。
 
 ## `agy -p` で分かった事
 
