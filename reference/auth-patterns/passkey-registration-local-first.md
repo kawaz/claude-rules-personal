@@ -7,12 +7,16 @@
 1. ホスト上の CLI が登録用の URL を 1 つ発行する。URL は `<webui の origin と path>/#register=<jwt>`。claims は `{ iss (発行 instance の id), sub (利用者の識別子), endpoint (登録を受ける入口の URL), rp_id, user_id, exp (10 分程度), jti }`
 2. jwt の署名は **登録ごとに生成する乱数 secret による HMAC**。検証者が発行者自身なので公開鍵は要らず、secret は発行 instance のメモリにだけ置いて `exp` で捨てる。永続鍵を持たない
 3. jwt は **fragment (`#`) で運ぶ**。fragment は server にも proxy log にも Referer にも乗らない
-4. ページは `/auth/challenge` で challenge を取り、`navigator.credentials.create()` を呼ぶ (`residentKey: "preferred"`、`userVerification: "required"`、`user.id` = jwt の `user_id`、`rp.id` = jwt の `rp_id`)
+4. ページは `/auth/challenge` で challenge を取り、`navigator.credentials.create()` を呼ぶ (`pubKeyCredParams` は `-7` (ES256) を先頭に `-257` (RS256) と `-8` (EdDSA)、`attestation: "none"`、`residentKey: "preferred"`、`userVerification: "required"`、`user.id` = jwt の `user_id`、`rp.id` = jwt の `rp_id`)
 5. できた credential と jwt を jwt の `endpoint` の `/auth/register` に POST する
 6. 受けた側は jwt を HMAC で検証し、WebAuthn の登録検証を通し、**通ってから jti と challenge を消費する**。順序が逆だと、ブラウザ側の一時的な失敗 1 回で登録 URL が焼ける
 7. `{ sub, credential id, COSE 公開鍵, user_id, 登録時刻 }` を credential record として保存する
 
 attestation は `none` で足りる。「この credential を作ってよい人か」は jwt が既に担保しており、authenticator の出自証明は要件に無い。attestation を要求すると証明書チェーンの検証と信頼リストという管理対象が増えるだけになる。
+
+`pubKeyCredParams` の 3 つは、WebAuthn Level 3 §5.4 が幅広い authenticator に対応する RP に勧める組。COSE の番号で渡す。`-8` (EdDSA) は WebAuthn では Ed25519 に限られ、曲線まで決めた新しい番号 (`-9`、`-19`) は対応していない実装が多いので使わない (JOSE の `alg` で `"EdDSA"` を避けるのとは向きが逆になる)。**passkey の署名 alg 選定判断基準日: 2026-11-27** (選定を変えたらこの日付と根拠も一緒に更新する)
+
+`residentKey: "preferred"` では、discoverable でない credential ができることがある。その credential は、`allowCredentials` を空にした認証 (利用者を先に特定しない入口) には出てこない。そういう入口しか持たないなら `"required"` にする。
 
 発行 instance が再起動すると secret が消えて登録は失敗する。fallback は置かず、CLI で URL を発行し直す (エラー文言も「登録 URL を再発行してください」にする)。
 
@@ -23,14 +27,16 @@ WebAuthn の RP ID は origin ではなく **domain** で、credential は「今
 - 既定の `rp_id` は入口の URL のホスト。これは webui が入口と同じホストから配られている構成を意味する
 - webui を別サブドメインに置くなら、共通の registrable domain を `rp_id` に渡す。server 側は「`rp_id` が入口のホストと一致するか、その registrable suffix である」ことだけを検証する。同じ registrable domain の下に信頼しないコンテンツを置かない (置くとその JS も同じ `rp_id` を使える。reference の `auth-patterns/origin-separation`)
 - `clientDataJSON.origin` の期待値は入口の origin ではなく **webui の origin 集合**。ページを配っている場所が origin を決める
-- `crossOrigin` は **`true` のときだけ拒否**する。Chrome 系は最上位フレームでも常に `false` を送るので、「present であること」を要求してはならない
+- `crossOrigin` は **`true` のときだけ拒否**する。この field は OPTIONAL なので (L3 §5.8.1)、「present であること」を要求してはならない。Chrome 系は最上位フレームでも常に `false` を送るので、present であることを拒否の条件にしてもならない
 - `topOrigin` は present なら拒否する (iframe 内からの登録・認証を許さない)
 - 2 つは独立した条件ではなく含意関係にある。WebAuthn L3 §5.8.1 は `crossOrigin` を「祖先と same-origin かどうか (`sameOriginWithAncestors`) の否定」、`topOrigin` を「その呼び出しが祖先と same-origin でない文脈から来た時、つまり `crossOrigin` が `true` の時にだけ設定される最上位 origin」と定義する。よって `topOrigin` が present なら `crossOrigin` も `true` のはずで、どちらか一方で拒否すれば足りるように見えるが、**両方を独立に検査する**。`topOrigin` は L3 で足された field で、L2 相当の client は `crossOrigin: true` だけを送って `topOrigin` を付けない。逆に `topOrigin` だけ付いて `crossOrigin` が欠ける値は client の不整合で、片方の検査に頼るとこれを通してしまう。検証手順 (§7.1) も `crossOrigin` と `topOrigin` を別の step で扱い、`topOrigin` が present なら「cross-origin iframe 内での作成を RP が想定しているか」を要求する — 想定しない設計なので、present の時点で拒否になる
 - 同じ RP ID の入口が複数あっても (`https://h.example/` と `https://h.example/personal`) credential は 1 つで足りる
 
 ## 検証手順
 
-登録 (WebAuthn L2 §7.1):
+節番号は WebAuthn Level 3 (W3C Recommendation 2026-08-25。以下 L3) のもの。**WebAuthn の参照版 選定判断基準日: 2026-11-27** (選定を変えたらこの日付と根拠も一緒に更新する)
+
+登録 (L3 §7.1):
 
 1. `clientDataJSON.type` が `webauthn.create`
 2. `challenge` が発行した値
@@ -39,24 +45,26 @@ WebAuthn の RP ID は origin ではなく **domain** で、credential は「今
 5. `authData.rpIdHash` が `sha256(rp_id)`
 6. UP と UV の flag が立っている (UV は必須にする)
 7. BE が 0 なのに BS が 1 なら拒否する。BS は「バックアップ可能な credential が今バックアップされている」ことを示すので、BE=0 と BS=1 の組は authenticator data として成立しない (L3 §7.1 はこの検査を無条件の step として置く)。通った BE / BS はそのまま credential record に保存する
-8. `fmt` が `none` で `attStmt` が空
-9. credential id が既存 record と重複しない
+8. 公開鍵の `alg` が、`create()` に渡した `pubKeyCredParams` のどれかと一致する。鍵の `crv` も見る (`-7` は P-256、`-8` は Ed25519。L3 §5.8.5)
+9. `fmt` が `none` で `attStmt` が空。または `fmt` が `packed` で `attStmt` に `x5c` が無い (self attestation)。client は `attestation: "none"` を受けても、aaguid が全 0 の self attestation は書き換えずに通す (L3 §5.1.3)。後者は L3 §8.2 の手順で、credential 自身の公開鍵による署名を検証する。それ以外の `fmt` は拒否する
+10. credential id が 1023 byte 以下
+11. credential id が既存 record と重複しない
 
 **extensions は要求せず、出力も判定に使わない。** `create()` に `extensions` を渡さないので、authData の extensions と `getClientExtensionResults()` に何か載っていても、それは client が自発的に足したものである。L3 §7.1 は要求していない extension の出力について「無視するか attestation を拒否するか」を RP の方針に委ね、要求した extension についても出力が全部は返らない前提で扱えと書く。この設計が必要とする判定 (誰が作ってよいか = jwt、誰が操作したか = UV) は extension に依存していないので、**無視する側**に倒す。拒否に倒すと、ブラウザや authenticator が将来足す extension で登録が壊れる。`credProps` (resident key になったかの報告) のような保守 UI の手がかりになる extension を後から要求する場合も、その出力は BE / BS と同じく記録に留め、可否判定には使わない。
 
 認証 (§7.2):
 
 1. `type` が `webauthn.get`
-2. `challenge`、`origin`、`crossOrigin`、`topOrigin`、`rpIdHash`、UP / UV は登録と同じ
-3. `userHandle` が record の `user_id` と一致する
-4. 署名 (`authData || sha256(clientDataJSON)`) を ES256 (加えて RS256 / Ed25519) で検証する
+2. `challenge`、`origin`、`crossOrigin`、`topOrigin`、`rpIdHash`、UP / UV、BE が 0 なのに BS が 1 なら拒否すること (L3 §7.2 でも無条件の step) は登録と同じ
+3. `userHandle` を record の `user_id` と照合する。`allowCredentials` を空にした認証では authenticator が必ず `userHandle` を返すので、present であることと一致の両方を見る。`allowCredentials` を渡した認証では、discoverable でない credential が `userHandle` を返さないことがあるので、record は credential id で引き、`userHandle` は present の時だけ一致を見る (L3 §5.2.2、§7.2)
+4. 署名 (`authData || sha256(clientDataJSON)`) を ES256 (加えて RS256 / Ed25519) で検証する。ES256 の署名は ASN.1 DER で届く (L3 §6.5.5)。WebCrypto の ECDSA の署名は r と s を固定長で連結した形なので、検証の前に変換する
 5. signCount は **record の値が非 0 なら「提示値 > record」を要求**する (提示 0 も退行として拒否)。record が 0 なら提示値をそのまま保存する。同期される passkey は常に 0 を返すので、0 のまま据え置く経路が要る
-6. `authenticatorData` の flags のうち **BE (backup eligible) / BS (backup state) を登録時・認証時ともに record へ記録**する。同期 passkey (BE=1) かデバイス束縛 (BE=0) かが保守 UI の手がかりになる。signCount が常に 0 なのが同期 passkey の常態であることは、BE=1 と対で読むと説明が付く。BE / BS は認証の可否判定には使わない (手がかりに留める)
+6. `authenticatorData` の flags のうち **BE (backup eligible) / BS (backup state) を登録時・認証時ともに record へ記録**する。同期 passkey (BE=1) かデバイス束縛 (BE=0) かが保守 UI の手がかりになる。signCount が常に 0 なのが同期 passkey の常態であることは、BE=1 と対で読むと説明が付く。成立しない組 (2 の BE=0 かつ BS=1) の拒否を除き、BE / BS は認証の可否判定には使わない (手がかりに留める)
 7. BE は credential の作成時に決まり変わらない性質で (L3 §6.1.3 の MUST NOT change)、BS は時間とともに変わりうる。L3 §7.2 の「record の BE と提示の BE の一致を検証する」step は「backup state を RP の業務判断や方針に使う場合」に限った条件付きの step なので、可否判定に使わないこの設計では拒否条件にしない。record と食い違う BE を見たら、BS の変化と同じく保守 UI に出す異常として記録する (BS が 1 → 0 に落ちた credential は単一端末の紛失で失われうるので、追加登録を促す手がかりになる)
 
 `user_id` (WebAuthn の user handle) は **server が sub ごとに 1 度だけ決めた 16 byte の乱数**を使い回す。authenticator は handle を server の手の届かない場所に保存するので、同じ人に 2 つの値を配ると端末上で 2 つのアカウントに見える。同じ sub への追加登録では既存の handle を再利用する。
 
-WebAuthn の検証に library は要らない。必要なのは小さな CBOR decoder (attestationObject と COSE 鍵) と WebCrypto (署名の verify、sha256、HMAC) だけで、library を入れると attestation の固定や challenge の転送のような細かい制御が効かなくなる。
+WebAuthn の検証に library は要らない。必要なのは小さな CBOR decoder (attestationObject と COSE 鍵)、WebCrypto (署名の verify、sha256、HMAC)、ES256 の署名を DER から r と s の連結へ直す短い変換だけで、library を入れると attestation の固定や challenge の転送のような細かい制御が効かなくなる。
 
 ## token は署名しない opaque 値
 

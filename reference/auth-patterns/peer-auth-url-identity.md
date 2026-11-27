@@ -110,7 +110,7 @@ id を持たない行も一覧に出す。config が挙げた peer は handshake
 
 | 方式 | 理由 |
 |---|---|
-| mTLS | 証明書の配布・更新という管理対象が増える。加えて public CA の clientAuth EKU は廃止済みで private CA の運用が必須になる |
+| mTLS | 証明書の配布・更新という管理対象が増える。加えて public CA は clientAuth EKU の付いた証明書の発行をやめていく途中で (Let's Encrypt は 2026-07 に終了。Chrome の root program は、2027-03-15 以降に発行する利用者向け証明書を serverAuth だけにするよう求める)、private CA の運用が必須になる。**mTLS 不採用 選定判断基準日: 2026-11-27** (選定を変えたらこの日付と根拠も一緒に更新する) |
 | Noise IK / WireGuard / 公開鍵の設定直書き | 相手の静的公開鍵を全ノードに事前配布することになり、管理対象を増やさない目的と真逆 |
 | Noise XX | 事前共有は不要だが、交換した鍵を FQDN に紐づける仕組みが別途要る。それが結局 PKI なら TLS の上に重ねる二度手間 |
 | SPKI pinning | ピン値の配布と更新という管理対象が生まれる |

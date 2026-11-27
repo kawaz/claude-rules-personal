@@ -9,9 +9,9 @@
 - **origin 境界** (scheme + host + port): localStorage / IndexedDB / DOM アクセスはここで切れる
 - **site 境界** (eTLD+1): SameSite cookie、cookie の `domain` 属性、WebAuthn の registrable suffix はここで切れる
 
-サブドメインで分けただけでは site 境界が同じままなので、次の 3 つが全部抜ける。
+サブドメインで分けただけでは site 境界が同じままなので、次の 3 つが抜ける。1 は RP ID を親ドメインにした時に、2 と 3 は RP ID に関係なく抜ける。
 
-1. **passkey の窃取**: RP ID を `myhost.example.com` にすると、全サブドメインから registrable suffix として使える。信頼しないプレビュー内の JS が `navigator.credentials.get({rpId: "myhost.example.com"})` を呼べ、偽 UI で TouchID を踏ませれば assertion を取得できる
+1. **passkey の窃取**: RP ID を `myhost.example.com` にすると、全サブドメインから registrable suffix として使える。信頼しないプレビュー内の JS が `navigator.credentials.get({rpId: "myhost.example.com"})` を呼べ、偽 UI で TouchID を踏ませれば assertion を取得できる。RP ID をアプリのホストそのもの (`ccmsg.myhost.example.com`。reference の `auth-patterns/passkey-registration-local-first` の既定) にしている間は、別のサブドメインからは使えない。複数のサブドメインで credential を共有しようとして RP ID を親へ上げた時点で開く
 2. **cookie tossing**: sandbox 側から `document.cookie = "sid=...; domain=.myhost.example.com"` を書ける。セッション固定攻撃になる
 3. **SameSite の無効化**: 同一 site 扱いなので `SameSite=Lax` / `Strict` が CSRF 防御にならない
 
