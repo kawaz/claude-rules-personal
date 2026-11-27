@@ -15,6 +15,7 @@ macOS で、秘密 (鍵、token、認証の可否のような判定の結論) �
   - **観測**: 実機で確かめたもの
   - **推定**: 観測や資料からの推論で、確かめていないもの
 - 観測は、特記が無ければ macOS 26.5.2 (25F84)、SIP 有効、開発者モード無効 (`DevToolsSecurity -status`) の Mac でのもの。**プロセスの守りの観測基準日: 2026-11-15** (観測をやり直したら、この日付と版と各項目の根拠も一緒に更新する)。項目の中に別の日付を書いた観測は、その日に同じ版・同じ設定の Mac で行ったもの。OS の版が変われば結果は変わりうる
+- data protection keychain と access group の観測 (「pam-passkey の観測」と書く) は、`kawaz/pam-passkey` の `docs/findings/2026-11-15-data-protection-keychain-stage1.md` (試験プログラムは同リポの `poc/dpk`) のもの。2026-11-15、macOS 26.5.2 (25F84)、SIP 有効、Apple silicon、利用者 (uid 501) の GUI のセッションの中の端末から、sudo なし。その間ダイアログは 1 度も出なかった
 - 本文が名前で指す一次資料の所在
   - Hardened Runtime: https://developer.apple.com/documentation/security/hardened-runtime
   - Debugging tool entitlement (`com.apple.security.cs.debugger`): https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.cs.debugger
@@ -92,7 +93,7 @@ macOS で、秘密 (鍵、token、認証の可否のような判定の結論) �
 | 起動時にライブラリを差し込む | M1 と M2 の両方。M1 だけだと (`get-task-allow` があると) library validation だけが残る | 観測 |
 | 保護の無い、同じ身元の別のビルド (access group では、同じ group を名乗れる別のビルド) を持ち込み、ライブラリを差し込んで、コードの身元で渡される秘密を読む | M3 | 観測、一次資料、推定 |
 | コアダンプに写ったメモリを読む | M2 (`get-task-allow` を付けない)。S1 が重ねる | 観測 (試験プログラム) |
-| 保存してある秘密を、置き場から読む | M4 | ファイル型の Keychain は観測、data protection keychain は一次資料 |
+| 保存してある秘密を、置き場から読む | M4 | 観測 (data protection keychain は pam-passkey の観測) |
 | 入口から秘密を出させる・使わせる | M5 | 観測と、そこからの帰結 |
 | argv、環境変数、ログ、ファイルから読む | M6 | 観測 |
 | 保護の無いビルドや別のコードの結論を、信頼する側に受け取らせる | M7 | 観測、推定 |
@@ -104,9 +105,9 @@ macOS で、秘密 (鍵、token、認証の可否のような判定の結論) �
 |---|---|---|
 | Apple の診断ツールが、対象の書き込み可能なメモリを読む | カーネルは断らない。相手に渡るのは道具の出力 (領域の一覧、型の集計、ブロックを指す値の場所) で、中身は出ない。中身が出ないことは道具の作りに依る。S2 と S3 が、崩れた時の被害を減らす | 観測 |
 | 利用者に認可のダイアログで応じさせる | M1 と M2 を満たした対象には届かない。満たさない対象では、利用者が見分けることに依る | 観測 |
-| ファイル型の Keychain のダイアログで、利用者に「常に許可」を押させる | 利用者の操作に依る。data protection keychain (M4 の (a)) にはこのダイアログが無い (一次資料からの推定) | 観測 |
+| ファイル型の Keychain のダイアログで、利用者に「常に許可」を押させる | 利用者の操作に依る。data protection keychain (M4 の (a)) では、group の外の相手が試してもダイアログは出ず、そのまま断られた (pam-passkey の観測) | 観測 |
 | プロセスにシグナルを送って止める・殺す | 同じ uid のプロセスは送れる。可用性は守れない。結論の偽造にならないようにすることだけ M7 が受け持つ | 一次資料 (POSIX `kill()`) |
-| ファイル型の Keychain の項目を消す、同名で作り直す | ACL の外の相手にもできる。data protection keychain (M4 の (a)) では group の外の相手にはできない見込み (推定、未観測) | 観測 |
+| ファイル型の Keychain の項目を消す、同名で作り直す | ACL の外の相手にもできる。data protection keychain (M4 の (a)) では、group の外の相手は持ち主の group の項目を消せず、更新できず、同名で書けなかった (pam-passkey の観測) | 観測 |
 | 末尾の「未調査・未観測の経路」に挙げたもの | 確かめていない | — |
 
 ## MUST
@@ -130,7 +131,7 @@ macOS で、秘密 (鍵、token、認証の可否のような判定の結論) �
   - task port: 相手が task port を求めた時 (`task_for_pid` 等、ptrace の接続) に、カーネルの AMFI が、対象の署名のフラグ (hardened runtime か) と entitlement (`get-task-allow` があるか)、呼び出し側が宣言済みのデバッガか root かを見て決める。`mach_vm_read` や `mach_vm_write` でのメモリの読み書きには task port が要るので、port が渡らなければこの手段は使えない
   - 差し込み: プロセスの起動時、`main` より前に、dyld が対象の署名を見て `DYLD_` で始まる変数を扱うかを決める。hardened runtime で `get-task-allow` も無い対象では、ライブラリを開こうとした跡がログに出ない (変数を読んでいないと見られる)
 - 欠けた時に起きること
-  - `DYLD_INSERT_LIBRARIES` を付けて起動すると、ライブラリが読み込まれる。ライブラリの constructor は `main` より前に、そのプロセスのコードの身元で動く (ファイル型の Keychain の ACL も通る (観測)。data protection keychain の access group も、読み込まれたコードは本体と区別されない (一次資料: Apple DTS の回答 thread/724013「an in-memory plug-in is indistinguishable from the host app」)。M3)
+  - `DYLD_INSERT_LIBRARIES` を付けて起動すると、ライブラリが読み込まれる。ライブラリの constructor は `main` より前に、そのプロセスのコードの身元で動く (ファイル型の Keychain の ACL も通る (観測)。data protection keychain の access group も、読み込まれたコードは本体と区別されない (一次資料: Apple DTS の回答 thread/724013「an in-memory plug-in is indistinguishable from the host app」。観測: hardened runtime の無い Apple Development 署名の bundle に差し込んだライブラリが、`main` より前に group の項目を読み書きし、Secure Enclave の鍵で署名できた。pam-passkey の観測)。M3)
   - 宣言済みのデバッガの task port の要求がカーネルを通り、利用者の認可の段に進む。認可があれば port が渡り、メモリを読み書きできる。認可は 1 度下りると共有され、その後は別のプロセスもダイアログ無しで通る。守りは、利用者がその瞬間に何のダイアログかを見分けることに依る (「利用者の認可は強い境界ではない」)
 - 確かめ方: `codesign -d -v <ファイルか pid>` の `CodeDirectory` の行の `flags` に `runtime` (0x10000) がある
 - 根拠: 観測 (差し込み、宣言済みのデバッガ、認可がある時とない時)、一次資料 (Hardened Runtime。保護は「SIP と組で」と書く)
@@ -181,7 +182,8 @@ macOS で、秘密 (鍵、token、認証の可否のような判定の結論) �
   - data protection keychain は、プロセスの署名の entitlement (`keychain-access-groups` 等) から読める group を決める。entitlement は provisioning profile が許すものに限られ、開発用の profile は `<Team ID>.*` のような wildcard で group を許しうる。読み込まれたライブラリは本体と区別されない (一次資料: Apple DTS の回答 thread/685723、thread/724013)
 - 欠けた時に起きること
   - hardened runtime でないバイナリにライブラリを差し込むと、そのバイナリだけを許す ACL の項目を、ライブラリの constructor が読めた。hardened runtime のバイナリでは読み込まれず、読めなかった (観測。ad-hoc 署名のバイナリと試験用の keychain)
-  - したがって、保護の無い署名済みのビルドが 1 つでもあれば、相手はそのファイルを持ち込み (守りたい Mac に元から在る必要は無い)、ライブラリを差し込んで、ACL を通って秘密を読める見込み。access group でも、group を名乗れる保護の無いビルドがあれば同じになる見込み (推定、未観測)
+  - したがって、保護の無い署名済みのビルドが 1 つでもあれば、相手はそのファイルを持ち込み (守りたい Mac に元から在る必要は無い)、ライブラリを差し込んで、ACL を通って秘密を読める見込み
+  - access group では観測で確かめた。持ち主と同じ entitlement と profile で、hardened runtime を付けずに Apple Development で署名した bundle に `DYLD_INSERT_LIBRARIES` でライブラリ (entitlement 無し。ad-hoc 署名でも、同じ Team の Apple Development 署名でも) を差し込むと、ライブラリは `main` より前に、持ち主の group の項目を読み、書き、Secure Enclave の鍵 (本人確認なし) で署名できた。hardened runtime を付けた bundle には読み込まれなかった (pam-passkey の観測)。開発用の profile は wildcard の App ID で group を許していたので、どの group を名乗らせるかは署名する側が決められる。Developer ID で署名した hardened runtime の無いビルドでは確かめていない (作らない)
 - 確かめ方: 下の `check_hardened` を署名の直後に、実行ファイルごとに呼ぶ (.app は中の実行ファイルを 1 つずつ渡す)。universal binary は arch ごとに調べる (`codesign -d -v` は `--arch` が無いと、動かしている Mac の arch しか表示しない)。条件を満たすファイルは残り、hardened runtime の無いもの、`get-task-allow` 付きのもの、一部の arch だけ hardened runtime の無い universal binary、Mach-O でないファイルは消えて失敗する (観測。最後の 2 つは 2026-11-27、bash 3.2)
 
   ```bash
@@ -222,7 +224,7 @@ macOS で、秘密 (鍵、token、認証の可否のような判定の結論) �
   ```
 
 - access group を使うなら、配る前に `codesign -d --entitlements - --xml <ファイル>` で `keychain-access-groups` を見て、本番の group を名乗るビルドを把握する。同じ group を名乗る開発用のビルドや別のアプリにも、この検査を当てる
-- 根拠: 観測 (差し込んだライブラリが ACL を通ること。ACL の requirement が cdhash になる ad-hoc 署名で確かめた)、一次資料 (requirement に hardened runtime を書けないこと。access group が entitlement と profile で決まり、差し込まれたコードが本体と区別されないこと)、推定 (Developer ID の designated requirement の ACL でも、access group でも同じになること)
+- 根拠: 観測 (差し込んだライブラリが ACL を通ること。ACL の requirement が cdhash になる ad-hoc 署名で確かめた。差し込んだライブラリが access group を通ること。Apple Development 署名で、pam-passkey の観測)、一次資料 (requirement に hardened runtime を書けないこと。access group が entitlement と profile で決まり、差し込まれたコードが本体と区別されないこと)、推定 (Developer ID の designated requirement の ACL でも、Developer ID 署名の access group でも同じになること)
 
 ### M4: 保存する秘密は、自分のコードの身元にだけ読ませる Keychain の項目に置く
 
@@ -241,15 +243,19 @@ data protection keychain はログインセッションの中でしか使えず�
   - app の形の bundle (`Contents/MacOS/` と `Contents/embedded.provisionprofile`) にして、Developer ID で署名する。provisioning profile が許す範囲で、自分だけが名乗る access group を `keychain-access-groups` (または `com.apple.application-identifier` の既定の group) で entitlement に入れる
   - 項目は SecItem の API で `kSecUseDataProtectionKeychain` を true にし、その group (`kSecAttrAccessGroup`) を指定して作る・読む
   - その group を名乗るビルドは全部 M1、M2、M3 の対象にする
-- 守るもの: 保存してある秘密を、group を名乗らないコード (別のバイナリ、`security` コマンド、スクリプト) が読むこと。項目の削除と作り直し、「常に許可」のダイアログの経路は、group の外の相手には開かない見込み (推定)
+- 守るもの: 保存してある秘密と Secure Enclave の鍵を、group を名乗らないコード (別のバイナリ、`security` コマンド、スクリプト、同じ Team の別の group を名乗る bundle) が読む・書く・更新する・消す・使うこと
+  - 観測: 同じ uid のこの 3 通りの相手は、持ち主の group の項目を読めず、書けず、更新できず、消せず、Secure Enclave の鍵の参照も取れなかった。group を指定した操作は全部 `errSecMissingEntitlement` (-34018)、group を指定しない読み出しは `errSecItemNotFound` (-25300)、`security find-generic-password` は終了コード 44。試した後も、持ち主の値と鍵は元のままで、ダイアログは出なかった (pam-passkey の観測。Developer ID 署名の持ち主と Apple Development 署名の持ち主の両方で同じ)
+  - 観測: entitlement を名乗る実行ファイルを bundle の外にコピーしたものと、同じ entitlement と profile を ad-hoc 署名で名乗る bundle は、起動の時点で kill された (終了コード 137。amfid の `-420 The signature on the file is invalid` / `-427 Unable to retrieve certificate chain`。pam-passkey の観測)
 - 守らないもの
   - group を名乗るプロセスの中で動くコード。差し込まれたライブラリは本体と区別されない → M1、M2、M3
   - 同じ Team ID で、profile が同じ group を許す別のアプリや開発用のビルド → M3
-  - group を名乗るバイナリを起動して、入口から出させること → M5
+  - group を名乗るバイナリを起動して、入口から出させること → M5。bundle の外の symlink からも hard link (同じ inode) からも、空の環境と cwd `/` でも、起動すると項目を読めた (pam-passkey の観測。コピーは止められ hard link は通る理由は未観測)。どの形でも動くのは同じ署名済みのコードなので、署名済みのバイナリを誰でも起動できること (M5) の範囲に収まる
   - メモリに読んだ後の秘密 → M1、M2
 - なぜ守られるか: Keychain が、要求したプロセスの署名の entitlement から読める group を決める。entitlement は provisioning profile が許すものに限られ、他の開発者は同じ group を名乗れない (一次資料: TN3137、Apple DTS の回答 thread/685723)
-- 確かめ方: `codesign -d --entitlements - --xml <app>` に `keychain-access-groups` (または `com.apple.application-identifier`) があり、`<app>/Contents/embedded.provisionprofile` がある。group を名乗らないバイナリから同じ項目を引いて、見つからないことを見る
-- 根拠: 一次資料 (TN3137、Apple DTS の回答)。観測なし (Developer ID の profile で `keychain-access-groups` を使えることも含めて未観測)
+- 確かめ方: `codesign -d --entitlements - --xml <app>` に `keychain-access-groups` (または `com.apple.application-identifier`) があり、`<app>/Contents/embedded.provisionprofile` がある。unified log に `taskgated-helper` の `allowing entitlement(s) for <bundle id> due to provisioning profile` が出る。group を名乗らないバイナリから、同じ項目の読み出し・書き込み・更新・削除を試して、-34018 か -25300 で断られ、持ち主の値が変わらないことを見る
+- 使えること: Developer ID Application 署名、`--options runtime`、Explicit の App ID の profile の bundle で、group を名乗って generic password の追加・読み出し・更新・削除と、Secure Enclave の鍵 (`privateKeyUsage` だけ) の作成・署名・削除ができた。Apple Development 署名と wildcard の App ID の profile でも同じ。作った項目の accessible は `WhenUnlockedThisDeviceOnly` だった (pam-passkey の観測)
+- 画面のロック中に読めるか、書けるかは未観測。cache-warden のように利用者が離れている間も読み出す設計はここに依るので、当てにする前に観測する (accessible の名前は「unlock されている間」だが、macOS の画面のロックがこれに当たるかは確かめていない)
+- 根拠: 観測 (pam-passkey の観測)、一次資料 (TN3137、Apple DTS の回答)
 
 #### (b) ファイル型の Keychain の ACL
 
@@ -443,7 +449,15 @@ MUST を全部満たしていても、次は確かめていない。
 - 認可の設定にある `system.privilege.taskport.safe` (`class: allow`、つまりダイアログ無しで許される。2026-11-27 に `security authorizationdb read` で読んだ値)。どの要求がこの right を使い、満たすべき形でない対象の read port がダイアログ無しで渡るか
 - Developer ID で署名した実物のバイナリのコアダンプ (観測は試験プログラムだけ)。`get-task-allow` のある対象で `ulimit -c` が 0 の時
 - Developer ID の designated requirement の ACL の項目を、同じ identifier と Team ID で hardened runtime なしに署名したビルドに差し込んだライブラリから読めるか (M3 の推定の部分)。System Keychain の項目での同じ観測
-- data protection keychain の access group (M4 の (a)) の全体: Developer ID の profile で `keychain-access-groups` を使えるか、group を名乗らないバイナリから項目を読めない・消せないこと、group を名乗る保護の無いビルドに差し込んだライブラリから読めること (M3 の推定の部分)
+- data protection keychain の access group (M4 の (a)) のうち、pam-passkey の観測に入っていないもの
+  - 画面のロック中の読み出しと書き込み (cache-warden の設計が当てにしている。未観測)
+  - データベースのファイル (`keychain-2.db`) を古い写しに戻す差し戻しで、消した項目や古い値が戻るか (cache-warden の設計が当てにしている。未観測)
+  - 本人確認を必須にした Secure Enclave の鍵を、差し込まれたコードが使おうとした時 (ダイアログが出るか)
+  - sudo の PAM から降格して exec したプロセス、ssh のセッション、GUI のセッションが無いユーザから使えるか
+  - root 所有の置き場に置いた bundle からの起動
+  - bundle の外の hard link からの起動が通る理由 (同じ inode の署名の検証の結果が使い回されるのか、bundle を辿れているのか)
+  - Developer ID で署名した hardened runtime の無いビルドへの差し込み (M3 の推定の部分。作らない)
+  - Developer ID の署名で別の group を名乗る相手
 - SIP を無効にした Mac での、表の各手段の結果
 - hardened runtime の他の例外の entitlement (`allow-jit`、`allow-unsigned-executable-memory`) が、同じ uid からの経路を開くか
 - socket、XPC、Mach service で要求を受けるプロセスが、相手のコードの身元を検査する方法とその抜け道
