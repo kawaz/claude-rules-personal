@@ -24,7 +24,7 @@ Error: HTTP status code: 403. A required agreement is missing or has expired.
 | エラー断片 | 真の原因 | 対処 |
 |---|---|---|
 | `A required agreement is missing or has expired` | **PLA 再同意 (本ケース)** | 下記の復旧手順 |
-| `Invalid credentials` / `authentication failed` | App-Specific Password の失効・タイポ | `setup-certificates.md` 手順 1 で再発行・再投入 |
+| `Invalid credentials` / `authentication failed` | App-Specific Password の失効・タイポ | `setup-certificates.md` の「3. Apple ID と App-Specific Password」で入れ直す。失効していたら同じ文書の「kawaz へ出す依頼文」で作り直してもらう |
 | `The team you specified is not active` | Team / Membership 状態 | Membership 課金状況を確認 |
 | `Your account does not have permission` | Account Holder 以外で操作 | ロール確認 (Account Holder のみ可) |
 | `invalid Apple ID or password` | Apple ID 自体の問題 | Apple ID パスワード再確認 |
@@ -48,9 +48,11 @@ gh run rerun "$run_id" --failed --repo kawaz/<product>
 
 | 症状 | 原因 | 対処 |
 |---|---|---|
-| codesign `errSecInternalComponent` | p12 に秘密鍵が含まれていない | `setup-certificates.md` 手順 2 で「証明書と秘密鍵の両方」を選び直して再エクスポート |
+| codesign `errSecInternalComponent` | codesign が秘密鍵を使えない: keychain がロックされている、秘密鍵の ACL の確認ダイアログを出せない (SSH・CI)、partition list が足りない、`sudo` 等で実行文脈が混ざっている | `security unlock-keychain`。import を `-T /usr/bin/codesign` 付きにし、`security set-key-partition-list -S apple-tool:,apple:,codesign:` を当てる (`ci-release-pipeline.md` の import と同じ形)。`sudo` を外す。原因と対処の一次資料は Apple DTS の回答 <https://developer.apple.com/forums/thread/712005> |
+| `security find-identity -v -p codesigning` に Developer ID Application が出ない | 証明書だけで秘密鍵が無い | 秘密鍵のある Mac から p12 を作り直す (`setup-certificates.md` の「2. 証明書」) |
 | `The signature does not include a secure timestamp` (notarize 側) | codesign に `--timestamp` 欠落 | 署名コマンドに `--timestamp` を追加 |
-| notarize 後も Gatekeeper 警告 (`spctl` reject) | Hardened Runtime 未適用 | codesign に `--options runtime` を追加 |
+| `The executable does not have the hardened runtime enabled` (notarize 側) | codesign に `--options runtime` 欠落 | 署名コマンドに `--options runtime` を追加 |
+| notarize は通ったのに Gatekeeper が拒む (`spctl` reject) | 候補: staple していない物をオフラインで開いた (bare binary は staple できず、確かめにネットワークが要る)、notarize の後に中身か署名が変わった、`spctl` の type の取り違え | `.app` は `spctl -a -vvv -t exec` で判定する (`-t install` はインストーラ package 用)。notarize に出した物と配った物の `codesign -dv` の `CDHash` を比べる |
 | Homebrew Cask インストール後 .app が壊れる | Formula の tarball strip / 単一トップレベル | Cask 一本 + tar に bare binary 併置 (`tcc-app-bundle.md`) |
 | `brew upgrade` で `formula requires at least a URL` | Formula + Cask 同名共存 | Formula を `rm -f` し Cask のみに (`tcc-app-bundle.md`) |
 

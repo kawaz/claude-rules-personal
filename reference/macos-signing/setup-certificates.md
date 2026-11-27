@@ -81,6 +81,12 @@ login keychain の **全 identity を一括で p12 に含める** (特定 identi
 
 > 余分な identity が混入した p12 でも codesign は `$APPLE_SIGNING_IDENTITY` 名指しで署名するため **動作はする**。問題は不要な秘密鍵の過剰共有。作り直して secret を上書きすれば次のリリースから反映。
 
+#### この手順で秘密鍵とパスワードが同じ uid に見える所 (この Mac の上で動かすので)
+
+- `security import … -A` は、一時 keychain の秘密鍵を「全アプリにダイアログ無しで」使わせる設定にする (man security の `-A`: 「Allow any application to access this key without warning (insecure, not recommended!)」)。一時 keychain は作った直後から unlock されているので、スクリプトが動いている間は、同じ uid の任意のプロセスが Developer ID の秘密鍵を取り出せる (推定)。`-A` の代わりに `-T /usr/bin/security` で `security` だけを許す形に絞れる見込みだが、この手順での動作は未検証
+- `-P "$P1"`、`-P "$P2"`、`-p "$KCPASS"` は argv に乗るので、その間は `ps` で見える (`/bin/ps` は setuid root で、別の uid からも見える)。`P2` は GitHub に入れる `APPLE_CERTIFICATE_PASSWORD` そのもの。argv に置かない形は reference の `keychain-secrets` の `security -i` (stdin にコマンド行を流す) だが、`export` / `import` / `create-keychain` での動作は未検証
+- 秘密をメモリや置き場に持つプロセスの守りの考え方は reference の `macos-process-protection` (M6: 秘密を argv に置かない)
+
 ### 3. Apple ID と App-Specific Password (1Password から)
 
 ```bash
@@ -164,7 +170,7 @@ notarization には **Developer ID Application** が必須 ($99/年の Apple Dev
 ```bash
 codesign --force --sign "$IDENTITY" --timestamp --options runtime <binary>
 codesign -dv --verbose=4 <binary>
-spctl -a -vvv -t install <app>     # Gatekeeper 判定 (.app のみ)
+spctl -a -vvv -t exec <app>        # Gatekeeper 判定 (.app のみ。-t install はインストーラ package 用)
 ```
 
 ## 関連

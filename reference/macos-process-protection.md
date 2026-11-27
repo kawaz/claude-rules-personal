@@ -14,7 +14,7 @@ macOS で、秘密 (鍵、token、認証の可否のような判定の結論) �
   - **一次資料**: Apple の文書、man、SDK のヘッダ
   - **観測**: 実機で確かめたもの
   - **推定**: 観測や資料からの推論で、確かめていないもの
-- 観測は、特記が無ければ macOS 26.5.2 (25F84)、SIP 有効、開発者モード無効 (`DevToolsSecurity -status`) の Mac でのもの。**プロセスの守りの観測基準日: 2026-11-15** (観測をやり直したら、この日付と版と各項目の根拠も一緒に更新する)。OS の版が変われば結果は変わりうる
+- 観測は、特記が無ければ macOS 26.5.2 (25F84)、SIP 有効、開発者モード無効 (`DevToolsSecurity -status`) の Mac でのもの。**プロセスの守りの観測基準日: 2026-11-15** (観測をやり直したら、この日付と版と各項目の根拠も一緒に更新する)。項目の中に別の日付を書いた観測は、その日に同じ版・同じ設定の Mac で行ったもの。OS の版が変われば結果は変わりうる
 - 本文が名前で指す一次資料の所在
   - Hardened Runtime: https://developer.apple.com/documentation/security/hardened-runtime
   - Debugging tool entitlement (`com.apple.security.cs.debugger`): https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.cs.debugger
@@ -24,14 +24,18 @@ macOS で、秘密 (鍵、token、認証の可否のような判定の結論) �
   - Resolving common notarization issues (`get-task-allow` の節): https://developer.apple.com/documentation/security/resolving-common-notarization-issues
   - Disabling and Enabling System Integrity Protection: https://developer.apple.com/documentation/security/disabling-and-enabling-system-integrity-protection
   - Code Signing Requirement Language: https://developer.apple.com/library/archive/documentation/Security/Conceptual/CodeSigningGuide/RequirementLang/RequirementLang.html
+  - TN3137 On Mac keychain APIs and implementations: https://developer.apple.com/documentation/technotes/tn3137-on-mac-keychains
+  - keychain access group と provisioning profile についての Apple DTS の回答: https://developer.apple.com/forums/thread/685723 、https://developer.apple.com/forums/thread/724013
   - POSIX `kill()`: https://pubs.opengroup.org/onlinepubs/9799919799/functions/kill.html
   - `taskgated(8)`、`DevToolsSecurity(8)`、`setrlimit(2)` は Mac の man
+  - SDK のヘッダ: `Security/CSCommon.h`、`Security/SecCode.h`、`Security/SecTrustedApplication.h`、`Security/SecAccess.h`、`sys/un.h`
 
 ## 想定する相手
 
 - 同じ uid で動く、root でないプロセス。任意のコードを実行でき、自分のバイナリを ad-hoc 署名できる
 - ad-hoc 署名のバイナリは、`com.apple.security.cs.debugger` を自分に付けて起動できる。カーネルはこれを「宣言済みのデバッガ」として扱う。`lldb` (Apple の `debugserver`) も宣言済みのデバッガに当たる (観測)
-- ad-hoc 署名のバイナリは、Apple 専用の entitlement を自分に付けられない。`com.apple.system-task-ports.read` を付けたものは起動時に kill された (観測。amfid のログは `The file is adhoc signed but contains restricted entitlements`)。`com.apple.system-task-ports.read.safe` も同じ扱いと見られる (推定。そのものでは試していない)
+- ad-hoc 署名のバイナリは、Apple 専用の entitlement を自分に付けられない。`com.apple.system-task-ports.read` と `com.apple.system-task-ports.read.safe` は、どちらも付けたものが起動時に kill された (観測。`.read.safe` は 2026-11-27。終了コードは 137、amfid のログは `The file is adhoc signed but contains restricted entitlements`)
+- `gcore` が持つ `com.apple.security.cs.debugger.read.root` は、ad-hoc 署名で自分に付けても起動を止められなかった (観測、2026-11-27)。この entitlement で何ができるかは未観測 (末尾の「未調査・未観測の経路」)
 - 相手は Apple の診断ツールを実行できる。道具の出力は相手に渡る
 - 相手は、利用者の画面に認可のダイアログを出させられる (宣言済みのデバッガで、hardened runtime でない対象か `get-task-allow` のある対象の task port を求める)
 - 扱わない相手: root、カーネル、SIP を無効にできる者、Mac に物理的に触れる者。プロセス自身の不具合 (入力の解釈の誤りからの乗っ取り) も扱わない
@@ -60,7 +64,7 @@ macOS で、秘密 (鍵、token、認証の可否のような判定の結論) �
 
 - ダイアログの文言は「Developer Tools Access はデバッグを続行するために別のプロセスを制御する必要があります」で、要求したプログラムも対象のプロセスも示さない。Touch ID で応じられる
 - 別の確認の操作の最中にこのダイアログが出ると、利用者はその一部だと思って応じる。同じ日に 2 回起きた (応じた本人の申告)
-- 1 つの要求に認可が下りると、その後は別のプロセスもダイアログ無しで同じ認可を使えた。設定は共有 (`shared`) で 10 時間 (`timeout: 36000`)。要求した検査プログラムを止めた後も、ダイアログは画面に残る
+- 1 つの要求に認可が下りると、その後は別のプロセスもダイアログ無しで同じ認可を使えた。設定は共有 (`shared`) で 10 時間 (`timeout: 36000`)。応じるには `_developer` グループの利用者としての認証が要る (`authenticate-user`、`group: _developer`)。設定は `security authorizationdb read system.privilege.taskport` で読める (2026-11-27 に読んだ値)。要求した検査プログラムを止めた後も、ダイアログは画面に残る
 - `security authorize -d system.privilege.taskport` では取り消せなかった。ログアウトで消える見込み (推定)
 - `lldb` (`debugserver`) は別の right (`system.privilege.taskport.debug`) を求め、改めてダイアログが出た
 
@@ -86,9 +90,9 @@ macOS で、秘密 (鍵、token、認証の可否のような判定の結論) �
 | entitlement を持たないプロセスが、task port か ptrace でメモリを読む・書く | M1 か、M2 のうち `get-task-allow` を付けないこと、のどちらか一方があれば断られる。両方を外すと開く | 観測 |
 | 宣言済みのデバッガが task port を取る | M1 と M2 の両方。片方でも欠けると、カーネルが断らなくなり、残るのは利用者の認可だけ (強い境界ではない) | 観測 |
 | 起動時にライブラリを差し込む | M1 と M2 の両方。M1 だけだと (`get-task-allow` があると) library validation だけが残る | 観測 |
-| 保護の無い、同じ身元の別のビルドを持ち込み、ライブラリを差し込んで、コードの身元で渡される秘密を読む | M3 | 観測、推定 |
+| 保護の無い、同じ身元の別のビルド (access group では、同じ group を名乗れる別のビルド) を持ち込み、ライブラリを差し込んで、コードの身元で渡される秘密を読む | M3 | 観測、一次資料、推定 |
 | コアダンプに写ったメモリを読む | M2 (`get-task-allow` を付けない)。S1 が重ねる | 観測 (試験プログラム) |
-| 保存してある秘密を、置き場から読む | M4 | 観測 |
+| 保存してある秘密を、置き場から読む | M4 | ファイル型の Keychain は観測、data protection keychain は一次資料 |
 | 入口から秘密を出させる・使わせる | M5 | 観測と、そこからの帰結 |
 | argv、環境変数、ログ、ファイルから読む | M6 | 観測 |
 | 保護の無いビルドや別のコードの結論を、信頼する側に受け取らせる | M7 | 観測、推定 |
@@ -100,9 +104,9 @@ macOS で、秘密 (鍵、token、認証の可否のような判定の結論) �
 |---|---|---|
 | Apple の診断ツールが、対象の書き込み可能なメモリを読む | カーネルは断らない。相手に渡るのは道具の出力 (領域の一覧、型の集計、ブロックを指す値の場所) で、中身は出ない。中身が出ないことは道具の作りに依る。S2 と S3 が、崩れた時の被害を減らす | 観測 |
 | 利用者に認可のダイアログで応じさせる | M1 と M2 を満たした対象には届かない。満たさない対象では、利用者が見分けることに依る | 観測 |
-| Keychain のダイアログで、利用者に「常に許可」を押させる | 利用者の操作に依る | 観測 |
+| ファイル型の Keychain のダイアログで、利用者に「常に許可」を押させる | 利用者の操作に依る。data protection keychain (M4 の (a)) にはこのダイアログが無い (一次資料からの推定) | 観測 |
 | プロセスにシグナルを送って止める・殺す | 同じ uid のプロセスは送れる。可用性は守れない。結論の偽造にならないようにすることだけ M7 が受け持つ | 一次資料 (POSIX `kill()`) |
-| Keychain の項目を消す、同名で作り直す | ACL の外の相手にもできる | 観測 |
+| ファイル型の Keychain の項目を消す、同名で作り直す | ACL の外の相手にもできる。data protection keychain (M4 の (a)) では group の外の相手にはできない見込み (推定、未観測) | 観測 |
 | 末尾の「未調査・未観測の経路」に挙げたもの | 確かめていない | — |
 
 ## MUST
@@ -126,7 +130,7 @@ macOS で、秘密 (鍵、token、認証の可否のような判定の結論) �
   - task port: 相手が task port を求めた時 (`task_for_pid` 等、ptrace の接続) に、カーネルの AMFI が、対象の署名のフラグ (hardened runtime か) と entitlement (`get-task-allow` があるか)、呼び出し側が宣言済みのデバッガか root かを見て決める。`mach_vm_read` や `mach_vm_write` でのメモリの読み書きには task port が要るので、port が渡らなければこの手段は使えない
   - 差し込み: プロセスの起動時、`main` より前に、dyld が対象の署名を見て `DYLD_` で始まる変数を扱うかを決める。hardened runtime で `get-task-allow` も無い対象では、ライブラリを開こうとした跡がログに出ない (変数を読んでいないと見られる)
 - 欠けた時に起きること
-  - `DYLD_INSERT_LIBRARIES` を付けて起動すると、ライブラリが読み込まれる。ライブラリの constructor は `main` より前に、そのプロセスのコードの身元で動く (Keychain の ACL も通る。M3)
+  - `DYLD_INSERT_LIBRARIES` を付けて起動すると、ライブラリが読み込まれる。ライブラリの constructor は `main` より前に、そのプロセスのコードの身元で動く (ファイル型の Keychain の ACL も通る (観測)。data protection keychain の access group も、読み込まれたコードは本体と区別されない (一次資料: Apple DTS の回答 thread/724013「an in-memory plug-in is indistinguishable from the host app」)。M3)
   - 宣言済みのデバッガの task port の要求がカーネルを通り、利用者の認可の段に進む。認可があれば port が渡り、メモリを読み書きできる。認可は 1 度下りると共有され、その後は別のプロセスもダイアログ無しで通る。守りは、利用者がその瞬間に何のダイアログかを見分けることに依る (「利用者の認可は強い境界ではない」)
 - 確かめ方: `codesign -d -v <ファイルか pid>` の `CodeDirectory` の行の `flags` に `runtime` (0x10000) がある
 - 根拠: 観測 (差し込み、宣言済みのデバッガ、認可がある時とない時)、一次資料 (Hardened Runtime。保護は「SIP と組で」と書く)
@@ -159,54 +163,95 @@ macOS で、秘密 (鍵、token、認証の可否のような判定の結論) �
 
 ### M3: 保護の無い署名済みのビルドを作らない・残さない
 
-- 条件: 配布用の証明書 (Developer ID) と同じ identifier で、M1 と M2 を満たさないファイルを、署名済みのまま 1 つも残さない・配らない。ビルドは署名の直後に M1 と M2 を検査し、落ちたら署名済みのファイルを消す。デバッグ用のビルドは ad-hoc 署名か別の identifier にする
-- 守るもの: コードの身元を条件に渡される秘密 (Keychain の ACL の項目) が、保護の無いビルドに差し込んだコードから読まれること
+- 条件
+  - 秘密の置き場が自分の身元として認めるビルド (下の 2 つ) のうち、M1 と M2 を満たさないものを、署名済みのまま 1 つも残さない・配らない
+    - ファイル型の Keychain の ACL (M4 の (b)): 配布用の証明書 (Developer ID) と同じ identifier のビルド
+    - data protection keychain の access group (M4 の (a)): その group を名乗れる全てのビルド。access group は署名の entitlement で決まり、同じ Team ID で profile が許す別のアプリや開発用のビルド (Apple Development 署名) も、同じ group を名乗れる
+  - ビルドは署名の直後に M1 と M2 を検査し、落ちたら署名済みのファイルを消す
+  - デバッグ用のビルドは、ad-hoc 署名か別の identifier にする。access group を使うなら、デバッグ用のビルドに本番の group を名乗らせない (profile と entitlement から外す)。Xcode は開発用のビルドに `get-task-allow` を自動で足す (M2) ので、本番の group を名乗る開発用のビルドは、そのまま保護の無いビルドになる
+- 守るもの: コードの身元を条件に渡される秘密 (ファイル型の Keychain の ACL の項目、data protection keychain の access group の項目) が、保護の無いビルドに差し込んだコードから読まれること
 - 守らないもの
   - 既に出てしまった保護の無いビルド。ファイルを消しても、写しの署名は有効なまま → 受け持つ項目なし
   - 署名に使う証明書の秘密鍵が漏れること (相手が自分で同じ身元のビルドを作れる) → 受け持つ項目なし
   - 保護のあるビルドの入口から秘密を出させること → M5
   - コードの身元に依らない置き場 (ファイル、全アプリ可の項目) → M4
 - なぜ要るか: OS はこの経路を止めない
-  - Keychain の ACL は、項目を読む要求が来た時に、要求したプロセスのコードの署名を requirement に照らして判定する。見るのはプロセスの本体の身元だけで、読み込まれたライブラリは見ない (観測)
-  - requirement は信頼アプリの designated requirement (identifier、Apple が発行した証明書、Team ID) になる。requirement の言語には署名のフラグの条件が無く、hardened runtime を条件に書けない (一次資料: Code Signing Requirement Language。公開 API で信頼アプリを作る関数は SDK の `SecTrustedApplicationCreateFromPath` だけ)
+  - ファイル型の Keychain の ACL は、項目を読む要求が来た時に、要求したプロセスのコードの署名を requirement に照らして判定する。見るのはプロセスの本体の身元だけで、読み込まれたライブラリは見ない (観測)
+  - その requirement は信頼アプリの designated requirement (identifier、Apple が発行した証明書、Team ID) になる。requirement の言語には署名のフラグの条件が無く、hardened runtime を条件に書けない (一次資料: Code Signing Requirement Language。公開 API で信頼アプリを作る関数は SDK の `SecTrustedApplicationCreateFromPath` だけ)
+  - data protection keychain は、プロセスの署名の entitlement (`keychain-access-groups` 等) から読める group を決める。entitlement は provisioning profile が許すものに限られ、開発用の profile は `<Team ID>.*` のような wildcard で group を許しうる。読み込まれたライブラリは本体と区別されない (一次資料: Apple DTS の回答 thread/685723、thread/724013)
 - 欠けた時に起きること
   - hardened runtime でないバイナリにライブラリを差し込むと、そのバイナリだけを許す ACL の項目を、ライブラリの constructor が読めた。hardened runtime のバイナリでは読み込まれず、読めなかった (観測。ad-hoc 署名のバイナリと試験用の keychain)
-  - したがって、保護の無い署名済みのビルドが 1 つでもあれば、相手はそのファイルを持ち込み (守りたい Mac に元から在る必要は無い)、ライブラリを差し込んで、ACL を通って秘密を読める見込み
-- 確かめ方: 下の `check_hardened` を署名の直後に呼ぶ。条件を満たすファイルは残り、hardened runtime の無いものと `get-task-allow` 付きのものは消えて失敗する (観測)
+  - したがって、保護の無い署名済みのビルドが 1 つでもあれば、相手はそのファイルを持ち込み (守りたい Mac に元から在る必要は無い)、ライブラリを差し込んで、ACL を通って秘密を読める見込み。access group でも、group を名乗れる保護の無いビルドがあれば同じになる見込み (推定、未観測)
+- 確かめ方: 下の `check_hardened` を署名の直後に、実行ファイルごとに呼ぶ (.app は中の実行ファイルを 1 つずつ渡す)。universal binary は arch ごとに調べる (`codesign -d -v` は `--arch` が無いと、動かしている Mac の arch しか表示しない)。条件を満たすファイルは残り、hardened runtime の無いもの、`get-task-allow` 付きのもの、一部の arch だけ hardened runtime の無い universal binary、Mach-O でないファイルは消えて失敗する (観測。最後の 2 つは 2026-11-27、bash 3.2)
 
   ```bash
-  # 署名の直後に呼ぶ。条件を満たさなければ、署名済みのファイルを消して失敗する
+  # 署名の直後に、実行ファイルごとに呼ぶ。条件を満たさなければ、署名済みのファイルを消して失敗する
   check_hardened() {
-    local file=$1 info flags entitlements key
-    if ! info=$(codesign -d -v "$file" 2>&1); then
+    local file=$1 archs arch info flags entitlements key
+    if ! archs=$(lipo -archs "$file" 2>&1); then
       rm -f "$file"
-      echo "$info" >&2
+      echo "$file: Mach-O の実行ファイルではない ($archs)" >&2
       return 1
     fi
-    flags=$(sed -nE 's/^CodeDirectory .* flags=0x([0-9a-fA-F]+).*/\1/p' <<<"$info")
-    if [[ -z $flags ]] || (( (16#$flags & 0x10000) == 0 )); then
-      rm -f "$file"
-      echo "$file: hardened runtime のフラグが無い (--options runtime で署名する)" >&2
-      return 1
-    fi
-    entitlements=$(codesign -d --entitlements - --xml "$file" 2>/dev/null)
-    for key in \
-      com.apple.security.get-task-allow \
-      com.apple.security.cs.allow-dyld-environment-variables \
-      com.apple.security.cs.disable-library-validation \
-      com.apple.security.cs.disable-executable-page-protection; do
-      if grep -qF "<key>$key</key>" <<<"$entitlements"; then
+    for arch in $archs; do
+      if ! info=$(codesign -d -v --arch "$arch" "$file" 2>&1); then
         rm -f "$file"
-        echo "$file: 保護を緩める entitlement $key がある" >&2
+        echo "$info" >&2
         return 1
       fi
+      flags=$(sed -nE 's/^CodeDirectory .* flags=0x([0-9a-fA-F]+).*/\1/p' <<<"$info")
+      if [[ -z $flags ]] || (( (16#$flags & 0x10000) == 0 )); then
+        rm -f "$file"
+        echo "$file ($arch): hardened runtime のフラグが無い (--options runtime で署名する)" >&2
+        return 1
+      fi
+      entitlements=$(codesign -d --entitlements - --xml --arch "$arch" "$file" 2>/dev/null)
+      for key in \
+        com.apple.security.get-task-allow \
+        com.apple.security.cs.allow-dyld-environment-variables \
+        com.apple.security.cs.disable-library-validation \
+        com.apple.security.cs.disable-executable-page-protection; do
+        if grep -qF "<key>$key</key>" <<<"$entitlements"; then
+          rm -f "$file"
+          echo "$file ($arch): 保護を緩める entitlement $key がある" >&2
+          return 1
+        fi
+      done
     done
   }
   ```
 
-- 根拠: 観測 (差し込んだライブラリが ACL を通ること。ACL の requirement が cdhash になる ad-hoc 署名で確かめた)、一次資料 (requirement に hardened runtime を書けないこと)、推定 (Developer ID の designated requirement の ACL でも同じになること)
+- access group を使うなら、配る前に `codesign -d --entitlements - --xml <ファイル>` で `keychain-access-groups` を見て、本番の group を名乗るビルドを把握する。同じ group を名乗る開発用のビルドや別のアプリにも、この検査を当てる
+- 根拠: 観測 (差し込んだライブラリが ACL を通ること。ACL の requirement が cdhash になる ad-hoc 署名で確かめた)、一次資料 (requirement に hardened runtime を書けないこと。access group が entitlement と profile で決まり、差し込まれたコードが本体と区別されないこと)、推定 (Developer ID の designated requirement の ACL でも、access group でも同じになること)
 
-### M4: 保存する秘密は、自分のバイナリだけを許す ACL の Keychain の項目に置く
+### M4: 保存する秘密は、自分のコードの身元にだけ読ませる Keychain の項目に置く
+
+置き場は 2 通り。プロセスが動く文脈で選ぶ。**Keychain の置き場 選定判断基準日: 2026-11-27** (選定を変えたらこの日付と根拠も一緒に更新する)
+
+| 動く文脈 | 置き場 |
+|---|---|
+| 利用者のログインセッション (app、LaunchAgent) で動き、app の形の bundle に provisioning profile を埋め込める | (a) data protection keychain と access group |
+| launchd daemon (system の文脈)、root で動くもの (PAM モジュール等)、bundle にできない CLI | (b) ファイル型の Keychain の ACL |
+
+data protection keychain はログインセッションの中でしか使えず、launchd daemon はファイル型を使うしかない (一次資料: TN3137)。root で動く PAM モジュールが (a) を使えないことは、TN3137 からの推定 (未観測)。ファイル型の Keychain の API (`SecTrustedApplicationCreateFromPath`、`SecAccessCreate`、`SecACLSetContents` を含む SecKeychain 系) は非推奨で、Apple はファイル型を「on the road to deprecation」と書く (一次資料: SDK のヘッダの `API_DEPRECATED("SecKeychain is deprecated", macos(10.x, 10.10))`、TN3137)。(a) を使えない文脈でだけ (b) を使う。
+
+#### (a) data protection keychain と access group
+
+- 条件
+  - app の形の bundle (`Contents/MacOS/` と `Contents/embedded.provisionprofile`) にして、Developer ID で署名する。provisioning profile が許す範囲で、自分だけが名乗る access group を `keychain-access-groups` (または `com.apple.application-identifier` の既定の group) で entitlement に入れる
+  - 項目は SecItem の API で `kSecUseDataProtectionKeychain` を true にし、その group (`kSecAttrAccessGroup`) を指定して作る・読む
+  - その group を名乗るビルドは全部 M1、M2、M3 の対象にする
+- 守るもの: 保存してある秘密を、group を名乗らないコード (別のバイナリ、`security` コマンド、スクリプト) が読むこと。項目の削除と作り直し、「常に許可」のダイアログの経路は、group の外の相手には開かない見込み (推定)
+- 守らないもの
+  - group を名乗るプロセスの中で動くコード。差し込まれたライブラリは本体と区別されない → M1、M2、M3
+  - 同じ Team ID で、profile が同じ group を許す別のアプリや開発用のビルド → M3
+  - group を名乗るバイナリを起動して、入口から出させること → M5
+  - メモリに読んだ後の秘密 → M1、M2
+- なぜ守られるか: Keychain が、要求したプロセスの署名の entitlement から読める group を決める。entitlement は provisioning profile が許すものに限られ、他の開発者は同じ group を名乗れない (一次資料: TN3137、Apple DTS の回答 thread/685723)
+- 確かめ方: `codesign -d --entitlements - --xml <app>` に `keychain-access-groups` (または `com.apple.application-identifier`) があり、`<app>/Contents/embedded.provisionprofile` がある。group を名乗らないバイナリから同じ項目を引いて、見つからないことを見る
+- 根拠: 一次資料 (TN3137、Apple DTS の回答)。観測なし (Developer ID の profile で `keychain-access-groups` を使えることも含めて未観測)
+
+#### (b) ファイル型の Keychain の ACL
 
 - 条件
   - 項目は、ACL の信頼アプリを自分のバイナリだけにして作る (`SecTrustedApplicationCreateFromPath` (自分の実行パス) → `SecAccessCreate` → 復号の ACL に `SecACLSetContents`)
@@ -220,10 +265,13 @@ macOS で、秘密 (鍵、token、認証の可否のような判定の結論) �
   - ACL の外の相手が読もうとした時に出るパスワード付きのダイアログで、利用者が「常に許可」を押すこと (その相手が ACL に加わる) → 受け持つ項目なし
   - メモリに読んだ後の秘密 → M1、M2
 - なぜ守られるか: 項目の復号を求められた時に、Keychain が、求めたプロセスのコードの署名を ACL の requirement に照らす。満たさなければ、ダイアログを出すか (対話が許されている時)、失敗を返す
-- 欠けた時に起きること: `security` コマンドで作った項目や「全アプリ可」の ACL の項目は、同じ uid の任意のプロセスが確認なしで読める。モード 600 のファイルも同じ uid から読める。メモリを守っても、置き場から読まれる
-- 読み手の身元を固定できない場合 (スクリプト、`security` コマンドで読むツール) は、この条件を満たせない。権限を絞った token だけを置く (reference の `keychain-secrets`)
 - 確かめ方: 同じ作り方で試験用の項目を作り、ACL の外のバイナリ (`security find-generic-password -s <service> -a <account> -w`) から読んで、失敗するかダイアログになることを見る。ダイアログでは「拒否」を押す
 - 根拠: 観測 (2026-11-06 と 2026-11-15。Developer ID 署名のバイナリの項目と、ad-hoc 署名の試験用の項目)
+
+#### (a) と (b) に共通
+
+- 欠けた時に起きること: `security` コマンドで作った項目や「全アプリ可」の ACL の項目は、同じ uid の任意のプロセスが確認なしで読める (観測)。モード 600 のファイルも同じ uid から読める。メモリを守っても、置き場から読まれる
+- 読み手の身元を固定できない場合 (スクリプト、`security` コマンドで読むツール) は、この条件を満たせない。権限を絞った token だけを置く (reference の `keychain-secrets`)
 
 ### M5: 誰でも使える入口から、秘密を出さない・勝手に使わせない
 
@@ -231,6 +279,7 @@ macOS で、秘密 (鍵、token、認証の可否のような判定の結論) �
   - 入口 (サブコマンド、引数、環境変数、標準入力、設定ファイル、socket や XPC で受ける要求) から、秘密の値を出力しない
   - 入口から、秘密の参照先 (どの項目を読むか、どこへ送るか) を切り替えさせない
   - 秘密を使う操作 (署名、復号、送信) を入口が代行するなら、OS が出す本人確認 (Touch ID 等) の後だけにするか、要求する相手のコードの身元を検査する
+  - 相手のコードの身元は、pid ではなく audit token で引く。Unix socket なら `getsockopt` の `LOCAL_PEERTOKEN` で相手の audit token を取り、`SecCodeCopyGuestWithAttributes` に `kSecGuestAttributeAudit` で渡す (一次資料: SDK の `sys/un.h`、`Security/SecCode.h`)。pid は、相手が終わって再利用されると別のプロセスを指す (推定、未観測)
 - 守るもの: 相手が、メモリも ACL も破らずに、正規の入口から秘密の値を得ること・秘密を使う操作をさせること
 - 守らないもの
   - メモリと置き場への直接の経路 → M1〜M4
@@ -258,7 +307,8 @@ macOS で、秘密 (鍵、token、認証の可否のような判定の結論) �
 他のプロセスがこのプロセスの結論や出力を信頼する構成にだけ当たる (例: root で動く PAM モジュールが、ユーザ権限に降格した helper を起動して、認証の可否を受け取る)。
 
 - 条件: 信頼する側は、起動した後の pid について次を検査し、1 つでも満たさなければ結果を受け取らない
-  - requirement: `identifier "<identifier>" and anchor apple generic and certificate leaf[subject.OU] = "<Team ID>"`。OID や OU の条件は必ず `anchor apple generic` の後ろに置く (自己署名の証明書でも OID や OU は名乗れる。`anchor apple generic` は満たせない)
+  - requirement: 配る実物の designated requirement (`codesign -d -r- <ファイル>` の `designated =>` の右辺) を使う。Developer ID で署名したものは `identifier "<identifier>" and anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] /* exists */ and certificate leaf[field.1.2.840.113635.100.6.1.13] /* exists */ and certificate leaf[subject.OU] = "<Team ID>"` になる (観測)。2 つの OID の条件が Developer ID の証明書に絞り、Apple Development 等の同じ Team の別の証明書を外す
+  - 手で書くなら、OID や OU の条件を `anchor apple generic` と `and` で結ぶ。`or` の枝に、`anchor apple generic` の無い OID や OU の条件を置かない (自己署名の証明書でも OID や OU は名乗れる。`anchor apple generic` は満たせない)。`and` で結んだ条件の並びの順は結果を変えない
   - hardened runtime のフラグ (`kSecCodeSignatureRuntime`) がある
   - 実行中のコードの状態が有効で (`kSecCodeStatusValid`)、デバッガに接続されていない (`kSecCodeStatusDebugged` が立たない)
   - M2 の 4 つの entitlement が無い
@@ -272,10 +322,10 @@ macOS で、秘密 (鍵、token、認証の可否のような判定の結論) �
   - 対象を止める・殺すこと。同じ uid のプロセスはシグナルを送れる。結果は失敗か時間切れになり、成功にはならない (上の「明示の成功だけ」) → 可用性は受け持つ項目なし
   - 検査を通ったビルド自身の不具合 → 扱わない
   - 対象が読む秘密の置き場 → M3、M4
-- なぜ守られるか: 信頼する側が、起動した直後に Security.framework で、その pid で走っているコードの署名を調べる (`SecCodeCopyGuestWithAttributes` (pid) → `SecCodeCheckValidity` (requirement) → `SecCodeCopySigningInformation` (`kSecCSDynamicInformation`))。OS が自動で行うものではなく、検査を書いた側が呼ぶ。保護の無いビルドは、観測の要点の表のとおり同じ uid から差し込める・書き換えられるので、この検査で受け取らないことにする
+- なぜ守られるか: 信頼する側が、起動した直後に Security.framework で、その pid で走っているコードの署名を調べる (`SecCodeCopyGuestWithAttributes` (pid) → `SecCodeCheckValidity` (requirement) → `SecCodeCopySigningInformation` (`kSecCSDynamicInformation`))。自分で起動して、まだ `wait` していない子なので、pid が他のプロセスを指すことはない。自分で起動していない相手 (socket で繋いでくる相手) は M5 のとおり audit token で引く。OS が自動で行うものではなく、検査を書いた側が呼ぶ。保護の無いビルドは、観測の要点の表のとおり同じ uid から差し込める・書き換えられるので、この検査で受け取らないことにする
 - 欠けた時に起きること: 保護の無いビルドの結論を受け取る。そのプロセスには同じ uid からライブラリを差し込める・メモリを書き換えられるので、結論を偽れる
 - 確かめ方: hardened runtime の無い ad-hoc 署名のバイナリと、4 つの entitlement を 1 つずつ付けたバイナリを起動して、検査が不合格にすることをテストで固定する。手では `codesign -v -R='<requirement>' <pid>` と `codesign -d -v --entitlements - <pid>`
-- 根拠: 観測 (保護の無い対象が差し込まれ・書き換えられること、走っているプロセスに requirement と署名の情報を評価できること、自己署名が `anchor apple generic` を満たさないこと)、一次資料 (POSIX `kill()`: 同じ uid はシグナルを送れる)、推定 (起動する前の検査が差し替えに負けること)
+- 根拠: 観測 (保護の無い対象が差し込まれ・書き換えられること、走っているプロセスに requirement と署名の情報を評価できること、自己署名が `anchor apple generic` を満たさないこと、Developer ID の designated requirement の形)、一次資料 (POSIX `kill()`: 同じ uid はシグナルを送れる)、推定 (起動する前の検査が差し替えに負けること)
 
 ### M8: SIP が有効な Mac で動かす
 
@@ -283,6 +333,7 @@ macOS で、秘密 (鍵、token、認証の可否のような判定の結論) �
 - 守るもの: M1 と M2 が依る、カーネルの判定そのもの
 - 守らないもの: SIP が有効でも、M1〜M7 のどれかが欠けて開く経路はそのまま開く。SIP は他の項目の代わりにならない
 - なぜ要るか: 一次資料の Hardened Runtime は保護を「SIP と組で」と書き、Debugging tool entitlement は `get-task-allow` の無いプロセスの task port が取れないことを「SIP に守られている」と書く。SIP は Recovery の `csrutil` でだけ切り替えられる
+- Debugging tool entitlement のこの記述は、hardened runtime の無い対象では観測と合わない。hardened runtime も `get-task-allow` も無い対象の task port を、宣言済みのデバッガは利用者の認可があれば取れた (「観測の要点」の表の 1 行目)。カーネルが断るのは、hardened runtime があり `get-task-allow` が無い対象だけ
 - 欠けた時に起きること: SIP を無効にした Mac での振る舞いは観測していない。一次資料の Disabling and Enabling System Integrity Protection は、無効のままにすると悪意あるコードに対して脆弱になると警告する
 - 確かめ方: `csrutil status`
 - 根拠: 一次資料 (観測なし)
@@ -388,10 +439,11 @@ MUST を全部満たしていても、次は確かめていない。
 - 認可がある状態での、root のプロセスが降格して起動した対象への宣言済みのデバッガ (利用者が起動した対象では、認可があっても断られた)
 - 認可がログアウトで消えるか
 - 開発者モードを有効にした Mac (`DevToolsSecurity -enable`)。変わるのは利用者の認可の段で、満たすべき形の対象への要求は認可より前にカーネルが断るので、影響しない見込み (推定)。満たすべき形でない対象は、ダイアログ無しで読まれうる (推定)
-- カーネルのログに出る `declared read-only debugger` に当たる entitlement の名前と、ad-hoc 署名で自分に付けられるか
-- `com.apple.system-task-ports.read.safe` を ad-hoc 署名で自分に付けた時の扱い (`.read` は起動時に kill された)
+- カーネルのログに出る `declared read-only debugger` に当たる entitlement と、それで何ができるか。候補は `gcore` が持つ `com.apple.security.cs.debugger.read.root` で、ad-hoc 署名で自分に付けても起動は止められなかった (観測、2026-11-27)。付けたプロセスから他のプロセスの read port を求めた時の結果は未観測
+- 認可の設定にある `system.privilege.taskport.safe` (`class: allow`、つまりダイアログ無しで許される。2026-11-27 に `security authorizationdb read` で読んだ値)。どの要求がこの right を使い、満たすべき形でない対象の read port がダイアログ無しで渡るか
 - Developer ID で署名した実物のバイナリのコアダンプ (観測は試験プログラムだけ)。`get-task-allow` のある対象で `ulimit -c` が 0 の時
 - Developer ID の designated requirement の ACL の項目を、同じ identifier と Team ID で hardened runtime なしに署名したビルドに差し込んだライブラリから読めるか (M3 の推定の部分)。System Keychain の項目での同じ観測
+- data protection keychain の access group (M4 の (a)) の全体: Developer ID の profile で `keychain-access-groups` を使えるか、group を名乗らないバイナリから項目を読めない・消せないこと、group を名乗る保護の無いビルドに差し込んだライブラリから読めること (M3 の推定の部分)
 - SIP を無効にした Mac での、表の各手段の結果
 - hardened runtime の他の例外の entitlement (`allow-jit`、`allow-unsigned-executable-memory`) が、同じ uid からの経路を開くか
 - socket、XPC、Mach service で要求を受けるプロセスが、相手のコードの身元を検査する方法とその抜け道

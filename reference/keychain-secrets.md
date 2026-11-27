@@ -1,6 +1,6 @@
 # 無人で読むツールの secret を macOS のキーチェーンに置く
 
-自作ツールが API トークン等を無人で読む (launchd、定時実行、CLI ツールの既定の読み口) なら、macOS のキーチェーンの generic password に置き、`/usr/bin/security` で読む。人が対話で使う secret は 1Password の `op run` で渡す (reference の `op-run-secret-injection`)。op は launchd 配下では Touch ID の確認が画面に届かず、無人では通らない。
+自作ツールが API トークン等を無人で読む (launchd、定時実行、CLI ツールの既定の読み口) なら、macOS のキーチェーンの generic password に置き、`/usr/bin/security` で読む。人が対話で使う secret は 1Password の `op run` で渡す (reference の `op-run-secret-injection`)。人のアカウントで使う op は、launchd 配下では Touch ID の確認が画面に届かず、無人では通らない。1Password の service account の token なら確認なしで通るが、その token 自体を無人で読める所 (ここで扱うキーチェーン) に置くことになる。
 
 実例は 2 つ: ある観測スクリプトの credential の取り出し口 (登録・取り出しを 1 本のスクリプトに閉じる) と、artifacts-share (reference の `artifacts/share`) の `load_settings` / `load_credentials`。
 
@@ -64,3 +64,5 @@ bash の `$(…)` は末尾の改行をすべて落とす。改行を 1 つだ�
 ## 守りの限界
 
 `security` で作った項目は、同じユーザーの任意のプロセスが確認なしで `find-generic-password -w` で読める (実測)。launchd agent からも読める。キーチェーンは読み手を絞る守りにならないので、守りは置く token の権限を絞って作る (読み取り専用、対象のバケットや Project 1 つだけ等)。漏れても損失がその権限の範囲に留まる token だけを置き、人の全権 token や書き込み権限が広い token は置かない。
+
+読み手を自分のコードに絞りたい時は、`security` コマンドで読む形をやめ、自作のバイナリが自分の身元にだけ読ませる項目を作る (reference の `macos-process-protection` の M4)。

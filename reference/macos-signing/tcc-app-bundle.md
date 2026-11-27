@@ -10,8 +10,10 @@ TCC (Transparency, Consent, and Control) はアクセスを要求した **respon
 |---|---|---|
 | Terminal.app → shell → bin | `com.apple.Terminal` (Bundle ID) | 一度許可で永続 |
 | LaunchAgent → bin (素のバイナリ) | **バイナリの実体パス** | パスが変わると許可消失 |
-| LaunchAgent → .app/Contents/MacOS/bin | **.app の Bundle ID** | パス非依存で永続 |
-| `open MyApp.app` | .app の Bundle ID | 永続 + FDA リスト自動追加 |
+| LaunchAgent → .app/Contents/MacOS/bin | **.app の Bundle ID** | パス非依存で永続 (署名の requirement が変わらない間) |
+| `open MyApp.app` | .app の Bundle ID | 永続 (同上) + FDA リスト自動追加 |
+
+TCC は許可を、client (Bundle ID か実体パス) と、許可した時の署名の requirement (`csreq`) の組で持つ (観測: ユーザの `TCC.db` の `access` テーブルの定義が `PRIMARY KEY (service, client, client_type, …)` と `csreq BLOB` を持つ)。Bundle ID で登録されていても、requirement が変わる署名 (ad-hoc 署名での作り直し、別の Team の証明書) に替わると、許可は外れる見込み (推定)。Developer ID で identifier と Team を変えずに署名し続ければ、更新しても designated requirement は変わらない。
 
 **問題**: Homebrew はバージョン付きディレクトリ (`.../Cellar/x/0.1.11/bin/...`) に入れるため、 LaunchAgent 経由だと `brew upgrade` のたびにパスが変わり TCC 許可が失われる。
 
@@ -57,6 +59,8 @@ LaunchAgent plist に `AssociatedBundleIdentifiers` を入れ、launchd がプ�
 | `kTCCServiceSystemPolicyAllFiles` (FDA) | ファイルシステム全体 | する (System Settings で ON にすれば永続) |
 
 FDA は AppData を**包含する**。よって他アプリのデータ (例: 1Password の Group Containers) に LaunchAgent から触る必要があるなら、AppData の個別許可ではなく **FDA を ON** にしてもらうのが 実用解 (authsock-warden DR-014)。FDA は名目上「全ディスク」だが実アクセスは限定的、という旨を ユーザ案内に明記する。
+
+FDA を与えた .app が起動する子プロセスも、responsible process が .app なので、その許可の下で動く (responsible process の仕組みからの推定、未観測)。利用者の指定したコマンドを起動する入口を持つプロダクトでは、その入口が「FDA の付いた任意のコマンドの実行」になる。入口の設計は reference の `macos-process-protection` の M5 に従う。
 
 FDA 状態のチェックは `/Library/Application Support/com.apple.TCC/TCC.db` の読み取り可否で判定 (読めれば ON。OFF と未登録は区別不能)。正しい responsible process で見るため `.app` として起動する:
 

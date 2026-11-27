@@ -2,7 +2,7 @@
 
 macOS ジョブ (matrix の `*-apple-darwin`) に挿入する署名・notarize ステップ。 canonical: `kawaz/cache-warden` / `kawaz/authsock-warden` (.app あり)、`kawaz/jj-worktree` (bare binary)。
 
-順序: **keychain セットアップ → codesign bottom-up → notarytool submit --wait → (staple) → keychain クリーンアップ (always)**。`secrets` 6 種は `setup-certificates.md` で投入済み前提。
+順序: **keychain セットアップ → codesign bottom-up → hardened runtime の検査 → notarytool submit --wait → (staple) → keychain クリーンアップ (always)**。`secrets` 6 種は `setup-certificates.md` で投入済み前提。
 
 ## 共通: 一時 keychain に証明書 import
 
@@ -38,6 +38,19 @@ macOS ジョブ (matrix の `*-apple-darwin`) に挿入する署名・notarize �
 - **`--deep` は使わない**: ネストの署名順序を保証せず Apple 非推奨
 - **`--options runtime`** (Hardened Runtime) と **`--timestamp`** を付ける (notarize 必須要件)
 - `--force` で既存署名を上書き
+- **署名の直後に、署名した実行ファイルを全部 `check_hardened` で検査する** (下の「共通: hardened runtime の検査」)。notarize は hardened runtime の無いものと `get-task-allow` 付きのものを落とすが、`disable-library-validation` や `allow-dyld-environment-variables` のような hardened runtime の例外は通す。秘密を持つプロセスの守りの条件 (reference の `macos-process-protection` の M1〜M3) はこの検査で確かめる
+
+## 共通: hardened runtime の検査
+
+`check_hardened` は reference の `macos-process-protection` の M3 にある関数。リポの `scripts/check-hardened.sh` に写して置き、署名ステップの直後に呼ぶ。universal binary は arch ごとに調べ、条件を満たさないファイルは消して失敗する。
+
+```yaml
+- name: Check hardened runtime (macOS)
+  if: runner.os == 'macOS'
+  run: |
+    source scripts/check-hardened.sh
+    check_hardened target/${{ matrix.target }}/release/my-bin   # 形態 A なら MyApp.app/Contents/MacOS/my-bin
+```
 
 ## 形態 A: .app バンドルあり (staple 可)
 

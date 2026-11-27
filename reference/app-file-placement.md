@@ -45,7 +45,7 @@ export function resolveStateDir(env = process.env): string {
 
 これらの env から場所を導く daemon を launchd / systemd に登録する時は、shell と daemon で env が食い違う罠がある。対処は reference の `cli-design/daemon-subcommands` の「`service register` は場所を決める env を unit に固定し、変わったら止まる」。
 
-実測 (macOS 15, 2026-08-31): `XDG_RUNTIME_DIR` は**未設定**。systemd の pam モジュールが設定するものなので、Linux 以外では期待できない。spec も「未設定なら同等の代替ディレクトリを使い warning を出せ」としか言っていないので、代替は自前で決める。
+実測 (macOS 26.5.2, 2026-11-27): `XDG_RUNTIME_DIR` は**未設定**。systemd の pam モジュールが設定するものなので、Linux 以外では期待できない。spec も「未設定なら同等の代替ディレクトリを使い warning を出せ」としか言っていないので、代替は自前で決める。
 
 **代替: `${XDG_RUNTIME_DIR:-${TMPDIR:-/tmp}}/{appname}-{uid}`**
 
@@ -72,7 +72,7 @@ mkdir -p "$runtime_dir" && chmod 700 "$runtime_dir"
 |---|---|---|
 | `config.json` (人が編集) | config | 宣言的設定。**アプリが起動時に自動生成して書き戻すもの**でも、人が編集する前提なら config |
 | 許可リスト・プロファイル定義 | config | 同上。「消えたらユーザが書き直す」性質 |
-| API token / 認証情報 | 専用扱い | 平文で config に置かない。OS keychain / secret manager 経由。やむなく file なら 0600 で state か専用 dir |
+| API token / 認証情報 | 専用扱い | 平文で config に置かない。macOS のキーチェーンでも、`security` コマンドで入れた項目は 0600 のファイルと同じく同じ uid の任意のプロセスから読める (reference の `keychain-secrets`)。読み手を自分のコードに絞るなら reference の `macos-process-protection` の M4。絞れないなら、漏れても損失の狭い権限の token だけを置く。やむなく file なら 0600 で state か専用 dir |
 | unix socket / pid / lock | runtime (無ければ state) | セッション寿命。**state に置く判断も可** (ccmsg は `daemon.sock`/`pid`/`lock` を state に置いている — 単一マシン常駐 daemon で TMPDIR の掃除に消されたくないため。どちらを選んでも良いが、選んだ理由をコメントに残す) |
 | 実行ログ (`daemon.log`) | state | spec が "logs" を state の例に明記 |
 | コマンド履歴 | state | 同上 ("history") |

@@ -36,6 +36,8 @@ Recovery Mode で開発モードを有効化する必要がある:
 1. Recovery Mode → 起動セキュリティユーティリティ → Reduced Security + kernel extension 許可
 2. `csrutil disable` → 再起動 → `systemextensionsctl developer on`
 
+SIP を無効にした Mac では、秘密をメモリに持つプロセス (cache-warden のような常駐の daemon / agent) を同じ uid の他のプロセスから守る条件 (hardened runtime と entitlement のカーネルの判定) が前提を失う。その Mac では、そうしたプロセスの守りが効いていない前提で扱う (reference の `macos-process-protection` の M8)。
+
 ## インストール / クリーンアップ
 
 ```bash
