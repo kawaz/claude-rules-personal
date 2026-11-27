@@ -10,6 +10,10 @@ access token が「ページのもの」ではなく「利用者の token family
 
 ## 手順 (クライアント)
 
+2 つのタブの access が同時に切れた時の、下の手順 1〜3 とサーバ側の据え置きの流れ。
+
+![2 つのタブ、排他ロック、BroadcastChannel、サーバの間の refresh の流れ](assets/multi-tab-refresh-sequence.svg)
+
 ### 1. refresh は排他ロックの中でだけ行う
 
 同一 origin のタブ間で共有される排他ロック (Web Locks API の `navigator.locks.request()`) の中で refresh する。1 セッションにつき同時に 1 タブだけが走る。

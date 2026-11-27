@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-16 -22 1102 718" width="1102" height="718" font-family="sans-serif">
+<title>2 つのタブの access が同時に切れた時の refresh</title>
+<defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#4a5568"/></marker></defs>
+<rect x="-16" y="-22" width="1102" height="718" fill="#ffffff"/>
+<text x="0" y="6" font-size="15" font-weight="bold" fill="#1a202c">2 つのタブの access が同時に切れた時の refresh</text>
+<path d="M960,60 V680" stroke="#a0aec0" stroke-width="1.2" stroke-dasharray="3,3" fill="none"/>
+<path d="M730,60 V680" stroke="#a0aec0" stroke-width="1.2" stroke-dasharray="3,3" fill="none"/>
+<path d="M500,60 V680" stroke="#a0aec0" stroke-width="1.2" stroke-dasharray="3,3" fill="none"/>
+<path d="M290,60 V680" stroke="#a0aec0" stroke-width="1.2" stroke-dasharray="3,3" fill="none"/>
+<path d="M90,60 V680" stroke="#a0aec0" stroke-width="1.2" stroke-dasharray="3,3" fill="none"/>
+<path d="M90.0,102.0 L500.0,102.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M290.0,134.0 L500.0,134.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M500.0,166.0 L90.0,166.0" fill="none" stroke="#4a5568" stroke-width="1.4" stroke-dasharray="6,4" marker-end="url(#arr)"/>
+<path d="M90.0,198.0 L730.0,198.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<rect x="10.0" y="214.0" width="197.6" height="28.0" fill="#fffde7" stroke="#a0a060" stroke-width="1"/>
+<path d="M90.0,268.0 L960.0,268.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<rect x="849.7" y="284.0" width="220.6" height="82.0" fill="#fffde7" stroke="#a0a060" stroke-width="1"/>
+<path d="M960.0,392.0 L90.0,392.0" fill="none" stroke="#4a5568" stroke-width="1.4" stroke-dasharray="6,4" marker-end="url(#arr)"/>
+<path d="M90.0,424.0 L730.0,424.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M90.0,456.0 L500.0,456.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M500.0,488.0 L290.0,488.0" fill="none" stroke="#4a5568" stroke-width="1.4" stroke-dasharray="6,4" marker-end="url(#arr)"/>
+<path d="M290.0,520.0 L730.0,520.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M730.0,552.0 L90.0,552.0" fill="none" stroke="#4a5568" stroke-width="1.4" stroke-dasharray="6,4" marker-end="url(#arr)"/>
+<path d="M90.0,584.0 L730.0,584.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M730.0,616.0 L290.0,616.0" fill="none" stroke="#4a5568" stroke-width="1.4" stroke-dasharray="6,4" marker-end="url(#arr)"/>
+<rect x="235.7" y="632.0" width="108.6" height="28.0" fill="#fffde7" stroke="#a0a060" stroke-width="1"/>
+<rect x="59.1" y="24.0" width="61.7" height="32.0" rx="6" fill="#f4f6fa" stroke="#4a5568" stroke-width="1.4"/>
+<rect x="259.1" y="24.0" width="61.7" height="32.0" rx="6" fill="#f4f6fa" stroke="#4a5568" stroke-width="1.4"/>
+<rect x="413.6" y="24.0" width="172.7" height="32.0" rx="6" fill="#f4f6fa" stroke="#4a5568" stroke-width="1.4"/>
+<rect x="657.7" y="24.0" width="144.6" height="32.0" rx="6" fill="#f4f6fa" stroke="#4a5568" stroke-width="1.4"/>
+<rect x="928.5" y="24.0" width="63.0" height="32.0" rx="6" fill="#f4f6fa" stroke="#4a5568" stroke-width="1.4"/>
+<text x="295.0" y="94.0" text-anchor="middle" font-size="12" fill="#1a202c">ロックを要求 (名前に endpoint と sub)</text>
+<text x="395.0" y="126.0" text-anchor="middle" font-size="12" fill="#1a202c">ロックを要求</text>
+<text x="295.0" y="158.0" text-anchor="middle" font-size="12" fill="#1a202c">A が取る (B は待つ)</text>
+<text x="410.0" y="190.0" text-anchor="middle" font-size="12" fill="#1a202c">期限内の access を持っている?</text>
+<text x="108.8" y="232.0" text-anchor="middle" font-size="12" fill="#1a202c">答えが無い。数十 ms で打ち切る</text>
+<text x="525.0" y="260.0" text-anchor="middle" font-size="12" fill="#1a202c">refresh</text>
+<text x="960.0" y="302.0" text-anchor="middle" font-size="12" fill="#1a202c">standing の access の残り寿命が</text>
+<text x="960.0" y="320.0" text-anchor="middle" font-size="12" fill="#1a202c">TTL の半分以上ならそれを返し、</text>
+<text x="960.0" y="338.0" text-anchor="middle" font-size="12" fill="#1a202c">切っていれば mint し直す。</text>
+<text x="960.0" y="356.0" text-anchor="middle" font-size="12" fill="#1a202c">refresh token は毎回 rotate する</text>
+<text x="525.0" y="384.0" text-anchor="middle" font-size="12" fill="#1a202c">access</text>
+<text x="410.0" y="416.0" text-anchor="middle" font-size="12" fill="#1a202c">access を配る (メモリからメモリへ。storage に書かない)</text>
+<text x="295.0" y="448.0" text-anchor="middle" font-size="12" fill="#1a202c">ロックを手放す</text>
+<text x="395.0" y="480.0" text-anchor="middle" font-size="12" fill="#1a202c">B が取る</text>
+<text x="510.0" y="512.0" text-anchor="middle" font-size="12" fill="#1a202c">期限内の access を持っている?</text>
+<text x="410.0" y="544.0" text-anchor="middle" font-size="12" fill="#1a202c">問い合わせ</text>
+<text x="410.0" y="576.0" text-anchor="middle" font-size="12" fill="#1a202c">期限内の access を答える</text>
+<text x="510.0" y="608.0" text-anchor="middle" font-size="12" fill="#1a202c">access</text>
+<text x="290.0" y="650.0" text-anchor="middle" font-size="12" fill="#1a202c">refresh しない</text>
+<text x="90.0" y="44.0" text-anchor="middle" font-size="13" fill="#1a202c">タブ A</text>
+<text x="290.0" y="44.0" text-anchor="middle" font-size="13" fill="#1a202c">タブ B</text>
+<text x="500.0" y="44.0" text-anchor="middle" font-size="13" fill="#1a202c">排他ロック (Web Locks)</text>
+<text x="730.0" y="44.0" text-anchor="middle" font-size="13" fill="#1a202c">BroadcastChannel</text>
+<text x="960.0" y="44.0" text-anchor="middle" font-size="13" fill="#1a202c">サーバ</text>
+</svg>

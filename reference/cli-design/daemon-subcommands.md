@@ -61,6 +61,10 @@ OPTIONS (共通)
 | `service start` / `stop` | 監督者 | なし (OS 側の起動状態のみ) | 使う (登録済みが前提) |
 | `service register` / `unregister` | なし | OS 側の unit ファイル | 作る / 消す |
 
+各コマンドが何に頼み、何を書き換えるかを図にすると次の通り (図の `tool` は `<tool>`)。OS が守るのは監督者 1 プロセス、監督者が守るのは登録された unit 群。
+
+![OS、監督者、unit の階層と、各サブコマンドが頼む相手と書き換えるもの](assets/daemon-supervise-layers.svg)
+
 ## `daemon supervise` を置く目的
 
 **OS 登録の契約を binary 更新から切り離す。** 監督者は OS に「`<tool> daemon supervise` を常駐させる」という 1 点だけを約束する。unit の実体や数がどう変わっても、tool の binary を入れ替えても、この契約は変わらないので `service register` をやり直さない。OS 登録 (plist / unit ファイル) の書き換えをバージョンアップ毎に発生させない。

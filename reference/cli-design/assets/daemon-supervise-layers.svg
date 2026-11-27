@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-131 -12 962 454" width="962" height="454" font-family="sans-serif">
+<title>daemon / service サブコマンドと監督者の階層 (tool は &lt;tool&gt;)</title>
+<defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#4a5568"/></marker></defs>
+<rect x="-131" y="-12" width="962" height="454" fill="#ffffff"/>
+<text x="-115" y="16" font-size="15" font-weight="bold" fill="#1a202c">daemon / service サブコマンドと監督者の階層 (tool は &lt;tool&gt;)</text>
+<rect x="46.6" y="34.0" width="266.8" height="32.0" rx="6" fill="#f4f6fa" stroke="#4a5568" stroke-width="1.4"/>
+<rect x="460.5" y="34.0" width="199.0" height="32.0" rx="6" fill="#f4f6fa" stroke="#4a5568" stroke-width="1.4"/>
+<rect x="255.4" y="144.0" width="229.1" height="32.0" rx="6" fill="#f4f6fa" stroke="#4a5568" stroke-width="1.4"/>
+<rect x="253.1" y="264.0" width="233.8" height="32.0" rx="6" fill="#f4f6fa" stroke="#4a5568" stroke-width="1.4"/>
+<rect x="624.3" y="264.0" width="191.4" height="32.0" rx="6" fill="#f4f6fa" stroke="#4a5568" stroke-width="1.4"/>
+<path d="M-114.7,261.0 A84.7,6 0 0 1 54.7,261.0 V311.0 A84.7,6 0 0 1 -114.7,311.0 Z" fill="#eef4fb" stroke="#2b6cb0" stroke-width="1.4"/>
+<path d="M-114.7,261.0 A84.7,6 0 0 0 54.7,261.0" fill="none" stroke="#2b6cb0" stroke-width="1.4"/>
+<rect x="192.1" y="394.0" width="135.8" height="32.0" rx="6" fill="#f4f6fa" stroke="#4a5568" stroke-width="1.4"/>
+<rect x="412.1" y="394.0" width="135.8" height="32.0" rx="6" fill="#f4f6fa" stroke="#4a5568" stroke-width="1.4"/>
+<path d="M180.0,66.0 L330.0,144.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M560.0,66.0 L410.0,144.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M370.0,176.0 L370.0,264.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M624.3,280.0 L486.9,280.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M253.1,280.0 L54.7,283.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M340.0,296.0 L260.0,394.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M400.0,296.0 L480.0,394.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<text x="180.0" y="54.0" text-anchor="middle" font-size="13" fill="#1a202c">tool service register / unregister</text>
+<text x="560.0" y="54.0" text-anchor="middle" font-size="13" fill="#1a202c">tool service start / stop</text>
+<text x="370.0" y="164.0" text-anchor="middle" font-size="13" fill="#1a202c">OS (launchd / systemd --user)</text>
+<text x="370.0" y="284.0" text-anchor="middle" font-size="13" fill="#1a202c">監督者 (tool daemon supervise)</text>
+<text x="720.0" y="284.0" text-anchor="middle" font-size="13" fill="#1a202c">tool daemon start / stop</text>
+<text x="-30.0" y="281.0" text-anchor="middle" font-size="13" fill="#1a202c">登録簿</text>
+<text x="-30.0" y="299.0" text-anchor="middle" font-size="13" fill="#1a202c">(unit ごとの enabled)</text>
+<text x="260.0" y="414.0" text-anchor="middle" font-size="13" fill="#1a202c">unit の instance</text>
+<text x="480.0" y="414.0" text-anchor="middle" font-size="13" fill="#1a202c">unit の instance</text>
+<rect x="158.8" y="95.0" width="162.3" height="20.0" fill="#ffffff" fill-opacity="0.92"/>
+<text x="240.0" y="109.0" text-anchor="middle" font-size="12" fill="#2d3748">unit ファイルを作る / 消す</text>
+<rect x="432.7" y="95.0" width="154.6" height="20.0" fill="#ffffff" fill-opacity="0.92"/>
+<text x="510.0" y="109.0" text-anchor="middle" font-size="12" fill="#2d3748">監督者の起動 / 停止を頼む</text>
+<rect x="386.0" y="210.0" width="172.4" height="20.0" fill="#ffffff" fill-opacity="0.92"/>
+<text x="390.0" y="224.0" text-anchor="start" font-size="12" fill="#2d3748">常駐させて守る (KeepAlive)</text>
+<rect x="511.0" y="252.0" width="128.0" height="20.0" fill="#ffffff" fill-opacity="0.92"/>
+<text x="575.0" y="266.0" text-anchor="middle" font-size="12" fill="#2d3748">起動中の監督者に頼む</text>
+<rect x="89.7" y="252.0" width="120.6" height="20.0" fill="#ffffff" fill-opacity="0.92"/>
+<text x="150.0" y="266.0" text-anchor="middle" font-size="12" fill="#2d3748">enabled を読み書き</text>
+<rect x="255.7" y="342.0" width="228.6" height="20.0" fill="#ffffff" fill-opacity="0.92"/>
+<text x="370.0" y="356.0" text-anchor="middle" font-size="12" fill="#2d3748">子として run で起動し、落ちたら上げる</text>
+</svg>

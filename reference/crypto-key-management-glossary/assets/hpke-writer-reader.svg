@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="34 -16 912 487" width="912" height="487" font-family="sans-serif">
+<title>HPKE の書き手と読み手 (AAD は両方で同じ値を渡す)</title>
+<defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#4a5568"/></marker></defs>
+<rect x="34" y="-16" width="912" height="487" fill="#ffffff"/>
+<text x="50" y="12" font-size="15" font-weight="bold" fill="#1a202c">HPKE の書き手と読み手 (AAD は両方で同じ値を渡す)</text>
+<rect x="590" y="30" width="340" height="425" rx="8" fill="#fafbfd" stroke="#a0aec0" stroke-width="1.2" stroke-dasharray="5,4"/>
+<rect x="50" y="30" width="360" height="425" rx="8" fill="#fafbfd" stroke="#a0aec0" stroke-width="1.2" stroke-dasharray="5,4"/>
+<rect x="172.5" y="54.0" width="115.0" height="32.0" rx="6" fill="#f4f6fa" stroke="#4a5568" stroke-width="1.4"/>
+<rect x="120.5" y="125.0" width="219.0" height="50.0" rx="6" fill="#f4f6fa" stroke="#4a5568" stroke-width="1.4"/>
+<rect x="138.8" y="215.0" width="182.3" height="50.0" rx="6" fill="#f4f6fa" stroke="#4a5568" stroke-width="1.4"/>
+<rect x="138.6" y="314.0" width="182.9" height="32.0" rx="6" fill="#f4f6fa" stroke="#4a5568" stroke-width="1.4"/>
+<rect x="115.0" y="404.0" width="50.0" height="32.0" rx="6" fill="#f4f6fa" stroke="#4a5568" stroke-width="1.4"/>
+<rect x="296.7" y="404.0" width="46.6" height="32.0" rx="6" fill="#f4f6fa" stroke="#4a5568" stroke-width="1.4"/>
+<rect x="702.5" y="54.0" width="115.0" height="32.0" rx="6" fill="#f4f6fa" stroke="#4a5568" stroke-width="1.4"/>
+<rect x="678.8" y="134.0" width="162.3" height="32.0" rx="6" fill="#f4f6fa" stroke="#4a5568" stroke-width="1.4"/>
+<rect x="636.6" y="224.0" width="246.8" height="32.0" rx="6" fill="#f4f6fa" stroke="#4a5568" stroke-width="1.4"/>
+<rect x="681.6" y="314.0" width="156.9" height="32.0" rx="6" fill="#f4f6fa" stroke="#4a5568" stroke-width="1.4"/>
+<rect x="645.0" y="404.0" width="50.0" height="32.0" rx="6" fill="#f4f6fa" stroke="#4a5568" stroke-width="1.4"/>
+<rect x="811.6" y="404.0" width="76.8" height="32.0" rx="6" fill="#f4f6fa" stroke="#4a5568" stroke-width="1.4"/>
+<path d="M230.0,86.0 L230.0,125.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M230.0,175.0 L230.0,215.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M230.0,265.0 L230.0,314.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M760.0,86.0 L760.0,134.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M760.0,166.0 L760.0,224.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M760.0,256.0 L760.0,314.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M140.0,404.0 L140.0,346.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M320.0,404.0 L320.0,346.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M850.0,404.0 L850.0,346.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M670.0,346.0 L670.0,404.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M339.5,150.0 L678.8,150.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M321.4,330.0 L681.6,330.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<text x="230.0" y="74.0" text-anchor="middle" font-size="13" fill="#1a202c">受信者の公開鍵</text>
+<text x="230.0" y="145.0" text-anchor="middle" font-size="13" fill="#1a202c">KEM: 使い捨ての共有鍵を作り、</text>
+<text x="230.0" y="163.0" text-anchor="middle" font-size="13" fill="#1a202c">受信者だけが取り出せる形にする</text>
+<text x="230.0" y="235.0" text-anchor="middle" font-size="13" fill="#1a202c">KDF: 共有鍵から</text>
+<text x="230.0" y="253.0" text-anchor="middle" font-size="13" fill="#1a202c">AEAD の鍵と nonce を作る</text>
+<text x="230.0" y="334.0" text-anchor="middle" font-size="13" fill="#1a202c">AEAD: データ本体を暗号化</text>
+<text x="140.0" y="424.0" text-anchor="middle" font-size="13" fill="#1a202c">平文</text>
+<text x="320.0" y="424.0" text-anchor="middle" font-size="13" fill="#1a202c">AAD</text>
+<text x="60.0" y="47.0" text-anchor="start" font-size="12" fill="#4a5568" font-weight="bold">書き手 (受信者の公開鍵を持つ)</text>
+<text x="760.0" y="74.0" text-anchor="middle" font-size="13" fill="#1a202c">受信者の秘密鍵</text>
+<text x="760.0" y="154.0" text-anchor="middle" font-size="13" fill="#1a202c">KEM: 共有鍵を取り出す</text>
+<text x="760.0" y="244.0" text-anchor="middle" font-size="13" fill="#1a202c">KDF: 同じ AEAD の鍵と nonce を作る</text>
+<text x="760.0" y="334.0" text-anchor="middle" font-size="13" fill="#1a202c">AEAD: 復号とタグ検証</text>
+<text x="670.0" y="424.0" text-anchor="middle" font-size="13" fill="#1a202c">平文</text>
+<text x="850.0" y="424.0" text-anchor="middle" font-size="13" fill="#1a202c">同じ AAD</text>
+<text x="600.0" y="47.0" text-anchor="start" font-size="12" fill="#4a5568" font-weight="bold">読み手 (受信者の秘密鍵を持つ)</text>
+<rect x="436.0" y="131.0" width="128.0" height="38.0" fill="#ffffff" fill-opacity="0.92"/>
+<text x="500.0" y="145.0" text-anchor="middle" font-size="12" fill="#2d3748">受信者だけが</text>
+<text x="500.0" y="163.0" text-anchor="middle" font-size="12" fill="#2d3748">取り出せる形の共有鍵</text>
+<rect x="478.0" y="320.0" width="44.0" height="20.0" fill="#ffffff" fill-opacity="0.92"/>
+<text x="500.0" y="334.0" text-anchor="middle" font-size="12" fill="#2d3748">暗号文</text>
+</svg>

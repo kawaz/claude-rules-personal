@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="54 -1 962 647" width="962" height="647" font-family="sans-serif">
+<title>peer 間相互認証の信頼の連鎖</title>
+<defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#4a5568"/></marker></defs>
+<rect x="54" y="-1" width="962" height="647" fill="#ffffff"/>
+<text x="70" y="27" font-size="15" font-weight="bold" fill="#1a202c">peer 間相互認証の信頼の連鎖</text>
+<rect x="580" y="160" width="420" height="470" rx="8" fill="#fafbfd" stroke="#a0aec0" stroke-width="1.2" stroke-dasharray="5,4"/>
+<rect x="70" y="160" width="250" height="240" rx="8" fill="#fafbfd" stroke="#a0aec0" stroke-width="1.2" stroke-dasharray="5,4"/>
+<path d="M394.7,51.0 A85.3,6 0 0 1 565.3,51.0 V101.0 A85.3,6 0 0 1 394.7,101.0 Z" fill="#eef4fb" stroke="#2b6cb0" stroke-width="1.4"/>
+<path d="M394.7,51.0 A85.3,6 0 0 0 565.3,51.0" fill="none" stroke="#2b6cb0" stroke-width="1.4"/>
+<path d="M365.5,266.0 A84.5,6 0 0 1 534.5,266.0 V316.0 A84.5,6 0 0 1 365.5,316.0 Z" fill="#eef4fb" stroke="#2b6cb0" stroke-width="1.4"/>
+<path d="M365.5,266.0 A84.5,6 0 0 0 534.5,266.0" fill="none" stroke="#2b6cb0" stroke-width="1.4"/>
+<rect x="115.7" y="184.0" width="168.6" height="32.0" rx="6" fill="#f4f6fa" stroke="#4a5568" stroke-width="1.4"/>
+<rect x="114.9" y="269.0" width="170.1" height="32.0" rx="6" fill="#f4f6fa" stroke="#4a5568" stroke-width="1.4"/>
+<rect x="139.0" y="354.0" width="122.0" height="32.0" rx="6" fill="#f4f6fa" stroke="#4a5568" stroke-width="1.4"/>
+<rect x="644.8" y="175.0" width="290.5" height="50.0" rx="6" fill="#f4f6fa" stroke="#4a5568" stroke-width="1.4"/>
+<rect x="704.9" y="269.0" width="170.1" height="32.0" rx="6" fill="#f4f6fa" stroke="#4a5568" stroke-width="1.4"/>
+<rect x="700.9" y="344.0" width="178.2" height="32.0" rx="6" fill="#f4f6fa" stroke="#4a5568" stroke-width="1.4"/>
+<rect x="677.9" y="419.0" width="224.2" height="32.0" rx="6" fill="#f4f6fa" stroke="#4a5568" stroke-width="1.4"/>
+<rect x="729.0" y="494.0" width="122.0" height="32.0" rx="6" fill="#f4f6fa" stroke="#4a5568" stroke-width="1.4"/>
+<rect x="670.4" y="584.0" width="239.3" height="32.0" rx="6" fill="#e8f5ec" stroke="#2f855a" stroke-width="1.4"/>
+<path d="M480.0,101.0 L480.0,135.0 L200.0,135.0 L200.0,184.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M480.0,135.0 L790.0,135.0 L790.0,175.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M365.5,288.0 L285.1,285.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M534.5,288.0 L704.9,285.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M200.0,216.0 L200.0,269.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M200.0,301.0 L200.0,354.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M790.0,225.0 L790.0,269.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M790.0,301.0 L790.0,344.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M790.0,376.0 L790.0,419.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M790.0,451.0 L790.0,494.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M790.0,526.0 L790.0,584.0" fill="none" stroke="#4a5568" stroke-width="1.4" stroke-dasharray="6,4" marker-end="url(#arr)"/>
+<text x="480.0" y="71.0" text-anchor="middle" font-size="13" fill="#1a202c">設定の endpoint リスト</text>
+<text x="480.0" y="89.0" text-anchor="middle" font-size="13" fill="#1a202c">(初期状態で双方が信頼)</text>
+<text x="450.0" y="286.0" text-anchor="middle" font-size="13" fill="#1a202c">CA</text>
+<text x="450.0" y="304.0" text-anchor="middle" font-size="13" fill="#1a202c">(初期状態で双方が信頼)</text>
+<text x="200.0" y="204.0" text-anchor="middle" font-size="13" fill="#1a202c">aud が接続してよい URL</text>
+<text x="200.0" y="289.0" text-anchor="middle" font-size="13" fill="#1a202c">aud の TLS で C1 を信頼</text>
+<text x="200.0" y="374.0" text-anchor="middle" font-size="13" fill="#1a202c">C1 の相手が aud</text>
+<text x="80.0" y="177.0" text-anchor="start" font-size="12" fill="#4a5568" font-weight="bold">S 側</text>
+<text x="790.0" y="195.0" text-anchor="middle" font-size="13" fill="#1a202c">iss が接続してよい URL</text>
+<text x="790.0" y="213.0" text-anchor="middle" font-size="13" fill="#1a202c">(同時に aud が self と一致することを確認)</text>
+<text x="790.0" y="289.0" text-anchor="middle" font-size="13" fill="#1a202c">iss の TLS で C2 を信頼</text>
+<text x="790.0" y="364.0" text-anchor="middle" font-size="13" fill="#1a202c">C2 への信頼で jwk を信頼</text>
+<text x="790.0" y="439.0" text-anchor="middle" font-size="13" fill="#1a202c">jwk と proof の検証で C1 を信頼</text>
+<text x="790.0" y="514.0" text-anchor="middle" font-size="13" fill="#1a202c">C1 の相手が iss</text>
+<text x="790.0" y="604.0" text-anchor="middle" font-size="13" fill="#1a202c">hello の内容 (kid、instance id)</text>
+<text x="590.0" y="177.0" text-anchor="start" font-size="12" fill="#4a5568" font-weight="bold">R 側</text>
+<rect x="806.0" y="545.0" width="80.0" height="20.0" fill="#ffffff" fill-opacity="0.92"/>
+<text x="810.0" y="559.0" text-anchor="start" font-size="12" fill="#2d3748">遡及して信頼</text>
+</svg>

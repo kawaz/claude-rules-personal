@@ -25,6 +25,8 @@
 
 本文 `<slug>.md` と `_index.md` のエントリは 1:1。**追加・削除・改名は両方を同じ変更で**行う。片方だけ足すと「本文はあるが誰も辿れない」「リンク先が無い」になる。
 
+本文が 1 枚で付属のファイル (図など) を持つトピックは、`_index.md` が本文を兼ね、索引のエントリを持たない (reference-layout)。そのトピックに 2 枚目の本文を足す時は、同じ変更で本文を `<slug>.md` に移し、`_index.md` を索引にする。
+
 ## private 層の写し
 
 privacy リポの本文は private のまま、**索引だけを public 側の `reference/_index.md` の「private 層」節に写す**。privacy 側の `reference/_index.md` を更新したら、同じ変更で public 側の写しも更新する。リンクはフルパスで書く (本文が別リポにあるため)。

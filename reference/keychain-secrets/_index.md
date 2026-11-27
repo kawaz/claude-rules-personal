@@ -2,6 +2,10 @@
 
 自作ツールが API トークン等を無人で読む (launchd、定時実行、CLI ツールの既定の読み口) なら、macOS のキーチェーンの generic password に置き、`/usr/bin/security` で読む。人が対話で使う secret は 1Password の `op run` で渡す (reference の `op-run-secret-injection`)。人のアカウントで使う op は、launchd 配下では Touch ID の確認が画面に届かず、無人では通らない。1Password の service account の token なら確認なしで通るが、その token 自体を無人で読める所 (ここで扱うキーチェーン) に置くことになる。
 
+secret の渡し方と置き場の選び方を、この文書と関連する reference で辿ると次の通り。
+
+![人が対話で使うなら op run、無人で読むならキーチェーン、読み手を絞るなら M4 を選ぶ流れ](assets/secret-placement-decision.svg)
+
 実例は 2 つ: ある観測スクリプトの credential の取り出し口 (登録・取り出しを 1 本のスクリプトに閉じる) と、artifacts-share (reference の `artifacts/share`) の `load_settings` / `load_credentials`。
 
 ## 項目の名前

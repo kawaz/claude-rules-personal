@@ -4,6 +4,8 @@ macOS ジョブ (matrix の `*-apple-darwin`) に挿入する署名・notarize �
 
 順序: **keychain セットアップ → codesign bottom-up → hardened runtime の検査 → notarytool submit --wait → (staple) → keychain クリーンアップ (always)**。`secrets` 6 種は `setup-certificates.md` で投入済み前提。
 
+![署名 → hardened runtime の検査 → notarize → 形態ごとの staple → keychain クリーンアップの流れ](assets/ci-release-signing-order.svg)
+
 ## 共通: 一時 keychain に証明書 import
 
 `runner.os == 'macOS'` の各ステップに `if:` を付ける。

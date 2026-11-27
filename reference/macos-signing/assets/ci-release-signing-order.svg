@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="52 -22 734 604" width="734" height="604" font-family="sans-serif">
+<title>署名と notarize の順序</title>
+<defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#4a5568"/></marker></defs>
+<rect x="52" y="-22" width="734" height="604" fill="#ffffff"/>
+<text x="68" y="6" font-size="15" font-weight="bold" fill="#1a202c">署名と notarize の順序</text>
+<rect x="213.5" y="24.0" width="233.0" height="32.0" rx="6" fill="#f4f6fa" stroke="#4a5568" stroke-width="1.4"/>
+<rect x="212.1" y="90.0" width="235.9" height="50.0" rx="6" fill="#f4f6fa" stroke="#4a5568" stroke-width="1.4"/>
+<polygon points="243.8,175.0 416.2,175.0 430.2,200.0 416.2,225.0 243.8,225.0 229.8,200.0" fill="#fff8e6" stroke="#b7791f" stroke-width="1.4"/>
+<rect x="590.0" y="184.0" width="180.0" height="32.0" rx="6" fill="#fdecec" stroke="#c53030" stroke-width="1.4"/>
+<rect x="230.9" y="269.0" width="198.2" height="32.0" rx="6" fill="#f4f6fa" stroke="#4a5568" stroke-width="1.4"/>
+<polygon points="311.0,344.0 349.0,344.0 363.0,360.0 349.0,376.0 311.0,376.0 297.0,360.0" fill="#fff8e6" stroke="#b7791f" stroke-width="1.4"/>
+<rect x="67.5" y="425.0" width="205.0" height="50.0" rx="6" fill="#f4f6fa" stroke="#4a5568" stroke-width="1.4"/>
+<rect x="319.7" y="425.0" width="300.6" height="50.0" rx="6" fill="#f4f6fa" stroke="#4a5568" stroke-width="1.4"/>
+<rect x="80.0" y="534.0" width="640.0" height="32.0" rx="6" fill="#f4f6fa" stroke="#4a5568" stroke-width="1.4"/>
+<path d="M330.0,56.0 L330.0,90.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M330.0,140.0 L330.0,175.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M430.2,200.0 L590.0,200.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M330.0,225.0 L330.0,269.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M330.0,301.0 L330.0,344.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M297.0,360.0 L170.0,360.0 L170.0,425.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M363.0,360.0 L470.0,360.0 L470.0,425.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M170.0,475.0 L170.0,534.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M470.0,475.0 L470.0,534.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M680.0,216.0 L680.0,534.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<text x="330.0" y="44.0" text-anchor="middle" font-size="13" fill="#1a202c">一時 keychain に証明書を import</text>
+<text x="330.0" y="110.0" text-anchor="middle" font-size="13" fill="#1a202c">codesign (bottom-up: .app なら</text>
+<text x="330.0" y="128.0" text-anchor="middle" font-size="13" fill="#1a202c">内側のバイナリ → 外側の .app)</text>
+<text x="330.0" y="195.0" text-anchor="middle" font-size="13" fill="#1a202c">hardened runtime の検査</text>
+<text x="330.0" y="213.0" text-anchor="middle" font-size="13" fill="#1a202c">(check_hardened)</text>
+<text x="680.0" y="204.0" text-anchor="middle" font-size="13" fill="#1a202c">そのファイルを消して失敗</text>
+<text x="330.0" y="289.0" text-anchor="middle" font-size="13" fill="#1a202c">notarytool submit --wait</text>
+<text x="330.0" y="364.0" text-anchor="middle" font-size="13" fill="#1a202c">形態</text>
+<text x="170.0" y="445.0" text-anchor="middle" font-size="13" fill="#1a202c">stapler staple</text>
+<text x="170.0" y="463.0" text-anchor="middle" font-size="13" fill="#1a202c">(.app に ticket を埋め込む)</text>
+<text x="470.0" y="445.0" text-anchor="middle" font-size="13" fill="#1a202c">staple しない</text>
+<text x="470.0" y="463.0" text-anchor="middle" font-size="13" fill="#1a202c">(Gatekeeper がオンライン検証で公証を確認)</text>
+<text x="400.0" y="554.0" text-anchor="middle" font-size="13" fill="#1a202c">keychain クリーンアップ (always: 途中で失敗しても走る)</text>
+<rect x="458.1" y="190.0" width="104.0" height="20.0" fill="#ffffff" fill-opacity="0.92"/>
+<text x="510.1" y="204.0" text-anchor="middle" font-size="12" fill="#2d3748">条件を満たさない</text>
+<rect x="351.0" y="235.0" width="32.0" height="20.0" fill="#ffffff" fill-opacity="0.92"/>
+<text x="355.0" y="249.0" text-anchor="start" font-size="12" fill="#2d3748">通る</text>
+<rect x="140.3" y="335.0" width="129.4" height="20.0" fill="#ffffff" fill-opacity="0.92"/>
+<text x="205.0" y="349.0" text-anchor="middle" font-size="12" fill="#2d3748">A: .app バンドルあり</text>
+<rect x="376.5" y="335.0" width="127.0" height="20.0" fill="#ffffff" fill-opacity="0.92"/>
+<text x="440.0" y="349.0" text-anchor="middle" font-size="12" fill="#2d3748">B: bare binary のみ</text>
+</svg>

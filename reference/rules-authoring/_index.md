@@ -4,8 +4,8 @@ rule / skill / 参照知識 (reference / memory / privacy) を書く・移す・
 
 - [classification](classification.md) — 常時ロード / skill / 参照知識の判定、3 層の書き先、本文の書き方、commit・push までの完結。
   rule を書く, skill を作る, どこに書く, 常時ロードが重い, skill か reference か, memory に書く, 知識を残す
-- [reference-layout](reference-layout.md) — トピックでの階層化、分割の粒度、スクリプト・テンプレの同梱、索引で引けない時の grep。
-  reference の構成, トピックを作る, 分割, scripts を同梱, templates, 索引に載せない, 見つからない, rg で探す
+- [reference-layout](reference-layout.md) — トピックでの階層化、分割の粒度、スクリプト・テンプレ・図の同梱 (本文 1 枚なら `_index.md` が本文を兼ねる)、索引で引けない時の grep。
+  reference の構成, トピックを作る, 分割, scripts を同梱, templates, 索引に載せない, 見つからない, rg で探す, 図を置く, assets, SVG
 - [index-conventions](index-conventions.md) — 索引エントリの書式と発火語、本文と索引の 1:1、private 層の写し、lint の検査項目。
   _index.md, 索引, 発火語, 索引漏れ, lint-rules, FATAL, dead wikilink, .lint-external-slugs
 - [role-main-loading](role-main-loading.md) — 2 段のロードリスト、必読 / 必要時の 2 節構成、必要時から必読への昇格。

@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-60 -17 1021 488" width="1021" height="488" font-family="sans-serif">
+<title>M4: 保存する秘密の置き場の選び方</title>
+<defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#4a5568"/></marker></defs>
+<rect x="-60" y="-17" width="1021" height="488" fill="#ffffff"/>
+<text x="-44" y="11" font-size="15" font-weight="bold" fill="#1a202c">M4: 保存する秘密の置き場の選び方</text>
+<rect x="443.5" y="29.0" width="193.0" height="32.0" rx="6" fill="#f4f6fa" stroke="#4a5568" stroke-width="1.4"/>
+<polygon points="456.0,110.0 624.0,110.0 638.0,135.0 624.0,160.0 456.0,160.0 442.0,135.0" fill="#fff8e6" stroke="#b7791f" stroke-width="1.4"/>
+<rect x="-44.4" y="101.0" width="248.9" height="68.0" rx="6" fill="#fff1e0" stroke="#c05621" stroke-width="1.4"/>
+<polygon points="412.7,237.0 667.3,237.0 681.3,280.0 667.3,323.0 412.7,323.0 398.7,280.0" fill="#fff8e6" stroke="#b7791f" stroke-width="1.4"/>
+<rect x="247.5" y="405.0" width="225.0" height="50.0" rx="6" fill="#e8f5ec" stroke="#2f855a" stroke-width="1.4"/>
+<rect x="621.4" y="414.0" width="237.2" height="32.0" rx="6" fill="#e8f5ec" stroke="#2f855a" stroke-width="1.4"/>
+<path d="M540.0,61.0 L540.0,110.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M442.0,135.0 L204.4,135.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M540.0,160.0 L540.0,237.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M460.0,323.0 L460.0,370.0 L360.0,370.0 L360.0,405.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M620.0,323.0 L620.0,370.0 L740.0,370.0 L740.0,414.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<text x="540.0" y="49.0" text-anchor="middle" font-size="13" fill="#1a202c">保存する秘密を持つプロセス</text>
+<text x="540.0" y="130.0" text-anchor="middle" font-size="13" fill="#1a202c">読み手を、自分のコードの</text>
+<text x="540.0" y="148.0" text-anchor="middle" font-size="13" fill="#1a202c">身元に固定できるか</text>
+<text x="80.0" y="121.0" text-anchor="middle" font-size="13" fill="#1a202c">この条件は満たせない。</text>
+<text x="80.0" y="139.0" text-anchor="middle" font-size="13" fill="#1a202c">権限を絞った token だけを置く</text>
+<text x="80.0" y="157.0" text-anchor="middle" font-size="13" fill="#1a202c">(reference の keychain-secrets)</text>
+<text x="540.0" y="257.0" text-anchor="middle" font-size="13" fill="#1a202c">利用者のログインセッション</text>
+<text x="540.0" y="275.0" text-anchor="middle" font-size="13" fill="#1a202c">(app、LaunchAgent) で動き、</text>
+<text x="540.0" y="293.0" text-anchor="middle" font-size="13" fill="#1a202c">app の形の bundle に</text>
+<text x="540.0" y="311.0" text-anchor="middle" font-size="13" fill="#1a202c">provisioning profile を埋め込めるか</text>
+<text x="360.0" y="425.0" text-anchor="middle" font-size="13" fill="#1a202c">(a) data protection keychain</text>
+<text x="360.0" y="443.0" text-anchor="middle" font-size="13" fill="#1a202c">と access group</text>
+<text x="740.0" y="434.0" text-anchor="middle" font-size="13" fill="#1a202c">(b) ファイル型の Keychain の ACL</text>
+<rect x="220.8" y="81.0" width="194.5" height="38.0" fill="#ffffff" fill-opacity="0.92"/>
+<text x="318.0" y="95.0" text-anchor="middle" font-size="12" fill="#2d3748">できない (スクリプト、</text>
+<text x="318.0" y="113.0" text-anchor="middle" font-size="12" fill="#2d3748">security コマンドで読むツール)</text>
+<rect x="546.0" y="188.0" width="44.0" height="20.0" fill="#ffffff" fill-opacity="0.92"/>
+<text x="550.0" y="202.0" text-anchor="start" font-size="12" fill="#2d3748">できる</text>
+<rect x="384.0" y="345.0" width="32.0" height="20.0" fill="#ffffff" fill-opacity="0.92"/>
+<text x="400.0" y="359.0" text-anchor="middle" font-size="12" fill="#2d3748">はい</text>
+<rect x="695.5" y="326.0" width="249.0" height="38.0" fill="#ffffff" fill-opacity="0.92"/>
+<text x="820.0" y="340.0" text-anchor="middle" font-size="12" fill="#2d3748">いいえ (launchd daemon、</text>
+<text x="820.0" y="358.0" text-anchor="middle" font-size="12" fill="#2d3748">root で動くもの、bundle にできない CLI)</text>
+</svg>

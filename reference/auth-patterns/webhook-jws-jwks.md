@@ -79,6 +79,10 @@ S は起動時にエフェメラルな P-256 の鍵ペア (ES256 用。alg の�
 | 現 (active) | 載る | 使う | 寿命 **100%** で「次」を「現」に昇格 |
 | 旧 (retiring) | 載る | 使わない | 寿命 **110%** で外す |
 
+鍵寿命 1h のときの重なりを時間軸に置くと次の通り (時刻は最初の鍵の昇格からの経過)。どの時点でも JWKS に載るのは 2 本までで、旧と次は重ならない。
+
+![鍵寿命 1h のとき、3 本の鍵の次・現・旧の期間が時間軸で重なる様子](assets/webhook-key-generations.svg)
+
 成立条件は 2 本ある。
 
 - (a) retiring 窓: `10% × 鍵寿命 > token 寿命 + 未知 kid 時の再取得の最小 interval` (1h なら 6 分 > 30 秒 + 30 秒)。昇格直前に旧鍵で署名した token が、R のキャッシュ miss と最小 interval を挟んでも旧鍵が JWKS に残っているうちに検証できる条件
@@ -138,6 +142,10 @@ claims:  {
 
 S は 401・5xx・接続失敗 (タイムアウト含む) だけを再署名して再送し、400 は捨てて log に残す。他の 4xx も 400 と同じ扱い (R 側の設定・配線の問題で、再送しても変わらない)。
 
+検証の順と、落ちた所ごとの応答コードを図にすると次の通り。
+
+![検証 1〜7 の順序と、落ちた所ごとの 400 / 401](assets/webhook-verification-order.svg)
+
 401 には `WWW-Authenticate: Bearer error="invalid_token"` を付ける。401 の応答は challenge を必ず持つ決まりで (RFC 9110 §15.5.2)、値は RFC 6750 §3 の形を使う。webhook の口は署名を body か専用の header で運ぶので Bearer の本来の使い方ではないが、401 を返す以上 challenge は要る。S はこの header を読まず、応答コードだけで再送を決める。
 
 ## 生の body に署名する形 (detached JWS)
@@ -158,6 +166,8 @@ body はアプリの JSON のまま送り、署名は request header に載せ�
 3. 普通の compact JWS として検証する
 
 JavaScript の `jose` なら、S は `CompactSign`、R は `compactVerify` がそのまま使える (加工するのは文字列だけ)。
+
+![detached JWS で送り側と受け側が body と header の文字列を加工する手順](assets/webhook-detached-jws.svg)
 
 生の body は、フレームワークが JSON を parse する前に取っておく。parse した値から書き出し直したものは、元のバイト列と一致しない。Express なら、`express.json()` を通した後では元のバイト列が取れないので、`express.raw()` で Buffer のまま受けるか、`express.json()` の `verify` (`verify(req, res, buf)`) で `buf` を退避する。
 
@@ -218,6 +228,8 @@ webhook (S が R へ本文を押す) だけでなく、**S が R の読み出し
 R が初期状態で信頼しているのは、設定 (`path` → `jwks_url`) と CA の 2 つだけ。設定への信頼で `jwks_url` が送り元の鍵置き場だと信頼する → `jwks_url` の TLS でその内容 (JWK) を信頼する → JWK で署名を信頼する → 署名で claims を信頼する → `aud` で「自分宛て」を、`jti` + `exp` で「初見で新鮮」を確定する。
 
 S 側は、設定への信頼で `endpoint` が送ってよい URL だと信頼し、endpoint の TLS で相手を信頼する。S 側の認証はこれで閉じている。
+
+![設定と CA から aud と jti + exp に至る R 側と S 側の信頼の連鎖](assets/webhook-trust-chain.svg)
 
 ## やらないこと
 

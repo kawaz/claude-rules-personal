@@ -12,6 +12,10 @@
 6. 受けた側は jwt を HMAC で検証し、WebAuthn の登録検証を通し、**通ってから jti と challenge を消費する**。順序が逆だと、ブラウザ側の一時的な失敗 1 回で登録 URL が焼ける
 7. `{ sub, credential id, COSE 公開鍵, user_id, 登録時刻 }` を credential record として保存する
 
+![ホスト上の CLI、ブラウザ、authenticator、入口の間の登録の手順 1〜7](assets/passkey-registration-sequence.svg)
+
+受けた instance が発行者でない時、HMAC の検証と challenge の消費は発行者へ問い合わせる (「複数 instance に複製する」の節)。
+
 attestation は `none` で足りる。「この credential を作ってよい人か」は jwt が既に担保しており、authenticator の出自証明は要件に無い。attestation を要求すると証明書チェーンの検証と信頼リストという管理対象が増えるだけになる。
 
 `pubKeyCredParams` の 3 つは、WebAuthn Level 3 §5.4 が幅広い authenticator に対応する RP に勧める組。COSE の番号で渡す。`-8` (EdDSA) は WebAuthn では Ed25519 に限られ、曲線まで決めた新しい番号 (`-9`、`-19`) は対応していない実装が多いので使わない (JOSE の `alg` で `"EdDSA"` を避けるのとは向きが逆になる)。**passkey の署名 alg 選定判断基準日: 2026-11-27** (選定を変えたらこの日付と根拠も一緒に更新する)

@@ -15,6 +15,10 @@ TCC (Transparency, Consent, and Control) はアクセスを要求した **respon
 
 TCC は許可を、client (Bundle ID か実体パス) と、許可した時の署名の requirement (`csreq`) の組で持つ (観測: ユーザの `TCC.db` の `access` テーブルの定義が `PRIMARY KEY (service, client, client_type, …)` と `csreq BLOB` を持つ)。Bundle ID で登録されていても、requirement が変わる署名 (ad-hoc 署名での作り直し、別の Team の証明書) に替わると、許可は外れる見込み (推定)。Developer ID で identifier と Team を変えずに署名し続ければ、更新しても designated requirement は変わらない。
 
+起動経路から許可の結び付きまでを図にすると次の通り。
+
+![起動経路ごとの responsible process と、TCC の許可が client と署名の requirement の組で外れる条件](assets/tcc-responsible-process.svg)
+
 **問題**: Homebrew はバージョン付きディレクトリ (`.../Cellar/x/0.1.11/bin/...`) に入れるため、 LaunchAgent 経由だと `brew upgrade` のたびにパスが変わり TCC 許可が失われる。
 
 **解決**: .app バンドルにラップすると responsible process が Bundle ID になり、パス変更に強い。

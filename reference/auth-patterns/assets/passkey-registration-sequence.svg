@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-16 -22 1167 602" width="1167" height="602" font-family="sans-serif">
+<title>登録をローカルに閉じる passkey の登録の流れ</title>
+<defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#4a5568"/></marker></defs>
+<rect x="-16" y="-22" width="1167" height="602" fill="#ffffff"/>
+<text x="0" y="6" font-size="15" font-weight="bold" fill="#1a202c">登録をローカルに閉じる passkey の登録の流れ</text>
+<path d="M1010,60 V564" stroke="#a0aec0" stroke-width="1.2" stroke-dasharray="3,3" fill="none"/>
+<path d="M760,60 V564" stroke="#a0aec0" stroke-width="1.2" stroke-dasharray="3,3" fill="none"/>
+<path d="M500,60 V564" stroke="#a0aec0" stroke-width="1.2" stroke-dasharray="3,3" fill="none"/>
+<path d="M160,60 V564" stroke="#a0aec0" stroke-width="1.2" stroke-dasharray="3,3" fill="none"/>
+<rect x="41.2" y="86.0" width="237.7" height="64.0" fill="#fffde7" stroke="#a0a060" stroke-width="1"/>
+<path d="M160.0,194.0 L500.0,194.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M500.0,226.0 L1010.0,226.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M1010.0,258.0 L500.0,258.0" fill="none" stroke="#4a5568" stroke-width="1.4" stroke-dasharray="6,4" marker-end="url(#arr)"/>
+<path d="M500.0,362.0 L760.0,362.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M760.0,394.0 L500.0,394.0" fill="none" stroke="#4a5568" stroke-width="1.4" stroke-dasharray="6,4" marker-end="url(#arr)"/>
+<path d="M500.0,426.0 L1010.0,426.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<rect x="884.6" y="442.0" width="250.9" height="64.0" fill="#fffde7" stroke="#a0a060" stroke-width="1"/>
+<rect x="913.6" y="516.0" width="192.8" height="28.0" fill="#fffde7" stroke="#a0a060" stroke-width="1"/>
+<rect x="48.3" y="24.0" width="223.4" height="32.0" rx="6" fill="#f4f6fa" stroke="#4a5568" stroke-width="1.4"/>
+<rect x="436.0" y="24.0" width="128.0" height="32.0" rx="6" fill="#f4f6fa" stroke="#4a5568" stroke-width="1.4"/>
+<rect x="699.0" y="24.0" width="122.0" height="32.0" rx="6" fill="#f4f6fa" stroke="#4a5568" stroke-width="1.4"/>
+<rect x="923.2" y="24.0" width="173.5" height="32.0" rx="6" fill="#f4f6fa" stroke="#4a5568" stroke-width="1.4"/>
+<text x="160.0" y="104.0" text-anchor="middle" font-size="12" fill="#1a202c">1-2. 登録ごとの乱数 secret を作り</text>
+<text x="160.0" y="122.0" text-anchor="middle" font-size="12" fill="#1a202c">(メモリだけ、exp で捨てる)、</text>
+<text x="160.0" y="140.0" text-anchor="middle" font-size="12" fill="#1a202c">claims に HMAC で署名した jwt を作る</text>
+<text x="330.0" y="168.0" text-anchor="middle" font-size="12" fill="#1a202c">3. 登録用の URL (jwt は fragment で運ぶ。</text>
+<text x="330.0" y="186.0" text-anchor="middle" font-size="12" fill="#1a202c">server、proxy log、Referer に乗らない)</text>
+<text x="755.0" y="218.0" text-anchor="middle" font-size="12" fill="#1a202c">4. /auth/challenge</text>
+<text x="755.0" y="250.0" text-anchor="middle" font-size="12" fill="#1a202c">challenge</text>
+<text x="630.0" y="282.0" text-anchor="middle" font-size="12" fill="#1a202c">navigator.credentials.create()</text>
+<text x="630.0" y="300.0" text-anchor="middle" font-size="12" fill="#1a202c">(rp.id = jwt の rp_id、</text>
+<text x="630.0" y="318.0" text-anchor="middle" font-size="12" fill="#1a202c">user.id = jwt の user_id、</text>
+<text x="630.0" y="336.0" text-anchor="middle" font-size="12" fill="#1a202c">userVerification required、</text>
+<text x="630.0" y="354.0" text-anchor="middle" font-size="12" fill="#1a202c">attestation none)</text>
+<text x="630.0" y="386.0" text-anchor="middle" font-size="12" fill="#1a202c">credential</text>
+<text x="755.0" y="418.0" text-anchor="middle" font-size="12" fill="#1a202c">5. /auth/register に credential と jwt を POST</text>
+<text x="1010.0" y="460.0" text-anchor="middle" font-size="12" fill="#1a202c">6. jwt を HMAC で検証し、</text>
+<text x="1010.0" y="478.0" text-anchor="middle" font-size="12" fill="#1a202c">WebAuthn の登録検証を通す。</text>
+<text x="1010.0" y="496.0" text-anchor="middle" font-size="12" fill="#1a202c">通ってから jti と challenge を消費する</text>
+<text x="1010.0" y="534.0" text-anchor="middle" font-size="12" fill="#1a202c">7. credential record を保存</text>
+<text x="160.0" y="44.0" text-anchor="middle" font-size="13" fill="#1a202c">ホスト上の CLI と発行 instance</text>
+<text x="500.0" y="44.0" text-anchor="middle" font-size="13" fill="#1a202c">ブラウザのページ</text>
+<text x="760.0" y="44.0" text-anchor="middle" font-size="13" fill="#1a202c">authenticator</text>
+<text x="1010.0" y="44.0" text-anchor="middle" font-size="13" fill="#1a202c">jwt の endpoint (入口)</text>
+</svg>

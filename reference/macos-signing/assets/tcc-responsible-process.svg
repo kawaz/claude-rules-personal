@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="4 -6 925 352" width="925" height="352" font-family="sans-serif">
+<title>起動経路と responsible process と TCC の許可</title>
+<defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#4a5568"/></marker></defs>
+<rect x="4" y="-6" width="925" height="352" fill="#ffffff"/>
+<text x="20" y="22" font-size="15" font-weight="bold" fill="#1a202c">起動経路と responsible process と TCC の許可</text>
+<rect x="330" y="40" width="245" height="290" rx="8" fill="#fafbfd" stroke="#a0aec0" stroke-width="1.2" stroke-dasharray="5,4"/>
+<rect x="20" y="40" width="260" height="290" rx="8" fill="#fafbfd" stroke="#a0aec0" stroke-width="1.2" stroke-dasharray="5,4"/>
+<rect x="46.7" y="64.0" width="206.5" height="32.0" rx="6" fill="#f4f6fa" stroke="#4a5568" stroke-width="1.4"/>
+<rect x="49.6" y="134.0" width="200.8" height="32.0" rx="6" fill="#f4f6fa" stroke="#4a5568" stroke-width="1.4"/>
+<rect x="51.3" y="200.0" width="197.4" height="50.0" rx="6" fill="#f4f6fa" stroke="#4a5568" stroke-width="1.4"/>
+<rect x="86.9" y="284.0" width="126.2" height="32.0" rx="6" fill="#f4f6fa" stroke="#4a5568" stroke-width="1.4"/>
+<rect x="328.3" y="64.0" width="243.4" height="32.0" rx="6" fill="#f4f6fa" stroke="#4a5568" stroke-width="1.4"/>
+<rect x="363.0" y="125.0" width="174.0" height="50.0" rx="6" fill="#f4f6fa" stroke="#4a5568" stroke-width="1.4"/>
+<rect x="380.0" y="246.0" width="140.0" height="32.0" rx="6" fill="#f4f6fa" stroke="#4a5568" stroke-width="1.4"/>
+<rect x="651.4" y="125.0" width="237.2" height="50.0" rx="6" fill="#f4f6fa" stroke="#4a5568" stroke-width="1.4"/>
+<rect x="626.8" y="241.0" width="286.3" height="68.0" rx="6" fill="#fff1e0" stroke="#c05621" stroke-width="1.4"/>
+<path d="M253.3,80.0 L328.3,80.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M250.4,150.0 L363.0,150.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M248.7,225.0 L380.0,254.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M213.1,300.0 L380.0,270.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M571.7,80.0 L651.4,140.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M537.0,150.0 L651.4,150.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M520.0,262.0 L651.4,160.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M770.0,175.0 L770.0,241.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<text x="150.0" y="84.0" text-anchor="middle" font-size="13" fill="#1a202c">Terminal.app → shell → bin</text>
+<text x="150.0" y="154.0" text-anchor="middle" font-size="13" fill="#1a202c">LaunchAgent → 素のバイナリ</text>
+<text x="150.0" y="220.0" text-anchor="middle" font-size="13" fill="#1a202c">LaunchAgent →</text>
+<text x="150.0" y="238.0" text-anchor="middle" font-size="13" fill="#1a202c">.app/Contents/MacOS/bin</text>
+<text x="150.0" y="304.0" text-anchor="middle" font-size="13" fill="#1a202c">open MyApp.app</text>
+<text x="30.0" y="57.0" text-anchor="start" font-size="12" fill="#4a5568" font-weight="bold">起動経路</text>
+<text x="450.0" y="84.0" text-anchor="middle" font-size="13" fill="#1a202c">com.apple.Terminal (Bundle ID)</text>
+<text x="450.0" y="145.0" text-anchor="middle" font-size="13" fill="#1a202c">バイナリの実体パス</text>
+<text x="450.0" y="163.0" text-anchor="middle" font-size="13" fill="#1a202c">(symlink は解決される)</text>
+<text x="450.0" y="266.0" text-anchor="middle" font-size="13" fill="#1a202c">.app の Bundle ID</text>
+<text x="340.0" y="57.0" text-anchor="start" font-size="12" fill="#4a5568" font-weight="bold">responsible process (TCC の client)</text>
+<text x="770.0" y="145.0" text-anchor="middle" font-size="13" fill="#1a202c">TCC の許可 = client と</text>
+<text x="770.0" y="163.0" text-anchor="middle" font-size="13" fill="#1a202c">署名の requirement (csreq) の組</text>
+<text x="770.0" y="261.0" text-anchor="middle" font-size="13" fill="#1a202c">外れる時: client が実体パスなら、</text>
+<text x="770.0" y="279.0" text-anchor="middle" font-size="13" fill="#1a202c">そのパスが変わる (brew upgrade)。</text>
+<text x="770.0" y="297.0" text-anchor="middle" font-size="13" fill="#1a202c">requirement が変わる署名に替わる (推定)</text>
+</svg>

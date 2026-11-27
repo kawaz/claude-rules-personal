@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="29 -36 1287 417" width="1287" height="417" font-family="sans-serif">
+<title>webhook 署名の信頼の連鎖</title>
+<defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#4a5568"/></marker></defs>
+<rect x="29" y="-36" width="1287" height="417" fill="#ffffff"/>
+<text x="45" y="-8" font-size="15" font-weight="bold" fill="#1a202c">webhook 署名の信頼の連鎖</text>
+<rect x="250" y="290" width="540" height="75" rx="8" fill="#fafbfd" stroke="#a0aec0" stroke-width="1.2" stroke-dasharray="5,4"/>
+<rect x="260" y="10" width="1040" height="140" rx="8" fill="#fafbfd" stroke="#a0aec0" stroke-width="1.2" stroke-dasharray="5,4"/>
+<rect x="296.0" y="55.0" width="128.0" height="50.0" rx="6" fill="#f4f6fa" stroke="#4a5568" stroke-width="1.4"/>
+<rect x="507.3" y="55.0" width="145.4" height="50.0" rx="6" fill="#f4f6fa" stroke="#4a5568" stroke-width="1.4"/>
+<rect x="715.6" y="64.0" width="128.8" height="32.0" rx="6" fill="#f4f6fa" stroke="#4a5568" stroke-width="1.4"/>
+<rect x="892.2" y="64.0" width="155.6" height="32.0" rx="6" fill="#f4f6fa" stroke="#4a5568" stroke-width="1.4"/>
+<rect x="1109.1" y="29.0" width="141.8" height="32.0" rx="6" fill="#e8f5ec" stroke="#2f855a" stroke-width="1.4"/>
+<rect x="1083.4" y="102.0" width="193.3" height="32.0" rx="6" fill="#e8f5ec" stroke="#2f855a" stroke-width="1.4"/>
+<rect x="263.4" y="314.0" width="193.3" height="32.0" rx="6" fill="#f4f6fa" stroke="#4a5568" stroke-width="1.4"/>
+<rect x="544.8" y="314.0" width="210.4" height="32.0" rx="6" fill="#e8f5ec" stroke="#2f855a" stroke-width="1.4"/>
+<path d="M45.0,186.0 A65.0,6 0 0 1 175.0,186.0 V236.0 A65.0,6 0 0 1 45.0,236.0 Z" fill="#eef4fb" stroke="#2b6cb0" stroke-width="1.4"/>
+<path d="M45.0,186.0 A65.0,6 0 0 0 175.0,186.0" fill="none" stroke="#2b6cb0" stroke-width="1.4"/>
+<path d="M545.0,186.0 A65.0,6 0 0 1 675.0,186.0 V236.0 A65.0,6 0 0 1 545.0,236.0 Z" fill="#eef4fb" stroke="#2b6cb0" stroke-width="1.4"/>
+<path d="M545.0,186.0 A65.0,6 0 0 0 675.0,186.0" fill="none" stroke="#2b6cb0" stroke-width="1.4"/>
+<path d="M110.0,180.0 L110.0,80.0 L296.0,80.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M110.0,236.0 L110.0,330.0 L263.4,330.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M424.0,80.0 L507.3,80.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M652.7,80.0 L715.6,80.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M844.4,80.0 L892.2,80.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M1047.8,80.0 L1109.1,45.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M1047.8,80.0 L1083.4,118.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M456.6,330.0 L544.8,330.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M610.0,180.0 L610.0,105.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M610.0,236.0 L610.0,314.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<text x="360.0" y="75.0" text-anchor="middle" font-size="13" fill="#1a202c">jwks_url が</text>
+<text x="360.0" y="93.0" text-anchor="middle" font-size="13" fill="#1a202c">送り元の鍵置き場</text>
+<text x="580.0" y="75.0" text-anchor="middle" font-size="13" fill="#1a202c">jwks_url の TLS で</text>
+<text x="580.0" y="93.0" text-anchor="middle" font-size="13" fill="#1a202c">内容 (JWK) を信頼</text>
+<text x="780.0" y="84.0" text-anchor="middle" font-size="13" fill="#1a202c">JWK で署名を信頼</text>
+<text x="970.0" y="84.0" text-anchor="middle" font-size="13" fill="#1a202c">署名で claims を信頼</text>
+<text x="1180.0" y="49.0" text-anchor="middle" font-size="13" fill="#1a202c">aud で「自分宛て」</text>
+<text x="1180.0" y="122.0" text-anchor="middle" font-size="13" fill="#1a202c">jti + exp で「初見で新鮮」</text>
+<text x="270.0" y="27.0" text-anchor="start" font-size="12" fill="#4a5568" font-weight="bold">R 側</text>
+<text x="360.0" y="334.0" text-anchor="middle" font-size="13" fill="#1a202c">endpoint が送ってよい URL</text>
+<text x="650.0" y="334.0" text-anchor="middle" font-size="13" fill="#1a202c">endpoint の TLS で相手を信頼</text>
+<text x="260.0" y="307.0" text-anchor="start" font-size="12" fill="#4a5568" font-weight="bold">S 側</text>
+<text x="110.0" y="206.0" text-anchor="middle" font-size="13" fill="#1a202c">設定</text>
+<text x="110.0" y="224.0" text-anchor="middle" font-size="13" fill="#1a202c">(初期状態で信頼)</text>
+<text x="610.0" y="206.0" text-anchor="middle" font-size="13" fill="#1a202c">CA</text>
+<text x="610.0" y="224.0" text-anchor="middle" font-size="13" fill="#1a202c">(初期状態で信頼)</text>
+<rect x="136.9" y="52.0" width="106.2" height="20.0" fill="#ffffff" fill-opacity="0.92"/>
+<text x="190.0" y="66.0" text-anchor="middle" font-size="12" fill="#2d3748">path → jwks_url</text>
+</svg>

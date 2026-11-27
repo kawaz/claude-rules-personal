@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="59 -13 919 340" width="919" height="340" font-family="sans-serif">
+<title>鍵寿命 1h の 3 状態の重なり (時刻は最初の鍵の昇格からの経過)</title>
+<defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#4a5568"/></marker></defs>
+<rect x="59" y="-13" width="919" height="340" fill="#ffffff"/>
+<text x="75" y="15" font-size="15" font-weight="bold" fill="#1a202c">鍵寿命 1h の 3 状態の重なり (時刻は最初の鍵の昇格からの経過)</text>
+<path d="M120.0,50 V215" stroke="#e2e8f0" stroke-width="1" fill="none"/>
+<path d="M258.0,50 V215" stroke="#e2e8f0" stroke-width="1" fill="none"/>
+<path d="M396.0,50 V215" stroke="#e2e8f0" stroke-width="1" fill="none"/>
+<path d="M534.0,50 V215" stroke="#e2e8f0" stroke-width="1" fill="none"/>
+<path d="M672.0,50 V215" stroke="#e2e8f0" stroke-width="1" fill="none"/>
+<path d="M810.0,50 V215" stroke="#e2e8f0" stroke-width="1" fill="none"/>
+<path d="M948.0,50 V215" stroke="#e2e8f0" stroke-width="1" fill="none"/>
+<path d="M396.0,50 V215" stroke="#718096" stroke-width="1.2" stroke-dasharray="5,3" fill="none"/>
+<path d="M672.0,50 V215" stroke="#718096" stroke-width="1.2" stroke-dasharray="5,3" fill="none"/>
+<rect x="120.0" y="70" width="276.0" height="28" rx="3" fill="#c6e6cf" stroke="#2f855a" stroke-width="1.2"/>
+<rect x="396.0" y="70" width="27.6" height="28" rx="3" fill="#f3d9c4" stroke="#c05621" stroke-width="1.2"/>
+<rect x="258.0" y="120" width="138.0" height="28" rx="3" fill="#d6e4f7" stroke="#2b6cb0" stroke-width="1.2"/>
+<rect x="396.0" y="120" width="276.0" height="28" rx="3" fill="#c6e6cf" stroke="#2f855a" stroke-width="1.2"/>
+<rect x="672.0" y="120" width="27.6" height="28" rx="3" fill="#f3d9c4" stroke="#c05621" stroke-width="1.2"/>
+<rect x="534.0" y="170" width="138.0" height="28" rx="3" fill="#d6e4f7" stroke="#2b6cb0" stroke-width="1.2"/>
+<rect x="672.0" y="170" width="276.0" height="28" rx="3" fill="#c6e6cf" stroke="#2f855a" stroke-width="1.2"/>
+<rect x="120" y="251" width="14" height="14" fill="#d6e4f7" stroke="#2b6cb0"/>
+<rect x="120" y="273" width="14" height="14" fill="#c6e6cf" stroke="#2f855a"/>
+<rect x="120" y="295" width="14" height="14" fill="#f3d9c4" stroke="#c05621"/>
+<text x="120.0" y="232.0" text-anchor="middle" font-size="12" fill="#4a5568">0:00</text>
+<text x="258.0" y="232.0" text-anchor="middle" font-size="12" fill="#4a5568">0:30</text>
+<text x="396.0" y="232.0" text-anchor="middle" font-size="12" fill="#4a5568">1:00</text>
+<text x="534.0" y="232.0" text-anchor="middle" font-size="12" fill="#4a5568">1:30</text>
+<text x="672.0" y="232.0" text-anchor="middle" font-size="12" fill="#4a5568">2:00</text>
+<text x="810.0" y="232.0" text-anchor="middle" font-size="12" fill="#4a5568">2:30</text>
+<text x="948.0" y="232.0" text-anchor="middle" font-size="12" fill="#4a5568">3:00</text>
+<text x="396.0" y="46.0" text-anchor="middle" font-size="12" fill="#4a5568">昇格</text>
+<text x="672.0" y="46.0" text-anchor="middle" font-size="12" fill="#4a5568">昇格</text>
+<text x="100.0" y="88.0" text-anchor="end" font-size="13" fill="#1a202c">鍵 1</text>
+<text x="258.0" y="88.0" text-anchor="middle" font-size="12" fill="#1a202c">現</text>
+<text x="409.8" y="88.0" text-anchor="middle" font-size="12" fill="#1a202c">旧</text>
+<text x="100.0" y="138.0" text-anchor="end" font-size="13" fill="#1a202c">鍵 2</text>
+<text x="327.0" y="138.0" text-anchor="middle" font-size="12" fill="#1a202c">次</text>
+<text x="534.0" y="138.0" text-anchor="middle" font-size="12" fill="#1a202c">現</text>
+<text x="685.8" y="138.0" text-anchor="middle" font-size="12" fill="#1a202c">旧</text>
+<text x="100.0" y="188.0" text-anchor="end" font-size="13" fill="#1a202c">鍵 3</text>
+<text x="603.0" y="188.0" text-anchor="middle" font-size="12" fill="#1a202c">次</text>
+<text x="810.0" y="188.0" text-anchor="middle" font-size="12" fill="#1a202c">現</text>
+<text x="142.0" y="262.0" text-anchor="start" font-size="12" fill="#1a202c">次 (pre-published): JWKS に載る、署名に使わない。現鍵の寿命 50% で生成して公開</text>
+<text x="142.0" y="284.0" text-anchor="start" font-size="12" fill="#1a202c">現 (active): JWKS に載る、署名に使う。寿命 100% で次を現に昇格</text>
+<text x="142.0" y="306.0" text-anchor="start" font-size="12" fill="#1a202c">旧 (retiring): JWKS に載る、署名に使わない。寿命 110% で外す</text>
+</svg>

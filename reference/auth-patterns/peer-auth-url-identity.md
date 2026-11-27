@@ -48,6 +48,8 @@ R 側: hello の時点では何も信頼しない → 設定への信頼で `iss
 
 最後の遡及の規則が、hello に載せた他の名乗り (後述の instance id) も proof の後で信頼できる根拠になる。
 
+![設定の endpoint リストと CA から始まる S 側と R 側の信頼の連鎖と、hello への遡及](assets/peer-auth-trust-chain.svg)
+
 ## `iss` / `aud` は URL の完全一致
 
 TLS が認証するのは FQDN までで、同一 origin 内の別 instance を区別しない。`wss://h.example/a` と `wss://h.example/b` は TLS から見れば同一主体である。`iss` / `aud` を **パスを含む URL の完全一致**で相互検証することでこの粒度差を埋め、1 つの origin に複数 instance を相乗りさせられる。

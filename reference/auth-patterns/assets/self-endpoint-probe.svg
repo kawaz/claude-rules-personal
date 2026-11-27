@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-16 -22 889 558" width="889" height="558" font-family="sans-serif">
+<title>probe による自己識別 (peers が peer_1 と peer_2 = 自分の URL の時)</title>
+<defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#4a5568"/></marker></defs>
+<rect x="-16" y="-22" width="889" height="558" fill="#ffffff"/>
+<text x="0" y="6" font-size="15" font-weight="bold" fill="#1a202c">probe による自己識別 (peers が peer_1 と peer_2 = 自分の URL の時)</text>
+<path d="M700,60 V520" stroke="#a0aec0" stroke-width="1.2" stroke-dasharray="3,3" fill="none"/>
+<path d="M220,60 V520" stroke="#a0aec0" stroke-width="1.2" stroke-dasharray="3,3" fill="none"/>
+<rect x="74.5" y="398.0" width="788.5" height="100.0" fill="none" stroke="#718096" stroke-width="1.1"/>
+<rect x="78.5" y="128.0" width="691.5" height="142.0" fill="none" stroke="#718096" stroke-width="1.1"/>
+<rect x="84.5" y="86.0" width="271.0" height="28.0" fill="#fffde7" stroke="#a0a060" stroke-width="1"/>
+<path d="M220.0,172.0 L700.0,172.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M220.0,212.0 L256.0,212.0 L256.0,234.0 L222.0,234.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<path d="M78.5,190.0 H770.0" stroke="#718096" stroke-dasharray="4,3" fill="none"/>
+<rect x="543.0" y="282.0" width="314.0" height="28.0" fill="#fffde7" stroke="#a0a060" stroke-width="1"/>
+<rect x="94.0" y="320.0" width="252.1" height="64.0" fill="#fffde7" stroke="#a0a060" stroke-width="1"/>
+<path d="M700.0,442.0 L220.0,442.0" fill="none" stroke="#4a5568" stroke-width="1.4" marker-end="url(#arr)"/>
+<rect x="97.8" y="458.0" width="244.4" height="28.0" fill="#fffde7" stroke="#a0a060" stroke-width="1"/>
+<rect x="75.1" y="24.0" width="289.7" height="32.0" rx="6" fill="#f4f6fa" stroke="#4a5568" stroke-width="1.4"/>
+<rect x="629.8" y="24.0" width="140.5" height="32.0" rx="6" fill="#f4f6fa" stroke="#4a5568" stroke-width="1.4"/>
+<text x="220.0" y="104.0" text-anchor="middle" font-size="12" fill="#1a202c">1. token_1、token_2 を生成し対応表に記録</text>
+<text x="460.0" y="164.0" text-anchor="middle" font-size="12" fill="#1a202c">probe { ver, token_1 }</text>
+<text x="264.0" y="218.0" text-anchor="start" font-size="12" fill="#1a202c">probe { ver, token_2 }</text>
+<text x="264.0" y="236.0" text-anchor="start" font-size="12" fill="#1a202c">(peer_2 の URL 経由で自分のハンドラに届く)</text>
+<rect x="80.5" y="128.0" width="163.0" height="20.0" fill="#ffffff" fill-opacity="0.92"/>
+<text x="84.5" y="142.0" text-anchor="start" font-size="12" fill="#2d3748" font-weight="bold">par  2. TLS 上で並行に送る</text>
+<text x="700.0" y="300.0" text-anchor="middle" font-size="12" fill="#1a202c">peer_1 の対応表に token_1 は無いので照合は外れる</text>
+<text x="220.0" y="338.0" text-anchor="middle" font-size="12" fill="#1a202c">3-4. 届いた token_2 が対応表と一致し、</text>
+<text x="220.0" y="356.0" text-anchor="middle" font-size="12" fill="#1a202c">peer_2 の URL を self とする</text>
+<text x="220.0" y="374.0" text-anchor="middle" font-size="12" fill="#1a202c">5. 全リクエストの完了後に対応表を破棄</text>
+<text x="460.0" y="434.0" text-anchor="middle" font-size="12" fill="#1a202c">probe { ver, token_1 }</text>
+<text x="220.0" y="476.0" text-anchor="middle" font-size="12" fill="#1a202c">一致数が 2 になり起動失敗 (誤認しない)</text>
+<rect x="76.5" y="398.0" width="318.6" height="20.0" fill="#ffffff" fill-opacity="0.92"/>
+<text x="80.5" y="412.0" text-anchor="start" font-size="12" fill="#2d3748" font-weight="bold">opt  悪意ある正規 peer が受け取った token を送り返す</text>
+<text x="220.0" y="44.0" text-anchor="middle" font-size="13" fill="#1a202c">起動中の instance (送信と受信のハンドラ)</text>
+<text x="700.0" y="44.0" text-anchor="middle" font-size="13" fill="#1a202c">peer_1 (他ノード)</text>
+</svg>

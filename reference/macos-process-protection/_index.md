@@ -64,6 +64,10 @@ macOS で、秘密 (鍵、token、認証の可否のような判定の結論) �
 - 満たすべき形の結果は、Developer ID で署名した実物のバイナリでも同じだった。認可が無い時の task port、ptrace、`lldb` は、利用者が起動したものと、root のプロセスがユーザ権限に永久降格してから exec したものの両方で確かめた。認可がある時と、起動時の差し込みは、利用者が起動したものだけ。コアダンプは試験プログラムだけで観測した
 - コアダンプは `get-task-allow` の有無で決まり、hardened runtime の有無は関係しない。`get-task-allow` の無い対象は `ulimit -c` が 0 でも unlimited でもカーネルが断る (`AMFI: Denying core dump for pid <pid>`)
 
+表の task port の 2 列を、要求する側と対象の署名で辿ると次の流れになる。カーネル (AMFI) の判定が先にあり、利用者の認可はその後ろにしか無い。
+
+![要求する側と対象の署名で、task port の要求をカーネルが断るか、利用者の認可の段に進むか](assets/task-port-decision.svg)
+
 ### 利用者の認可は強い境界ではない
 
 宣言済みのデバッガの要求がカーネルを通った先にあるのは、利用者の認可 (`system.privilege.taskport`) だけ。この認可は次の性質を持つ (観測)。
@@ -250,6 +254,10 @@ macOS で、秘密 (鍵、token、認証の可否のような判定の結論) �
 | launchd daemon (system の文脈)、root で動くもの (PAM モジュール等)、bundle にできない CLI | (b) ファイル型の Keychain の ACL |
 
 data protection keychain はログインセッションの中でしか使えず、launchd daemon はファイル型を使うしかない (一次資料: TN3137)。root で動く PAM モジュールが (a) を使えないことは、TN3137 からの推定 (未観測)。ファイル型の Keychain の API (`SecTrustedApplicationCreateFromPath`、`SecAccessCreate`、`SecACLSetContents` を含む SecKeychain 系) は非推奨で、Apple はファイル型を「on the road to deprecation」と書く (一次資料: SDK のヘッダの `API_DEPRECATED("SecKeychain is deprecated", macos(10.x, 10.10))`、TN3137)。(a) を使えない文脈でだけ (b) を使う。
+
+読み手の身元を固定できない場合 (下の「(a) と (b) に共通」) も含めて、置き場の選び方を辿ると次の通り。
+
+![読み手の身元を固定できるかと動く文脈で、(a) / (b) / 権限を絞った token を選ぶ流れ](assets/keychain-placement-decision.svg)
 
 #### (a) data protection keychain と access group
 
