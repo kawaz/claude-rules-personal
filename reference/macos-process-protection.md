@@ -16,6 +16,11 @@ macOS で、秘密 (鍵、token、認証の可否のような判定の結論) �
   - **推定**: 観測や資料からの推論で、確かめていないもの
 - 観測は、特記が無ければ macOS 26.5.2 (25F84)、SIP 有効、開発者モード無効 (`DevToolsSecurity -status`) の Mac でのもの。**プロセスの守りの観測基準日: 2026-11-15** (観測をやり直したら、この日付と版と各項目の根拠も一緒に更新する)。項目の中に別の日付を書いた観測は、その日に同じ版・同じ設定の Mac で行ったもの。OS の版が変われば結果は変わりうる
 - data protection keychain と access group の観測 (「pam-passkey の観測」と書く) は、`kawaz/pam-passkey` の `docs/findings/2026-11-15-data-protection-keychain-stage1.md` (試験プログラムは同リポの `poc/dpk`) のもの。2026-11-15、macOS 26.5.2 (25F84)、SIP 有効、Apple silicon、利用者 (uid 501) の GUI のセッションの中の端末から、sudo なし。その間ダイアログは 1 度も出なかった
+- 次の 4 件の観測 (「procline の lean4 の観測」と書く) は、`kawaz/procline` の lean4 の作業の `docs/findings/` のもの (main に未合流、2026-11-27 時点)。どれも 2026-11-25、macOS 26.5.2、arm64 の Mac で、利用者 (uid 501、admin) の権限で行った (版の 25F84 は、ライブラリの置き換え、Electron、hard link の 3 件に書かれている。admin であることは書き込み権限の件に書かれている)。hard link と書き込み権限の 2 件は、root 所有のファイルを置く所だけ sudo を使った。SIP と開発者モードの状態は findings に書かれていない
+  - `2026-11-25-late-dlopen-library-replacement.md`: 起動した後に `dlopen` するライブラリのファイルの置き換え (M1、M2、M3)
+  - `2026-11-25-electron-run-as-node-satisfies-strong-binary.md`: Electron の `ELECTRON_RUN_AS_NODE` で、署名済みのアプリに任意の JavaScript を動かさせる (M4、M5、M7)
+  - `2026-11-25-pidpath-follows-hard-link-names.md`: hard link を経た起動と `proc_pidpath` が返す path (M4、M5、M7)
+  - `2026-11-25-path-meta-misses-acl-and-extra-groups.md`: ACL と資格情報に入らないグループで書ける場所 (M7)
 - 本文が名前で指す一次資料の所在
   - Hardened Runtime: https://developer.apple.com/documentation/security/hardened-runtime
   - Debugging tool entitlement (`com.apple.security.cs.debugger`): https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.cs.debugger
@@ -91,7 +96,11 @@ macOS で、秘密 (鍵、token、認証の可否のような判定の結論) �
 | entitlement を持たないプロセスが、task port か ptrace でメモリを読む・書く | M1 か、M2 のうち `get-task-allow` を付けないこと、のどちらか一方があれば断られる。両方を外すと開く | 観測 |
 | 宣言済みのデバッガが task port を取る | M1 と M2 の両方。片方でも欠けると、カーネルが断らなくなり、残るのは利用者の認可だけ (強い境界ではない) | 観測 |
 | 起動時にライブラリを差し込む | M1 と M2 の両方。M1 だけだと (`get-task-allow` があると) library validation だけが残る | 観測 |
+| 起動した後に `dlopen` するライブラリのファイルを、別の署名のものに置き換える | M1 と、M2 のうち `disable-library-validation` を付けないこと、の両方。同じ Team ID で署名した別のライブラリへの置き換えは未観測 | 観測 (procline の lean4 の観測) |
 | 保護の無い、同じ身元の別のビルド (access group では、同じ group を名乗れる別のビルド) を持ち込み、ライブラリを差し込んで、コードの身元で渡される秘密を読む | M3 | 観測、一次資料、推定 |
+| 署名済みのバイナリが持つ、入力をコードとして実行する口 (インタプリタとしての起動、Electron の `RunAsNode`、プラグイン) から、その署名の身元で自分のコードを動かす | M5。M1〜M3 を満たし、M4 の ACL や access group、M7 の検査を通るバイナリでも開く | 観測 (procline の lean4 の観測) |
+| 自分の bundle から hard link で正規のバイナリを起動し、起動の場所から読む入力 (bundle の resource) を自分の物にする | M5 | 観測 (procline の lean4 の観測) |
+| 身元を path (`proc_pidpath`、実行ファイルの所有者と書き込み権限) で判定する側をすり抜ける | M5、M7 (身元は署名で判定する。置き場の書き込み権限は ACL とグループまで含めて確かめる) | 観測 (procline の lean4 の観測) |
 | コアダンプに写ったメモリを読む | M2 (`get-task-allow` を付けない)。S1 が重ねる | 観測 (試験プログラム) |
 | 保存してある秘密を、置き場から読む | M4 | 観測 (data protection keychain は pam-passkey の観測) |
 | 入口から秘密を出させる・使わせる | M5 | 観測と、そこからの帰結 |
@@ -119,7 +128,10 @@ macOS で、秘密 (鍵、token、認証の可否のような判定の結論) �
   - 起動時のライブラリの差し込み (`DYLD_INSERT_LIBRARIES`)。M2 も満たしている時
   - 宣言済みのデバッガからの task port の取得。M2 も満たしている時。利用者の認可があっても断られる
   - entitlement を持たないプロセスからの task port の取得と ptrace の接続 (これは M2 だけでも断られる)
+  - 起動した後に `dlopen` するライブラリのファイルを、別の Team ID の署名のもの (ad-hoc 署名を含む) に置き換えること。M2 の `disable-library-validation` も無い時。Developer ID と hardened runtime で署名した試験プログラムは、同じ Team ID で署名した元のライブラリは読み込み、ad-hoc 署名のものに置き換えると拒んだ。dyld の理由は `mapping process and mapped file (non-platform) have different Team IDs` (procline の lean4 の観測、2026-11-25)。ad-hoc 署名と hardened runtime のプロセスは Team ID を持たないので、元のライブラリも置き換えたものも同じ理由で拒んだ (同)
 - 守らないもの
+  - 起動した後に `dlopen` するライブラリを、同じ Team ID で署名した別のライブラリ (古い版など) に置き換えること → 未観測 (末尾の「未調査・未観測の経路」)
+  - バイナリ自身が、入力をコードとして実行する口 (インタプリタとしての起動、Electron の `RunAsNode`、プラグイン) を持つこと。その口から渡したコードは、hardened runtime があってもこのバイナリの署名の身元で動く → M5
   - Apple の診断ツール (`com.apple.system-task-ports.read.safe` を持つもの) が、対象の書き込み可能なメモリを読むこと。カーネルは断らない。中身が相手に渡らないのは、道具が出力しないことに依る → 受け持つ項目なし (S2、S3 が被害を減らす)
   - `get-task-allow` が付いている時の、宣言済みのデバッガ、差し込み (library validation だけが残る)、コアダンプ → M2
   - コアダンプ。hardened runtime の有無は関係しない → M2、S1
@@ -133,8 +145,9 @@ macOS で、秘密 (鍵、token、認証の可否のような判定の結論) �
 - 欠けた時に起きること
   - `DYLD_INSERT_LIBRARIES` を付けて起動すると、ライブラリが読み込まれる。ライブラリの constructor は `main` より前に、そのプロセスのコードの身元で動く (ファイル型の Keychain の ACL も通る (観測)。data protection keychain の access group も、読み込まれたコードは本体と区別されない (一次資料: Apple DTS の回答 thread/724013「an in-memory plug-in is indistinguishable from the host app」。観測: hardened runtime の無い Apple Development 署名の bundle に差し込んだライブラリが、`main` より前に group の項目を読み書きし、Secure Enclave の鍵で署名できた。pam-passkey の観測)。M3)
   - 宣言済みのデバッガの task port の要求がカーネルを通り、利用者の認可の段に進む。認可があれば port が渡り、メモリを読み書きできる。認可は 1 度下りると共有され、その後は別のプロセスもダイアログ無しで通る。守りは、利用者がその瞬間に何のダイアログかを見分けることに依る (「利用者の認可は強い境界ではない」)
+  - 起動した後に `dlopen` するライブラリのファイルを置き換えると、別の署名 (ad-hoc 署名で、identifier も違う) のライブラリが読み込まれ、その constructor が動いた。ad-hoc 署名のプロセスでも、Developer ID で署名したプロセスでも同じだった (procline の lean4 の観測、2026-11-25)。走っているプロセスを、利用者の認可も `DYLD_` の変数も使わずに乗っ取れる。利用者が書ける場所からライブラリを読み込むプロセスなら、そのファイルを置き換えるだけでよい。どこから読み込むかは署名からは分からない
 - 確かめ方: `codesign -d -v <ファイルか pid>` の `CodeDirectory` の行の `flags` に `runtime` (0x10000) がある
-- 根拠: 観測 (差し込み、宣言済みのデバッガ、認可がある時とない時)、一次資料 (Hardened Runtime。保護は「SIP と組で」と書く)
+- 根拠: 観測 (差し込み、宣言済みのデバッガ、認可がある時とない時、起動した後の読み込みの置き換え)、一次資料 (Hardened Runtime。保護は「SIP と組で」と書く)
 
 ### M2: 保護を緩める entitlement を付けない
 
@@ -156,11 +169,11 @@ macOS で、秘密 (鍵、token、認証の可否のような判定の結論) �
 - 欠けた時に起きること
   - `get-task-allow` (観測): hardened runtime があっても、dyld が `DYLD_` の変数を読むようになり (残る守りは library validation だけ)、宣言済みのデバッガの要求をカーネルが断らなくなり (認可があれば読み書きできる)、上限 (`ulimit -c`) が許せばコアダンプが書かれ、Apple の診断ツールが中身を出す。hardened runtime も無ければ、entitlement を持たないプロセスがそのままメモリを読み書きできる
   - `allow-dyld-environment-variables` (一次資料): dyld が `DYLD_` の変数を読むようになる
-  - `disable-library-validation` (一次資料): Apple か同じ Team ID の署名でないライブラリも読み込むようになる
+  - `disable-library-validation` (一次資料、観測): Apple か同じ Team ID の署名でないライブラリも読み込むようになる。Developer ID と hardened runtime で署名した試験プログラムにこれを付けると、起動した後に ad-hoc 署名のものに置き換えたライブラリを読み込んだ (procline の lean4 の観測、2026-11-25)
   - `disable-executable-page-protection` (一次資料): コード署名の保護が全部外れ、実行コードを検出されずに書き換えられる
 - Xcode は開発用のビルドに `get-task-allow` を自動で足す (`CODE_SIGN_INJECT_BASE_ENTITLEMENTS`。一次資料の Resolving common notarization issues)。配るビルドで外れていることを確かめる
 - 確かめ方: `codesign -d --entitlements - --xml <ファイル>` の出力に上の key が無い
-- 根拠: `get-task-allow` は観測。他の 3 つは一次資料 (それぞれの entitlement のページ。個別の観測はしていない)
+- 根拠: `get-task-allow` は観測。`disable-library-validation` は一次資料と、起動した後の読み込みの置き換えの観測。他の 2 つは一次資料 (それぞれの entitlement のページ。個別の観測はしていない)
 
 ### M3: 保護の無い署名済みのビルドを作らない・残さない
 
@@ -175,6 +188,7 @@ macOS で、秘密 (鍵、token、認証の可否のような判定の結論) �
   - 既に出てしまった保護の無いビルド。ファイルを消しても、写しの署名は有効なまま → 受け持つ項目なし
   - 署名に使う証明書の秘密鍵が漏れること (相手が自分で同じ身元のビルドを作れる) → 受け持つ項目なし
   - 保護のあるビルドの入口から秘密を出させること → M5
+  - M1 と M2 を満たしたビルドが、入力をコードとして実行する口を持つこと。その口から渡したコードは、そのビルドの身元で置き場を通る → M5
   - コードの身元に依らない置き場 (ファイル、全アプリ可の項目) → M4
 - なぜ要るか: OS はこの経路を止めない
   - ファイル型の Keychain の ACL は、項目を読む要求が来た時に、要求したプロセスのコードの署名を requirement に照らして判定する。見るのはプロセスの本体の身元だけで、読み込まれたライブラリは見ない (観測)
@@ -183,7 +197,7 @@ macOS で、秘密 (鍵、token、認証の可否のような判定の結論) �
 - 欠けた時に起きること
   - hardened runtime でないバイナリにライブラリを差し込むと、そのバイナリだけを許す ACL の項目を、ライブラリの constructor が読めた。hardened runtime のバイナリでは読み込まれず、読めなかった (観測。ad-hoc 署名のバイナリと試験用の keychain)
   - したがって、保護の無い署名済みのビルドが 1 つでもあれば、相手はそのファイルを持ち込み (守りたい Mac に元から在る必要は無い)、ライブラリを差し込んで、ACL を通って秘密を読める見込み
-  - access group では観測で確かめた。持ち主と同じ entitlement と profile で、hardened runtime を付けずに Apple Development で署名した bundle に `DYLD_INSERT_LIBRARIES` でライブラリ (entitlement 無し。ad-hoc 署名でも、同じ Team の Apple Development 署名でも) を差し込むと、ライブラリは `main` より前に、持ち主の group の項目を読み、書き、Secure Enclave の鍵 (本人確認なし) で署名できた。hardened runtime を付けた bundle には読み込まれなかった (pam-passkey の観測)。開発用の profile は wildcard の App ID で group を許していたので、どの group を名乗らせるかは署名する側が決められる。Developer ID で署名した hardened runtime の無いビルドでは確かめていない (作らない)
+  - access group では観測で確かめた。持ち主と同じ entitlement と profile で、hardened runtime を付けずに Apple Development で署名した bundle に `DYLD_INSERT_LIBRARIES` でライブラリ (entitlement 無し。ad-hoc 署名でも、同じ Team の Apple Development 署名でも) を差し込むと、ライブラリは `main` より前に、持ち主の group の項目を読み、書き、Secure Enclave の鍵 (本人確認なし) で署名できた。hardened runtime を付けた bundle には読み込まれなかった (pam-passkey の観測)。開発用の profile は wildcard の App ID で group を許していたので、どの group を名乗らせるかは署名する側が決められる。Developer ID で署名した hardened runtime の無いビルドで Keychain の項目を読めるかは確かめていない (作らない)。Developer ID で署名した hardened runtime の無い試験プログラムが、起動した後に置き換えた別の署名のライブラリを読み込み、その constructor が動いたことは観測した (procline の lean4 の観測、2026-11-25)
 - 確かめ方: 下の `check_hardened` を署名の直後に、実行ファイルごとに呼ぶ (.app は中の実行ファイルを 1 つずつ渡す)。universal binary は arch ごとに調べる (`codesign -d -v` は `--arch` が無いと、動かしている Mac の arch しか表示しない)。条件を満たすファイルは残り、hardened runtime の無いもの、`get-task-allow` 付きのもの、一部の arch だけ hardened runtime の無い universal binary、Mach-O でないファイルは消えて失敗する (観測。最後の 2 つは 2026-11-27、bash 3.2)
 
   ```bash
@@ -249,7 +263,7 @@ data protection keychain はログインセッションの中でしか使えず�
 - 守らないもの
   - group を名乗るプロセスの中で動くコード。差し込まれたライブラリは本体と区別されない → M1、M2、M3
   - 同じ Team ID で、profile が同じ group を許す別のアプリや開発用のビルド → M3
-  - group を名乗るバイナリを起動して、入口から出させること → M5。bundle の外の symlink からも hard link (同じ inode) からも、空の環境と cwd `/` でも、起動すると項目を読めた (pam-passkey の観測。コピーは止められ hard link は通る理由は未観測)。どの形でも動くのは同じ署名済みのコードなので、署名済みのバイナリを誰でも起動できること (M5) の範囲に収まる
+  - group を名乗るバイナリを起動して、入口から出させること → M5。bundle の外の symlink からも hard link (同じ inode) からも、空の環境と cwd `/` でも、起動すると項目を読めた (pam-passkey の観測。コピーは止められ hard link は通る理由は未観測)。どの形でも動くのは同じ署名済みのコードなので、署名済みのバイナリを誰でも起動できること (M5) の範囲に収まる。ただし起動の場所から読む入力は相手が選べる。利用者は、自分の物でない root 所有の app の実行ファイルにも、同じ volume の自分の bundle の中から hard link を張れ、そこから起動したプロセスは、署名の検査を本物と同じに通したまま、利用者の bundle の resource を読んだ (procline の lean4 の観測、2026-11-25。Keychain の項目は読ませていない)。group を名乗るバイナリが bundle の resource や隣のファイルを読むなら、それも M5 の入口になる
   - メモリに読んだ後の秘密 → M1、M2
 - なぜ守られるか: Keychain が、要求したプロセスの署名の entitlement から読める group を決める。entitlement は provisioning profile が許すものに限られ、他の開発者は同じ group を名乗れない (一次資料: TN3137、Apple DTS の回答 thread/685723)
 - 確かめ方: `codesign -d --entitlements - --xml <app>` に `keychain-access-groups` (または `com.apple.application-identifier`) があり、`<app>/Contents/embedded.provisionprofile` がある。unified log に `taskgated-helper` の `allowing entitlement(s) for <bundle id> due to provisioning profile` が出る。group を名乗らないバイナリから、同じ項目の読み出し・書き込み・更新・削除を試して、-34018 か -25300 で断られ、持ち主の値が変わらないことを見る
@@ -277,6 +291,7 @@ data protection keychain はログインセッションの中でしか使えず�
 #### (a) と (b) に共通
 
 - 欠けた時に起きること: `security` コマンドで作った項目や「全アプリ可」の ACL の項目は、同じ uid の任意のプロセスが確認なしで読める (観測)。モード 600 のファイルも同じ uid から読める。メモリを守っても、置き場から読まれる
+- 守らないもの: 読み手を絞れるのはコードの身元までで、その身元で動くコードが何を実行するかまでは絞れない。group を名乗るバイナリや ACL を満たすバイナリが、入力をコードとして実行する口 (インタプリタとしての起動、Electron の `RunAsNode`、プラグイン) を持てば、その口から渡したコードがその身元で項目を読める → M5。M1〜M3 を満たすだけでは足りない。公証済みで hardened runtime があり、M2 の 4 つの entitlement も無い Electron のアプリが、同じ uid のプロセスから渡された JavaScript を自分の署名の身元で動かした (procline の lean4 の観測、2026-11-25。Keychain の項目は読ませていない。読める見込みは推定)
 - 読み手の身元を固定できない場合 (スクリプト、`security` コマンドで読むツール) は、この条件を満たせない。権限を絞った token だけを置く (reference の `keychain-secrets`)
 
 ### M5: 誰でも使える入口から、秘密を出さない・勝手に使わせない
@@ -285,17 +300,33 @@ data protection keychain はログインセッションの中でしか使えず�
   - 入口 (サブコマンド、引数、環境変数、標準入力、設定ファイル、socket や XPC で受ける要求) から、秘密の値を出力しない
   - 入口から、秘密の参照先 (どの項目を読むか、どこへ送るか) を切り替えさせない
   - 秘密を使う操作 (署名、復号、送信) を入口が代行するなら、OS が出す本人確認 (Touch ID 等) の後だけにするか、要求する相手のコードの身元を検査する
+  - 入力をコードとして実行する口を持たない。インタプリタとしての起動 (Electron の `RunAsNode` の fuse で開く `ELECTRON_RUN_AS_NODE`、`-e` でスクリプトを受ける起動)、プラグインやスクリプトの読み込み、環境変数や引数で読み込むコードを足す仕組みがこれに当たる。持てば、その口から渡したコードはこのバイナリの署名の身元で動き、M1〜M3 を満たしていても、M4 の ACL や access group と、M7 の検査を通る。この口の有無は署名の事実 (hardened runtime、entitlement) からは分からない
+  - 起動の場所に依る入力も入口に数える。作業ディレクトリ、`argv[0]`、実行ファイルの場所から相対に探すファイル (app bundle の resource、隣のファイル) がこれに当たる。利用者は、同じ volume にある読めるファイルなら、自分の物でない root 所有のものにも hard link を張って、自分の bundle から起動できる。動くのは同じ署名のコードで署名の検査も通るが、bundle の resource は利用者の物になる
+  - 相手のコードの身元を検査する時、許す相手 (requirement に当たるバイナリ) にも、入力をコードとして実行する口を持つものを入れない。そのバイナリの署名の身元は、同じ uid の誰のコードでも名乗れる
+  - 相手の身元を path (`proc_pidpath` の path、実行ファイルの所有者と書き込み権限) で判定しない。`proc_pidpath` が返すのは exec した時の path ではなく実行ファイルの今の名前の 1 つで、利用者は hard link を張る・消すことでそれを変えられる (下の「欠けた時に起きること」)
   - 相手のコードの身元は、pid ではなく audit token で引く。Unix socket なら `getsockopt` の `LOCAL_PEERTOKEN` で相手の audit token を取り、`SecCodeCopyGuestWithAttributes` に `kSecGuestAttributeAudit` で渡す (一次資料: SDK の `sys/un.h`、`Security/SecCode.h`)。pid は、相手が終わって再利用されると別のプロセスを指す (観測: 利用者の権限だけで fork を繰り返し、同じ数値の pid の再割り当てを 47.8 秒で起こせた。その後の `LOCAL_PEERPID` は同じ数値を返し、`LOCAL_PEERTOKEN` は無関係のそのプロセスの token を返したが、token の pidversion は元と違った。`kawaz/procline` の `docs/findings/2026-11-15-socketpair-peer-after-fork-exec.md`、macOS 26.5.2)
   - `LOCAL_PEERPID` と `LOCAL_PEERTOKEN` が指すのは、connect した時点のプロセスではなく、`getsockopt` を読んだ時点で相手側の端を最後に送受信に使ったプロセス。fd を fork や fd 渡しで引き継いだプロセスが送受信すると、そちらに変わる。資格情報もその時点の値で、相手が setuid のプログラムを exec すれば euid も変わる (同じ findings の観測)。なので、身元は判定に使う時点で token を読み直して確かめ、pid の数値だけを持ち回らない。token の pidversion を比べれば、pid の再利用は見分けられる
 - 守るもの: 相手が、メモリも ACL も破らずに、正規の入口から秘密の値を得ること・秘密を使う操作をさせること
 - 守らないもの
   - メモリと置き場への直接の経路 → M1〜M4
   - 本人確認を通した利用者自身の操作 (利用者が、何の確認かを見分けずに応じる) → 受け持つ項目なし
-  - 相手のコードの身元を検査する方法の抜け道 → 未調査
-- なぜ要るか: OS はこの経路を止めない。Keychain の ACL はコードの身元で判定し、誰が起動したかを問わない (観測)。署名済みのバイナリは同じ uid の誰でも起動でき、開いている socket には同じ uid の誰でも繋げる
-- 欠けた時に起きること: 入口が秘密を出す・使うなら、相手は M1〜M4 を 1 つも破らずに目的を果たす
-- 確かめ方: 入口の一覧 (help、引数のパーサ、読む環境変数、受ける要求) を作り、秘密に触る箇所から逆に辿って、どの入口から届くかを見る。内部用の入口の数をテストで固定する
-- 根拠: 観測 (ACL の判定がコードの身元だけで決まること)。残りはそこからの帰結
+  - 相手のコードの身元を検査する方法の抜け道のうち、上の条件 (入力をコードとして実行する口、起動の場所に依る入力、path) の他のもの → 未調査
+- なぜ要るか: OS はこの経路を止めない。Keychain の ACL はコードの身元で判定し、誰が起動したかを問わない (観測)。署名済みのバイナリは同じ uid の誰でも起動でき、開いている socket には同じ uid の誰でも繋げる。署名が保証するのはディスク上で封印されたコードで、そのコードが実行時に受け取って実行するものや、起動の場所から読むものではない
+- 欠けた時に起きること
+  - 入口が秘密を出す・使うなら、相手は M1〜M4 を 1 つも破らずに目的を果たす
+  - 入力をコードとして実行する口 (procline の lean4 の観測、2026-11-25): 公証済みで hardened runtime があり、M2 の 4 つの entitlement も無い Visual Studio Code と Antigravity を、同じ uid のプロセスが環境変数 `ELECTRON_RUN_AS_NODE=1` と引数 `-e '<JavaScript>'` で起動すると、ウィンドウを開かずに、渡した JavaScript がそのプロセスで動いた (`require("child_process")` も使えた)。その最中のプロセスは、走っているコードの署名の検査 (`SecCodeCheckValidity`) を通り、hardened runtime があり、デバッガに接続されていなかった。`/Applications` の Electron のアプリ 9 個のうち、`RunAsNode` の fuse が有効なのはこの 2 個だった。2 個が持つ `cs.allow-jit` は無効な 7 個も全部持っていたので、entitlement では区別できない
+  - 起動の場所に依る入力と path (procline の lean4 の観測、2026-11-25): root 所有の場所に置いた、Developer ID と hardened runtime で署名した app bundle の実行ファイルに、利用者が自分で作った bundle (`Info.plist` は写し、resource は利用者が書いた物) の中から hard link を張って起動すると、プロセスは利用者の bundle の resource を読んだ。link を消した後、`proc_pidpath` は root の場所の path を返し、その path は root 所有で利用者が書けず、走っているコードの署名の検査は通り、identifier、Team ID、bundle ID も本物と同じで、本物の場所から起動したプロセスと見分けが付かなかった。link を張った後は、link を張る前から root の path で動いていたプロセスにも、`proc_pidpath` は link の path を返した
+- 確かめ方
+  - 入口の一覧 (help、引数のパーサ、読む環境変数、受ける要求、入力をコードとして実行する口、起動の場所から読むファイル) を作り、秘密に触る箇所から逆に辿って、どの入口から届くかを見る。内部用の入口の数をテストで固定する
+  - Electron のアプリは、Electron Framework の中の fuse を読む。印の文字列の後に、版の 1 バイト、長さの 1 バイト、fuse ごとに `0` か `1` が並び、1 番目が `RunAsNode` (2026-11-27、`/Applications` の Electron のアプリで、procline の lean4 の観測と同じ値が読めることを確かめた)
+
+  ```bash
+  fw="<app>/Contents/Frameworks/Electron Framework.framework/Electron Framework"
+  off=$(LC_ALL=C grep -aobF dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX "$fw" | head -1 | cut -d: -f1)
+  dd if="$fw" bs=1 skip=$((off + 34)) count=1 2>/dev/null   # 1 なら RunAsNode が有効
+  ```
+
+- 根拠: 観測 (ACL の判定がコードの身元だけで決まること。Electron の `RunAsNode`、hard link を経た起動と `proc_pidpath` は procline の lean4 の観測)。残りはそこからの帰結
 
 ### M6: 秘密を、プロセスの外から見える場所に置かない
 
@@ -320,19 +351,25 @@ data protection keychain はログインセッションの中でしか使えず�
   - 実行中のコードの状態が有効で (`kSecCodeStatusValid`)、デバッガに接続されていない (`kSecCodeStatusDebugged` が立たない)
   - M2 の 4 つの entitlement が無い
   - 署名の情報が読めない時、検証が失敗した時も不合格にする (実行中にディスク上のファイルが差し替えられると、返る署名の情報は走っているコードのものではなくなる)
+  - requirement が許すバイナリは、入力をコードとして実行する口を持たないものに限る (M5)。持つバイナリは、渡されたコードを動かしている最中も、上の検査を全部通る (procline の lean4 の観測。M5 の「欠けた時に起きること」)
+  - 身元は署名で判定し、`proc_pidpath` の path や、その path の所有者と書き込み権限を根拠にしない (M5)
 - あわせて守ること
   - 実行ファイルと親ディレクトリ (`/` まで) を、信頼する側の権限でしか書けない場所に置く。起動する前のファイルの検査は、exec までの間に差し替えられる (推定。差し替えの観測はしていない)
+  - 書けない場所かを、mode の bit と、プロセスの資格情報のグループ (`id -G`、カーネルが返すのは最大 16 件) だけで判定しない。カーネルは、root 所有で 755 のディレクトリに ACL (`user:<利用者> allow add_file,delete_child`) を付けた場所と、root 所有でグループが資格情報に入らない 17 件目の所属グループの 775 のディレクトリで、利用者に中の root 所有の実行ファイルの置き換えを許した。ACL の無い root 所有の 755 のディレクトリでは断った (procline の lean4 の観測、2026-11-25。17 件目のグループは `com.apple.sharepoint.group.1` で、所属は `dsmemberutil checkmembership` で数えた)
+  - なので置き場は、各ディレクトリ (`/` まで) が、所有者が信頼する側 (root) で、group と other の書き込みの bit が無く、ACL が無い形にする (推定。観測で置き換えを断った対照の形)。ACL は `/bin/ls -lde <dir>` の 2 行目以降に出る (GNU の `ls` が先に見つかる環境では `/bin/ls` を絶対パスで呼ぶ)
+  - 所有者が root であることは、その場所のファイルが自分の置いた物である証拠にならない。利用者が書ける場所には、利用者は自分の物でない root 所有のファイル (別のプログラム) を hard link で置けて、置いたファイルは root 所有のまま (procline の lean4 の観測、2026-11-25)
   - 結論は、信頼する側が自分で作ったパイプで受け、明示の成功だけを成功にする。無応答や終了を成功にしない
 - 守るもの: M1〜M3 を満たさないビルド (別の配布経路のもの、手作業で署名したもの) や別の身元のコードが出した結論を、信頼する側が受け取ること
 - 守らないもの
   - 検査の後に起きること。検査は起動した直後の 1 回で、その後に対象を守るのは M1 と M2 のカーネルの判定 → M1、M2
   - 対象を止める・殺すこと。同じ uid のプロセスはシグナルを送れる。結果は失敗か時間切れになり、成功にはならない (上の「明示の成功だけ」) → 可用性は受け持つ項目なし
   - 検査を通ったビルド自身の不具合 → 扱わない
+  - 検査を通ったビルドが、入力をコードとして実行する口や起動の場所から読む入力を持つこと → M5 (requirement で許すバイナリを絞る)
   - 対象が読む秘密の置き場 → M3、M4
 - なぜ守られるか: 信頼する側が、起動した直後に Security.framework で、その pid で走っているコードの署名を調べる (`SecCodeCopyGuestWithAttributes` (pid) → `SecCodeCheckValidity` (requirement) → `SecCodeCopySigningInformation` (`kSecCSDynamicInformation`))。自分で起動して、まだ `wait` していない子なので、pid が他のプロセスを指すことはない。自分で起動していない相手 (socket で繋いでくる相手) は M5 のとおり audit token で引く。OS が自動で行うものではなく、検査を書いた側が呼ぶ。保護の無いビルドは、観測の要点の表のとおり同じ uid から差し込める・書き換えられるので、この検査で受け取らないことにする
 - 欠けた時に起きること: 保護の無いビルドの結論を受け取る。そのプロセスには同じ uid からライブラリを差し込める・メモリを書き換えられるので、結論を偽れる
-- 確かめ方: hardened runtime の無い ad-hoc 署名のバイナリと、4 つの entitlement を 1 つずつ付けたバイナリを起動して、検査が不合格にすることをテストで固定する。手では `codesign -v -R='<requirement>' <pid>` と `codesign -d -v --entitlements - <pid>`
-- 根拠: 観測 (保護の無い対象が差し込まれ・書き換えられること、走っているプロセスに requirement と署名の情報を評価できること、自己署名が `anchor apple generic` を満たさないこと、Developer ID の designated requirement の形)、一次資料 (POSIX `kill()`: 同じ uid はシグナルを送れる)、推定 (起動する前の検査が差し替えに負けること)
+- 確かめ方: hardened runtime の無い ad-hoc 署名のバイナリと、4 つの entitlement を 1 つずつ付けたバイナリを起動して、検査が不合格にすることをテストで固定する。手では `codesign -v -R='<requirement>' <pid>` と `codesign -d -v --entitlements - <pid>`。置き場は、実行ファイルの親ディレクトリから `/` まで `/bin/ls -lde` で所有者、mode、ACL を見る
+- 根拠: 観測 (保護の無い対象が差し込まれ・書き換えられること、走っているプロセスに requirement と署名の情報を評価できること、自己署名が `anchor apple generic` を満たさないこと、Developer ID の designated requirement の形。入力をコードとして実行する口を持つバイナリが署名の検査を通ること、ACL と 17 件目のグループで書ける場所、hard link で置いた root 所有のファイルは procline の lean4 の観測)、一次資料 (POSIX `kill()`: 同じ uid はシグナルを送れる)、推定 (起動する前の検査が差し替えに負けること、ACL もグループの書き込みも無い置き場で足りること)
 
 ### M8: SIP が有効な Mac で動かす
 
@@ -461,7 +498,23 @@ MUST を全部満たしていても、次は確かめていない。
   - Developer ID の署名で別の group を名乗る相手
 - SIP を無効にした Mac での、表の各手段の結果
 - hardened runtime の他の例外の entitlement (`allow-jit`、`allow-unsigned-executable-memory`) が、同じ uid からの経路を開くか
-- socket、XPC、Mach service で要求を受けるプロセスが、相手のコードの身元を検査する方法とその抜け道
+- 起動した後に読み込むライブラリの置き換えのうち、procline の lean4 の観測に入っていないもの
+  - 同じ Team ID で署名した別のライブラリ (古い版など) への置き換え (M1 の守らないもの)
+  - 公証済みのアプリと、実在のアプリが `dlopen` するプラグイン
+  - `@rpath` や `DYLD_FALLBACK_LIBRARY_PATH` のように探す先を持つ読み込み
+- 入力をコードとして実行する口のうち、Electron の `ELECTRON_RUN_AS_NODE` の他のもの (M5)
+  - `NODE_OPTIONS` と Node の inspect の引数 (fuse で有効なアプリがある)
+  - asar の完全性の検査が無効なアプリで、bundle の中の resource を書き換えて起動すること
+  - Electron 以外の、外からコードを受ける起動の方法 (Java の `JAVA_TOOL_OPTIONS`、Python の `PYTHONPATH` を読む署名済みのアプリ等)
+  - その口から渡したコードが、そのアプリの身元で Keychain の項目 (ACL、access group) を読めるか (推定では読める)
+- hard link と path のうち、procline の lean4 の観測に入っていないもの
+  - hard link で置いた別のプログラムが、元の path の名前で起動された時の `proc_pidpath` の値
+  - hard link を張れない別の volume にある実行ファイル
+  - hard link を経て起動した、access group を名乗る bundle が、利用者の resource を読みながら項目を読めるか
+- 置き場の書き込み権限のうち、procline の lean4 の観測に入っていないもの
+  - ACL の継承 (`file_inherit`、`directory_inherit`) で受けた場所
+  - 17 件目以降のグループで書ける場所が、実際の Mac に実行ファイルを含む形であるか
+- socket、XPC、Mach service で要求を受けるプロセスが、相手のコードの身元を検査する方法の抜け道のうち、M5 の条件に挙げたもの (入力をコードとして実行する口、起動の場所に依る入力、path) の他のもの
 - スワップ、メモリの圧縮、休止のイメージに写った秘密
 - 画面やキー入力を介する経路 (Accessibility、Apple Events、画面の読み取り)
 - macOS の他の版
