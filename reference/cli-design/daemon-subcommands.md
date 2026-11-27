@@ -63,7 +63,9 @@ OPTIONS (共通)
 
 ## `daemon supervise` を置く目的
 
-**OS 登録の契約を binary 更新から切り離す。** 監督者は OS に「`<tool> daemon supervise` を常駐させる」という 1 点だけを約束する。unit の実体や数がどう変わっても、tool の binary を入れ替えても、この契約は変わらないので `service register` をやり直さない。OS 登録レベルの更新 (plist / unit ファイルの書き換え、署名や FDA 等の権限付与のやり直し) をバージョンアップ毎に発生させない。
+**OS 登録の契約を binary 更新から切り離す。** 監督者は OS に「`<tool> daemon supervise` を常駐させる」という 1 点だけを約束する。unit の実体や数がどう変わっても、tool の binary を入れ替えても、この契約は変わらないので `service register` をやり直さない。OS 登録 (plist / unit ファイル) の書き換えをバージョンアップ毎に発生させない。
+
+macOS の TCC の許可 (FDA 等) は、この契約だけでは保たれない。TCC は、launchd から起きたプロセスの許可を、client (.app の Bundle ID か、symlink を解決した実体パス) と、許可した時の署名の requirement の組で持つ (reference の `macos-signing/tcc-app-bundle`)。plist が変わらなくても、更新で実体パスが変わる (Homebrew の Cellar の版付きのディレクトリ。`/opt/homebrew/bin/<tool>` の symlink を登録しても実体で判定される) か、署名の requirement が変わる (ad-hoc 署名での作り直し) と、許可は外れる。更新をまたいで許可を保つには、監督者を Bundle ID と designated requirement の変わらない .app の中に置く (同じ reference) か、末尾の「署名済み launcher」の形にする。
 
 **status とログのスコープを分離する。** `service` はサービスとしての面 (OS への登録の有無、監督者が上がっているか、OS 側から取れる last_exit 等) だけを担当する。`daemon` は子である instance の生存と再起動だけを担当する。OS の機能と重複しない — OS が見るのは監督者だけ、監督者が見るのは unit だけで、見る対象が階層で分かれている。
 
@@ -137,7 +139,9 @@ OPTIONS (共通)
 - GitHub アカウント `kawaz` の所有と常に一致するので、所有の確認自体が要らない。自前ドメインは更新切れや手放しで正当性を失いうるうえ、所有していないドメイン (例: `kawaz.com`) を名乗る誤りを生む
 - 先頭をリポ名にする (`<repo>-<sub>` のような別名を作らない)。label からリポへ辿れ、XDG の置き場 (`$XDG_*_HOME/<repo>/`) と同じ軸になる
 - systemd の user unit も同じ文字列に `.service` を付ける (OS ごとに名前を分けない)
-- 署名・notarization する成果物 (署名済み launcher の `.app` 等) の bundle id は別物。署名する証明書の持ち主の規約に従う
+- 署名・notarization する成果物 (.app、署名済み launcher) の bundle id と署名の identifier も、既定は同じ `com.github.kawaz.<repo>[.<sub>...]` にする。Developer ID の証明書の組織名と名前空間が違っていても、署名・notarize でき、Gatekeeper に通る (観測、2026-11-27: cache-warden の .app は bundle id と launchd label がともに `com.github.kawaz.cache-warden` で、`spctl -a -vvv -t exec` が `accepted` / `source=Notarized Developer ID`)。他人の証明書で署名する成果物は、その持ち主の規約に従う
+- 一度配った bundle id と identifier は変えない。TCC の許可も、Keychain の ACL と access group も、署名の requirement (identifier を含む) や App ID で照合するので、変えると利用者が許可を与え直し、保存した秘密に届かなくなる (reference の `macos-signing/tcc-app-bundle`、reference の `macos-process-protection` の M4)
+- provisioning profile を使う (access group を名乗る等) なら、profile は App ID (Team の App ID prefix と bundle id の組) に結びつく (一次資料: TN3125 Inside Code Signing: Provisioning Profiles)。bundle id をその App ID として Developer のアカウントに登録する
 
 ## `service register` は場所を決める env を unit に固定し、変わったら止まる
 
@@ -150,6 +154,12 @@ daemon が socket / state / config の場所を env (`XDG_RUNTIME_DIR` / `XDG_ST
 
 固定する変数の一覧は、そのツールの path 導出コード (paths 相当) が読む変数を正とし、unit 生成側に別のリストを持たない。
 
-ドメイン要件によっては launchd に登録する署名済み launcher を別途用意してそれを登録し、launcher は `<tool> daemon supervise` の起動と死活監視に徹する形も検討する。FDA 要求などがバージョンアップ毎に発生するのを回避するための構成。
+ドメイン要件によっては launchd に登録する署名済み launcher を別途用意してそれを登録し、launcher は `<tool> daemon supervise` の起動と死活監視に徹する形も検討する。FDA 要求などがバージョンアップ毎に発生するのを回避するための構成。launcher が responsible process になり、子の TCC の判定は launcher の Bundle ID と署名の requirement で行われるので、tool を更新しても許可を求め直されない (responsible process の仕組みからの推定、未観測)。tool 自体を、Bundle ID と designated requirement が変わらない .app として配れるなら (reference の `macos-signing/tcc-app-bundle`)、launcher は要らない。
+
+launcher は、自分に与えられた許可 (FDA 等) を、起動した子に渡す。起動する tool の実行ファイルを、同じ uid が書き換えられる場所 (Homebrew の prefix、`PATH` の探索) から取ると、そこに置かれた任意のバイナリが FDA の下で動く。
+
+- tool は絶対パスで起動する。`PATH` で探さない
+- 起動の前にファイルの署名を requirement で検査し、起動した後の pid も同じく検査して、合わなければ止める (reference の `macos-process-protection` の M7 と同じ検査)
+- それでも、同じ uid がその場所を書き換えられる限り、検査から exec までの間や、起動から検査までの間は、別のコードが FDA の下で動きうる (推定、未観測)。tool を置く場所の書き込み権限も含めて設計する (M7 の「あわせて守ること」)
 
 関連: [preferences](preferences.md)
