@@ -285,7 +285,8 @@ data protection keychain はログインセッションの中でしか使えず�
   - 入口 (サブコマンド、引数、環境変数、標準入力、設定ファイル、socket や XPC で受ける要求) から、秘密の値を出力しない
   - 入口から、秘密の参照先 (どの項目を読むか、どこへ送るか) を切り替えさせない
   - 秘密を使う操作 (署名、復号、送信) を入口が代行するなら、OS が出す本人確認 (Touch ID 等) の後だけにするか、要求する相手のコードの身元を検査する
-  - 相手のコードの身元は、pid ではなく audit token で引く。Unix socket なら `getsockopt` の `LOCAL_PEERTOKEN` で相手の audit token を取り、`SecCodeCopyGuestWithAttributes` に `kSecGuestAttributeAudit` で渡す (一次資料: SDK の `sys/un.h`、`Security/SecCode.h`)。pid は、相手が終わって再利用されると別のプロセスを指す (推定、未観測)
+  - 相手のコードの身元は、pid ではなく audit token で引く。Unix socket なら `getsockopt` の `LOCAL_PEERTOKEN` で相手の audit token を取り、`SecCodeCopyGuestWithAttributes` に `kSecGuestAttributeAudit` で渡す (一次資料: SDK の `sys/un.h`、`Security/SecCode.h`)。pid は、相手が終わって再利用されると別のプロセスを指す (観測: 利用者の権限だけで fork を繰り返し、同じ数値の pid の再割り当てを 47.8 秒で起こせた。その後の `LOCAL_PEERPID` は同じ数値を返し、`LOCAL_PEERTOKEN` は無関係のそのプロセスの token を返したが、token の pidversion は元と違った。`kawaz/procline` の `docs/findings/2026-11-15-socketpair-peer-after-fork-exec.md`、macOS 26.5.2)
+  - `LOCAL_PEERPID` と `LOCAL_PEERTOKEN` が指すのは、connect した時点のプロセスではなく、`getsockopt` を読んだ時点で相手側の端を最後に送受信に使ったプロセス。fd を fork や fd 渡しで引き継いだプロセスが送受信すると、そちらに変わる。資格情報もその時点の値で、相手が setuid のプログラムを exec すれば euid も変わる (同じ findings の観測)。なので、身元は判定に使う時点で token を読み直して確かめ、pid の数値だけを持ち回らない。token の pidversion を比べれば、pid の再利用は見分けられる
 - 守るもの: 相手が、メモリも ACL も破らずに、正規の入口から秘密の値を得ること・秘密を使う操作をさせること
 - 守らないもの
   - メモリと置き場への直接の経路 → M1〜M4
@@ -313,7 +314,7 @@ data protection keychain はログインセッションの中でしか使えず�
 他のプロセスがこのプロセスの結論や出力を信頼する構成にだけ当たる (例: root で動く PAM モジュールが、ユーザ権限に降格した helper を起動して、認証の可否を受け取る)。
 
 - 条件: 信頼する側は、起動した後の pid について次を検査し、1 つでも満たさなければ結果を受け取らない
-  - requirement: 配る実物の designated requirement (`codesign -d -r- <ファイル>` の `designated =>` の右辺) を使う。Developer ID で署名したものは `identifier "<identifier>" and anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] /* exists */ and certificate leaf[field.1.2.840.113635.100.6.1.13] /* exists */ and certificate leaf[subject.OU] = "<Team ID>"` になる (観測)。2 つの OID の条件が Developer ID の証明書に絞り、Apple Development 等の同じ Team の別の証明書を外す
+  - requirement: 配る実物の designated requirement (`codesign -d -r- <ファイル>` の `designated =>` の右辺) を使う。Developer ID で署名したものは `identifier "<identifier>" and anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] /* exists */ and certificate leaf[field.1.2.840.113635.100.6.1.13] /* exists */ and certificate leaf[subject.OU] = "<Team ID>"` になる (観測)。2 つの OID の条件が Developer ID の証明書に絞り、Apple Development 等の同じ Team の別の証明書を外す (一次資料: TN3127 Inside Code Signing: Requirements は 6.2.6 を Developer ID Certification Authority の中間証明書、6.1.13 を Developer ID Application の証明書の印として説明し、Apple の Developer ID の CPS §4.11.2 は Application Code Signing の証明書の拡張に 6.1.13 を挙げる。Apple Development 等の開発用の証明書は Worldwide Developer Relations の CPS §4.11.4 の 6.1.12 で、Developer ID の条件を満たさない。裏取りは `kawaz/procline` の DR-0011 に引用がある)
   - 手で書くなら、OID や OU の条件を `anchor apple generic` と `and` で結ぶ。`or` の枝に、`anchor apple generic` の無い OID や OU の条件を置かない (自己署名の証明書でも OID や OU は名乗れる。`anchor apple generic` は満たせない)。`and` で結んだ条件の並びの順は結果を変えない
   - hardened runtime のフラグ (`kSecCodeSignatureRuntime`) がある
   - 実行中のコードの状態が有効で (`kSecCodeStatusValid`)、デバッガに接続されていない (`kSecCodeStatusDebugged` が立たない)

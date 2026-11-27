@@ -64,7 +64,7 @@ WebAuthn の RP ID は origin ではなく **domain** で、credential は「今
 
 `user_id` (WebAuthn の user handle) は **server が sub ごとに 1 度だけ決めた 16 byte の乱数**を使い回す。authenticator は handle を server の手の届かない場所に保存するので、同じ人に 2 つの値を配ると端末上で 2 つのアカウントに見える。同じ sub への追加登録では既存の handle を再利用する。
 
-WebAuthn の検証に library は要らない。必要なのは小さな CBOR decoder (attestationObject と COSE 鍵)、WebCrypto (署名の verify、sha256、HMAC)、ES256 の署名を DER から r と s の連結へ直す短い変換だけで、library を入れると attestation の固定や challenge の転送のような細かい制御が効かなくなる。
+WebAuthn の検証に library は要らない。必要なのは小さな CBOR decoder (attestationObject と COSE 鍵)、WebCrypto (署名の verify、sha256、HMAC)、ES256 の署名を DER から r と s の連結へ直す短い変換だけで、library を入れると attestation の固定や challenge の転送のような細かい制御が効かなくなる。この理由が当たるのは、challenge や session を自分で持ち、検証の方針を内に決めている library。状態を持たず、期待値 (challenge、origin、受け付ける `fmt`、`topOrigin` の可否) を呼び出し側から受けて検証だけをする部品なら、この制御は呼び出し側に残るので、使ってよい (kawaz の `@kawaz/passkey-server` がこの形)。
 
 ## token は署名しない opaque 値
 
@@ -135,5 +135,5 @@ CLI が URL とは**別に** 6 桁のコードを表示し、ページがそれ�
 | 人の認証を前段 (forward auth / VPN の identity) に寄せる | 前段の構成が利用者ごとに違い、daemon が「誰か」を知る形が揃わない。passkey なら daemon 自身が判定でき、前段は透過でよい |
 | instance の永続鍵で token を署名する | 鍵の保管・rotate・配布という管理対象が増える。record の lookup + 発行者への問い合わせで同じことが鍵なしでできる |
 | token を localStorage に置く | XSS 1 つで長期 token が抜ける。httpOnly cookie なら JS から読めない |
-| WebAuthn の library を入れる | attestation の固定や challenge の転送といった制御が効かなくなる。検証手順自体は短い |
+| challenge や session を自分で持つ WebAuthn の library を入れる | attestation の固定や challenge の転送といった制御が効かなくなる。検証手順自体は短い。状態を持たず期待値を呼び出し側から受ける検証部品は、この理由に当たらない |
 | リモートからの登録・復旧経路 | 登録がローカルに閉じることが、この設計の安全性の根そのもの |
