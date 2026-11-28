@@ -1,6 +1,6 @@
 # スキーマから型を導き、境界で parse する書き方
 
-`typescript-typing` rule の水準を満たすコードの形。例は valibot (1.x) で書くが、zod 等でも構造は同じ。
+`typescript-typing` rule の、外部入力とプロトコルの境界でスキーマを使うときのコードの形。例は valibot (1.x) で書くが、zod 等でも構造は同じ。境界でない場所 (型を満たす呼び出し元だけの公開 API や内部の関数) にはスキーマを入れない。その場合は型を手で書き、範囲や個数の素朴な検査だけを実行時に残す。
 
 ## ライブラリの選び方
 
@@ -64,10 +64,11 @@ handle(req.value); // handle(req: Request) — 以降は型付きの値だけが
 | 書きたくなった形 | 代わりに |
 |---|---|
 | `JSON.parse(s) as Foo` | `parseJsonWith(FooSchema, s)` |
-| `(x: unknown) => { if (isRecord(x) ...) }` | 呼び出し元の境界でスキーマに通し、関数は `(x: Foo)` を受ける |
+| `(x: unknown) => { if (isRecord(x) ...) }` | 外から来る値なら呼び出し元の境界でスキーマに通し、関数は `(x: Foo)` を受ける |
 | `map.get(k)!` | `const v = map.get(k); if (v === undefined) { ... }` で分岐する |
 | `obj as Foo` で余分な field を黙らせる | `const x: Foo = obj` か `obj satisfies Foo` で検査させる |
 | `el as HTMLInputElement` | `if (el instanceof HTMLInputElement)` で narrowing する |
-| `x ?? String(x)` で穴を埋める | 穴を作った境界でスキーマに通す |
+| `x ?? String(x)` で穴を埋める | 穴を作った境界 (外から来る値) でスキーマに通す。境界でなければ型の設計を直す |
+| リテラル・定数への `as Foo` | `satisfies Foo` か型注釈 (`const x: Foo = ...`) |
 
 lint の設定は reference の `typescript/typing-lint` を読む。

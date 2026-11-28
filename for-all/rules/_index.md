@@ -34,7 +34,7 @@
 - [[tooling-tips]] — 別ディレクトリでコマンドを実行するとき
 - [[temp-files]] — 一時ファイルを作るとき (テスト・実験環境含む)
 - [[secret-hygiene]] — TOKEN / KEY / .env 等を扱うとき
-- [[typescript-typing]] — TypeScript を書くとき (スキーマから型、境界で parse、`as` / `any` / `!` 禁止)
+- [[typescript-typing]] — TypeScript を書くとき (外部入力・プロトコルの境界ではスキーマで parse、それ以外はバリデータの必要性を判断、`as` / `any` / `!` 禁止)
 
 ## コミット・プッシュ
 

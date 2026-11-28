@@ -1,6 +1,6 @@
 # TypeScript の参照知識
 
-型の付け方の水準 (スキーマから型を導く、境界で parse する、`as` / `any` / `!` を使わない) そのものは `for-all/rules/typescript-typing.md` が正本。ここはその書き方と検査の設定。
+型の付け方の水準 (外部入力とプロトコルの境界ではスキーマで parse する、それ以外はバリデータの必要性を判断する、`as` / `any` / `!` を使わない) そのものは `for-all/rules/typescript-typing.md` が正本。ここは境界でのその書き方と検査の設定。
 
 - [schema-first-typing](schema-first-typing.md) — スキーマライブラリの選び方、型の導き方、`unknown` を閉じ込める境界、主張の置き換え表。
   valibot, zod, スキーマ定義, InferOutput, safeParse, JSON.parse as, unknown を受ける関数, isRecord, 型ガード, 外部 JSON の型付け
